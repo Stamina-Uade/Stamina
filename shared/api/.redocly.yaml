@@ -1,0 +1,16 @@
+# Configuración del linter del contrato. Se corre en CI (AGENTS.md §13) y a mano:
+#   npx @redocly/cli lint shared/api/openapi.yaml
+#
+# Sólo hay UNA regla apagada, y está apagada con motivo escrito. Si aparece otra
+# excepción, va acá con su motivo: una regla apagada sin explicación es una regla
+# que nadie va a volver a prender.
+
+extends:
+  - recommended
+
+rules:
+  # /health y /version no reciben un cuerpo del cliente, así que no tienen forma de
+  # devolver un 4xx que no sea el 400 genérico de un query param mal formado —que
+  # /version sí declara—. Exigirle un 4xx a /health obliga a inventar una respuesta
+  # que el endpoint no puede producir.
+  operation-4xx-response: off

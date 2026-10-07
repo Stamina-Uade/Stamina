@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  Configuración de red del build de DEBUG. Pisa a src/main/res/xml/seguridad_de_red.xml,
+  que es la del release y no permite nada en claro.
+
+  🛑 Una sola excepción: 10.0.2.2, que no es una IP de internet sino la máquina de
+  desarrollo vista desde el emulador. Es lo que deja hablar con el backend local
+  (trainer.apiBase=http://10.0.2.2:8082/v1, docs/CORRER-LOCAL.md §4).
+
+  Nada más, a propósito: ni localhost, ni la IP de la PC en la red de la casa. Un
+  teléfono real va contra el servidor por HTTPS, que es la base por defecto. Y el
+  resto del mundo sigue exigiendo HTTPS también en debug.
+-->
+<network-security-config>
+    <domain-config cleartextTrafficPermitted="true">
+        <domain includeSubdomains="false">10.0.2.2</domain>
+    </domain-config>
+    <base-config cleartextTrafficPermitted="false" />
+</network-security-config>

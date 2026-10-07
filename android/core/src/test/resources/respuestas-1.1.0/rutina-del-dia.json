@@ -1,0 +1,164 @@
+{
+  "data": {
+    "date_ms": 1789009200000,
+    "session_id": "gym-2026-09-10",
+    "planned": false,
+    "equipment_assumed": [
+      "mancuernas",
+      "banco",
+      "ninguno"
+    ],
+    "exercises": [
+      {
+        "exercise_id": "estocada-deficit",
+        "name": "Zancada con déficit",
+        "pattern": "rodilla-unilateral",
+        "equipment": "banco",
+        "unit": "reps",
+        "label": "Para correr",
+        "reason": "Fuerza de a una pierna: menos desequilibrios, que es donde empiezan muchas molestias.",
+        "rest_s": 75,
+        "sets": [
+          {
+            "number": 1,
+            "reps": 10
+          },
+          {
+            "number": 2,
+            "reps": 10
+          },
+          {
+            "number": 3,
+            "reps": 10
+          }
+        ],
+        "previous_sets": []
+      },
+      {
+        "exercise_id": "extension-lumbar",
+        "name": "Extensión lumbar en banco",
+        "pattern": "cadera",
+        "equipment": "banco",
+        "unit": "reps",
+        "label": "Para correr",
+        "reason": "Glúteos e isquiotibiales: son los que empujan en cada zancada.",
+        "rest_s": 75,
+        "sets": [
+          {
+            "number": 1,
+            "reps": 10
+          },
+          {
+            "number": 2,
+            "reps": 10
+          },
+          {
+            "number": 3,
+            "reps": 10
+          }
+        ],
+        "previous_sets": []
+      },
+      {
+        "exercise_id": "elevacion-talones-pie",
+        "name": "Elevación de talones de pie",
+        "pattern": "tobillo",
+        "equipment": "mancuernas",
+        "unit": "reps",
+        "label": "Para correr",
+        "reason": "Gemelos y sóleo: sostienen el tendón de Aquiles en las salidas largas.",
+        "rest_s": 75,
+        "sets": [
+          {
+            "number": 1,
+            "reps": 10
+          },
+          {
+            "number": 2,
+            "reps": 10
+          },
+          {
+            "number": 3,
+            "reps": 10
+          }
+        ],
+        "previous_sets": []
+      },
+      {
+        "exercise_id": "plancha-pies-elevados",
+        "name": "Plancha con pies elevados",
+        "pattern": "antiextension",
+        "equipment": "banco",
+        "unit": "tiempo",
+        "label": "Para correr",
+        "reason": "Un tronco estable gasta menos energía cuando llega el cansancio.",
+        "rest_s": 75,
+        "sets": [
+          {
+            "number": 1,
+            "reps": 40
+          },
+          {
+            "number": 2,
+            "reps": 40
+          },
+          {
+            "number": 3,
+            "reps": 40
+          }
+        ],
+        "previous_sets": []
+      },
+      {
+        "exercise_id": "aperturas-mancuernas",
+        "name": "Aperturas con mancuernas",
+        "pattern": "empuje-horizontal",
+        "equipment": "mancuernas",
+        "unit": "reps",
+        "label": "General",
+        "reason": "Fuerza general de empuje, para equilibrar el cuerpo.",
+        "rest_s": 75,
+        "sets": [
+          {
+            "number": 1,
+            "reps": 10
+          },
+          {
+            "number": 2,
+            "reps": 10
+          },
+          {
+            "number": 3,
+            "reps": 10
+          }
+        ],
+        "previous_sets": []
+      },
+      {
+        "exercise_id": "encogimientos-mancuernas",
+        "name": "Encogimientos con mancuernas",
+        "pattern": "traccion-horizontal",
+        "equipment": "mancuernas",
+        "unit": "reps",
+        "label": "General",
+        "reason": "Espalda alta: ayuda a sostener la postura al final de una salida.",
+        "rest_s": 75,
+        "sets": [
+          {
+            "number": 1,
+            "reps": 10
+          },
+          {
+            "number": 2,
+            "reps": 10
+          },
+          {
+            "number": 3,
+            "reps": 10
+          }
+        ],
+        "previous_sets": []
+      }
+    ]
+  }
+}

@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  🎨 EL COLOR DE LA APP SE CAMBIA ACÁ, Y EN NINGÚN OTRO LADO.
+
+  Cambiá el hex de `acento` y toda la app cambia: los botones primarios, los chips
+  elegidos, la pestaña activa de la barra de abajo, los bordes de un campo en foco,
+  las series marcadas como hechas, las barras de fuerza de la contraseña, el día
+  elegido del calendario. No hay que tocar ninguna pantalla ni correr ningún
+  generador: se guarda, se corre la app, y ya está.
+
+  Y el texto que va ENCIMA del acento **no** hay que elegirlo. Lo calcula
+  `Contraste.mejorSobre` midiendo el contraste real de los dos candidatos: con este
+  amarillo da el casi-negro, y con un acento oscuro se da vuelta solo al claro. Por eso
+  se puede poner cualquier color acá sin que algo quede ilegible.
+
+  🛑 ESTE ARCHIVO NO ES PARA COLORES SUELTOS. Es la fuente del acento de Android y
+  nada más. El resto de la paleta —fondos, superficies, los ocho roles de texto—
+  sale de `shared/design/tokens.json` y se genera en `TokensGenerados.kt`. Un color
+  nuevo acá abajo hace fallar `scripts/verificar-tokens.mjs`, a propósito: es el
+  mismo guardián que impide escribir un hex en un `.kt`.
+
+  🛑 DIVERGENCIA CONOCIDA: para Android el acento sale de acá y para iOS y los
+  relojes sigue saliendo de `tokens.json`. Es una decisión, no un olvido — está en
+  `docs/decisiones/0009-el-acento-de-android-sale-de-colors-xml.md` y anotada en el
+  registro de AGENTS.md §10.4. Mientras `ios/` esté vacío no cuesta nada; el día que
+  exista, cambiar el color son dos archivos.
+-->
+<resources>
+
+    <!-- El acento del producto. Es el ÚNICO color que se edita a mano en Android. -->
+    <color name="acento">#FFFF00</color>
+
+    <!--
+      El fondo de la ventana, sólo para el instante entre que Android abre la app y
+      Compose dibuja el primer cuadro. Tiene que ser el MISMO que `telefono.fondo` de
+      los tokens (`TokensColor.telefonoFondo`), o se ve un parpadeo de otro negro al
+      abrir. Hasta el 2026-09-10 decía #0B0E13, que era el de la app vieja y no
+      coincidía: eso era el parpadeo.
+    -->
+    <color name="fondo_de_ventana">#0B0C0A</color>
+
+</resources>

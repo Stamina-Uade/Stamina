@@ -1,0 +1,30 @@
+import type { FastifyInstance } from "fastify";
+import type { Contexto } from "../../contexto.js";
+import { ErrorApi } from "../../infra/errores.js";
+import { cuerpo } from "../../infra/esquemas.js";
+import { crearGuardia, usuarioDe } from "../auth/guardia.js";
+import { crearRepoObjetivos, type ObjetivoActivo } from "./repositorio.js";
+
+const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+
+export async function rutasObjetivos(app: FastifyInstance, ctx: Contexto): Promise<void> {
+  const repo = crearRepoObjetivos(ctx.db);
+  const guardia = crearGuardia(ctx);
+  app.get("/me/goals", { preHandler: guardia }, async (req) => ({
+    data: await repo.listar(usuarioDe(req)),
+  }));
+  app.put("/me/goals", { preHandler: guardia, schema: { body: cuerpo("replaceGoals") } }, async (req) => {
+    const { goals } = req.body as { goals: ObjetivoActivo[] };
+    const ids = new Set<string>();
+    for (const [i, goal] of goals.entries()) {
+      const id = goal.id ?? "";
+      if ((i === 0 && id !== "" && id !== "principal") ||
+          (i > 0 && id !== "" && !UUID.test(id)) ||
+          (id !== "" && ids.has(id))) {
+        throw new ErrorApi("bad_request", "Invalid goal identifier");
+      }
+      if (id !== "") ids.add(id);
+    }
+    return { data: await repo.reemplazar(usuarioDe(req), goals, ctx.ahoraMs()) };
+  });
+}

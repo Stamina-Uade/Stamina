@@ -1,0 +1,108 @@
+# .github/workflows/diseno.yml
+#
+# 🛑 Este workflow es el que hace que AGENTS.md §10.1 sobreviva sin que nadie la
+# vigile:
+#
+#   "ningún color, tamaño, radio ni fuente se escribe a mano en una pantalla.
+#    Todo sale de los tokens."
+#
+# Una regla escrita en un documento dura hasta el primer viernes a las siete. Una
+# regla que rompe el build, dura.
+
+name: diseno
+
+on:
+  push:
+    paths:
+      - "shared/design/**"
+      - "shared/datos/**"
+      - "android/**"
+      - "ios/**"
+      - "scripts/generar-tema.mjs"
+      - "scripts/verificar-tokens.mjs"
+      - "scripts/verificar-catalogo.mjs"
+      - "scripts/test/**"
+      - "package.json"
+      - "package-lock.json"
+      # Lo que leen los tests del guardián fuera de las carpetas de arriba: el
+      # contrato, el backend y la guía local. disparadores-de-diseno.test.mjs
+      # falla si un test nombra un archivo que esta lista no cubre.
+      - "shared/api/openapi.yaml"
+      - "backend/.env.example"
+      - "backend/docker-compose.yml"
+      - "backend/package.json"
+      - "backend/tsconfig.json"
+      - "backend/src/servidor.ts"
+      - "backend/src/infra/password.ts"
+      - "backend/src/dominios/auth/servicio.ts"
+      - "README.md"
+      - ".github/workflows/diseno.yml"
+  pull_request:
+    paths:
+      - "shared/design/**"
+      - "shared/datos/**"
+      - "android/**"
+      - "ios/**"
+      - "scripts/generar-tema.mjs"
+      - "scripts/verificar-tokens.mjs"
+      - "scripts/verificar-catalogo.mjs"
+      - "scripts/test/**"
+      - "package.json"
+      - "package-lock.json"
+      # Lo que leen los tests del guardián fuera de las carpetas de arriba: el
+      # contrato, el backend y la guía local. disparadores-de-diseno.test.mjs
+      # falla si un test nombra un archivo que esta lista no cubre.
+      - "shared/api/openapi.yaml"
+      - "backend/.env.example"
+      - "backend/docker-compose.yml"
+      - "backend/package.json"
+      - "backend/tsconfig.json"
+      - "backend/src/servidor.ts"
+      - "backend/src/infra/password.ts"
+      - "backend/src/dominios/auth/servicio.ts"
+      - "README.md"
+      - ".github/workflows/diseno.yml"
+
+jobs:
+  tokens:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: npm
+          cache-dependency-path: package-lock.json
+
+      # 🪤 Los tests del guardián leen el contrato (shared/api/openapi.yaml) con el
+      # paquete `yaml`, que es devDependency de la raíz. Sin instalarlo, cinco tests
+      # caían con MODULE_NOT_FOUND antes de comparar nada, el job moría acá y los
+      # pasos de abajo no llegaban a correr: el 2026-09-10 este workflow estaba en
+      # rojo en cada push sin haber probado nada.
+      - name: Dependencias de los scripts
+        run: npm ci
+
+      # El guardián tiene sus propios tests: un lint que nunca se demostró que
+      # falla no es un guardián, es un archivo.
+      - name: Tests del guardián
+        run: node --test scripts/test/*.test.mjs
+
+      - name: Ningún color, tamaño ni fuente a mano
+        run: node scripts/verificar-tokens.mjs
+
+      # §9.1: el catálogo es dato y se agrega SIN desplegar, o sea que nadie lo
+      # compila. Por eso se valida acá.
+      - name: El catálogo de ejercicios es consistente
+        run: node scripts/verificar-catalogo.mjs
+
+      # AGENTS.md §4.2: si se toca shared/, los clientes van regenerados EN EL
+      # MISMO COMMIT. Esto lo verifica en vez de confiar.
+      - name: El tema generado coincide con tokens.json
+        run: |
+          node scripts/generar-tema.mjs
+          if ! git diff --exit-code -- android/core ios/TrainerCore; then
+            echo ""
+            echo "🛑 shared/design/tokens.json cambió y el tema generado NO está actualizado."
+            echo "   Corré: npm run generar:tema  — y commiteá el resultado."
+            exit 1
+          fi

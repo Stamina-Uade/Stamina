@@ -1,0 +1,54 @@
+# .editorconfig — AGENTS.md §10.3
+# Que el editor no pelee contra .gitattributes: mismo encoding, mismos finales
+# de linea y misma indentacion en Windows y en macOS.
+
+root = true
+
+[*]
+charset = utf-8
+end_of_line = lf
+insert_final_newline = true
+trim_trailing_whitespace = true
+indent_style = space
+indent_size = 4
+
+# Los .bat de Windows fallan con LF (coincide con .gitattributes).
+[*.{bat,cmd}]
+end_of_line = crlf
+
+[*.{kt,kts}]
+indent_size = 4
+max_line_length = 100
+ij_kotlin_allow_trailing_comma = true
+
+[*.java]
+indent_size = 4
+max_line_length = 100
+
+[*.swift]
+indent_size = 4
+max_line_length = 100
+
+[*.{yaml,yml}]
+indent_size = 2
+
+[*.json]
+indent_size = 2
+
+[*.{xml,plist}]
+indent_size = 4
+
+[*.{sh,bash}]
+indent_size = 2
+
+[*.md]
+# En Markdown, dos espacios al final de una linea son un salto de linea: si el
+# editor los recorta, cambia el texto renderizado.
+trim_trailing_whitespace = false
+max_line_length = 100
+
+[Makefile]
+indent_style = tab
+
+[*.{properties,toml}]
+indent_size = 4

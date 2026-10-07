@@ -1,0 +1,99 @@
+{
+  "data": [
+    {
+      "id": "bicho-muerto",
+      "name": "Bicho muerto",
+      "pattern": "antiextension",
+      "equipment": "ninguno",
+      "side": "bilateral",
+      "unit": "reps",
+      "muscles": [
+        {
+          "id": "core",
+          "role": "principal"
+        }
+      ],
+      "substitutes": [
+        {
+          "id": "plancha-frontal",
+          "kind": "mismo_patron"
+        }
+      ],
+      "joints": [
+        "zona-lumbar"
+      ]
+    },
+    {
+      "id": "buenos-dias",
+      "name": "Buenos días",
+      "pattern": "cadera",
+      "equipment": "barra",
+      "side": "bilateral",
+      "unit": "reps",
+      "muscles": [
+        {
+          "id": "isquiotibiales",
+          "role": "principal"
+        },
+        {
+          "id": "zona-lumbar",
+          "role": "principal"
+        }
+      ],
+      "substitutes": [
+        {
+          "id": "peso-muerto-rumano",
+          "kind": "mismo_patron"
+        }
+      ],
+      "joints": [
+        "cadera",
+        "zona-lumbar"
+      ]
+    },
+    {
+      "id": "buenos-dias-banda",
+      "name": "Buenos días con banda",
+      "pattern": "cadera",
+      "equipment": "banda",
+      "side": "bilateral",
+      "unit": "reps",
+      "muscles": [
+        {
+          "id": "isquiotibiales",
+          "role": "principal"
+        },
+        {
+          "id": "gluteo",
+          "role": "secundario"
+        },
+        {
+          "id": "zona-lumbar",
+          "role": "secundario"
+        }
+      ],
+      "substitutes": [
+        {
+          "id": "curl-nordico",
+          "kind": "mismo_patron"
+        },
+        {
+          "id": "puente-gluteo",
+          "kind": "mismo_patron"
+        },
+        {
+          "id": "buenos-dias",
+          "kind": "mismo_patron"
+        }
+      ],
+      "joints": [
+        "cadera",
+        "zona-lumbar"
+      ]
+    }
+  ],
+  "pagination": {
+    "next_cursor": "WyJidWVub3MtZGlhcy1iYW5kYSJd",
+    "has_more": true
+  }
+}

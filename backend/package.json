@@ -1,0 +1,41 @@
+{
+  "name": "trainer-backend",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "engines": {
+    "node": ">=22.0.0"
+  },
+  "scripts": {
+    "generar": "node ../scripts/generar-esquemas.mjs",
+    "build": "npm run generar && tsc -p tsconfig.json",
+    "dev": "npm run generar && tsx watch --env-file-if-exists=.env src/index.ts",
+    "start": "node --env-file-if-exists=.env --max-old-space-size=256 dist/src/index.js",
+    "test": "npm run build && node --test dist/**/*.test.js",
+    "test:unit": "npm run build && node --test dist/test/unit.*.test.js",
+    "migrar": "node --env-file-if-exists=.env --max-old-space-size=128 dist/src/infra/migrar.js",
+    "sembrar": "node --env-file-if-exists=.env --max-old-space-size=128 dist/src/dominios/catalogo/sembrar.js",
+    "purgar": "node --env-file-if-exists=.env --max-old-space-size=128 dist/src/dominios/cuenta/purgar.js",
+    "local": "npm run build && npm run migrar && npm run sembrar && npm start",
+    "typecheck": "tsc -p tsconfig.json --noEmit"
+  },
+  "dependencies": {
+    "@aws-sdk/client-secrets-manager": "^3.1146.0",
+    "@fastify/rate-limit": "^10.2.0",
+    "@node-rs/argon2": "^2.0.2",
+    "fastify": "^5.2.0",
+    "ioredis": "^5.4.2",
+    "jose": "^5.9.6",
+    "nodemailer": "^10.0.15",
+    "pg": "^8.13.1"
+  },
+  "devDependencies": {
+    "@types/node": "^22.10.2",
+    "@types/nodemailer": "^8.0.2",
+    "@types/pg": "^8.11.10",
+    "pino-pretty": "^13.0.0",
+    "tsx": "^4.19.2",
+    "typescript": "^5.7.2",
+    "yaml": "^2.6.1"
+  }
+}

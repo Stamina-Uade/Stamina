@@ -1,0 +1,21 @@
+# .github/workflows/contrato.yml
+#
+# El contrato lo consumen los CUATRO clientes (AGENTS.md §4.2), así que se valida
+# solo aunque no se toque el backend. Es rápido y barato.
+
+name: contrato
+
+on:
+  push:
+    paths: ["shared/api/**", ".github/workflows/contrato.yml"]
+  pull_request:
+    paths: ["shared/api/**", ".github/workflows/contrato.yml"]
+
+jobs:
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: "22" }
+      - run: npx --yes @redocly/cli@1 lint --config shared/api/.redocly.yaml shared/api/openapi.yaml

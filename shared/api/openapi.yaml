@@ -1,0 +1,2251 @@
+openapi: 3.1.0
+
+# =============================================================================
+# shared/api/openapi.yaml — EL CONTRATO. Fuente de verdad de los cuatro clientes.
+#
+# AGENTS.md §4.2: los modelos de red de Android, Wear, iOS y watchOS SE GENERAN
+# desde acá. No se escriben a mano. Si tocás este archivo, en el MISMO commit van
+# los clientes regenerados o una nota explícita de por qué no.
+#
+# AGENTS.md §5: a partir de la primera versión en tienda, un cambio de forma o de
+# tipo ROMPE apps ya instaladas. Desde ese día esto es aditivo o no es.
+#
+# Decisiones cerradas: docs/decisiones/0005-contrato-de-la-api.md
+# Envelope y códigos de error: docs/API.md
+# =============================================================================
+
+info:
+  title: Trainer API
+  version: 1.2.0
+  license:
+    name: >-
+      COMPLETAR. El repositorio es privado y la licencia del proyecto no está
+      decidida. Es un hueco marcado, no un valor por defecto.
+    identifier: LicenseRef-COMPLETAR
+  description: |
+    Contrato v1 de Trainer. Sólo lo que existe: salud del servicio, puerta de
+    versión mínima, legal, registro, login, refresh, recuperación de contraseña y
+    perfil (1.0.0). Desde la 1.1.0, el motor: catálogo de ejercicios, plan de
+    entrenamiento, rutina del día, sesiones de gimnasio con la sincronización de la
+    decisión 0006, actividades, el día de nutrición detrás de los guardarraíles de
+    AGENTS.md §9.2, comidas, y exportar o borrar la cuenta. Todo aditivo: nada de
+    la 1.0.0 cambió de forma.
+    Desde la 1.2.0 se agregaron objetivos y planes simultáneos, triatlón en
+    actividades y pronóstico de calor para avisos del día, sin quitar los
+    endpoints anteriores.
+
+    **Reglas que valen en TODA la API** (docs/API.md las explica):
+
+    - Éxito: `{"data": ...}`. Error: `{"error": {"code": "...", "message": "..."}}`.
+    - El `code` del error es CONTRATO, igual que el status HTTP. Los clientes lo
+      mapean a su catálogo de textos. Cambiar un `code` es cambiar la API.
+    - Todos los IDs viajan como **string**, aunque hoy sean UUID.
+    - Todos los tiempos son **milisegundos epoch, enteros**. Nunca ISO, nunca
+      segundos, nunca strings.
+    - Unidades base, siempre enteras: peso corporal en **gramos**, altura en
+      **milímetros**, distancia en **metros**, energía en **kcal enteras**, plata
+      en **centavos**. La conversión a lo que el usuario prefiere ve es del cliente.
+    - `snake_case` en las claves, simétrico: lo que entra y lo que sale se escriben
+      igual.
+    - Los números salen como números y los booleanos como booleanos.
+
+servers:
+  - url: https://{host}/v1
+    description: >-
+      Staging (decisión 0011). El dominio de PRODUCCIÓN sigue sin decidirse
+      (AGENTS.md §2.3.1): cuando exista, se agrega acá como otro servidor.
+    variables:
+      host:
+        default: stamina.com.ar
+        description: >-
+          El dominio propio de Stamina en el EC2 compartido.
+
+tags:
+  - name: servicio
+    description: Salud y puerta de versión. Públicos, sin autenticación.
+  - name: legal
+    description: El aviso de salud y los términos, con su versión.
+  - name: auth
+    description: Registro, sesión y recuperación de contraseña.
+  - name: perfil
+    description: Los datos de la persona.
+  - name: catalogo
+    description: El catálogo de ejercicios. Es dato del servidor, no código (AGENTS.md §9.1).
+  - name: plan
+    description: El plan de entrenamiento y la rutina del día. Los calcula el servidor.
+  - name: gimnasio
+    description: Sesiones y series, sincronizadas entre teléfono, reloj y servidor (decisión 0006).
+  - name: actividades
+    description: Lo que se entrenó afuera del gimnasio.
+  - name: nutricion
+    description: Objetivos del día detrás de los guardarraíles de AGENTS.md §9.2, y comidas.
+  - name: cuenta
+    description: Exportar y borrar la cuenta (AGENTS.md §8).
+
+paths:
+
+  # ---------------------------------------------------------------- servicio --
+  /health:
+    get:
+      tags: [servicio]
+      operationId: getHealth
+      summary: Estado del servicio
+      description: |
+        Público y sin autenticación. Dice la versión desplegada y si las
+        dependencias responden. **No expone nada de un usuario** ni de la
+        infraestructura compartida: ni host, ni versión de Postgres, ni conteos.
+        Es un endpoint público en una máquina de producción ajena (AGENTS.md §2).
+      security: []
+      responses:
+        '200':
+          description: El servicio responde. `status` dice si además está sano.
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [data]
+                properties:
+                  data: { $ref: '#/components/schemas/Health' }
+        '503':
+          $ref: '#/components/responses/ServicioNoDisponible'
+
+  /version:
+    get:
+      tags: [servicio]
+      operationId: getVersionGate
+      summary: Puerta de versión mínima
+      description: |
+        **AGENTS.md §5.1: esto existe ANTES de publicar la v1, o no existe nunca.**
+        La app lo consulta al arrancar. Si su `build` es menor que `minimum_build`,
+        muestra la pantalla de actualización obligatoria y no sigue.
+
+        El mínimo **se cambia sin desplegar**: sale de una tabla de la base, no de
+        una constante compilada (ver docs/API.md).
+      security: []
+      parameters:
+        - name: platform
+          in: query
+          required: true
+          description: Qué cliente pregunta. Cada uno tiene su propio número.
+          schema: { $ref: '#/components/schemas/Plataforma' }
+        - name: build
+          in: query
+          required: false
+          description: >-
+            Build del cliente que pregunta. Opcional: si viene, el servidor
+            devuelve `action` ya resuelta y el cliente no tiene que comparar.
+          schema: { type: integer, format: int64, minimum: 1 }
+      responses:
+        '200':
+          description: Números vigentes para esa plataforma.
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [data]
+                properties:
+                  data: { $ref: '#/components/schemas/VersionGate' }
+        '400':
+          $ref: '#/components/responses/PedidoInvalido'
+
+  # -------------------------------------------------------------------- auth --
+  /legal:
+    get:
+      tags: [legal]
+      operationId: getLegal
+      summary: El aviso de salud y los términos, con su versión
+      description: |
+        Devuelve el texto que hay que mostrar antes de crear una cuenta, y la
+        `version` que después va en `POST /auth/register/complete`.
+
+        Es **público** y no lleva sesión: se muestra antes de que exista la cuenta.
+
+        🛑 El teléfono NO trae este texto empaquetado, y es a propósito. Un aviso
+        legal que hay que corregir esperando la revisión de la tienda es un aviso
+        legal que se queda mal escrito una semana. El cliente puede cachear la
+        última respuesta para poder mostrarla sin señal, pero la `version` que
+        manda al registrarse tiene que ser la de este endpoint: si mandó una vieja,
+        el servidor contesta `legal_version_stale` y hay que volver a pedir esto.
+      security: []
+      responses:
+        '200':
+          description: El texto vigente.
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [data]
+                properties:
+                  data: { $ref: '#/components/schemas/TextosLegales' }
+
+  /auth/register:
+    post:
+      tags: [auth]
+      operationId: registerStart
+      summary: Paso 1 del registro — pedir el código al correo
+      description: |
+        **Anti-enumeración (AGENTS.md §12): responde SIEMPRE 202, exista o no la
+        cuenta**, y el servidor gasta el mismo tiempo en las dos ramas. Si el
+        correo ya tiene cuenta, se le manda un aviso de que alguien intentó
+        registrarse con su dirección, no un código.
+
+        Rate limit por PATH, nunca por un parámetro del cliente (AGENTS.md §12).
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [email]
+              additionalProperties: false
+              properties:
+                email: { $ref: '#/components/schemas/Email' }
+                first_name: { type: string, minLength: 1, maxLength: 80 }
+                last_name: { type: string, minLength: 1, maxLength: 80 }
+      responses:
+        '202':
+          description: >-
+            Si esa dirección puede recibir un código, se mandó. La respuesta es
+            idéntica exista o no la cuenta.
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [data]
+                properties:
+                  data: { $ref: '#/components/schemas/DesafioCorreo' }
+        '400': { $ref: '#/components/responses/PedidoInvalido' }
+        '429': { $ref: '#/components/responses/DemasiadosPedidos' }
+
+  /auth/register/verify:
+    post:
+      tags: [auth]
+      operationId: registerVerify
+      summary: Paso 2 del registro — verificar el código
+      description: |
+        Devuelve un **token de registro** de vida corta, que es lo único que
+        habilita el paso 3. No es un token de sesión y no sirve para nada más.
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [email, code]
+              additionalProperties: false
+              properties:
+                email: { $ref: '#/components/schemas/Email' }
+                code: { $ref: '#/components/schemas/CodigoVerificacion' }
+      responses:
+        '200':
+          description: Código correcto.
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [data]
+                properties:
+                  data: { $ref: '#/components/schemas/TokenDeRegistro' }
+        '400': { $ref: '#/components/responses/PedidoInvalido' }
+        '429': { $ref: '#/components/responses/DemasiadosPedidos' }
+
+  /auth/register/complete:
+    post:
+      tags: [auth]
+      operationId: registerComplete
+      summary: Paso 3 del registro — contraseña y perfil
+      description: |
+        Cierra el registro y devuelve la sesión. El cuerpo lleva lo que los 13
+        pasos del diseño juntan (design/ESPECIFICACION.md §5.1).
+
+        `legal` es **obligatorio** y no es una formalidad: sin la versión del aviso
+        de salud que la persona aceptó, el registro de la aceptación no dice nada.
+        Los textos cambian; "aceptó los términos" sin decir cuáles no sirve el día
+        que haga falta.
+
+        Dos rechazos posibles, y son dos códigos distintos porque el cliente tiene
+        que hacer cosas distintas: `legal_not_accepted` (400) es volver a la
+        pantalla; `legal_version_stale` (409) es **bajar el texto nuevo** antes de
+        volver a mostrarlo — si no, le pide otra vez que acepte el mismo texto
+        viejo. En los dos casos NO se creó ninguna cuenta: se comprueba antes.
+
+        Todo se valida **en el servidor** (AGENTS.md §14.1), no sólo en el cliente.
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [registration_token, password, profile, legal]
+              additionalProperties: false
+              properties:
+                registration_token: { type: string }
+                password: { $ref: '#/components/schemas/Password' }
+                profile: { $ref: '#/components/schemas/PerfilEntrada' }
+                legal: { $ref: '#/components/schemas/AceptacionLegal' }
+      responses:
+        '201':
+          description: Cuenta creada y sesión abierta.
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [data]
+                properties:
+                  data: { $ref: '#/components/schemas/Sesion' }
+        '400': { $ref: '#/components/responses/PedidoInvalido' }
+        '429': { $ref: '#/components/responses/DemasiadosPedidos' }
+
+  /auth/login:
+    post:
+      tags: [auth]
+      operationId: login
+      summary: Entrar
+      description: |
+        **Anti-enumeración con verificación dummy (AGENTS.md §12):** si el correo
+        no existe, el servidor igual verifica un hash de descarte, para que el
+        TIEMPO de respuesta tampoco delate qué cuentas existen. Un solo código de
+        error, `invalid_credentials`, para las dos ramas.
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [email, password]
+              additionalProperties: false
+              properties:
+                email: { $ref: '#/components/schemas/Email' }
+                password: { type: string, minLength: 1, maxLength: 200 }
+      responses:
+        '200':
+          description: Sesión abierta.
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [data]
+                properties:
+                  data: { $ref: '#/components/schemas/Sesion' }
+        '400': { $ref: '#/components/responses/PedidoInvalido' }
+        '401': { $ref: '#/components/responses/NoAutorizado' }
+        '429': { $ref: '#/components/responses/DemasiadosPedidos' }
+
+  /auth/refresh:
+    post:
+      tags: [auth]
+      operationId: refresh
+      summary: Renovar el token de acceso
+      description: |
+        El refresh token se guarda **hasheado** en el servidor (AGENTS.md §12) y
+        **rota en cada uso**: el que se manda queda canjeado y se devuelve uno
+        nuevo. Rotar **no** revoca los access que ya salieron: valen hasta que
+        vencen (decisión 0013).
+
+        Volver a mandar un refresh ya canjeado es un **reintento** —la respuesta
+        anterior no llegó— si pasaron 2 minutos o menos y su sucesor no se usó:
+        devuelve **el mismo** refresh nuevo, con un access nuevo. En cualquier
+        otro caso es **reuso**, se revoca la familia entera de esa sesión y
+        contesta `session_revoked`: es la señal de que alguien lo copió.
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [refresh_token]
+              additionalProperties: false
+              properties:
+                refresh_token: { type: string }
+      responses:
+        '200':
+          description: Sesión renovada.
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [data]
+                properties:
+                  data: { $ref: '#/components/schemas/Sesion' }
+        '400': { $ref: '#/components/responses/PedidoInvalido' }
+        '401': { $ref: '#/components/responses/NoAutorizado' }
+
+  /auth/logout:
+    post:
+      tags: [auth]
+      operationId: logout
+      summary: Cerrar sesión
+      description: |
+        Revoca el refresh token que se manda. Con `all: true` revoca **todas** las
+        sesiones de la persona.
+
+        Idempotente: cerrar una sesión ya cerrada devuelve 204 igual, porque un
+        cliente sin señal va a reintentar (AGENTS.md §5.2).
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: false
+              properties:
+                refresh_token: { type: string }
+                all: { type: boolean, default: false }
+      responses:
+        '204': { description: Sesión cerrada. Sin cuerpo. }
+        '401': { $ref: '#/components/responses/NoAutorizado' }
+
+  /auth/password/forgot:
+    post:
+      tags: [auth]
+      operationId: passwordForgot
+      summary: Recuperar contraseña — pedir el código
+      description: >-
+        Mismo trato anti-enumeración que el registro: **siempre 202**, exista o no
+        la cuenta, y con el mismo costo de tiempo.
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [email]
+              additionalProperties: false
+              properties:
+                email: { $ref: '#/components/schemas/Email' }
+      responses:
+        '202':
+          description: Si esa dirección tiene cuenta, se mandó el código.
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [data]
+                properties:
+                  data: { $ref: '#/components/schemas/DesafioCorreo' }
+        '400': { $ref: '#/components/responses/PedidoInvalido' }
+        '429': { $ref: '#/components/responses/DemasiadosPedidos' }
+
+  /auth/password/verify:
+    post:
+      tags: [auth]
+      operationId: passwordVerify
+      summary: Recuperar contraseña — verificar el código
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [email, code]
+              additionalProperties: false
+              properties:
+                email: { $ref: '#/components/schemas/Email' }
+                code: { $ref: '#/components/schemas/CodigoVerificacion' }
+      responses:
+        '200':
+          description: Código correcto.
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [data]
+                properties:
+                  data: { $ref: '#/components/schemas/TokenDeReseteo' }
+        '400': { $ref: '#/components/responses/PedidoInvalido' }
+        '429': { $ref: '#/components/responses/DemasiadosPedidos' }
+
+  /auth/password/reset:
+    post:
+      tags: [auth]
+      operationId: passwordReset
+      summary: Recuperar contraseña — poner la nueva
+      description: >-
+        **Cambiar la contraseña revoca todas las demás sesiones** (AGENTS.md §12).
+        La respuesta trae una sesión nueva, así que el cliente no queda afuera.
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [reset_token, password]
+              additionalProperties: false
+              properties:
+                reset_token: { type: string }
+                password: { $ref: '#/components/schemas/Password' }
+      responses:
+        '200':
+          description: Contraseña cambiada y sesión nueva abierta.
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [data]
+                properties:
+                  data: { $ref: '#/components/schemas/Sesion' }
+        '400': { $ref: '#/components/responses/PedidoInvalido' }
+        '401': { $ref: '#/components/responses/NoAutorizado' }
+
+  # ------------------------------------------------------------------ perfil --
+  /me:
+    get:
+      tags: [perfil]
+      operationId: getMe
+      summary: Mi perfil
+      description: >-
+        Devuelve el perfil **del dueño del token**. No existe `GET /users/{id}`:
+        no hay forma de pedir el perfil de otro, que es la manera más simple de no
+        tener un IDOR (AGENTS.md §12).
+      responses:
+        '200':
+          description: El perfil.
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [data]
+                properties:
+                  data: { $ref: '#/components/schemas/Perfil' }
+        '401': { $ref: '#/components/responses/NoAutorizado' }
+    patch:
+      tags: [perfil]
+      operationId: updateMe
+      summary: Editar mi perfil
+      description: |
+        Parcial: sólo se manda lo que cambia. El correo **no** se edita acá — mover
+        una cuenta a otra dirección necesita verificar la nueva, y eso es su propio
+        flujo, que no está en la v1.
+      parameters:
+        - $ref: '#/components/parameters/ClaveDeIdempotencia'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/PerfilEntrada' }
+      responses:
+        '200':
+          description: Perfil actualizado. Devuelve el perfil completo, ya guardado.
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [data]
+                properties:
+                  data: { $ref: '#/components/schemas/Perfil' }
+        '400': { $ref: '#/components/responses/PedidoInvalido' }
+        '401': { $ref: '#/components/responses/NoAutorizado' }
+        '409':
+          description: >-
+            La misma `Idempotency-Key` con otro cuerpo, o un reintento del mismo
+            pedido que todavía está en vuelo. En el segundo caso el pedido no
+            falló: hay que volver a intentar en un momento.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Error' }
+
+  # ---------------------------------------------------------------- cuenta --
+  /me/goals:
+    get:
+      tags: [perfil]
+      operationId: getGoals
+      summary: Mis objetivos activos, en el orden elegido
+      responses:
+        '200':
+          description: Objetivos actuales. Una lista vacía pide elegir uno.
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [data]
+                properties:
+                  data:
+                    type: array
+                    items: { $ref: '#/components/schemas/ObjetivoActivo' }
+        '401': { $ref: '#/components/responses/NoAutorizado' }
+    put:
+      tags: [perfil]
+      operationId: replaceGoals
+      summary: Reemplazar mis objetivos activos
+      description: >-
+        El primer elemento es el principal, compatible con GET /plan y PATCH /me.
+        Los siguientes tienen planes independientes. Enviar una lista vacía deja
+        el perfil sin objetivo y la app muestra la invitación a elegirlo.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [goals]
+              additionalProperties: false
+              properties:
+                goals:
+                  type: array
+                  maxItems: 10
+                  items: { $ref: '#/components/schemas/ObjetivoEntrada' }
+      responses:
+        '200':
+          description: Lista guardada con los identificadores definitivos.
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [data]
+                properties:
+                  data:
+                    type: array
+                    items: { $ref: '#/components/schemas/ObjetivoActivo' }
+        '400': { $ref: '#/components/responses/PedidoInvalido' }
+        '401': { $ref: '#/components/responses/NoAutorizado' }
+
+  # ---------------------------------------------------------------- cuenta --
+  /me/delete:
+    post:
+      tags: [cuenta]
+      operationId: deleteMe
+      summary: Borrar mi cuenta
+      description: |
+        **AGENTS.md §8: borrar es una feature, no un favor.** Pide la contraseña otra
+        vez: un access token robado no alcanza para borrarle la cuenta a nadie.
+
+        La cuenta y sus datos dependientes se borran físicamente en el acto por
+        cascada; sus sesiones dejan de existir y el correo queda libre para volver
+        a registrarse. No hay plazo de retención de 30 días en la base activa.
+
+        Es un POST y no un DELETE con cuerpo a propósito: el `HttpURLConnection` de
+        Java no manda cuerpo en un DELETE, y la contraseña tiene que viajar.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [password]
+              additionalProperties: false
+              properties:
+                password: { type: string, minLength: 1, maxLength: 200 }
+      responses:
+        '204': { description: Cuenta borrada. Sin cuerpo. }
+        '400': { $ref: '#/components/responses/PedidoInvalido' }
+        '401': { $ref: '#/components/responses/NoAutorizado' }
+        '429': { $ref: '#/components/responses/DemasiadosPedidos' }
+
+  /me/export:
+    get:
+      tags: [cuenta]
+      operationId: exportMe
+      summary: Exportar mis datos
+      description: >-
+        **AGENTS.md §8.** Todo lo que el servidor guarda de la persona, en un solo
+        JSON: perfil, aceptaciones legales, anclas del plan, sesiones de gimnasio con
+        sus series, actividades y comidas. Nunca incluye hashes ni tokens.
+      responses:
+        '200':
+          description: Los datos.
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [data]
+                properties:
+                  data: { $ref: '#/components/schemas/ExportacionDeDatos' }
+        '401': { $ref: '#/components/responses/NoAutorizado' }
+        '429': { $ref: '#/components/responses/DemasiadosPedidos' }
+
+  # -------------------------------------------------------------- catálogo --
+  /exercises:
+    get:
+      tags: [catalogo]
+      operationId: listExercises
+      summary: El catálogo de ejercicios
+      description: |
+        Paginado por cursor (docs/API.md §1). Los nombres salen en el idioma de
+        `Accept-Language`: es-AR o en-US, y cualquier otro cae en es-AR.
+
+        Las apps traen una copia de la semilla para abrir sin señal, pero **lo que
+        manda es esto**: agregar un ejercicio no puede exigir publicar la app
+        (AGENTS.md §9.1).
+      parameters:
+        - $ref: '#/components/parameters/Cursor'
+        - $ref: '#/components/parameters/Limite'
+      responses:
+        '200':
+          description: Una página del catálogo, ordenada por id.
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [data, pagination]
+                properties:
+                  data:
+                    type: array
+                    items: { $ref: '#/components/schemas/EjercicioCatalogado' }
+                  pagination: { $ref: '#/components/schemas/Paginacion' }
+        '400': { $ref: '#/components/responses/PedidoInvalido' }
+        '401': { $ref: '#/components/responses/NoAutorizado' }
+
+  /exercises/dictionary:
+    get:
+      tags: [catalogo]
+      operationId: getExerciseDictionary
+      summary: Los nombres de patrones, equipamiento, músculos y articulaciones
+      responses:
+        '200':
+          description: El diccionario, en el idioma de `Accept-Language`.
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [data]
+                properties:
+                  data: { $ref: '#/components/schemas/DiccionarioDeEjercicios' }
+        '401': { $ref: '#/components/responses/NoAutorizado' }
+
+  # ------------------------------------------------------------------ plan --
+  /plan:
+    get:
+      tags: [plan]
+      operationId: getPlan
+      summary: Mi plan de entrenamiento
+      description: |
+        **Lo calcula el servidor** (AGENTS.md §9.1 y §10). Es determinístico: con el
+        mismo perfil sale el mismo plan, e `input_hash` dice qué entró al cálculo.
+        Viene el bloque entero para que la app lo guarde: el plan del jueves no puede
+        depender de tener señal el jueves (§6).
+
+        El bloque arranca el día en que se generó y se REEMPLAZA sólo cuando cambia
+        algo estructural del perfil: objetivo, fecha, nivel, deporte, días o zona
+        horaria. Cambiar el peso recalcula kcal y avituallamiento sin mover el bloque.
+
+        Necesita `goal`, `level`, `sport`, `timezone` y al menos un día en
+        `training_days`; si falta alguno, `profile_incomplete`. El peso y la fecha de
+        nacimiento son opcionales: sin ellos no salen las kcal, el pulso ni el
+        avituallamiento, pero el plan sale igual.
+
+        Los textos (`title`, `detail`, `reasons[].text`) vienen en el idioma de
+        `Accept-Language`. Los `code` son estables.
+      responses:
+        '200':
+          description: El plan.
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [data]
+                properties:
+                  data: { $ref: '#/components/schemas/Plan' }
+        '400': { $ref: '#/components/responses/PedidoInvalido' }
+        '401': { $ref: '#/components/responses/NoAutorizado' }
+
+  /plans:
+    get:
+      tags: [plan]
+      operationId: getPlans
+      summary: Planes de todos mis objetivos activos
+      description: >-
+        Un plan por objetivo, en el orden elegido. Puede haber sesiones de dos
+        planes en el mismo día; cada una conserva el objetivo al que pertenece.
+      responses:
+        '200':
+          description: Lista de planes; vacía cuando no hay objetivos.
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [data]
+                properties:
+                  data:
+                    type: array
+                    items: { $ref: '#/components/schemas/PlanDeObjetivo' }
+        '401': { $ref: '#/components/responses/NoAutorizado' }
+
+  /weather/forecast:
+    post:
+      tags: [plan]
+      operationId: forecastWeather
+      summary: Pronóstico horario para avisos de calor
+      description: >-
+        El servidor reduce las coordenadas a décimas de grado antes de consultar
+        MET Norway y cachea la respuesta. No guarda la ubicación de la persona.
+        El pronóstico es informativo y debe citar la fuente.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [lat, lon]
+              additionalProperties: false
+              properties:
+                lat: { type: number, minimum: -90, maximum: 90 }
+                lon: { type: number, minimum: -180, maximum: 180 }
+      responses:
+        '200':
+          description: Temperaturas pronosticadas para las próximas 48 horas.
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [data]
+                properties:
+                  data: { $ref: '#/components/schemas/PronosticoDeCalor' }
+        '401': { $ref: '#/components/responses/NoAutorizado' }
+        '503': { $ref: '#/components/responses/ServicioNoDisponible' }
+
+  /plan/routine:
+    get:
+      tags: [plan]
+      operationId: getRoutine
+      summary: La rutina de gimnasio de un día
+      description: |
+        Los ejercicios con su prescripción SERIE POR SERIE (design/ESPECIFICACION.md
+        §6.2: una lista, no una cadena) y las series de la última vez que la persona
+        hizo cada uno, que es la columna PREVIA de la tabla.
+
+        Se eligen por patrón de movimiento con el equipamiento del perfil. Sin
+        equipamiento declarado se asume **sin equipo** (docs/PROPUESTA-MOTOR.md
+        §4.3): un plan que pide una barra a quien no la tiene no se hace.
+
+        🛑 **No prescribe peso.** La carga la decide la persona mirando lo que hizo
+        la vez anterior: el motor no inventa progresiones sin historial.
+      parameters:
+        - $ref: '#/components/parameters/FechaDelDia'
+      responses:
+        '200':
+          description: La rutina.
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [data]
+                properties:
+                  data: { $ref: '#/components/schemas/RutinaDelDia' }
+        '400': { $ref: '#/components/responses/PedidoInvalido' }
+        '401': { $ref: '#/components/responses/NoAutorizado' }
+
+  # -------------------------------------------------------------- gimnasio --
+  /gym/sessions:
+    get:
+      tags: [gimnasio]
+      operationId: listGymSessions
+      summary: Mis sesiones de gimnasio
+      parameters:
+        - $ref: '#/components/parameters/Cursor'
+        - $ref: '#/components/parameters/Limite'
+      responses:
+        '200':
+          description: Una página del historial, de la más nueva a la más vieja.
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [data, pagination]
+                properties:
+                  data:
+                    type: array
+                    items: { $ref: '#/components/schemas/ResumenDeSesionDeGimnasio' }
+                  pagination: { $ref: '#/components/schemas/Paginacion' }
+        '400': { $ref: '#/components/responses/PedidoInvalido' }
+        '401': { $ref: '#/components/responses/NoAutorizado' }
+
+  /gym/sessions/{session_id}:
+    get:
+      tags: [gimnasio]
+      operationId: getGymSession
+      summary: Una sesión de gimnasio con sus series
+      parameters:
+        - $ref: '#/components/parameters/IdDeSesionDeGimnasio'
+      responses:
+        '200':
+          description: La sesión.
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [data]
+                properties:
+                  data: { $ref: '#/components/schemas/SesionDeGimnasio' }
+        '400': { $ref: '#/components/responses/PedidoInvalido' }
+        '401': { $ref: '#/components/responses/NoAutorizado' }
+        '404':
+          description: >-
+            No existe, o no es de quien pregunta: en esta API son el mismo caso
+            (docs/API.md §2).
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Error' }
+
+  /gym/sessions/{session_id}/sets:
+    post:
+      tags: [gimnasio]
+      operationId: syncGymSets
+      summary: Sincronizar series
+      description: |
+        **Decisión 0006.** No es "crear": es "esto es lo que tengo". El servidor
+        fusiona cada serie con la que ya tenía —identidad `(sesión, ejercicio,
+        número)`, `done` monotónica, fila completa, gana la última en llegar AL
+        SERVIDOR— y devuelve la sesión ENTERA con `received_at_ms` puesto, para que
+        el dispositivo la fusione a su vez con lo suyo.
+
+        Mandar el mismo lote dos veces no duplica nada por construcción, y además
+        acepta `Idempotency-Key` (AGENTS.md §5.2). La sesión se crea sola la primera
+        vez. Con un id `gym-YYYY-MM-DD` la respuesta trae `date_ms`.
+
+        🛑 Mandar primero lo pendiente y DESPUÉS pedir: lo que llegó al servidor le
+        gana a lo que todavía no llegó, así que traer la sesión antes de subir lo
+        propio le haría perder al dispositivo sus cambios sin mandar.
+      parameters:
+        - $ref: '#/components/parameters/IdDeSesionDeGimnasio'
+        - $ref: '#/components/parameters/ClaveDeIdempotencia'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [sets]
+              additionalProperties: false
+              properties:
+                sets:
+                  type: array
+                  minItems: 1
+                  maxItems: 200
+                  items: { $ref: '#/components/schemas/SerieDeGimnasioEntrada' }
+      responses:
+        '200':
+          description: La sesión entera, ya fusionada.
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [data]
+                properties:
+                  data: { $ref: '#/components/schemas/SesionDeGimnasio' }
+        '400': { $ref: '#/components/responses/PedidoInvalido' }
+        '401': { $ref: '#/components/responses/NoAutorizado' }
+        '409':
+          description: La misma `Idempotency-Key` con otro cuerpo, o el mismo pedido todavía en vuelo.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Error' }
+        '429': { $ref: '#/components/responses/DemasiadosPedidos' }
+
+  # ----------------------------------------------------------- actividades --
+  /activities:
+    get:
+      tags: [actividades]
+      operationId: listActivities
+      summary: Mis actividades
+      parameters:
+        - $ref: '#/components/parameters/Cursor'
+        - $ref: '#/components/parameters/Limite'
+      responses:
+        '200':
+          description: Una página, de la más nueva a la más vieja.
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [data, pagination]
+                properties:
+                  data:
+                    type: array
+                    items: { $ref: '#/components/schemas/Actividad' }
+                  pagination: { $ref: '#/components/schemas/Paginacion' }
+        '400': { $ref: '#/components/responses/PedidoInvalido' }
+        '401': { $ref: '#/components/responses/NoAutorizado' }
+
+  /activities/{activity_id}:
+    put:
+      tags: [actividades]
+      operationId: putActivity
+      summary: Guardar una actividad
+      description: >-
+        Idempotente por id: la actividad nace sin señal, el id lo genera el cliente
+        y reintentar el PUT no crea dos (AGENTS.md §5.2). Un id que ya se borró
+        devuelve 404: un PUT viejo que llega tarde no resucita lo que la persona
+        borró.
+      parameters:
+        - $ref: '#/components/parameters/IdDeActividad'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/ActividadEntrada' }
+      responses:
+        '200':
+          description: La actividad guardada.
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [data]
+                properties:
+                  data: { $ref: '#/components/schemas/Actividad' }
+        '400': { $ref: '#/components/responses/PedidoInvalido' }
+        '401': { $ref: '#/components/responses/NoAutorizado' }
+        '404':
+          description: Ese id existió y se borró.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Error' }
+    delete:
+      tags: [actividades]
+      operationId: deleteActivity
+      summary: Borrar una actividad
+      description: Idempotente. Borrar lo ya borrado, o lo que no existe, también da 204.
+      parameters:
+        - $ref: '#/components/parameters/IdDeActividad'
+      responses:
+        '204': { description: Borrada. Sin cuerpo. }
+        '400': { $ref: '#/components/responses/PedidoInvalido' }
+        '401': { $ref: '#/components/responses/NoAutorizado' }
+
+  /activities/{activity_id}/route:
+    put:
+      tags: [actividades]
+      operationId: putActivityRoute
+      summary: Guardar el recorrido GPS de una actividad existente
+      description: >-
+        Idempotente por actividad. Máximo 10000 puntos ordenados por instante.
+        Sólo la persona dueña de la actividad puede escribirlo o leerlo.
+      parameters:
+        - $ref: '#/components/parameters/IdDeActividad'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: false
+              required: [points]
+              properties:
+                points:
+                  type: array
+                  minItems: 1
+                  maxItems: 10000
+                  items:
+                    type: object
+                    additionalProperties: false
+                    required: [lat, lon, at_ms]
+                    properties:
+                      lat: { type: number, minimum: -90, maximum: 90 }
+                      lon: { type: number, minimum: -180, maximum: 180 }
+                      at_ms: { $ref: '#/components/schemas/EpochMs' }
+      responses:
+        '200': { description: Recorrido guardado. }
+        '400': { $ref: '#/components/responses/PedidoInvalido' }
+        '401': { $ref: '#/components/responses/NoAutorizado' }
+        '404':
+          description: Actividad inexistente o borrada.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Error' }
+    get:
+      tags: [actividades]
+      operationId: getActivityRoute
+      summary: Leer el recorrido GPS de una actividad propia
+      parameters:
+        - $ref: '#/components/parameters/IdDeActividad'
+      responses:
+        '200': { description: Recorrido guardado. }
+        '401': { $ref: '#/components/responses/NoAutorizado' }
+        '404':
+          description: Recorrido inexistente o actividad borrada.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Error' }
+
+  # ------------------------------------------------------------- nutrición --
+  /nutrition/day:
+    get:
+      tags: [nutricion]
+      operationId: getNutritionDay
+      summary: La nutrición de un día
+      description: |
+        Los objetivos del día y lo que se comió. **Los objetivos los calcula el
+        servidor y pasan por los guardarraíles de AGENTS.md §9.2**: nunca salen por
+        debajo del piso calórico, y hay casos en los que NO salen.
+
+        Cuando no hay objetivos viene `unavailable_reason` en lugar de `targets`, y la
+        app muestra apoyo en vez de un número. Se decide ANTES de calcular: menores
+        de edad, embarazo o lactancia, quien no respondió si lo está, y quien no
+        declaró el sexo biológico (Mifflin-St Jeor lo necesita y no se promedia).
+
+        `targets.provisional` es `true` mientras los números no los haya revisado
+        alguien con formación. En producción el servidor no arranca en ese estado.
+      parameters:
+        - $ref: '#/components/parameters/FechaDelDia'
+      responses:
+        '200':
+          description: El día.
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [data]
+                properties:
+                  data: { $ref: '#/components/schemas/DiaNutricional' }
+        '400': { $ref: '#/components/responses/PedidoInvalido' }
+        '401': { $ref: '#/components/responses/NoAutorizado' }
+
+  /meals/{meal_id}:
+    put:
+      tags: [nutricion]
+      operationId: putMeal
+      summary: Guardar una comida
+      description: >-
+        Idempotente por id, igual que una actividad. Un id que ya se borró devuelve
+        404.
+      parameters:
+        - $ref: '#/components/parameters/IdDeComida'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/ComidaEntrada' }
+      responses:
+        '200':
+          description: La comida guardada.
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [data]
+                properties:
+                  data: { $ref: '#/components/schemas/ComidaRegistrada' }
+        '400': { $ref: '#/components/responses/PedidoInvalido' }
+        '401': { $ref: '#/components/responses/NoAutorizado' }
+        '404':
+          description: Ese id existió y se borró.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Error' }
+    delete:
+      tags: [nutricion]
+      operationId: deleteMeal
+      summary: Borrar una comida
+      description: Idempotente. Borrar lo ya borrado, o lo que no existe, también da 204.
+      parameters:
+        - $ref: '#/components/parameters/IdDeComida'
+      responses:
+        '204': { description: Borrada. Sin cuerpo. }
+        '400': { $ref: '#/components/responses/PedidoInvalido' }
+        '401': { $ref: '#/components/responses/NoAutorizado' }
+
+components:
+
+  parameters:
+    Cursor:
+      name: cursor
+      in: query
+      required: false
+      description: >-
+        El `next_cursor` de la página anterior, tal cual vino. Es opaco: el cliente
+        no lo arma ni lo interpreta (docs/API.md §1).
+      schema: { type: string, minLength: 1, maxLength: 512 }
+
+    Limite:
+      name: limit
+      in: query
+      required: false
+      description: >-
+        Cuántos por página. Por defecto 50 y como mucho 200. El servidor lo clampea
+        igual (AGENTS.md §12).
+      schema: { type: integer, minimum: 1, maximum: 200 }
+
+    FechaDelDia:
+      name: date_ms
+      in: query
+      required: true
+      description: >-
+        Cualquier instante del día que se pide. El servidor lo lleva al día LOCAL de
+        la persona con la `timezone` de su perfil, así que para pedir hoy alcanza
+        con mandar "ahora".
+      schema: { $ref: '#/components/schemas/EpochMs' }
+
+    IdDeSesionDeGimnasio:
+      name: session_id
+      in: path
+      required: true
+      description: >-
+        El id que derivan los dos dispositivos, `gym-YYYY-MM-DD` con la fecha local
+        (`ClaveDeSerie.sesionDeGimnasio` en TrainerCore). Minúsculas, números y guiones.
+      schema: { type: string, pattern: '^[a-z0-9][a-z0-9-]{0,63}$' }
+
+    IdDeActividad:
+      name: activity_id
+      in: path
+      required: true
+      description: Lo genera el cliente (un UUID sirve), para que reintentar el PUT no cree dos.
+      schema: { type: string, pattern: '^[A-Za-z0-9-]{8,64}$' }
+
+    IdDeComida:
+      name: meal_id
+      in: path
+      required: true
+      description: Lo genera el cliente, igual que el de una actividad.
+      schema: { type: string, pattern: '^[A-Za-z0-9-]{8,64}$' }
+
+    ClaveDeIdempotencia:
+      name: Idempotency-Key
+      in: header
+      required: false
+      description: >-
+        AGENTS.md §5.2. La genera el cliente, **una por intento de escritura y
+        estable entre reintentos de ESE intento**: el servidor devuelve la misma
+        respuesta en vez de escribir dos veces. Con otro cuerpo, la misma clave da
+        409. Opcional en la API y obligatoria en el cliente: exigir el header
+        rompería a cualquier versión publicada que todavía no lo mande.
+      schema: { type: string, maxLength: 200 }
+
+  securitySchemes:
+    accessToken:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+      description: >-
+        `Authorization: Bearer <access_token>`. El algoritmo está **fijado en
+        código**, nunca se lee del header del token (AGENTS.md §12).
+
+  schemas:
+
+    # ---- tipos base ----
+    EpochMs:
+      type: integer
+      format: int64
+      description: Milisegundos desde epoch, UTC. Entero. Es el ÚNICO formato de tiempo de la API.
+      examples: [1757308800000]
+
+    Id:
+      type: string
+      description: >-
+        Identificador. **Siempre string**, aunque hoy sea un UUID: es lo único que
+        deja cambiar de tipo sin romper decoders tipados de Swift y Kotlin.
+      minLength: 1
+      maxLength: 64
+      examples: ["9f1c2b7e-5a3d-4c81-9f0e-2b6d8a4c1f70"]
+
+    Email:
+      type: string
+      format: email
+      minLength: 3
+      maxLength: 254
+      description: Se normaliza a minúsculas en el servidor antes de comparar.
+
+    Password:
+      type: string
+      minLength: 10
+      maxLength: 200
+      pattern: '(?=.*\p{Lu})(?=.*\p{Nd})'
+      description: >-
+        Mínimo 10 caracteres, con al menos una mayúscula y al menos un número.
+        Las mayúsculas acentuadas y la Ñ cuentan: el servidor usa `\p{Lu}`, no
+        `[A-Z]`.
+
+        Esas tres son las reglas que la app MUESTRA mientras alguien escribe
+        (`design/origen/Trainer App.dc.html`, pantalla `fpNew`: tres barras y tres
+        puntitos). El servidor además rechaza, sin anticiparlo, las que están en su
+        lista de contraseñas conocidas y las que tienen menos de cuatro caracteres
+        distintos; las dos devuelven `weak_password`.
+
+        Se guarda con argon2id, nunca en claro y nunca en un log.
+
+    CodigoVerificacion:
+      type: string
+      pattern: '^[A-Z0-9]{6}$'
+      description: >-
+        6 alfanuméricos en mayúscula, como el diseño (design/ESPECIFICACION.md
+        §5.1). Vive 15 minutos y se puede reenviar a los 60 segundos.
+      examples: ["7KQ2M9"]
+
+    Plataforma:
+      type: string
+      enum: [android, ios, wear, watchos]
+      description: Los cuatro clientes de AGENTS.md §1.3. Cada uno versiona por separado.
+
+    # ---- servicio ----
+    Health:
+      type: object
+      required: [status, version, dependencies]
+      properties:
+        status:
+          type: string
+          enum: [ok, degraded, down]
+        version:
+          type: string
+          description: Versión desplegada de Trainer. No la de Postgres ni la del sistema.
+        dependencies: { $ref: '#/components/schemas/EstadoDeDependencias' }
+
+    EstadoDeDependencias:
+      type: object
+      description: >-
+        Estaba escrito adentro de Health, sin nombre. Se extrajo el 2026-09-08 para
+        que el generador de modelos pueda emitirlo: un objeto anonimo obliga a
+        inventarle un nombre al cliente, y cada cliente inventa el suyo. La forma en
+        el cable NO cambia: es el mismo objeto en el mismo lugar.
+      required: [database, redis]
+      properties:
+        database: { type: string, enum: [ok, down] }
+        redis:
+          type: string
+          enum: [ok, down, disabled]
+          description: >-
+            `disabled` (1.1.0) no es una falla: el servidor corre con
+            `REDIS_URL=disabled` a propósito y la caché vive en el proceso
+            (decisión 0011). No baja el `status` a `degraded`.
+
+    VersionGate:
+      type: object
+      required: [platform, minimum_build, recommended_build, action]
+      properties:
+        platform: { $ref: '#/components/schemas/Plataforma' }
+        minimum_build:
+          type: integer
+          format: int64
+          description: Por debajo de esto la app **no puede seguir**.
+        recommended_build:
+          type: integer
+          format: int64
+        action:
+          type: string
+          enum: [ok, update_recommended, update_required]
+          description: >-
+            Resuelto por el servidor cuando el cliente manda su `build`. Si no lo
+            manda, viene `ok` y el cliente compara solo.
+        code:
+          type: string
+          description: >-
+            Clave estable del mensaje. El cliente la mapea a su propio texto
+            traducido; `message` es el respaldo para cuando todavía no la conoce.
+          examples: ["update_required_security"]
+        message:
+          type: string
+          description: Texto ya traducido por el servidor según `Accept-Language`.
+        store_url:
+          type: string
+          description: A dónde mandar a la persona a actualizar.
+
+    # ---- auth ----
+    DesafioCorreo:
+      type: object
+      required: [expires_at_ms, resend_after_ms]
+      description: >-
+        Lo que se puede decir sin filtrar si la cuenta existe: cuánto vive el
+        código y cuándo se puede pedir otro. Nada más.
+      properties:
+        expires_at_ms: { $ref: '#/components/schemas/EpochMs' }
+        resend_after_ms: { $ref: '#/components/schemas/EpochMs' }
+
+    TokenDeRegistro:
+      type: object
+      description: >-
+        Lo que devuelve /auth/register/verify: el permiso de un solo uso para
+        completar el registro. Estaba escrito adentro de la respuesta, sin nombre;
+        se extrajo el 2026-09-09 para que el generador de modelos pueda emitirlo.
+        La forma en el cable NO cambia.
+      required: [registration_token, expires_at_ms]
+      properties:
+        registration_token: { type: string }
+        expires_at_ms: { $ref: '#/components/schemas/EpochMs' }
+
+    TokenDeReseteo:
+      type: object
+      description: >-
+        Lo que devuelve /auth/password/verify: el permiso de un solo uso para
+        poner la contraseña nueva. Estaba escrito adentro de la respuesta, sin
+        nombre; se extrajo el 2026-09-09 por el mismo motivo que TokenDeRegistro
+        —el generador de modelos no emite objetos anónimos— al escribir las
+        pantallas de recuperar contraseña. La forma en el cable NO cambia.
+      required: [reset_token, expires_at_ms]
+      properties:
+        reset_token: { type: string }
+        expires_at_ms: { $ref: '#/components/schemas/EpochMs' }
+
+    Sesion:
+      type: object
+      required: [access_token, access_expires_at_ms, refresh_token, refresh_expires_at_ms, user_id]
+      properties:
+        access_token:
+          type: string
+          description: "Corto. Va en el header `Authorization`, con el esquema Bearer."
+        access_expires_at_ms: { $ref: '#/components/schemas/EpochMs' }
+        refresh_token:
+          type: string
+          description: >-
+            Rota en cada uso. En el cliente va al almacenamiento seguro de la
+            plataforma —Keystore o Keychain—, nunca a preferencias planas ni a un
+            log (AGENTS.md §12.1).
+        refresh_expires_at_ms: { $ref: '#/components/schemas/EpochMs' }
+        user_id: { $ref: '#/components/schemas/Id' }
+
+    # ---- perfil ----
+    SexoBiologico:
+      type: string
+      enum: [femenino, masculino, sin_declarar]
+      description: >-
+        Para el cálculo de sudoración y de metabolismo basal, no para nada más.
+        Incluye "prefiero no decirlo" como el diseño (`reg-sexo`).
+
+    Deporte:
+      type: string
+      enum: [running, ciclismo, trekking, triatlon]
+
+    Nivel:
+      type: string
+      enum: [principiante, intermedio, avanzado]
+
+    Objetivo:
+      type: string
+      enum: [c5k, c10k, media_maraton, maraton, trail_montana, triatlon_olimpico, volver_sin_lesiones]
+      description: >-
+        Los 7 objetivos cerrados de `reg-objetivo`
+        (design/ESPECIFICACION.md §5.1). Cerrar la lista es lo que hace que el
+        motor del plan sea determinístico (AGENTS.md §9.1).
+
+    ObjetivoEntrada:
+      type: object
+      required: [goal, goal_date_ms]
+      additionalProperties: false
+      properties:
+        id:
+          type: string
+          description: principal para el primero, UUID existente para los demás; omitir al crear.
+        goal: { $ref: '#/components/schemas/Objetivo' }
+        goal_date_ms:
+          oneOf:
+            - $ref: '#/components/schemas/EpochMs'
+            - type: 'null'
+
+    ObjetivoActivo:
+      type: object
+      required: [id, goal, goal_date_ms]
+      properties:
+        id: { type: string }
+        goal: { $ref: '#/components/schemas/Objetivo' }
+        goal_date_ms:
+          oneOf:
+            - $ref: '#/components/schemas/EpochMs'
+            - type: 'null'
+
+    PlanDeObjetivo:
+      type: object
+      required: [goal_id, plan]
+      properties:
+        goal_id: { type: string }
+        plan: { $ref: '#/components/schemas/Plan' }
+
+    PronosticoDeCalor:
+      type: object
+      required: [source, source_url, hours]
+      properties:
+        source: { type: string, description: 'MET Norway' }
+        source_url: { type: string, format: uri }
+        hours:
+          type: array
+          items: { $ref: '#/components/schemas/HoraDePronostico' }
+
+    HoraDePronostico:
+      type: object
+      required: [at_ms, air_temperature_c]
+      properties:
+        at_ms: { $ref: '#/components/schemas/EpochMs' }
+        air_temperature_c: { type: number }
+
+    DiaEntrenamiento:
+      type: object
+      required: [weekday, minute_of_day]
+      additionalProperties: false
+      properties:
+        weekday:
+          type: integer
+          minimum: 1
+          maximum: 7
+          description: ISO-8601, 1 = lunes. La semana del diseño empieza el lunes.
+        minute_of_day:
+          type: integer
+          minimum: 0
+          maximum: 1439
+          description: >-
+            Minutos desde la medianoche **local de la persona**. Sin zona no
+            significa nada, por eso el perfil lleva `timezone`.
+
+    TextosLegales:
+      type: object
+      description: >-
+        El aviso de salud y los términos, tal como se muestran. La estructura es
+        deliberadamente tonta —título, resumen y una lista de bloques— porque el
+        texto lo edita quien lo revise, no quien programa: cuantos menos campos con
+        significado, menos chances de que un cambio de redacción rompa la pantalla.
+      required: [version, health_notice, terms]
+      additionalProperties: false
+      properties:
+        version:
+          type: string
+          pattern: '^\d+\.\d+\.\d+$'
+        reviewed:
+          type: boolean
+          description: >-
+            `false` mientras el texto sea un borrador que no revisó nadie con
+            formación legal. El servidor **no arranca en producción** con esto en
+            `false`; el campo existe para que se vea en desarrollo.
+        health_notice: { $ref: '#/components/schemas/BloqueLegal' }
+        terms: { $ref: '#/components/schemas/BloqueLegal' }
+
+    SeccionLegal:
+      type: object
+      description: Un bloque del texto. Un título corto y un párrafo.
+      required: [title, body]
+      additionalProperties: false
+      properties:
+        title: { type: string }
+        body: { type: string }
+
+    BloqueLegal:
+      type: object
+      required: [title, summary, sections, acceptance]
+      additionalProperties: false
+      properties:
+        title: { type: string }
+        summary: { type: string }
+        sections:
+          type: array
+          maxItems: 40
+          items: { $ref: '#/components/schemas/SeccionLegal' }
+        acceptance:
+          type: string
+          description: La frase que va al lado de la casilla de aceptar.
+
+    AceptacionLegal:
+      type: object
+      description: >-
+        La constancia de que la persona vio y aceptó el aviso de salud y los
+        términos. Se guarda con la versión y con la hora del servidor.
+
+        `version` es la de `shared/datos/textos-legales.json`. Es el campo que hace
+        que esto valga: sin él queda un "sí" sin referencia a qué se dijo.
+
+        No hay dos campos separados para el aviso y los términos porque el aviso de
+        salud **es parte** de los términos (sección 2) y se aceptan en la misma
+        pantalla. Si algún día se separan, se agrega un campo; sacarlo sería un
+        cambio incompatible.
+      required: [version, accepted]
+      additionalProperties: false
+      properties:
+        version:
+          type: string
+          pattern: '^\d+\.\d+\.\d+$'
+          description: La versión del texto que se le mostró, tal cual.
+        accepted:
+          type: boolean
+          description: >-
+            Tiene que ser `true`. Existe como campo, y no se da por implícito al
+            mandar `version`, para que un cliente no pueda "aceptar" por descuido
+            mandando sólo la versión que tenía cacheada.
+
+    PerfilEntrada:
+      type: object
+      description: >-
+        Lo que el cliente puede escribir. Todo opcional para que `PATCH /me` mande
+        sólo lo que cambia; `POST /auth/register/complete` exige el mínimo que el
+        motor necesita, y esa validación es del servidor.
+      additionalProperties: false
+      properties:
+        first_name: { type: string, minLength: 1, maxLength: 80 }
+        last_name:
+          oneOf:
+            - { type: string, minLength: 1, maxLength: 80 }
+            - type: 'null'
+          description: >-
+            Puede ser null a propósito, igual que `goal_date_ms`: el apellido es
+            opcional (`reg-nombre` del diseño) y quien lo cargó tiene que poder
+            borrarlo. Sin el null, un apellido escrito una vez no se saca nunca
+            —mandar `""` lo rechaza el `minLength`, y omitir la clave deja el
+            valor viejo—. Aditivo: nada que hoy mande un string deja de andar.
+        birthdate_ms: { $ref: '#/components/schemas/EpochMs' }
+        biological_sex: { $ref: '#/components/schemas/SexoBiologico' }
+        weight_g:
+          type: integer
+          minimum: 20000
+          maximum: 400000
+          description: Peso corporal en **gramos**. Entero, nunca decimal.
+        height_mm:
+          type: integer
+          minimum: 500
+          maximum: 2600
+          description: >-
+            Altura en **milímetros**. La regla de §5 fija la distancia en metros,
+            pero eso es para distancias de entrenamiento: una altura en metros
+            enteros no sirve. Ver la decisión 0005.
+        sport: { $ref: '#/components/schemas/Deporte' }
+        level: { $ref: '#/components/schemas/Nivel' }
+        goal: { $ref: '#/components/schemas/Objetivo' }
+        goal_date_ms:
+          oneOf:
+            - $ref: '#/components/schemas/EpochMs'
+            - type: 'null'
+          description: >-
+            Fecha de la carrera. Puede ser null a propósito: el diseño deja seguir
+            sin fecha (`reg-objetivo`). Es una fecha SIN HORA, igual que
+            `birthdate_ms`: viaja como la medianoche UTC del día elegido, y el
+            servidor lee sólo la fecha en UTC (docs/API.md §1).
+        training_days:
+          type: array
+          maxItems: 7
+          items: { $ref: '#/components/schemas/DiaEntrenamiento' }
+        timezone:
+          type: string
+          maxLength: 64
+          description: Zona IANA, p. ej. `America/Argentina/Buenos_Aires`.
+          examples: ["America/Argentina/Buenos_Aires"]
+        unit_system:
+          type: string
+          enum: [metrico, imperial]
+          description: >-
+            Preferencia de PRESENTACIÓN. No cambia lo que se guarda: la API habla
+            siempre en la unidad base (AGENTS.md §10).
+        medical_disclaimer_accepted:
+          type: boolean
+          description: El descargo de `reg-salud`. Se guarda con su fecha del lado del servidor.
+        equipment:
+          oneOf:
+            - type: array
+              maxItems: 20
+              items: { type: string, pattern: '^[a-z0-9][a-z0-9-]{0,39}$' }
+            - type: 'null'
+          description: >-
+            (1.1.0) Qué equipamiento tiene la persona, con los ids del diccionario del
+            catálogo (`GET /exercises/dictionary`). Sin declarar, la rutina asume sin
+            equipo. Acepta null para poder vaciarlo (docs/API.md §7).
+        pregnant_or_breastfeeding:
+          oneOf:
+            - type: boolean
+            - type: 'null'
+          description: >-
+            (1.1.0) 🛑 AGENTS.md §9.2: embarazo y lactancia están FUERA del flujo
+            genérico de nutrición. Sin esta respuesta el servidor no da objetivos
+            calóricos a quien declaró sexo biológico femenino. Es un dato de salud
+            (§8): se pregunta sólo para eso y no se usa para nada más.
+
+    Perfil:
+      type: object
+      required: [id, email, created_at_ms, updated_at_ms]
+      description: >-
+        Lo que el servidor devuelve. **Nunca** incluye el hash de la contraseña, ni
+        tokens, ni tokens de terceros (AGENTS.md §7).
+      properties:
+        id: { $ref: '#/components/schemas/Id' }
+        email: { $ref: '#/components/schemas/Email' }
+        first_name: { type: string }
+        last_name: { type: string }
+        birthdate_ms: { $ref: '#/components/schemas/EpochMs' }
+        biological_sex: { $ref: '#/components/schemas/SexoBiologico' }
+        weight_g: { type: integer }
+        height_mm: { type: integer }
+        sport: { $ref: '#/components/schemas/Deporte' }
+        level: { $ref: '#/components/schemas/Nivel' }
+        goal: { $ref: '#/components/schemas/Objetivo' }
+        goal_date_ms:
+          oneOf:
+            - $ref: '#/components/schemas/EpochMs'
+            - type: 'null'
+        training_days:
+          type: array
+          items: { $ref: '#/components/schemas/DiaEntrenamiento' }
+        timezone: { type: string }
+        unit_system: { type: string, enum: [metrico, imperial] }
+        medical_disclaimer_accepted_at_ms:
+          oneOf:
+            - $ref: '#/components/schemas/EpochMs'
+            - type: 'null'
+        equipment:
+          type: array
+          items: { type: string }
+        pregnant_or_breastfeeding: { type: boolean }
+        created_at_ms: { $ref: '#/components/schemas/EpochMs' }
+        updated_at_ms: { $ref: '#/components/schemas/EpochMs' }
+
+    # ---- listas ----
+    Paginacion:
+      type: object
+      description: >-
+        La otra mitad de toda lista (docs/API.md §1). `next_cursor` viene sólo si hay
+        otra página, y se devuelve tal cual en el parámetro `cursor`.
+      required: [has_more]
+      properties:
+        next_cursor: { type: string }
+        has_more: { type: boolean }
+
+    # ---- catálogo ----
+    EjercicioCatalogado:
+      type: object
+      description: >-
+        Un ejercicio del catálogo. `pattern`, `equipment`, `muscles[].id` y `joints`
+        son ids del diccionario y NO son enums: el catálogo es dato y crece sin
+        publicar la app (AGENTS.md §9.1). No trae prescripción: series, repeticiones
+        y descanso los decide la rutina, no el ejercicio.
+      required: [id, name, pattern, equipment, side, unit, muscles, substitutes, joints]
+      properties:
+        id: { type: string }
+        name: { type: string, description: En el idioma de `Accept-Language`. }
+        pattern: { type: string }
+        equipment: { type: string }
+        side:
+          type: string
+          description: "`bilateral` o `unilateral`. String y no enum: es dato del catálogo."
+        unit:
+          type: string
+          description: "`reps` o `tiempo`. Con `tiempo`, las repeticiones de la rutina son segundos."
+        muscles:
+          type: array
+          items: { $ref: '#/components/schemas/MusculoDeEjercicio' }
+        substitutes:
+          type: array
+          items: { $ref: '#/components/schemas/SustitutoDeEjercicio' }
+        joints:
+          type: array
+          items: { type: string }
+          description: Qué articulaciones CARGA. Es un dato estructural, no un criterio clínico.
+
+    MusculoDeEjercicio:
+      type: object
+      required: [id, role]
+      properties:
+        id: { type: string }
+        role: { $ref: '#/components/schemas/RolDeMusculo' }
+
+    RolDeMusculo:
+      type: string
+      enum: [principal, secundario]
+
+    SustitutoDeEjercicio:
+      type: object
+      required: [id, kind]
+      properties:
+        id: { type: string }
+        kind: { $ref: '#/components/schemas/TipoDeSustituto' }
+
+    TipoDeSustituto:
+      type: string
+      enum: [mismo_patron, mismo_musculo]
+      description: >-
+        `mismo_patron` se intercambia sin cambiar la forma de la sesión;
+        `mismo_musculo` carga lo mismo por otro camino y NO es un reemplazo
+        transparente: se ofrece, no se cambia solo.
+
+    DiccionarioDeEjercicios:
+      type: object
+      required: [patterns, equipment, muscles, joints]
+      properties:
+        patterns:
+          type: array
+          items: { $ref: '#/components/schemas/EntradaDeDiccionario' }
+        equipment:
+          type: array
+          items: { $ref: '#/components/schemas/EntradaDeDiccionario' }
+        muscles:
+          type: array
+          items: { $ref: '#/components/schemas/EntradaDeDiccionario' }
+        joints:
+          type: array
+          items: { $ref: '#/components/schemas/EntradaDeDiccionario' }
+
+    EntradaDeDiccionario:
+      type: object
+      required: [id, name]
+      properties:
+        id: { type: string }
+        name: { type: string }
+
+    # ---- plan ----
+    Fase:
+      type: string
+      enum: [base, construccion, pico, afinamiento, carrera]
+
+    TipoDeSesion:
+      type: string
+      enum: [descanso, regenerativo, suave, fondo, tempo, umbral, series, cuestas, fartlek, ritmo_carrera, fuerza, carrera]
+
+    DeporteDeSesion:
+      type: string
+      enum: [running, ciclismo, natacion, trekking, fuerza, otro, triatlon]
+
+    Zona:
+      type: string
+      enum: [z1, z2, z3, z4, z5]
+      description: Zona de frecuencia cardíaca, como porcentaje de la máxima.
+
+    Plan:
+      type: object
+      required: [motor_version, input_hash, generated_at_ms, timezone, locale, start_date_ms, event_date_ms, total_weeks, goal, phases, weeks, days]
+      properties:
+        motor_version: { type: string, description: La versión del motor que hizo el cálculo. }
+        input_hash:
+          type: string
+          description: >-
+            Hash de TODO lo que entró al cálculo, motor incluido. Si no cambia, el plan
+            tampoco: es lo que responde "¿por qué me cambió el plan?" con un dato.
+        generated_at_ms:
+          $ref: '#/components/schemas/EpochMs'
+        timezone: { type: string, description: La zona con la que se armaron los días. }
+        locale: { type: string, description: 'El idioma de los textos: es-AR o en-US.' }
+        start_date_ms:
+          $ref: '#/components/schemas/EpochMs'
+        event_date_ms:
+          oneOf:
+            - $ref: '#/components/schemas/EpochMs'
+            - type: 'null'
+          description: >-
+            00:00 local del día del evento, o null si el bloque es genérico (sin fecha,
+            o con una fecha pasada o a más de un año).
+        total_weeks: { type: integer }
+        goal: { $ref: '#/components/schemas/Objetivo' }
+        phases:
+          type: array
+          items: { $ref: '#/components/schemas/TramoDeFase' }
+        weeks:
+          type: array
+          items: { $ref: '#/components/schemas/SemanaPlanificada' }
+        streak:
+          type: object
+          required: [current, active_today, trained_today, scheduled_today]
+          properties:
+            current: { type: integer, minimum: 0 }
+            active_today: { type: boolean }
+            trained_today: { type: boolean }
+            scheduled_today: { type: boolean }
+        days:
+          type: array
+          items: { $ref: '#/components/schemas/DiaPlanificado' }
+
+    TramoDeFase:
+      type: object
+      required: [phase, first_week, last_week]
+      properties:
+        phase: { $ref: '#/components/schemas/Fase' }
+        first_week: { type: integer }
+        last_week: { type: integer }
+
+    SemanaPlanificada:
+      type: object
+      required: [number, phase, start_date_ms, is_deload, planned_duration_min, planned_distance_m, done_sessions, done_distance_m]
+      properties:
+        number: { type: integer }
+        phase: { $ref: '#/components/schemas/Fase' }
+        start_date_ms: { $ref: '#/components/schemas/EpochMs' }
+        is_deload: { type: boolean, description: Semana de descarga. No son opcionales (AGENTS.md §9.1). }
+        planned_duration_min: { type: integer }
+        planned_distance_m: { type: integer }
+        done_sessions: { type: integer, description: Días de esa semana con una actividad o series de gimnasio registradas. }
+        done_distance_m: { type: integer }
+
+    DiaPlanificado:
+      type: object
+      required: [date_ms, day_index, weekday, week_number, phase, type, sport, duration_min, is_deload_week, title, detail, reasons, done]
+      properties:
+        date_ms:
+          $ref: '#/components/schemas/EpochMs'
+        day_index: { type: integer, description: 0 es el primer día del bloque. }
+        weekday: { type: integer, minimum: 1, maximum: 7, description: 'ISO-8601, 1 = lunes.' }
+        week_number: { type: integer }
+        phase: { $ref: '#/components/schemas/Fase' }
+        type: { $ref: '#/components/schemas/TipoDeSesion' }
+        sport: { $ref: '#/components/schemas/DeporteDeSesion' }
+        scheduled_minute_of_day:
+          type: integer
+          minimum: 0
+          maximum: 1439
+          description: La hora que eligió la persona para ese día de la semana. Ausente en descanso.
+        duration_min: { type: integer }
+        distance_m: { type: integer }
+        zone: { $ref: '#/components/schemas/Zona' }
+        hr_low_bpm: { type: integer, description: Ausente sin fecha de nacimiento. }
+        hr_high_bpm: { type: integer }
+        pace_low_s_per_km: { type: integer }
+        pace_high_s_per_km: { type: integer }
+        estimated_kcal: { type: integer, description: Ausente sin peso. }
+        fueling: { $ref: '#/components/schemas/Avituallamiento' }
+        is_deload_week: { type: boolean }
+        title: { type: string }
+        detail: { type: string }
+        reasons:
+          type: array
+          items: { $ref: '#/components/schemas/MotivoDelPlan' }
+        done: { type: boolean, description: Hay una actividad o series de gimnasio registradas ese día. }
+
+    MotivoDelPlan:
+      type: object
+      description: >-
+        El "por qué" de un día (AGENTS.md §9.1: explicable). `code` es estable;
+        `text` viene traducido.
+      required: [code, text]
+      properties:
+        code: { type: string }
+        text: { type: string }
+
+    Avituallamiento:
+      type: object
+      description: >-
+        Líquido, sodio e hidratos de la sesión, calculados por el servidor. Ausente en
+        descanso y sin peso. Los números son de un port SIN VERIFICAR
+        (docs/PROPUESTA-MOTOR.md §2).
+      required: [fluid_ml_per_hour, fluid_total_ml, sodium_mg_per_hour, sodium_total_mg, carbs_g_per_hour, carbs_total_g, gels, pre_fluid_ml, pre_carbs_g, post_fluid_ml, post_carbs_g, post_protein_g]
+      properties:
+        fluid_ml_per_hour: { type: integer }
+        fluid_total_ml: { type: integer }
+        sodium_mg_per_hour: { type: integer }
+        sodium_total_mg: { type: integer }
+        carbs_g_per_hour: { type: integer }
+        carbs_total_g: { type: integer }
+        gels: { type: integer }
+        pre_fluid_ml: { type: integer }
+        pre_carbs_g: { type: integer }
+        post_fluid_ml: { type: integer }
+        post_carbs_g: { type: integer }
+        post_protein_g: { type: integer }
+
+    RutinaDelDia:
+      type: object
+      required: [date_ms, session_id, planned, equipment_assumed, exercises]
+      properties:
+        date_ms: { $ref: '#/components/schemas/EpochMs' }
+        session_id:
+          type: string
+          description: El id con el que se sincronizan las series de esta rutina, `gym-YYYY-MM-DD`.
+        planned: { type: boolean, description: El plan pone fuerza ese día. }
+        equipment_assumed:
+          type: array
+          items: { type: string }
+          description: Con qué equipamiento se eligió. `ninguno` si la persona no declaró.
+        exercises:
+          type: array
+          items: { $ref: '#/components/schemas/EjercicioDeRutina' }
+
+    EjercicioDeRutina:
+      type: object
+      required: [exercise_id, name, pattern, equipment, unit, label, reason, rest_s, sets, previous_sets]
+      properties:
+        exercise_id: { type: string }
+        name: { type: string }
+        pattern: { type: string }
+        equipment: { type: string }
+        unit: { type: string, description: "`reps` o `tiempo`." }
+        label: { type: string, description: 'Traducido: "Para correr" o "General".' }
+        reason: { type: string, description: 'El "por qué" de este ejercicio, traducido.' }
+        rest_s: { type: integer }
+        sets:
+          type: array
+          items: { $ref: '#/components/schemas/SeriePrescritaDeRutina' }
+        previous_sets:
+          type: array
+          items: { $ref: '#/components/schemas/SerieAnterior' }
+          description: La columna PREVIA. Vacía si nunca lo hizo.
+
+    SeriePrescritaDeRutina:
+      type: object
+      required: [number, reps]
+      properties:
+        number: { type: integer }
+        reps: { type: integer, description: 'Repeticiones, o segundos si `unit` es `tiempo`.' }
+        weight_g:
+          type: integer
+          description: 'Gramos. Hoy no viene nunca: el motor no prescribe carga.'
+
+    SerieAnterior:
+      type: object
+      required: [number, reps, skipped]
+      properties:
+        number: { type: integer }
+        reps: { type: integer }
+        weight_g: { type: integer }
+        skipped: { type: boolean }
+
+    # ---- gimnasio ----
+    DispositivoDeOrigen:
+      type: string
+      enum: [telefono, reloj]
+
+    SerieDeGimnasioEntrada:
+      type: object
+      additionalProperties: false
+      required: [exercise_id, number, done, reps, skipped, is_extra, recorded_at_ms, device]
+      properties:
+        exercise_id: { type: string, pattern: '^[a-z0-9][a-z0-9-]{0,63}$' }
+        number: { type: integer, minimum: 1, maximum: 50, description: 1-based. Las extra siguen numerando. }
+        done: { type: boolean }
+        reps: { type: integer, minimum: 0, maximum: 1000 }
+        weight_g: { type: integer, minimum: 0, maximum: 1000000, description: 'Gramos. Sin el campo, peso corporal.' }
+        skipped: { type: boolean }
+        is_extra: { type: boolean }
+        recorded_at_ms:
+          $ref: '#/components/schemas/EpochMs'
+        device: { $ref: '#/components/schemas/DispositivoDeOrigen' }
+
+    SerieDeGimnasio:
+      type: object
+      required: [exercise_id, number, done, reps, skipped, is_extra, recorded_at_ms, received_at_ms, device]
+      properties:
+        exercise_id: { type: string }
+        number: { type: integer }
+        done: { type: boolean }
+        reps: { type: integer }
+        weight_g: { type: integer }
+        skipped: { type: boolean }
+        is_extra: { type: boolean }
+        recorded_at_ms: { $ref: '#/components/schemas/EpochMs' }
+        received_at_ms:
+          $ref: '#/components/schemas/EpochMs'
+        device: { $ref: '#/components/schemas/DispositivoDeOrigen' }
+
+    SesionDeGimnasio:
+      type: object
+      required: [session_id, updated_at_ms, sets]
+      properties:
+        session_id: { type: string }
+        date_ms: { $ref: '#/components/schemas/EpochMs' }
+        updated_at_ms: { $ref: '#/components/schemas/EpochMs' }
+        sets:
+          type: array
+          items: { $ref: '#/components/schemas/SerieDeGimnasio' }
+
+    ResumenDeSesionDeGimnasio:
+      type: object
+      required: [session_id, updated_at_ms, sets_done, exercises]
+      properties:
+        session_id: { type: string }
+        date_ms: { $ref: '#/components/schemas/EpochMs' }
+        updated_at_ms: { $ref: '#/components/schemas/EpochMs' }
+        sets_done: { type: integer }
+        exercises: { type: integer }
+
+    # ---- actividades ----
+    ActividadEntrada:
+      type: object
+      additionalProperties: false
+      required: [sport, started_at_ms, duration_s, device]
+      properties:
+        sport: { $ref: '#/components/schemas/DeporteDeSesion' }
+        started_at_ms: { $ref: '#/components/schemas/EpochMs' }
+        duration_s: { type: integer, minimum: 1, maximum: 172800 }
+        distance_m: { type: integer, minimum: 0, maximum: 1000000 }
+        elevation_gain_m: { type: integer, minimum: 0, maximum: 20000 }
+        avg_hr_bpm: { type: integer, minimum: 30, maximum: 250 }
+        max_hr_bpm: { type: integer, minimum: 30, maximum: 250 }
+        kcal: { type: integer, minimum: 0, maximum: 20000 }
+        device: { $ref: '#/components/schemas/DispositivoDeOrigen' }
+
+    Actividad:
+      type: object
+      required: [id, sport, started_at_ms, duration_s, device, created_at_ms, updated_at_ms]
+      properties:
+        id: { $ref: '#/components/schemas/Id' }
+        sport: { $ref: '#/components/schemas/DeporteDeSesion' }
+        started_at_ms: { $ref: '#/components/schemas/EpochMs' }
+        duration_s: { type: integer }
+        distance_m: { type: integer }
+        elevation_gain_m: { type: integer }
+        avg_hr_bpm: { type: integer }
+        max_hr_bpm: { type: integer }
+        kcal: { type: integer }
+        device: { $ref: '#/components/schemas/DispositivoDeOrigen' }
+        created_at_ms: { $ref: '#/components/schemas/EpochMs' }
+        updated_at_ms: { $ref: '#/components/schemas/EpochMs' }
+
+    # ---- nutrición ----
+    CargaDelDia:
+      type: string
+      enum: [descanso, baja, moderada, alta, competencia]
+
+    MotivoSinObjetivos:
+      type: string
+      enum: [perfil_incompleto, menor_de_edad, sexo_sin_declarar, falta_embarazo_o_lactancia, embarazo_o_lactancia]
+      description: >-
+        Por qué NO hay objetivos (AGENTS.md §9.2). La app muestra apoyo y, si
+        corresponde, la pregunta que falta; nunca un número inventado.
+
+    ObjetivosDelDia:
+      type: object
+      required: [kcal, carbs_g, protein_g, fat_g, water_ml, sodium_mg, day_load, adjusted, provisional]
+      properties:
+        kcal: { type: integer }
+        carbs_g: { type: integer }
+        protein_g: { type: integer }
+        fat_g: { type: integer }
+        water_ml: { type: integer }
+        sodium_mg: { type: integer }
+        day_load: { $ref: '#/components/schemas/CargaDelDia' }
+        adjusted: { type: boolean, description: Los guardarraíles subieron el número. }
+        adjustment_reason: { type: string, description: "`piso_calorico` o `techo_de_deficit`." }
+        provisional:
+          type: boolean
+          description: Los números no los revisó nadie con formación. En producción el servidor no arranca así.
+
+    TotalesNutricionales:
+      type: object
+      required: [kcal, carbs_g, protein_g, fat_g]
+      properties:
+        kcal: { type: integer }
+        carbs_g: { type: integer }
+        protein_g: { type: integer }
+        fat_g: { type: integer }
+
+    DiaNutricional:
+      type: object
+      required: [date_ms, consumed, meals]
+      properties:
+        date_ms: { $ref: '#/components/schemas/EpochMs' }
+        targets: { $ref: '#/components/schemas/ObjetivosDelDia' }
+        unavailable_reason: { $ref: '#/components/schemas/MotivoSinObjetivos' }
+        consumed: { $ref: '#/components/schemas/TotalesNutricionales' }
+        meals:
+          type: array
+          items: { $ref: '#/components/schemas/ComidaRegistrada' }
+
+    ComidaEntrada:
+      type: object
+      additionalProperties: false
+      required: [eaten_at_ms, name, kcal, carbs_g, protein_g, fat_g]
+      properties:
+        eaten_at_ms: { $ref: '#/components/schemas/EpochMs' }
+        name: { type: string, minLength: 1, maxLength: 120 }
+        kcal: { type: integer, minimum: 0, maximum: 5000 }
+        carbs_g: { type: integer, minimum: 0, maximum: 1000 }
+        protein_g: { type: integer, minimum: 0, maximum: 1000 }
+        fat_g: { type: integer, minimum: 0, maximum: 1000 }
+
+    ComidaRegistrada:
+      type: object
+      required: [id, eaten_at_ms, name, kcal, carbs_g, protein_g, fat_g, created_at_ms, updated_at_ms]
+      properties:
+        id: { $ref: '#/components/schemas/Id' }
+        eaten_at_ms: { $ref: '#/components/schemas/EpochMs' }
+        name: { type: string }
+        kcal: { type: integer }
+        carbs_g: { type: integer }
+        protein_g: { type: integer }
+        fat_g: { type: integer }
+        created_at_ms: { $ref: '#/components/schemas/EpochMs' }
+        updated_at_ms: { $ref: '#/components/schemas/EpochMs' }
+
+    # ---- cuenta ----
+    AceptacionRegistrada:
+      type: object
+      required: [version, accepted_at_ms, reason]
+      properties:
+        version: { type: string }
+        accepted_at_ms: { $ref: '#/components/schemas/EpochMs' }
+        reason: { type: string }
+
+    AnclaDePlan:
+      type: object
+      required: [motor_version, start_date_ms, timezone, created_at_ms]
+      properties:
+        goal_id: { type: string, description: ID del objetivo adicional; omitido para el principal. }
+        motor_version: { type: string }
+        start_date_ms: { $ref: '#/components/schemas/EpochMs' }
+        timezone: { type: string }
+        created_at_ms: { $ref: '#/components/schemas/EpochMs' }
+        replaced_at_ms: { $ref: '#/components/schemas/EpochMs' }
+
+    ExportacionDeDatos:
+      type: object
+      required: [exported_at_ms, profile, goals, legal_acceptances, plans, gym_sessions, activities, meals]
+      properties:
+        exported_at_ms: { $ref: '#/components/schemas/EpochMs' }
+        profile: { $ref: '#/components/schemas/Perfil' }
+        goals:
+          type: array
+          items: { $ref: '#/components/schemas/ObjetivoExportado' }
+        legal_acceptances:
+          type: array
+          items: { $ref: '#/components/schemas/AceptacionRegistrada' }
+        plans:
+          type: array
+          items: { $ref: '#/components/schemas/AnclaDePlan' }
+        gym_sessions:
+          type: array
+          items: { $ref: '#/components/schemas/SesionDeGimnasio' }
+        activities:
+          type: array
+          items: { $ref: '#/components/schemas/Actividad' }
+        meals:
+          type: array
+          items: { $ref: '#/components/schemas/ComidaRegistrada' }
+
+    ObjetivoExportado:
+      type: object
+      required: [id, goal, goal_date_ms, order, created_at_ms, completed_at_ms]
+      properties:
+        id: { type: string }
+        goal: { $ref: '#/components/schemas/Objetivo' }
+        goal_date_ms: { oneOf: [{ $ref: '#/components/schemas/EpochMs' }, { type: 'null' }] }
+        order: { type: integer }
+        created_at_ms: { $ref: '#/components/schemas/EpochMs' }
+        completed_at_ms: { oneOf: [{ $ref: '#/components/schemas/EpochMs' }, { type: 'null' }] }
+
+    # ---- error ----
+    Error:
+      type: object
+      required: [error]
+      properties:
+        error: { $ref: '#/components/schemas/DetalleDeError' }
+
+    DetalleDeError:
+      type: object
+      description: >-
+        El cuerpo del sobre de error. Estaba escrito adentro de Error, sin nombre;
+        se extrajo el 2026-09-08 por el mismo motivo que EstadoDeDependencias. La
+        forma en el cable NO cambia.
+      required: [code, message]
+      additionalProperties: false
+      properties:
+        code:
+          type: string
+          description: >-
+            **Estable y parte del contrato.** El cliente lo mapea a su texto
+            traducido. La lista completa está en docs/API.md.
+          examples: ["invalid_credentials"]
+        message:
+          type: string
+          description: >-
+            Para el log del desarrollador y como respaldo. **El cliente no lo
+            muestra tal cual**: muestra su propia traducción del `code`.
+            Nunca lleva datos de salud ni de identidad (AGENTS.md §8).
+
+  responses:
+    PedidoInvalido:
+      description: El pedido no pasó la validación del servidor.
+      content:
+        application/json:
+          schema: { $ref: '#/components/schemas/Error' }
+    NoAutorizado:
+      description: Falta el token, está vencido, o las credenciales no son válidas.
+      content:
+        application/json:
+          schema: { $ref: '#/components/schemas/Error' }
+    DemasiadosPedidos:
+      description: Rate limit. El bucket sale del PATH, nunca de un parámetro del cliente.
+      headers:
+        Retry-After:
+          schema: { type: integer }
+          description: Segundos hasta poder reintentar.
+      content:
+        application/json:
+          schema: { $ref: '#/components/schemas/Error' }
+    ServicioNoDisponible:
+      description: El servicio o una dependencia no responden.
+      content:
+        application/json:
+          schema: { $ref: '#/components/schemas/Error' }
+
+security:
+  - accessToken: []

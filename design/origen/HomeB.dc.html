@@ -1,0 +1,1421 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<div ref="{{ rootRef }}" style="height:100%;position:relative;display:flex;flex-direction:column;background:#0B0C0A;color:#F2F4F0;font-family:Archivo,system-ui,sans-serif;overflow:hidden">
+
+  <sc-if value="{{ on.inicio }}" hint-placeholder-val="{{ true }}">
+    <div class="wheel" style="flex:1;min-height:0;overflow:auto;display:flex;flex-direction:column;gap:13px;padding:8px 18px 0">
+      <div style="font-size:10px;font-weight:600;letter-spacing:.14em;text-transform:uppercase;color:rgba(242,244,240,.4)">Jue 28 ago · semana 6/12</div>
+
+      <div style="border-radius:20px;background:var(--ac);color:#0B0C0A;padding:17px 18px 16px;display:flex;flex-direction:column;gap:12px">
+        <div style="font-size:10px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;opacity:.65">Ahora mismo</div>
+        <div style="display:flex;flex-direction:column;gap:3px">
+          <div style="font-size:30px;font-weight:700;letter-spacing:-.03em;line-height:1;font-variant-numeric:tabular-nums">{{ today.big }}</div>
+          <div style="font-size:13px;font-weight:500;opacity:.75">{{ today.countdown }}</div>
+        </div>
+        <div style="display:flex;gap:8px;padding-top:2px">
+          <div onClick="{{ go.entreno }}" style="flex:1;background:#0B0C0A;color:#F2F4F0;font-size:13px;font-weight:600;text-align:center;padding:12px;border-radius:12px;cursor:pointer">Preparar salida</div>
+          <div onClick="{{ go.plan }}" style="padding:12px 14px;border:1px solid rgba(11,12,10,.25);border-radius:12px;font-size:13px;font-weight:600;cursor:pointer">Ver plan</div>
+        </div>
+      </div>
+
+      <div style="display:flex;flex-direction:column;gap:9px">
+        <div style="font-size:13px;font-weight:600">Tu día</div>
+
+        <sc-for list="{{ agenda }}" as="r" hint-placeholder-count="4">
+          <div style="display:flex;gap:11px;align-items:stretch">
+            <div style="width:42px;flex:none;font-size:11px;font-variant-numeric:tabular-nums;padding-top:12px;color:{{ r.timeColor }};font-weight:{{ r.timeWeight }}">{{ r.time }}</div>
+            <sc-if value="{{ r.isSession }}" hint-placeholder-val="{{ false }}">
+              <div style="flex:1;border-radius:14px;background:#131511;border:1px solid rgba(255,255,255,.09);padding:12px 13px;display:flex;flex-direction:column;gap:9px">
+                <div style="display:flex;align-items:baseline;justify-content:space-between;gap:10px">
+                  <div onClick="{{ go.entreno }}" style="font-size:13px;font-weight:600;cursor:pointer">{{ today.title }}</div>
+                  <div onClick="{{ openEdit }}" style="font-size:10.5px;font-weight:600;color:var(--ac);cursor:pointer;flex:none">Editar</div>
+                </div>
+                <div style="display:flex;gap:6px;flex-wrap:wrap">
+                  <sc-for list="{{ today.chips }}" as="c" hint-placeholder-count="4">
+                    <div style="font-size:10px;padding:4px 8px;border-radius:999px;background:{{ c.bg }};color:{{ c.color }}">{{ c.label }}</div>
+                  </sc-for>
+                </div>
+                <div style="font-size:10.5px;color:rgba(242,244,240,.45)">{{ today.note }}</div>
+              </div>
+            </sc-if>
+            <sc-if value="{{ r.isPlain }}" hint-placeholder-val="{{ true }}">
+              <div onClick="{{ r.act }}" style="flex:1;border-radius:14px;padding:11px 13px;display:flex;flex-direction:column;gap:3px;background:{{ r.bg }};border:1px solid {{ r.border }};opacity:{{ r.opacity }};cursor:{{ r.cursor }}">
+                <div style="font-size:12.5px;font-weight:600">{{ r.title }}</div>
+                <div style="font-size:11px;color:rgba(242,244,240,.58)">{{ r.detail }}</div>
+              </div>
+            </sc-if>
+          </div>
+        </sc-for>
+      </div>
+
+      <div onClick="{{ go.plan }}" style="display:flex;gap:10px;border-radius:16px;background:#131511;border:1px solid rgba(255,255,255,.07);padding:13px 15px;align-items:flex-end;cursor:pointer">
+        <div style="flex:1;display:flex;flex-direction:column;gap:8px">
+          <div style="font-size:11px;color:rgba(242,244,240,.5)">Carga semanal</div>
+          <div style="display:flex;align-items:flex-end;gap:5px;height:30px">
+            <div style="flex:1;height:40%;background:rgba(255,255,255,.14);border-radius:2px"></div>
+            <div style="flex:1;height:65%;background:rgba(255,255,255,.14);border-radius:2px"></div>
+            <div style="flex:1;height:30%;background:rgba(255,255,255,.14);border-radius:2px"></div>
+            <div style="flex:1;height:85%;background:var(--ac);border-radius:2px"></div>
+            <div style="flex:1;height:20%;background:rgba(255,255,255,.08);border-radius:2px"></div>
+            <div style="flex:1;height:55%;background:rgba(255,255,255,.08);border-radius:2px"></div>
+            <div style="flex:1;height:100%;background:rgba(255,255,255,.08);border-radius:2px"></div>
+          </div>
+        </div>
+        <div style="text-align:right;display:flex;flex-direction:column;gap:2px">
+          <div style="font-size:17px;font-weight:600;font-variant-numeric:tabular-nums">48 km</div>
+          <div style="font-size:10px;color:rgba(242,244,240,.45)">de 62 previstos</div>
+        </div>
+      </div>
+      <div style="height:38px;flex:none"></div>
+    </div>
+  </sc-if>
+
+  <sc-if value="{{ logOpen }}" hint-placeholder-val="{{ false }}">
+    <div style="position:absolute;inset:0;z-index:6;background:rgba(6,7,5,.78);display:flex;flex-direction:column;justify-content:flex-end">
+      <div class="wheel" style="background:#0F1210;border-top:1px solid rgba(255,255,255,.1);border-radius:22px 22px 0 0;padding:16px 18px 24px;display:flex;flex-direction:column;gap:14px;max-height:94%;overflow:auto">
+
+        <div style="display:flex;align-items:center;justify-content:space-between;gap:12px">
+          <div style="font-size:18px;font-weight:600;letter-spacing:-.02em">{{ log.title }}</div>
+          <div onClick="{{ closeLog }}" style="font-size:11.5px;color:rgba(242,244,240,.5);cursor:pointer;flex:none">Cancelar</div>
+        </div>
+
+        <sc-if value="{{ log.isPick }}" hint-placeholder-val="{{ true }}">
+          <div style="display:flex;flex-direction:column;gap:12px">
+            <div onClick="{{ log.openCamera }}" style="border-radius:18px;background:var(--ac);color:#0B0C0A;padding:16px;display:flex;align-items:center;gap:13px;cursor:pointer">
+              <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#0B0C0A" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" style="flex:none"><path d="M4 8.5h3l1.5-2.5h7L17 8.5h3v11H4z"></path><circle cx="12" cy="14" r="3.4"></circle></svg>
+              <div style="flex:1;display:flex;flex-direction:column;gap:2px">
+                <div style="font-size:15px;font-weight:700;letter-spacing:-.01em">Sacar una foto</div>
+                <div style="font-size:11.5px;font-weight:500;opacity:.7">Detectamos el plato y estimamos calorías y macros</div>
+              </div>
+            </div>
+
+            <div style="display:flex;flex-direction:column;gap:8px">
+              <div style="font-size:11.5px;color:rgba(242,244,240,.5)">O elegí de tus comidas frecuentes</div>
+              <sc-for list="{{ log.presets }}" as="p" hint-placeholder-count="4">
+                <div onClick="{{ p.pick }}" style="display:flex;align-items:center;gap:11px;padding:13px;border-radius:13px;background:#131511;border:1px solid rgba(255,255,255,.08);cursor:pointer">
+                  <div style="flex:1;display:flex;flex-direction:column;gap:2px">
+                    <div style="font-size:13px;font-weight:600">{{ p.name }}</div>
+                    <div style="font-size:11px;color:rgba(242,244,240,.5)">{{ p.detail }}</div>
+                  </div>
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="rgba(242,244,240,.35)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex:none"><path d="M9 5l7 7-7 7"></path></svg>
+                </div>
+              </sc-for>
+            </div>
+
+            <div onClick="{{ log.manual }}" style="text-align:center;padding:13px;border-radius:13px;border:1px solid rgba(255,255,255,.14);font-size:13px;font-weight:600;color:rgba(242,244,240,.7);cursor:pointer">Cargar a mano</div>
+          </div>
+        </sc-if>
+
+        <sc-if value="{{ log.isCamera }}" hint-placeholder-val="{{ false }}">
+          <div style="display:flex;flex-direction:column;gap:13px">
+            <div style="position:relative;border-radius:18px;overflow:hidden;background:#08090A;aspect-ratio:4/3;display:flex;align-items:center;justify-content:center">
+              <sc-if value="{{ log.hasShot }}" hint-placeholder-val="{{ false }}">{{ log.shotFull }}</sc-if>
+              <sc-if value="{{ log.noShot }}" hint-placeholder-val="{{ true }}">
+                <div style="position:absolute;inset:0;background:repeating-linear-gradient(125deg,#191C17 0 10px,#12150F 10px 20px)"></div>
+                <div style="position:relative;display:flex;flex-direction:column;align-items:center;gap:9px;padding:20px;text-align:center">
+                  <svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="rgba(242,244,240,.5)" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M4 8.5h3l1.5-2.5h7L17 8.5h3v11H4z"></path><circle cx="12" cy="14" r="3.4"></circle></svg>
+                  <div style="font-size:12px;line-height:1.4;color:rgba(242,244,240,.5)">Encuadrá el plato completo desde arriba</div>
+                </div>
+              </sc-if>
+              <div style="position:absolute;inset:16px;border:1.5px dashed rgb(var(--ac-rgb) / .4);border-radius:12px;pointerEvents:none"></div>
+            </div>
+
+            <label style="display:flex;align-items:center;justify-content:center;gap:9px;padding:15px;border-radius:14px;background:var(--ac);color:#0B0C0A;font-size:14px;font-weight:700;cursor:pointer">
+              <input type="file" accept="image/*" capture="environment" onChange="{{ log.shoot }}" style="position:absolute;width:1px;height:1px;opacity:0;pointerEvents:none">
+              <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="#0B0C0A" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 8.5h3l1.5-2.5h7L17 8.5h3v11H4z"></path><circle cx="12" cy="14" r="3.4"></circle></svg>{{ log.shootLabel }}
+            </label>
+            <div onClick="{{ log.back }}" style="text-align:center;padding:11px;font-size:12.5px;font-weight:600;color:rgba(242,244,240,.55);cursor:pointer">Volver</div>
+          </div>
+        </sc-if>
+
+        <sc-if value="{{ log.isScanning }}" hint-placeholder-val="{{ false }}">
+          <div style="display:flex;flex-direction:column;gap:14px">
+            <div style="position:relative;border-radius:18px;overflow:hidden;background:#08090A;aspect-ratio:4/3">
+              <sc-if value="{{ log.hasShot }}" hint-placeholder-val="{{ false }}">{{ log.shotDim }}</sc-if>
+              <sc-if value="{{ log.noShot }}" hint-placeholder-val="{{ true }}">
+                <div style="position:absolute;inset:0;background:repeating-linear-gradient(125deg,#191C17 0 10px,#12150F 10px 20px);opacity:.6"></div>
+              </sc-if>
+              <div style="position:absolute;left:0;right:0;height:2px;background:var(--ac);top:{{ log.scanY }};transition:top .45s linear"></div>
+              <div style="position:absolute;inset:0;display:flex;align-items:flex-end;padding:14px">
+                <div style="font-size:12px;font-weight:600;color:var(--ac)">Analizando la foto…</div>
+              </div>
+            </div>
+            <div style="display:flex;flex-direction:column;gap:9px">
+              <sc-for list="{{ log.steps }}" as="s" hint-placeholder-count="3">
+                <div style="display:flex;align-items:center;gap:9px;font-size:12.5px;color:{{ s.color }}">
+                  <span style="width:6px;height:6px;border-radius:50%;display:block;flex:none;background:{{ s.dot }}"></span>{{ s.label }}
+                </div>
+              </sc-for>
+            </div>
+          </div>
+        </sc-if>
+
+        <sc-if value="{{ log.isResult }}" hint-placeholder-val="{{ false }}">
+          <div style="display:flex;flex-direction:column;gap:13px">
+            <div style="display:flex;gap:12px;align-items:center">
+              <div style="width:74px;height:74px;border-radius:16px;overflow:hidden;flex:none;background:repeating-linear-gradient(125deg,#191C17 0 10px,#12150F 10px 20px)">
+                <sc-if value="{{ log.hasShot }}" hint-placeholder-val="{{ false }}">{{ log.shotThumb }}</sc-if>
+              </div>
+              <div style="flex:1;display:flex;flex-direction:column;gap:3px">
+                <div style="font-size:16px;font-weight:600;letter-spacing:-.01em">{{ log.result.name }}</div>
+                <div style="display:flex;align-items:center;gap:7px">
+                  <div style="font-size:10px;font-weight:600;padding:3px 7px;border-radius:999px;background:rgb(var(--ac-rgb) / .14);color:var(--ac)">{{ log.result.confidence }}</div>
+                  <div style="font-size:11px;color:rgba(242,244,240,.45)">detectado por foto</div>
+                </div>
+              </div>
+            </div>
+
+            <div style="display:flex;flex-direction:column;gap:7px">
+              <sc-for list="{{ log.result.items }}" as="it" hint-placeholder-count="3">
+                <div style="display:flex;align-items:center;gap:10px;padding:11px 13px;border-radius:13px;background:#131511;border:1px solid rgba(255,255,255,.07)">
+                  <div style="flex:1;font-size:12.5px;font-weight:500">{{ it.label }}</div>
+                  <div style="font-size:11.5px;color:rgba(242,244,240,.5);font-variant-numeric:tabular-nums">{{ it.amount }}</div>
+                </div>
+              </sc-for>
+            </div>
+
+            <div style="border-radius:16px;background:#131511;border:1px solid rgba(255,255,255,.09);padding:14px;display:flex;flex-direction:column;gap:11px">
+              <div style="display:flex;align-items:flex-end;justify-content:space-between">
+                <div style="display:flex;align-items:baseline;gap:4px"><div style="font-size:26px;font-weight:700;letter-spacing:-.03em;font-variant-numeric:tabular-nums">{{ log.result.kcal }}</div><div style="font-size:11.5px;color:rgba(242,244,240,.5)">kcal</div></div>
+                <div style="display:flex;gap:12px">
+                  <div style="text-align:right"><div style="font-size:13px;font-weight:600;font-variant-numeric:tabular-nums">{{ log.result.carbs }} g</div><div style="font-size:10px;color:rgba(242,244,240,.45)">carbos</div></div>
+                  <div style="text-align:right"><div style="font-size:13px;font-weight:600;font-variant-numeric:tabular-nums">{{ log.result.protein }} g</div><div style="font-size:10px;color:rgba(242,244,240,.45)">prote</div></div>
+                  <div style="text-align:right"><div style="font-size:13px;font-weight:600;font-variant-numeric:tabular-nums">{{ log.result.fat }} g</div><div style="font-size:10px;color:rgba(242,244,240,.45)">grasas</div></div>
+                </div>
+              </div>
+              <div style="display:flex;align-items:center;gap:10px">
+                <div style="font-size:11.5px;color:rgba(242,244,240,.5);flex:1">Porción</div>
+                <div onClick="{{ log.smaller }}" style="width:34px;height:34px;border-radius:10px;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.12);display:flex;align-items:center;justify-content:center;font-size:16px;cursor:pointer;flex:none">−</div>
+                <div style="font-size:13px;font-weight:600;min-width:44px;text-align:center;font-variant-numeric:tabular-nums">{{ log.result.portion }}</div>
+                <div onClick="{{ log.bigger }}" style="width:34px;height:34px;border-radius:10px;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.12);display:flex;align-items:center;justify-content:center;font-size:16px;cursor:pointer;flex:none">+</div>
+              </div>
+            </div>
+
+            <div style="font-size:11px;line-height:1.45;color:rgba(242,244,240,.4)">La detección es una estimación: revisá la porción antes de guardar. Podés corregir cualquier valor a mano.</div>
+
+            <div style="display:flex;gap:10px">
+              <div onClick="{{ log.retake }}" style="padding:14px 16px;border-radius:13px;border:1px solid rgba(255,255,255,.14);font-size:13px;font-weight:600;cursor:pointer">Otra foto</div>
+              <div onClick="{{ log.save }}" style="flex:1;text-align:center;padding:14px;border-radius:13px;background:var(--ac);color:#0B0C0A;font-size:13.5px;font-weight:600;cursor:pointer">Guardar comida</div>
+            </div>
+          </div>
+        </sc-if>
+
+      </div>
+    </div>
+  </sc-if>
+
+  <sc-if value="{{ editing }}" hint-placeholder-val="{{ false }}">
+    <div style="position:absolute;inset:0;z-index:5;background:rgba(6,7,5,.72);display:flex;flex-direction:column;justify-content:flex-end">
+      <div style="background:#0F1210;border-top:1px solid rgba(255,255,255,.1);border-radius:22px 22px 0 0;padding:16px 18px 24px;display:flex;flex-direction:column;gap:14px;max-height:92%;overflow:auto" class="wheel">
+        <div style="display:flex;align-items:center;justify-content:space-between;gap:12px">
+          <div style="font-size:18px;font-weight:600;letter-spacing:-.02em">Editar el entreno de hoy</div>
+          <div onClick="{{ closeEdit }}" style="font-size:11.5px;color:rgba(242,244,240,.5);cursor:pointer;flex:none">Cancelar</div>
+        </div>
+
+        <div style="display:flex;flex-direction:column;gap:8px">
+          <div style="font-size:11.5px;color:rgba(242,244,240,.5)">Tipo de sesión</div>
+          <div style="display:flex;gap:6px;flex-wrap:wrap">
+            <sc-for list="{{ edit.kinds }}" as="k" hint-placeholder-count="4">
+              <div onClick="{{ k.pick }}" style="padding:9px 12px;border-radius:11px;font-size:12px;font-weight:600;cursor:pointer;background:{{ k.bg }};border:1px solid {{ k.border }};color:{{ k.color }}">{{ k.label }}</div>
+            </sc-for>
+          </div>
+        </div>
+
+        <div style="display:flex;flex-direction:column;gap:9px">
+          <div style="display:flex;align-items:baseline;justify-content:space-between">
+            <div style="font-size:11.5px;color:rgba(242,244,240,.5)">Distancia</div>
+            <div style="font-size:14px;font-weight:600;font-variant-numeric:tabular-nums">{{ edit.km }} km</div>
+          </div>
+          <div style="display:flex;align-items:center;gap:10px">
+            <div onClick="{{ edit.less }}" style="width:42px;height:42px;border-radius:12px;background:#131511;border:1px solid rgba(255,255,255,.12);display:flex;align-items:center;justify-content:center;font-size:19px;cursor:pointer;flex:none">−</div>
+            <div style="flex:1;height:4px;border-radius:2px;background:rgba(255,255,255,.1);overflow:hidden"><div style="height:100%;background:var(--ac);width:{{ edit.kmPct }}"></div></div>
+            <div onClick="{{ edit.more }}" style="width:42px;height:42px;border-radius:12px;background:#131511;border:1px solid rgba(255,255,255,.12);display:flex;align-items:center;justify-content:center;font-size:19px;cursor:pointer;flex:none">+</div>
+          </div>
+        </div>
+
+        <div style="display:flex;flex-direction:column;gap:8px">
+          <div style="font-size:11.5px;color:rgba(242,244,240,.5)">Zona objetivo</div>
+          <div style="display:flex;gap:6px">
+            <sc-for list="{{ edit.zones }}" as="z" hint-placeholder-count="4">
+              <div onClick="{{ z.pick }}" style="flex:1;text-align:center;padding:10px 0;border-radius:11px;font-size:12px;font-weight:600;cursor:pointer;background:{{ z.bg }};border:1px solid {{ z.border }};color:{{ z.color }}">{{ z.label }}</div>
+            </sc-for>
+          </div>
+        </div>
+
+        <div style="display:flex;flex-direction:column;gap:8px">
+          <div style="font-size:11.5px;color:rgba(242,244,240,.5)">Hora de salida</div>
+          <div style="display:flex;gap:6px;flex-wrap:wrap">
+            <sc-for list="{{ edit.times }}" as="t" hint-placeholder-count="5">
+              <div onClick="{{ t.pick }}" style="padding:9px 12px;border-radius:11px;font-size:12px;font-weight:600;cursor:pointer;font-variant-numeric:tabular-nums;background:{{ t.bg }};border:1px solid {{ t.border }};color:{{ t.color }}">{{ t.label }}</div>
+            </sc-for>
+          </div>
+        </div>
+
+        <div onClick="{{ edit.toggleWalkRun }}" style="display:flex;align-items:center;gap:12px;padding:14px;border-radius:13px;cursor:pointer;background:{{ edit.wrBox.bg }};border:1px solid {{ edit.wrBox.border }}">
+          <div style="flex:1;display:flex;flex-direction:column;gap:2px">
+            <div style="font-size:13px;font-weight:600">Run-Walk-Run</div>
+            <div style="font-size:11px;line-height:1.4;color:rgba(242,244,240,.5)">Alterna 4 min de trote y 1 min de caminata. Recomendado para volver o para fondos largos.</div>
+          </div>
+          <div style="width:44px;height:26px;border-radius:999px;padding:3px;flex:none;background:{{ wrTrack }};display:flex;justify-content:{{ wrAlign }};transition:background .2s ease">
+            <div style="width:20px;height:20px;border-radius:50%;background:#0B0C0A"></div>
+          </div>
+        </div>
+
+        <div style="border-radius:14px;background:rgb(var(--ac-rgb) / .08);border:1px solid rgb(var(--ac-rgb) / .22);padding:12px 13px;display:flex;flex-direction:column;gap:4px">
+          <div style="font-size:11px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:var(--ac)">Plan recalculado</div>
+          <div style="font-size:12px;line-height:1.45;color:rgba(242,244,240,.75)">{{ edit.recalc }}</div>
+        </div>
+
+        <div style="display:flex;gap:10px">
+          <div onClick="{{ resetEdit }}" style="padding:14px 16px;border-radius:13px;border:1px solid rgba(255,255,255,.14);font-size:13px;font-weight:600;cursor:pointer">Volver al plan</div>
+          <div onClick="{{ saveEdit }}" style="flex:1;text-align:center;padding:14px;border-radius:13px;background:var(--ac);color:#0B0C0A;font-size:13.5px;font-weight:600;cursor:pointer">Guardar cambios</div>
+        </div>
+      </div>
+    </div>
+  </sc-if>
+
+  <sc-if value="{{ on.gym }}" hint-placeholder-val="{{ false }}">
+    <div class="wheel" style="flex:1;min-height:0;overflow:auto;display:flex;flex-direction:column;gap:13px;padding:8px 18px 0">
+      <div style="display:flex;align-items:center;gap:12px">
+        <div onClick="{{ go.inicio }}" style="font-size:19px;color:rgba(242,244,240,.6);cursor:pointer;line-height:1;flex:none">‹</div>
+        <div style="display:flex;flex-direction:column;gap:1px">
+          <div style="font-size:20px;font-weight:600;letter-spacing:-.02em">Gimnasio</div>
+          <div style="font-size:11px;color:rgba(242,244,240,.5)">Jue 28 ago · tren superior y core</div>
+        </div>
+      </div>
+
+      <div style="border-radius:18px;background:#131511;border:1px solid rgba(255,255,255,.09);padding:15px;display:flex;flex-direction:column;gap:11px">
+        <div style="display:flex;align-items:flex-end;justify-content:space-between;gap:12px">
+          <div style="display:flex;flex-direction:column;gap:2px">
+            <div style="font-size:22px;font-weight:700;letter-spacing:-.03em;line-height:1;font-variant-numeric:tabular-nums">{{ gym.doneSets }} / {{ gym.totalSets }}</div>
+            <div style="font-size:11px;color:rgba(242,244,240,.5)">series completadas · 45 min estimados</div>
+          </div>
+          <div style="font-size:11.5px;font-weight:600;color:var(--ac)">{{ gym.pctLabel }}</div>
+        </div>
+        <div style="height:5px;border-radius:3px;background:rgba(255,255,255,.1);overflow:hidden"><div style="height:100%;background:var(--ac);width:{{ gym.pct }}"></div></div>
+        <div style="font-size:11px;line-height:1.45;color:rgba(242,244,240,.5)">Hoy corrés a la tarde: la sesión es de fuerza liviana, sin llegar al fallo, para no comprometer el fondo.</div>
+      </div>
+
+      <sc-for list="{{ gym.exercises }}" as="e" hint-placeholder-count="6">
+        <div style="border-radius:15px;background:#131511;border:1px solid {{ e.border }};padding:13px 14px;display:flex;flex-direction:column;gap:10px">
+          <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:10px">
+            <div style="display:flex;flex-direction:column;gap:3px">
+              <div style="font-size:13.5px;font-weight:600">{{ e.name }}</div>
+              <div style="font-size:11px;color:rgba(242,244,240,.5)">{{ e.prescription }}</div>
+            </div>
+            <div style="font-size:9.5px;font-weight:600;padding:4px 8px;border-radius:999px;flex:none;background:{{ e.tagBg }};color:{{ e.tagColor }}">{{ e.tag }}</div>
+          </div>
+          <div style="display:flex;align-items:center;gap:7px">
+            <sc-for list="{{ e.sets }}" as="s" hint-placeholder-count="4">
+              <div onClick="{{ s.tap }}" style="flex:1;height:30px;border-radius:9px;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:600;cursor:pointer;background:{{ s.bg }};border:1px solid {{ s.border }};color:{{ s.color }};font-variant-numeric:tabular-nums">{{ s.label }}</div>
+            </sc-for>
+          </div>
+          <div style="font-size:10.5px;color:rgba(242,244,240,.42)">{{ e.why }}</div>
+        </div>
+      </sc-for>
+
+      <div style="display:flex;align-items:center;justify-content:center;gap:8px;padding:13px;border-radius:13px;border:1px dashed rgba(255,255,255,.16);font-size:13px;font-weight:600;color:rgba(242,244,240,.7);cursor:pointer">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 5v14M5 12h14"></path></svg>Agregar ejercicio
+      </div>
+
+      <div onClick="{{ gym.finish }}" style="margin-bottom:26px;text-align:center;padding:15px;border-radius:13px;background:var(--ac);color:#0B0C0A;font-size:13.5px;font-weight:600;cursor:pointer">Terminar sesión de gimnasio</div>
+      <div style="height:38px;flex:none"></div>
+    </div>
+  </sc-if>
+
+  <sc-if value="{{ on.plan }}" hint-placeholder-val="{{ false }}">
+    <div class="wheel" style="flex:1;min-height:0;overflow:auto;display:flex;flex-direction:column;gap:13px;padding:8px 18px 0">
+      <div style="display:flex;flex-direction:column;gap:2px">
+        <div style="font-size:22px;font-weight:600;letter-spacing:-.02em">Plan</div>
+        <div style="font-size:11.5px;color:rgba(242,244,240,.5)">{{ plan.subtitle }}</div>
+      </div>
+
+      <div style="border-radius:18px;background:#131511;border:1px solid rgba(255,255,255,.09);padding:15px;display:flex;flex-direction:column;gap:12px">
+        <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:12px">
+          <div style="display:flex;flex-direction:column;gap:3px">
+            <div style="font-size:15px;font-weight:600;letter-spacing:-.01em">{{ plan.event }}</div>
+            <div style="font-size:11.5px;color:rgba(242,244,240,.5)">{{ plan.when }}</div>
+          </div>
+          <div style="text-align:right;flex:none">
+            <div style="font-size:22px;font-weight:700;color:var(--ac);line-height:1;font-variant-numeric:tabular-nums">{{ plan.weeksLeft }}</div>
+            <div style="font-size:10px;color:rgba(242,244,240,.45)">semanas</div>
+          </div>
+        </div>
+        <div style="display:flex;gap:4px">
+          <sc-for list="{{ plan.bars }}" as="b" hint-placeholder-count="3">
+            <div style="height:4px;border-radius:2px;flex:{{ b.flex }};background:{{ b.bg }}"></div>
+          </sc-for>
+        </div>
+        <div style="display:flex;justify-content:space-between;font-size:10px;gap:8px">
+          <sc-for list="{{ plan.phases }}" as="p" hint-placeholder-count="3">
+            <span style="color:{{ p.color }};font-weight:{{ p.weight }}">{{ p.label }}</span>
+          </sc-for>
+        </div>
+      </div>
+
+      <div style="display:flex;gap:6px">
+        <sc-for list="{{ weekChips }}" as="w" hint-placeholder-count="5">
+          <div onClick="{{ w.pick }}" style="flex:1;text-align:center;padding:9px 0;border-radius:10px;font-size:11.5px;font-weight:600;cursor:pointer;background:{{ w.bg }};border:1px solid {{ w.border }};color:{{ w.color }}">{{ w.label }}</div>
+        </sc-for>
+      </div>
+
+      <div style="display:flex;align-items:baseline;justify-content:space-between">
+        <div style="font-size:13px;font-weight:600">{{ weekTitle }}</div>
+        <div style="font-size:11px;color:rgba(242,244,240,.5);font-variant-numeric:tabular-nums">{{ weekKm }}</div>
+      </div>
+
+      <div style="display:flex;flex-direction:column;gap:7px">
+        <sc-for list="{{ weekDays }}" as="d" hint-placeholder-count="7">
+          <div onClick="{{ d.act }}" style="display:flex;gap:10px;align-items:center;padding:12px 13px;border-radius:13px;background:{{ d.bg }};border:1px solid {{ d.border }};opacity:{{ d.opacity }};cursor:{{ d.cursor }}">
+            <div style="width:34px;flex:none;font-size:10.5px;font-variant-numeric:tabular-nums;color:{{ d.dayColor }};font-weight:{{ d.dayWeight }}">{{ d.short }}<br>{{ d.num }}</div>
+            <div style="flex:1;display:flex;flex-direction:column;gap:2px">
+              <div style="font-size:12.5px;font-weight:600">{{ d.title }}</div>
+              <div style="font-size:10.5px;color:rgba(242,244,240,.52)">{{ d.detail }}</div>
+            </div>
+            <sc-if value="{{ d.done }}" hint-placeholder-val="{{ false }}">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="var(--ac)" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" style="flex:none"><path d="M4 12.5l5 5 11-11"></path></svg>
+            </sc-if>
+            <sc-if value="{{ d.today }}" hint-placeholder-val="{{ false }}">
+              <div style="font-size:10px;font-weight:600;color:var(--ac);flex:none">HOY</div>
+            </sc-if>
+          </div>
+        </sc-for>
+      </div>
+      <div style="height:38px;flex:none"></div>
+    </div>
+  </sc-if>
+
+  <sc-if value="{{ on.entreno }}" hint-placeholder-val="{{ false }}">
+    <div style="flex:1;min-height:0;position:relative;overflow:hidden;background:#0F1310">
+      <svg viewBox="0 0 390 720" preserveAspectRatio="xMidYMid slice" style="position:absolute;inset:0;width:100%;height:100%;display:block">
+        <rect x="0" y="0" width="390" height="720" fill="#0F1310"></rect>
+        <path d="M-20 120 L150 40 L300 130 L250 260 L60 250 Z" fill="rgb(var(--ac-rgb) / .055)"></path>
+        <path d="M210 470 L400 400 L420 560 L260 620 Z" fill="rgb(var(--ac-rgb) / .045)"></path>
+        <path d="M-20 640 C 90 600 150 660 260 700 L 410 690" stroke="rgba(96,150,190,.16)" stroke-width="16" fill="none"></path>
+        <g stroke="rgba(255,255,255,.055)" stroke-width="9" fill="none" stroke-linecap="round">
+          <path d="M-10 300 L410 220"></path>
+          <path d="M60 -10 L120 730"></path>
+          <path d="M280 -10 L330 730"></path>
+          <path d="M-10 520 L410 470"></path>
+        </g>
+        <g stroke="rgba(255,255,255,.032)" stroke-width="4" fill="none" stroke-linecap="round">
+          <path d="M-10 160 L410 90"></path>
+          <path d="M-10 400 L410 335"></path>
+          <path d="M-10 610 L410 560"></path>
+          <path d="M180 -10 L215 730"></path>
+          <path d="M370 -10 L390 730"></path>
+        </g>
+        <g opacity="{{ routeOpacity }}">
+          <path d="M96 610 L112 470 L84 300 L150 232 L292 258 L316 372 L232 430 L214 520" stroke="rgb(var(--ac-rgb) / .22)" stroke-width="13" fill="none" stroke-linecap="round" stroke-linejoin="round"></path>
+          <path d="M96 610 L112 470 L84 300 L150 232 L292 258 L316 372 L232 430 L214 520" stroke="var(--ac)" stroke-width="4" fill="none" stroke-linecap="round" stroke-linejoin="round"></path>
+        </g>
+        <circle cx="214" cy="520" r="15" fill="rgb(var(--ac-rgb) / .18)"></circle>
+        <circle cx="214" cy="520" r="7.5" fill="#F2F4F0" stroke="var(--ac)" stroke-width="2.5"></circle>
+        <circle cx="96" cy="610" r="4.5" fill="rgba(242,244,240,.55)"></circle>
+      </svg>
+      <div style="position:absolute;inset:0;background:linear-gradient(#0B0C0A 0%,rgba(11,12,10,.35) 18%,rgba(11,12,10,0) 34%,rgba(11,12,10,0) 42%,rgba(11,12,10,.9) 68%,#0B0C0A 84%)"></div>
+
+      <div style="position:absolute;top:6px;left:14px;right:14px;display:flex;flex-direction:column;gap:10px">
+        <div style="display:flex;align-items:center;justify-content:space-between;gap:10px">
+          <div onClick="{{ exitRun }}" style="width:42px;height:42px;border-radius:50%;background:rgba(11,12,10,.82);border:1px solid rgba(255,255,255,.14);display:flex;align-items:center;justify-content:center;cursor:pointer;flex:none">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#F2F4F0" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9.5l6 6 6-6"></path></svg>
+          </div>
+          <div style="display:flex;align-items:center;gap:7px;padding:8px 12px;border-radius:999px;background:rgba(11,12,10,.72);border:1px solid rgba(255,255,255,.1)">
+            <span style="width:6px;height:6px;border-radius:50%;display:block;background:{{ runColor }}"></span>
+            <div style="font-size:10.5px;font-weight:600;color:rgba(242,244,240,.8)">{{ runState }}</div>
+          </div>
+        </div>
+        <div style="border-radius:18px;background:rgba(19,21,17,.92);border:1px solid rgba(255,255,255,.1);padding:13px 14px;display:flex;flex-direction:column;gap:10px">
+          <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:10px">
+            <div style="display:flex;flex-direction:column;gap:2px">
+              <div style="font-size:19px;font-weight:600;letter-spacing:-.02em;line-height:1.15">{{ ses.name }}</div>
+              <div style="font-size:12px;color:rgba(242,244,240,.6)">{{ ses.target }}</div>
+            </div>
+            <div style="font-size:10.5px;color:rgba(242,244,240,.5);text-align:right;flex:none">{{ ses.when }}<br>26° · 62%</div>
+          </div>
+          <div style="display:flex;flex-direction:column;gap:6px">
+            <sc-for list="{{ blocks }}" as="b" hint-placeholder-count="3">
+              <div style="display:flex;align-items:center;gap:9px;padding:8px 10px;border-radius:11px;background:{{ b.bg }};border:1px solid {{ b.border }};opacity:{{ b.opacity }}">
+                <span style="width:5px;height:5px;border-radius:50%;display:block;flex:none;background:{{ b.dot }}"></span>
+                <div style="flex:1;display:flex;flex-direction:column;gap:1px">
+                  <div style="font-size:11.5px;font-weight:600">{{ b.label }}</div>
+                  <div style="font-size:10.5px;color:rgba(242,244,240,.5)">{{ b.detail }}</div>
+                </div>
+                <div style="font-size:10.5px;font-weight:600;color:{{ b.dot }};flex:none;font-variant-numeric:tabular-nums">{{ b.badge }}</div>
+              </div>
+            </sc-for>
+          </div>
+        </div>
+      </div>
+
+      <div style="position:absolute;bottom:0;left:0;right:0;padding:0 14px 26px;display:flex;flex-direction:column;gap:10px">
+
+        <sc-if value="{{ isIdle }}" hint-placeholder-val="{{ true }}">
+          <div style="border-radius:18px;background:rgba(19,21,17,.94);border:1px solid rgb(var(--ac-rgb) / .22);padding:13px 14px;display:flex;flex-direction:column;gap:9px">
+            <div style="display:flex;align-items:center;gap:7px;font-size:10px;font-weight:600;letter-spacing:.12em;text-transform:uppercase;color:var(--ac)">Llevá con vos</div>
+            <div style="display:flex;gap:6px;flex-wrap:wrap">
+              <sc-for list="{{ ses.fuel }}" as="c" hint-placeholder-count="3">
+                <div style="font-size:11px;padding:5px 9px;border-radius:999px;background:rgb(var(--ac-rgb) / .12);color:var(--ac)">{{ c.label }}</div>
+              </sc-for>
+            </div>
+            <div style="font-size:11.5px;line-height:1.4;color:rgba(242,244,240,.6)">{{ ses.tip }}</div>
+            <div style="font-size:10.5px;line-height:1.4;color:rgba(242,244,240,.42);padding-top:2px;border-top:1px solid rgba(255,255,255,.07)">Geles, sales y bebidas son un complemento, no reemplazan comer e hidratarte bien. Si tomás medicación o tenés alguna condición, consultá antes.</div>
+          </div>
+        </sc-if>
+
+        <sc-if value="{{ isRunning }}" hint-placeholder-val="{{ false }}">
+          <div style="border-radius:18px;background:var(--ac);color:#0B0C0A;padding:13px 15px;display:flex;flex-direction:column;gap:8px">
+            <div style="display:flex;align-items:center;justify-content:space-between">
+              <div style="font-size:10px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;opacity:.65">Próximo aviso</div>
+              <div style="font-size:12px;font-weight:600;font-variant-numeric:tabular-nums">{{ ses.nextIn }}</div>
+            </div>
+            <div style="font-size:18px;font-weight:700;letter-spacing:-.02em">{{ ses.next }}</div>
+            <div style="height:4px;border-radius:2px;background:rgba(11,12,10,.2);overflow:hidden"><div style="height:100%;background:#0B0C0A;width:{{ ses.nextPct }}"></div></div>
+            <div style="font-size:11px;font-weight:500;opacity:.75">{{ ses.fuelState }}</div>
+          </div>
+        </sc-if>
+
+        <div style="border-radius:18px;background:rgba(19,21,17,.94);border:1px solid rgba(255,255,255,.1);padding:13px 8px;display:flex">
+          <div style="flex:1;display:flex;flex-direction:column;gap:3px;align-items:center">
+            <div style="font-size:21px;font-weight:700;letter-spacing:-.02em;font-variant-numeric:tabular-nums">{{ ses.dur }}</div>
+            <div style="font-size:9.5px;color:rgba(242,244,240,.45);text-transform:uppercase;letter-spacing:.08em">duración</div>
+          </div>
+          <div style="width:1px;background:rgba(255,255,255,.08)"></div>
+          <div style="flex:1;display:flex;flex-direction:column;gap:3px;align-items:center">
+            <div style="font-size:21px;font-weight:700;letter-spacing:-.02em;font-variant-numeric:tabular-nums">{{ ses.pace }}</div>
+            <div style="font-size:9.5px;color:rgba(242,244,240,.45);text-transform:uppercase;letter-spacing:.08em">ritmo /km</div>
+          </div>
+          <div style="width:1px;background:rgba(255,255,255,.08)"></div>
+          <div style="flex:1;display:flex;flex-direction:column;gap:3px;align-items:center">
+            <div style="font-size:21px;font-weight:700;letter-spacing:-.02em;font-variant-numeric:tabular-nums">{{ ses.dist }}</div>
+            <div style="font-size:9.5px;color:rgba(242,244,240,.45);text-transform:uppercase;letter-spacing:.08em">km</div>
+          </div>
+        </div>
+
+        <div style="display:flex;align-items:flex-start;justify-content:center;gap:22px;padding-top:2px">
+          <div onClick="{{ toggleRoute }}" style="display:flex;flex-direction:column;align-items:center;gap:5px;width:64px;cursor:pointer">
+            <div style="width:44px;height:44px;border-radius:50%;background:{{ routeBtnBg }};border:1px solid {{ routeBtnBorder }};display:flex;align-items:center;justify-content:center">
+              <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="color:{{ routeBtnColor }}"><path d="M12 20.5s7-5.4 7-11a7 7 0 1 0-14 0c0 5.6 7 11 7 11Z"></path><circle cx="12" cy="9.5" r="2.4"></circle></svg>
+            </div>
+            <div style="font-size:9.5px;color:{{ routeBtnColor }}">Ruta</div>
+          </div>
+
+          <div onClick="{{ mainAction }}" style="display:flex;flex-direction:column;align-items:center;gap:5px;width:78px;cursor:pointer">
+            <div style="width:72px;height:72px;border-radius:50%;background:var(--ac);display:flex;align-items:center;justify-content:center">
+              <sc-if value="{{ showPlay }}" hint-placeholder-val="{{ true }}">
+                <svg width="30" height="30" viewBox="0 0 24 24" fill="#0B0C0A"><path d="M8 5.5v13l11-6.5z"></path></svg>
+              </sc-if>
+              <sc-if value="{{ showPause }}" hint-placeholder-val="{{ false }}">
+                <svg width="28" height="28" viewBox="0 0 24 24" fill="#0B0C0A"><rect x="7" y="5.5" width="3.6" height="13" rx="1.2"></rect><rect x="13.4" y="5.5" width="3.6" height="13" rx="1.2"></rect></svg>
+              </sc-if>
+            </div>
+            <div style="font-size:9.5px;font-weight:600;color:var(--ac)">{{ mainLabel }}</div>
+          </div>
+
+          <sc-if value="{{ isIdle }}" hint-placeholder-val="{{ true }}">
+            <div onClick="{{ toggleAlerts }}" style="display:flex;flex-direction:column;align-items:center;gap:5px;width:64px;cursor:pointer">
+              <div style="width:44px;height:44px;border-radius:50%;background:{{ alertBtnBg }};border:1px solid {{ alertBtnBorder }};display:flex;align-items:center;justify-content:center">
+                <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="color:{{ alertBtnColor }}"><path d="M6 9.5a6 6 0 0 1 12 0c0 4 1.4 5.5 1.4 5.5H4.6S6 13.5 6 9.5Z"></path><path d="M10.2 18.5a2 2 0 0 0 3.6 0"></path></svg>
+              </div>
+              <div style="font-size:9.5px;color:{{ alertBtnColor }}">{{ alertLabel }}</div>
+            </div>
+          </sc-if>
+          <sc-if value="{{ isRunning }}" hint-placeholder-val="{{ false }}">
+            <div onClick="{{ finishRun }}" style="display:flex;flex-direction:column;align-items:center;gap:5px;width:64px;cursor:pointer">
+              <div style="width:44px;height:44px;border-radius:50%;background:rgba(255,140,120,.14);border:1px solid rgba(255,140,120,.4);display:flex;align-items:center;justify-content:center">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="rgba(255,170,155,.95)"><rect x="6" y="6" width="12" height="12" rx="2"></rect></svg>
+              </div>
+              <div style="font-size:9.5px;color:rgba(255,170,155,.9)">Terminar</div>
+            </div>
+          </sc-if>
+        </div>
+      </div>
+    </div>
+  </sc-if>
+
+  <sc-if value="{{ on.nutricion }}" hint-placeholder-val="{{ false }}">
+    <div class="wheel" style="flex:1;min-height:0;overflow:auto;display:flex;flex-direction:column;gap:13px;padding:8px 18px 0">
+      <div style="display:flex;flex-direction:column;gap:2px">
+        <div style="font-size:22px;font-weight:600;letter-spacing:-.02em">Nutrición</div>
+        <div style="font-size:11.5px;color:rgba(242,244,240,.5)">Jueves 28 de agosto · día de carga</div>
+      </div>
+
+      <div style="border-radius:18px;background:#131511;border:1px solid rgba(255,255,255,.09);padding:16px;display:flex;flex-direction:column;gap:13px">
+        <div style="display:flex;align-items:flex-end;justify-content:space-between">
+          <div style="display:flex;flex-direction:column;gap:2px">
+            <div style="font-size:30px;font-weight:700;letter-spacing:-.03em;line-height:1;font-variant-numeric:tabular-nums">{{ totals.kcal }}</div>
+            <div style="font-size:11px;color:rgba(242,244,240,.5)">de {{ totals.kcalTarget }} kcal</div>
+          </div>
+          <div style="font-size:11.5px;color:var(--ac);font-weight:600">{{ totals.left }}</div>
+        </div>
+        <div style="height:5px;border-radius:3px;background:rgba(255,255,255,.1);overflow:hidden"><div style="height:100%;background:var(--ac);width:{{ totals.kcalPct }}"></div></div>
+        <div style="display:flex;gap:10px">
+          <sc-for list="{{ totals.macros }}" as="m" hint-placeholder-count="3">
+            <div style="flex:1;display:flex;flex-direction:column;gap:6px"><div style="height:4px;border-radius:2px;background:rgba(255,255,255,.1);overflow:hidden"><div style="height:100%;background:{{ m.color }};width:{{ m.pct }}"></div></div><div style="font-size:10px;color:rgba(242,244,240,.55)">{{ m.label }}</div></div>
+          </sc-for>
+        </div>
+        <div style="font-size:11px;line-height:1.45;color:rgba(242,244,240,.5)">{{ totals.hint }}</div>
+      </div>
+
+      <div style="border-radius:18px;background:#131511;border:1px solid rgba(255,255,255,.08);padding:15px 16px;display:flex;flex-direction:column;gap:11px">
+        <div style="display:flex;align-items:baseline;justify-content:space-between">
+          <div style="font-size:13px;font-weight:600">Hidratación</div>
+          <div style="font-size:11px;color:rgba(242,244,240,.5);font-variant-numeric:tabular-nums">1,8 / 3,2 L</div>
+        </div>
+        <div style="display:flex;gap:5px">
+          <div style="flex:1;height:26px;border-radius:6px;background:rgb(var(--ac-rgb) / .85)"></div>
+          <div style="flex:1;height:26px;border-radius:6px;background:rgb(var(--ac-rgb) / .85)"></div>
+          <div style="flex:1;height:26px;border-radius:6px;background:rgb(var(--ac-rgb) / .85)"></div>
+          <div style="flex:1;height:26px;border-radius:6px;background:rgb(var(--ac-rgb) / .85)"></div>
+          <div style="flex:1;height:26px;border-radius:6px;background:rgb(var(--ac-rgb) / .85)"></div>
+          <div style="flex:1;height:26px;border-radius:6px;background:rgba(255,255,255,.09)"></div>
+          <div style="flex:1;height:26px;border-radius:6px;background:rgba(255,255,255,.09)"></div>
+          <div style="flex:1;height:26px;border-radius:6px;background:rgba(255,255,255,.09)"></div>
+        </div>
+        <div style="font-size:10.5px;color:rgba(242,244,240,.45)">Sumá 900 ml durante el entreno de esta tarde.</div>
+      </div>
+
+      <div style="display:flex;flex-direction:column;gap:8px">
+        <div style="display:flex;align-items:baseline;justify-content:space-between">
+          <div style="font-size:13px;font-weight:600">Comidas de hoy</div>
+          <div style="font-size:11px;color:rgba(242,244,240,.45)">{{ meals.summary }}</div>
+        </div>
+
+        <sc-for list="{{ meals.list }}" as="m" hint-placeholder-count="4">
+          <div style="display:flex;gap:11px;align-items:center;padding:12px 13px;border-radius:13px;background:{{ m.bg }};border:1px solid {{ m.border }};opacity:{{ m.opacity }}">
+            <div style="width:38px;flex:none;font-size:10.5px;font-variant-numeric:tabular-nums;color:{{ m.timeColor }};font-weight:{{ m.timeWeight }}">{{ m.time }}</div>
+            <div style="flex:1;display:flex;flex-direction:column;gap:2px">
+              <div style="font-size:12.5px;font-weight:600">{{ m.name }}</div>
+              <div style="font-size:10.5px;color:rgba(242,244,240,.52)">{{ m.detail }}</div>
+            </div>
+            <sc-if value="{{ m.logged }}" hint-placeholder-val="{{ false }}">
+              <div onClick="{{ m.remove }}" style="font-size:11px;color:rgba(242,244,240,.45);cursor:pointer;flex:none">Quitar</div>
+            </sc-if>
+            <sc-if value="{{ m.pending }}" hint-placeholder-val="{{ false }}">
+              <div onClick="{{ openLog }}" style="font-size:11px;font-weight:600;color:var(--ac);cursor:pointer;flex:none">Registrar</div>
+            </sc-if>
+          </div>
+        </sc-for>
+
+        <div onClick="{{ openLog }}" style="display:flex;align-items:center;justify-content:center;gap:8px;padding:13px;border-radius:13px;border:1px dashed rgba(255,255,255,.16);font-size:13px;font-weight:600;color:rgba(242,244,240,.7);cursor:pointer">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 5v14M5 12h14"></path></svg>Registrar comida
+        </div>
+      </div>
+
+      <div style="display:flex;flex-direction:column;gap:8px">
+        <div style="font-size:13px;font-weight:600">Descanso y sueño</div>
+        <div style="display:flex;gap:8px">
+          <div style="flex:1;border-radius:15px;background:#131511;border:1px solid rgba(255,255,255,.08);padding:14px;display:flex;flex-direction:column;gap:9px">
+            <div style="font-size:11px;color:rgba(242,244,240,.5)">Anoche dormiste</div>
+            <div style="display:flex;align-items:baseline;gap:3px"><div style="font-size:24px;font-weight:700;letter-spacing:-.03em;font-variant-numeric:tabular-nums">{{ sleep.value }}</div><div style="font-size:12px;color:rgba(242,244,240,.5)">h</div></div>
+            <div style="display:flex;gap:8px">
+              <div onClick="{{ sleep.less }}" style="flex:1;height:34px;border-radius:10px;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.1);display:flex;align-items:center;justify-content:center;font-size:17px;cursor:pointer">−</div>
+              <div onClick="{{ sleep.more }}" style="flex:1;height:34px;border-radius:10px;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.1);display:flex;align-items:center;justify-content:center;font-size:17px;cursor:pointer">+</div>
+            </div>
+            <div style="font-size:10.5px;line-height:1.4;color:{{ sleep.color }}">{{ sleep.note }}</div>
+          </div>
+          <div style="flex:1;border-radius:15px;background:#131511;border:1px solid rgba(255,255,255,.08);padding:14px;display:flex;flex-direction:column;gap:9px">
+            <div style="font-size:11px;color:rgba(242,244,240,.5)">Días de descanso</div>
+            <div style="display:flex;align-items:baseline;gap:3px"><div style="font-size:24px;font-weight:700;letter-spacing:-.03em;font-variant-numeric:tabular-nums">{{ rest.count }}</div><div style="font-size:12px;color:rgba(242,244,240,.5)">esta semana</div></div>
+            <div style="display:flex;gap:4px">
+              <sc-for list="{{ rest.days }}" as="d" hint-placeholder-count="7">
+                <div onClick="{{ d.toggle }}" style="flex:1;height:34px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:9.5px;font-weight:600;cursor:pointer;background:{{ d.bg }};border:1px solid {{ d.border }};color:{{ d.color }}">{{ d.label }}</div>
+              </sc-for>
+            </div>
+            <div style="font-size:10.5px;line-height:1.4;color:{{ rest.color }}">{{ rest.note }}</div>
+          </div>
+        </div>
+      </div>
+      <div style="height:38px;flex:none"></div>
+    </div>
+  </sc-if>
+
+  <sc-if value="{{ on.perfil }}" hint-placeholder-val="{{ false }}">
+    <div class="wheel" style="flex:1;min-height:0;overflow:auto;display:flex;flex-direction:column;gap:14px;padding:8px 18px 0">
+      <div style="display:flex;align-items:center;justify-content:space-between;gap:12px">
+        <div style="font-size:22px;font-weight:600;letter-spacing:-.02em">Perfil</div>
+        <div onClick="{{ go.ajustes }}" style="width:38px;height:38px;border-radius:50%;background:#131511;border:1px solid rgba(255,255,255,.1);display:flex;align-items:center;justify-content:center;cursor:pointer;flex:none">
+          <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="rgba(242,244,240,.75)" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3.2"></circle><path d="M19.4 15a1.7 1.7 0 0 0 .34 1.87l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.7 1.7 0 0 0-1.87-.34 1.7 1.7 0 0 0-1.03 1.56V21a2 2 0 1 1-4 0v-.09A1.7 1.7 0 0 0 8.94 19.3a1.7 1.7 0 0 0-1.87.34l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06A1.7 1.7 0 0 0 4.6 15a1.7 1.7 0 0 0-1.56-1.03H3a2 2 0 1 1 0-4h.09A1.7 1.7 0 0 0 4.6 8.94a1.7 1.7 0 0 0-.34-1.87l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06A1.7 1.7 0 0 0 9 4.6 1.7 1.7 0 0 0 10 3.04V3a2 2 0 1 1 4 0v.09a1.7 1.7 0 0 0 1.03 1.56 1.7 1.7 0 0 0 1.87-.34l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.7 1.7 0 0 0-.34 1.87V9a1.7 1.7 0 0 0 1.56 1.03H21a2 2 0 1 1 0 4h-.09A1.7 1.7 0 0 0 19.4 15Z"></path></svg>
+        </div>
+      </div>
+
+      <div style="display:flex;flex-direction:column;align-items:center;gap:11px;padding:4px 0 2px">
+        <label style="position:relative;width:88px;height:88px;cursor:pointer;display:block">
+          <input type="file" accept="image/*" onChange="{{ pickPhoto }}" style="position:absolute;width:1px;height:1px;opacity:0;pointerEvents:none">
+          <sc-if value="{{ hasPhoto }}" hint-placeholder-val="{{ false }}">
+            <img src="{{ photo }}" alt="Tu foto de perfil" style="width:88px;height:88px;border-radius:50%;object-fit:cover;display:block;border:1px solid rgba(255,255,255,.14)">
+          </sc-if>
+          <sc-if value="{{ noPhoto }}" hint-placeholder-val="{{ true }}">
+            <div style="width:88px;height:88px;border-radius:50%;background:#1C1F1A;border:1px solid rgba(255,255,255,.09);display:flex;align-items:center;justify-content:center;font-size:27px;font-weight:600;color:rgba(242,244,240,.6)">{{ initials }}</div>
+          </sc-if>
+          <div style="position:absolute;right:-1px;bottom:-1px;width:28px;height:28px;border-radius:50%;background:var(--ac);border:3px solid #0B0C0A;display:flex;align-items:center;justify-content:center">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#0B0C0A" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 8.5h3l1.5-2.5h7L17 8.5h3v11H4z"></path><circle cx="12" cy="14" r="3.2"></circle></svg>
+          </div>
+        </label>
+        <div style="display:flex;flex-direction:column;gap:3px;align-items:center">
+          <div style="font-size:18px;font-weight:600;letter-spacing:-.01em">{{ fullName }}</div>
+          <div style="font-size:11.5px;color:rgba(242,244,240,.5)">ivan.benitez@mail.com</div>
+        </div>
+        <div style="font-size:11.5px;font-weight:600;color:var(--ac);cursor:pointer">{{ photoAction }}</div>
+      </div>
+
+      <div style="display:flex;gap:8px">
+        <div style="flex:1;border-radius:14px;background:#131511;border:1px solid rgba(255,255,255,.08);padding:13px 10px;display:flex;flex-direction:column;gap:3px;align-items:center">
+          <div style="font-size:18px;font-weight:600;font-variant-numeric:tabular-nums">72</div>
+          <div style="font-size:9.5px;color:rgba(242,244,240,.45);text-transform:uppercase;letter-spacing:.08em">kg</div>
+        </div>
+        <div style="flex:1;border-radius:14px;background:#131511;border:1px solid rgba(255,255,255,.08);padding:13px 10px;display:flex;flex-direction:column;gap:3px;align-items:center">
+          <div style="font-size:18px;font-weight:600;font-variant-numeric:tabular-nums">178</div>
+          <div style="font-size:9.5px;color:rgba(242,244,240,.45);text-transform:uppercase;letter-spacing:.08em">cm</div>
+        </div>
+        <div style="flex:1;border-radius:14px;background:#131511;border:1px solid rgba(255,255,255,.08);padding:13px 10px;display:flex;flex-direction:column;gap:3px;align-items:center">
+          <div style="font-size:18px;font-weight:600;font-variant-numeric:tabular-nums">28</div>
+          <div style="font-size:9.5px;color:rgba(242,244,240,.45);text-transform:uppercase;letter-spacing:.08em">años</div>
+        </div>
+      </div>
+
+      <div style="display:flex;flex-direction:column;gap:7px">
+        <div style="font-size:10px;font-weight:600;letter-spacing:.12em;text-transform:uppercase;color:rgba(242,244,240,.4)">Tu entrenamiento</div>
+        <div onClick="{{ editSport }}" style="display:flex;align-items:center;gap:10px;padding:14px 15px;border-radius:13px;background:#131511;border:1px solid rgba(255,255,255,.07);cursor:pointer">
+          <div style="flex:1;font-size:13px;font-weight:500">Deporte y nivel</div>
+          <div style="font-size:12px;color:rgba(242,244,240,.5)">Running · Intermedio</div>
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="rgba(242,244,240,.35)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex:none"><path d="M9 5l7 7-7 7"></path></svg>
+        </div>
+        <div onClick="{{ editGoal }}" style="display:flex;align-items:center;gap:10px;padding:14px 15px;border-radius:13px;background:#131511;border:1px solid rgba(255,255,255,.07);cursor:pointer">
+          <div style="flex:1;font-size:13px;font-weight:500">Objetivo</div>
+          <div style="font-size:12px;color:rgba(242,244,240,.5)">Media maratón · 11 oct</div>
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="rgba(242,244,240,.35)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex:none"><path d="M9 5l7 7-7 7"></path></svg>
+        </div>
+        <div onClick="{{ editDays }}" style="display:flex;align-items:center;gap:10px;padding:14px 15px;border-radius:13px;background:#131511;border:1px solid rgba(255,255,255,.07);cursor:pointer">
+          <div style="flex:1;font-size:13px;font-weight:500">Días y horarios</div>
+          <div style="font-size:12px;color:rgba(242,244,240,.5)">Mar, Jue, Sáb</div>
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="rgba(242,244,240,.35)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex:none"><path d="M9 5l7 7-7 7"></path></svg>
+        </div>
+      </div>
+
+      <div onClick="{{ go.ajustes }}" style="display:flex;align-items:center;gap:10px;padding:14px 15px;border-radius:13px;background:#131511;border:1px solid rgba(255,255,255,.07);cursor:pointer">
+        <div style="flex:1;font-size:13px;font-weight:500">Ajustes de la app</div>
+        <div style="font-size:12px;color:rgba(242,244,240,.5)">Avisos, unidades, cuenta</div>
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="rgba(242,244,240,.35)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex:none"><path d="M9 5l7 7-7 7"></path></svg>
+      </div>
+      <div style="height:38px;flex:none"></div>
+    </div>
+  </sc-if>
+
+  <sc-if value="{{ on.ajustes }}" hint-placeholder-val="{{ false }}">
+    <div class="wheel" style="flex:1;min-height:0;overflow:auto;display:flex;flex-direction:column;gap:14px;padding:8px 18px 0">
+      <div style="display:flex;align-items:center;gap:12px">
+        <div onClick="{{ go.perfil }}" style="font-size:19px;color:rgba(242,244,240,.6);cursor:pointer;line-height:1;flex:none">‹</div>
+        <div style="font-size:22px;font-weight:600;letter-spacing:-.02em">Ajustes</div>
+      </div>
+
+      <div style="display:flex;flex-direction:column;gap:8px">
+        <div style="font-size:10px;font-weight:600;letter-spacing:.12em;text-transform:uppercase;color:rgba(242,244,240,.4)">Avisos</div>
+        <div style="display:flex;align-items:center;gap:12px;padding:14px 15px;border-radius:13px;background:#131511;border:1px solid rgba(255,255,255,.07)">
+          <div style="flex:1;display:flex;flex-direction:column;gap:2px">
+            <div style="font-size:13px;font-weight:500">Preparación antes del entreno</div>
+            <div style="font-size:11px;color:rgba(242,244,240,.45)">Bidones, geles y snack previo</div>
+          </div>
+          <div onClick="{{ sw.prep.toggle }}" style="width:44px;height:26px;border-radius:999px;padding:3px;cursor:pointer;flex:none;background:{{ sw.prep.track }};display:flex;justify-content:{{ sw.prep.align }};transition:background .2s ease">
+            <div style="width:20px;height:20px;border-radius:50%;background:#0B0C0A"></div>
+          </div>
+        </div>
+        <div style="display:flex;align-items:center;gap:12px;padding:14px 15px;border-radius:13px;background:#131511;border:1px solid rgba(255,255,255,.07)">
+          <div style="flex:1;display:flex;flex-direction:column;gap:2px">
+            <div style="font-size:13px;font-weight:500">Avisos durante el esfuerzo</div>
+            <div style="font-size:11px;color:rgba(242,244,240,.45)">Hidratación, sales y geles en carrera</div>
+          </div>
+          <div onClick="{{ sw.race.toggle }}" style="width:44px;height:26px;border-radius:999px;padding:3px;cursor:pointer;flex:none;background:{{ sw.race.track }};display:flex;justify-content:{{ sw.race.align }};transition:background .2s ease">
+            <div style="width:20px;height:20px;border-radius:50%;background:#0B0C0A"></div>
+          </div>
+        </div>
+        <div style="display:flex;align-items:center;gap:12px;padding:14px 15px;border-radius:13px;background:#131511;border:1px solid rgba(255,255,255,.07)">
+          <div style="flex:1;display:flex;flex-direction:column;gap:2px">
+            <div style="font-size:13px;font-weight:500">Resumen semanal</div>
+            <div style="font-size:11px;color:rgba(242,244,240,.45)">Domingos, por correo</div>
+          </div>
+          <div onClick="{{ sw.weekly.toggle }}" style="width:44px;height:26px;border-radius:999px;padding:3px;cursor:pointer;flex:none;background:{{ sw.weekly.track }};display:flex;justify-content:{{ sw.weekly.align }};transition:background .2s ease">
+            <div style="width:20px;height:20px;border-radius:50%;background:#0B0C0A"></div>
+          </div>
+        </div>
+        <div style="display:flex;flex-direction:column;gap:9px;padding:14px 15px;border-radius:13px;background:#131511;border:1px solid rgba(255,255,255,.07)">
+          <div style="display:flex;align-items:baseline;justify-content:space-between">
+            <div style="font-size:13px;font-weight:500">Cuánto antes te avisamos</div>
+            <div style="font-size:12px;font-weight:600;color:var(--ac);font-variant-numeric:tabular-nums">{{ leadLabel }}</div>
+          </div>
+          <div style="display:flex;gap:6px">
+            <sc-for list="{{ leadOptions }}" as="o" hint-placeholder-count="4">
+              <div onClick="{{ o.pick }}" style="flex:1;text-align:center;padding:9px 0;border-radius:10px;font-size:11.5px;font-weight:600;cursor:pointer;background:{{ o.bg }};border:1px solid {{ o.border }};color:{{ o.color }}">{{ o.label }}</div>
+            </sc-for>
+          </div>
+        </div>
+      </div>
+
+      <div style="display:flex;flex-direction:column;gap:8px">
+        <div style="font-size:10px;font-weight:600;letter-spacing:.12em;text-transform:uppercase;color:rgba(242,244,240,.4)">Unidades</div>
+        <div style="display:flex;flex-direction:column;gap:9px;padding:14px 15px;border-radius:13px;background:#131511;border:1px solid rgba(255,255,255,.07)">
+          <div style="font-size:13px;font-weight:500">Sistema de medida</div>
+          <div style="display:flex;gap:6px">
+            <sc-for list="{{ unitOptions }}" as="o" hint-placeholder-count="2">
+              <div onClick="{{ o.pick }}" style="flex:1;text-align:center;padding:10px 0;border-radius:10px;font-size:12px;font-weight:600;cursor:pointer;background:{{ o.bg }};border:1px solid {{ o.border }};color:{{ o.color }}">{{ o.label }}</div>
+            </sc-for>
+          </div>
+        </div>
+      </div>
+
+      <div style="display:flex;flex-direction:column;gap:8px">
+        <div style="font-size:10px;font-weight:600;letter-spacing:.12em;text-transform:uppercase;color:rgba(242,244,240,.4)">Cuenta</div>
+        <div style="display:flex;align-items:center;gap:10px;padding:14px 15px;border-radius:13px;background:#131511;border:1px solid rgba(255,255,255,.07)">
+          <div style="flex:1;font-size:13px;font-weight:500">Correo</div>
+          <div style="font-size:12px;color:rgba(242,244,240,.5)">ivan.benitez@mail.com</div>
+        </div>
+        <div onClick="{{ editDays }}" style="display:flex;align-items:center;gap:10px;padding:14px 15px;border-radius:13px;background:#131511;border:1px solid rgba(255,255,255,.07);cursor:pointer">
+          <div style="flex:1;font-size:13px;font-weight:500">Días y horarios</div>
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="rgba(242,244,240,.35)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex:none"><path d="M9 5l7 7-7 7"></path></svg>
+        </div>
+        <div style="display:flex;align-items:center;gap:12px;padding:14px 15px;border-radius:13px;background:#131511;border:1px solid rgba(255,255,255,.07)">
+          <div style="flex:1;display:flex;flex-direction:column;gap:2px">
+            <div style="font-size:13px;font-weight:500">Perfil privado</div>
+            <div style="font-size:11px;color:rgba(242,244,240,.45)">Nadie ve tus datos ni tus rutas</div>
+          </div>
+          <div onClick="{{ sw.private.toggle }}" style="width:44px;height:26px;border-radius:999px;padding:3px;cursor:pointer;flex:none;background:{{ sw.private.track }};display:flex;justify-content:{{ sw.private.align }};transition:background .2s ease">
+            <div style="width:20px;height:20px;border-radius:50%;background:#0B0C0A"></div>
+          </div>
+        </div>
+      </div>
+
+      <div onClick="{{ logout }}" style="text-align:center;padding:15px;border-radius:13px;background:rgba(255,140,120,.12);border:1px solid rgba(255,140,120,.35);font-size:13.5px;font-weight:600;color:rgba(255,170,155,.95);cursor:pointer">Cerrar sesión</div>
+      <div style="text-align:center;font-size:11px;color:rgba(242,244,240,.35);padding-bottom:38px">Trainer 0.9 · beta</div>
+    </div>
+  </sc-if>
+
+  <sc-if value="{{ showNav }}" hint-placeholder-val="{{ true }}">
+  <div style="position:relative;flex:none;background:#0E100D;border-top:1px solid rgba(255,255,255,.07);padding:10px 10px 22px;display:flex;align-items:flex-start">
+    <div onClick="{{ go.inicio }}" style="flex:1;display:flex;flex-direction:column;align-items:center;gap:5px;cursor:pointer;color:{{ tint.inicio }}">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M3 10.6 12 3.2l9 7.4"></path><path d="M5.6 9.6V20a1 1 0 0 0 1 1h3.6v-5.6h3.6V21h3.6a1 1 0 0 0 1-1V9.6"></path></svg>
+      <div style="font-size:9.5px;font-weight:600">Inicio</div>
+    </div>
+    <div onClick="{{ go.plan }}" style="flex:1;display:flex;flex-direction:column;align-items:center;gap:5px;cursor:pointer;color:{{ tint.plan }}">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="3.4" y="5" width="17.2" height="15.6" rx="2.6"></rect><path d="M8.2 3v3.6M15.8 3v3.6M3.4 10.2h17.2"></path><path d="M7.6 14h2.2M14.2 14h2.2M7.6 17.4h2.2M14.2 17.4h2.2"></path></svg>
+      <div style="font-size:9.5px;font-weight:600">Plan</div>
+    </div>
+    <div style="width:74px;flex:none"></div>
+    <div onClick="{{ go.nutricion }}" style="flex:1;display:flex;flex-direction:column;align-items:center;gap:5px;cursor:pointer;color:{{ tint.nutricion }}">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M3.6 11.2h16.8c0 4.5-3.8 8-8.4 8s-8.4-3.5-8.4-8Z"></path><path d="M8.8 7.8c0-1.3 1-1.7 1-3M12.6 7.4c0-1.5 1.2-2 1.2-3.4"></path></svg>
+      <div style="font-size:9.5px;font-weight:600">Nutrición</div>
+    </div>
+    <div onClick="{{ go.perfil }}" style="flex:1;display:flex;flex-direction:column;align-items:center;gap:5px;cursor:pointer;color:{{ tint.perfil }}">
+      <sc-if value="{{ hasPhoto }}" hint-placeholder-val="{{ false }}">
+        <img src="{{ photo }}" alt="Tu perfil" style="width:22px;height:22px;border-radius:50%;object-fit:cover;display:block;border:1px solid rgba(255,255,255,.2)">
+      </sc-if>
+      <sc-if value="{{ noPhoto }}" hint-placeholder-val="{{ true }}">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8.4" r="3.6"></circle><path d="M4.8 20.6c0-4 3.3-6.2 7.2-6.2s7.2 2.2 7.2 6.2"></path></svg>
+      </sc-if>
+      <div style="font-size:9.5px;font-weight:600">Perfil</div>
+    </div>
+
+    <div onClick="{{ go.entreno }}" style="position:absolute;left:50%;top:-24px;transform:translateX(-50%);display:flex;flex-direction:column;align-items:center;gap:4px;cursor:pointer">
+      <div style="width:62px;height:62px;border-radius:50%;background:var(--ac);border:4px solid #0B0C0A;display:flex;align-items:center;justify-content:center">
+        <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#0B0C0A" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round"><path d="M2.6 12h3.8l2.4-6.4 4 13 2.4-6.6h4.2"></path></svg>
+      </div>
+      <div style="font-size:9.5px;font-weight:600;color:{{ tint.entreno }}">Entreno</div>
+    </div>
+  </div>
+  </sc-if>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;:{&quot;width&quot;:390,&quot;height&quot;:844},&quot;athleteName&quot;:{&quot;editor&quot;:&quot;text&quot;,&quot;default&quot;:&quot;Iván Benítez&quot;,&quot;tsType&quot;:&quot;string&quot;},&quot;goal&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;default&quot;:&quot;Media maratón&quot;,&quot;options&quot;:[&quot;5 km&quot;,&quot;10 km&quot;,&quot;Media maratón&quot;,&quot;Maratón&quot;,&quot;Trail de montaña&quot;,&quot;Triatlón olímpico&quot;],&quot;tsType&quot;:&quot;string&quot;},&quot;accent&quot;:{&quot;editor&quot;:&quot;text&quot;,&quot;default&quot;:&quot;#7CF03D&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Color de acento (hex, ej. #FF5A1F)&quot;}}">
+const TABS = ["inicio", "plan", "entreno", "nutricion", "perfil", "ajustes", "gym"];
+const EXERCISES = [
+  ["Press plano con barra", "4 series × 8 · 45 kg · 90 s", 4, "General", "Fuerza de empuje: no aporta a la carrera, pero es tu objetivo estético."],
+  ["Dominadas", "4 series × 6 · peso corporal · 90 s", 4, "General", "Tracción y espalda alta; ayuda a mantener el torso firme al correr cansado."],
+  ["Remo con barra", "3 series × 10 · 35 kg · 75 s", 3, "General", "Equilibra el trabajo de empuje del press."],
+  ["Sentadilla búlgara", "3 series × 10 por pierna · 12 kg", 3, "Para correr", "Fuerza unilateral: menos desequilibrios y menos riesgo de lesión."],
+  ["Elevación de talones", "3 series × 15 · 20 kg · 60 s", 3, "Para correr", "Protege tendón de Aquiles y sóleo, los que más sufren en fondos largos."],
+  ["Plancha frontal", "3 series × 45 s · 45 s de pausa", 3, "Para correr", "Core estable = mejor economía de carrera en los últimos kilómetros."]
+];
+const D = ["Lun", "Mar", "Mié", "Jue", "Vie", "Sáb", "Dom"];
+const WEEKS = {
+  5: { km: "42 de 42 km", from: 18, done: 7, today: -1, rows: [
+    ["Recuperación · 5 km", "Zona 1 · 32 min"], ["Series · 6×400 m", "6 km totales · 1 gel"],
+    ["Descanso", "Fuerza opcional · 30 min"], ["Fondo largo · 12 km", "Zona 2 · 650 ml/h · 1 gel"],
+    ["Descanso", "Movilidad y elongación"], ["Ritmo · 8 km", "5:00 /km · 07:00"], ["Suave · 6 km", "Zona 1-2 · sin geles"]] },
+  6: { km: "48 de 62 km", from: 25, done: 3, today: 3, rows: [
+    ["Recuperación · 6 km", "Zona 1 · 38 min"], ["Series · 8×400 m", "7 km totales · 1 gel"],
+    ["Descanso", "Fuerza opcional · 30 min"], ["Fondo largo · 14 km", "Zona 2 · 750 ml/h · 2 geles"],
+    ["Descanso", "Movilidad y elongación"], ["Ritmo · 10 km", "4:55 /km · 07:00"], ["Suave · 8 km", "Zona 1-2 · sin geles"]] },
+  7: { km: "0 de 68 km", from: 1, done: 0, today: -1, rows: [
+    ["Recuperación · 6 km", "Zona 1 · 38 min"], ["Series · 6×800 m", "10 km totales · 1 gel"],
+    ["Descanso", "Fuerza opcional · 30 min"], ["Fondo largo · 16 km", "Zona 2 · 750 ml/h · 2 geles"],
+    ["Descanso", "Movilidad y elongación"], ["Ritmo · 12 km", "4:55 /km · 07:00"], ["Suave · 8 km", "Zona 1-2 · sin geles"]] },
+  8: { km: "0 de 74 km", from: 8, done: 0, today: -1, rows: [
+    ["Recuperación · 7 km", "Zona 1 · 45 min"], ["Series · 5×1000 m", "10 km totales · 1 gel"],
+    ["Descanso", "Fuerza opcional · 30 min"], ["Fondo largo · 18 km", "Zona 2 · 800 ml/h · 3 geles"],
+    ["Descanso", "Movilidad y elongación"], ["Ritmo · 12 km", "4:50 /km · 07:00"], ["Suave · 9 km", "Zona 1-2 · sin geles"]] },
+  9: { km: "0 de 78 km", from: 15, done: 0, today: -1, rows: [
+    ["Recuperación · 7 km", "Zona 1 · 45 min"], ["Series · 6×1000 m", "11 km totales · 1 gel"],
+    ["Descanso", "Fuerza opcional · 30 min"], ["Fondo largo · 20 km", "Zona 2 · 800 ml/h · 3 geles"],
+    ["Descanso", "Movilidad y elongación"], ["Ritmo · 14 km", "4:50 /km · 07:00"], ["Suave · 9 km", "Zona 1-2 · sin geles"]] }
+};
+const MONTH = { 5: "ago", 6: "ago", 7: "sep", 8: "sep", 9: "sep" };
+const BEGINNER = {
+  subtitle: "Bloque de 4 semanas · primeros 5 km",
+  event: "Tus primeros 5 km",
+  when: "Domingo 27 de septiembre · 5 km",
+  weeksLeft: 3,
+  bars: [{ flex: 1, bg: "var(--ac)" }, { flex: 1, bg: "rgb(var(--ac-rgb) / .45)" }, { flex: 2, bg: "rgba(255,255,255,.1)" }],
+  phases: [["Caminar y trotar · 1", 0], ["Trote continuo · 2", 1], ["Prueba de 5 km · 3-4", 0]],
+  keys: [1, 2, 3, 4],
+  weeks: {
+    1: { km: "10 de 10 km", from: 1, month: "sep", done: 7, today: -1, rows: [
+      ["Caminar y trotar · 3 km", "4′ trote / 1′ caminata × 4"], ["Descanso", "Movilidad 15 min"],
+      ["Caminar y trotar · 3 km", "4′ trote / 1′ caminata × 4"], ["Descanso", "Fuerza 30 min"],
+      ["Caminar y trotar · 4 km", "4′ trote / 1′ caminata × 5"], ["Descanso", "Elongación"],
+      ["Caminata rápida · 4 km", "Zona 1, sin trotar"]] },
+    2: { km: "6 de 13 km", from: 8, month: "sep", done: 3, today: 3, rows: [
+      ["Caminar y trotar · 4 km", "5′ trote / 1′ caminata × 4"], ["Descanso", "Movilidad 15 min"],
+      ["Trote continuo · 2 km", "Zona 2, sin caminar"], ["Caminar y trotar · 5 km", "5′ trote / 1′ caminata × 5"],
+      ["Descanso", "Fuerza 30 min"], ["Trote continuo · 3 km", "Zona 2 · ritmo cómodo"],
+      ["Caminata rápida · 5 km", "Zona 1"]] },
+    3: { km: "0 de 16 km", from: 15, month: "sep", done: 0, today: -1, rows: [
+      ["Trote continuo · 3 km", "Zona 2"], ["Descanso", "Movilidad 15 min"],
+      ["Trote continuo · 4 km", "Zona 2"], ["Descanso", "Fuerza 30 min"],
+      ["Series suaves · 6×400 m", "Con 1′ de caminata entre series"], ["Descanso", "Elongación"],
+      ["Trote continuo · 5 km", "Ritmo de tu carrera"]] },
+    4: { km: "0 de 12 km", from: 22, month: "sep", done: 0, today: -1, rows: [
+      ["Trote continuo · 3 km", "Zona 2, suave"], ["Descanso", "Movilidad 15 min"],
+      ["Trote continuo · 2 km", "Zona 2 + 3 sprints"], ["Descanso", "Elongación"],
+      ["Activación · 2 km", "Trote muy suave"], ["Descanso", "Dormí 8 h"],
+      ["Carrera · 5 km", "Tu objetivo · 750 ml/h · sin geles"]] }
+  }
+};
+const RACE = {
+  subtitle: "Bloque de 12 semanas · media maratón",
+  event: "Media maratón de Buenos Aires",
+  when: "Domingo 11 de octubre · 21,1 km",
+  weeksLeft: 6,
+  bars: [{ flex: 5, bg: "var(--ac)" }, { flex: 1, bg: "rgb(var(--ac-rgb) / .45)" }, { flex: 6, bg: "rgba(255,255,255,.1)" }],
+  phases: [["Base · 1-5", 0], ["Carga · 6-10", 1], ["Afinamiento · 11-12", 0]],
+  keys: [5, 6, 7, 8, 9],
+  weeks: WEEKS
+};
+
+
+const PRESETS = [
+  { name: "Avena con banana y miel", kcal: 420, carbs: 72, protein: 12, fat: 9 },
+  { name: "Pollo, arroz y verduras", kcal: 640, carbs: 78, protein: 46, fat: 14 },
+  { name: "Yogur con granola", kcal: 290, carbs: 38, protein: 16, fat: 8 },
+  { name: "Sándwich de atún", kcal: 480, carbs: 52, protein: 32, fat: 15 }
+];
+const DETECTED = [
+  { name: "Pollo grillado con arroz y brócoli", confidence: "92% de certeza", kcal: 640, carbs: 78, protein: 46, fat: 14,
+    items: [["Pechuga de pollo grillada", "180 g"], ["Arroz blanco cocido", "200 g"], ["Brócoli al vapor", "90 g"], ["Aceite de oliva", "1 cda"]] },
+  { name: "Tostadas con palta y huevo", confidence: "88% de certeza", kcal: 520, carbs: 44, protein: 24, fat: 27,
+    items: [["Pan integral", "2 rebanadas"], ["Palta", "1/2 unidad"], ["Huevo revuelto", "2 unidades"]] },
+  { name: "Milanesa con puré", confidence: "85% de certeza", kcal: 780, carbs: 68, protein: 42, fat: 36,
+    items: [["Milanesa de carne al horno", "160 g"], ["Puré de papas", "250 g"], ["Ensalada de tomate", "80 g"]] }
+];
+const COUNTABLE = { rebanada: "rebanadas", unidad: "unidades", taza: "tazas", porcion: "porciones" };
+const SINGULAR = { rebanadas: "rebanada", unidades: "unidad", tazas: "taza", porciones: "porción" };
+function scaleAmount(amount, portion) {
+  const m = /^(\d+\s*\/\s*\d+|[\d.,]+)\s*(.*)$/.exec(amount);
+  if (!m) return amount;
+  let unit = m[2];
+  if (/^cda|^cta|^cuchar/.test(unit)) return amount;
+  const raw = m[1].indexOf("/") >= 0
+    ? m[1].split("/").reduce((a, b) => parseFloat(a) / parseFloat(b))
+    : parseFloat(m[1].replace(",", "."));
+  const base = SINGULAR[unit] || unit;
+  const countable = !!(COUNTABLE[base] || SINGULAR[unit]);
+  const n = raw * portion;
+  const rounded = countable ? Math.max(0.5, Math.round(n * 2) / 2) : Math.round(n);
+  if (countable) unit = rounded <= 1 ? base : (COUNTABLE[base] || unit);
+  const label = rounded === 0.5 ? "1/2" : String(rounded).replace(".", ",");
+  return label + " " + unit;
+}
+const SCAN_STEPS = ["Reconociendo el plato", "Estimando porciones", "Calculando calorías y macros"];
+const SESSIONS = {
+  fondo: {
+    name: "Fondo largo", target: "14 km · Zona 2 · 1 h 25 min", when: "Hoy 18:30",
+    blocks: [["Calentamiento", "2 km en Zona 1", ""], ["Bloque principal", "10 km en Z2 · 5:10-5:20", "10 km"], ["Vuelta a la calma", "2 km suaves", ""]],
+    fuel: ["2 geles", "900 ml con sales", "600 mg de sodio"],
+    tip: "26° y 62% de humedad: subimos el objetivo a 750 ml/h y agregamos sales.",
+    live: { dur: "1:12:34", pace: "5:12", dist: "9,8", block: 1, next: "Gel + 300 ml con sales", nextIn: "en 4:20", nextPct: "78%", fuelState: "540 de 900 ml · 1 de 2 geles · 600 mg de sodio" }
+  },
+  series: {
+    name: "Series · 6×800 m", target: "10 km totales · Zona 4 · 3:05 el 800", when: "Mar 2 sep 18:30",
+    blocks: [["Calentamiento", "2 km en Z1-Z2 + 4 sprints", ""], ["6×800 m", "3:05 cada uno · 90 s de trote", "3 de 6"], ["Vuelta a la calma", "1,5 km suaves", ""]],
+    fuel: ["1 gel a los 25′", "500 ml con sales", "300 mg de sodio"],
+    tip: "Sesión corta e intensa: con 1 gel y 500 ml alcanza, pero no salteés las sales.",
+    live: { dur: "0:28:40", pace: "3:58", dist: "5,2", block: 1, next: "Gel antes del cuarto 800", nextIn: "ahora", nextPct: "100%", fuelState: "260 de 500 ml · 0 de 1 gel · repetición 3 de 6" }
+  }
+};
+
+class Component extends DCLogic {
+  state = { tab: "inicio", photo: null, week: 6, run: "idle", session: "fondo", route: true, alerts: true,
+    sw: { prep: true, race: true, weekly: true, private: true }, lead: 45, units: "metrico",
+    editing: false, logStage: null, shot: null, detected: 0, portion: 1, scanTick: 0, meals: [
+      { time: "07:10", name: "Avena con banana y miel", kcal: 420, carbs: 72, protein: 12, fat: 9 },
+      { time: "10:40", name: "Yogur con granola y frutos secos", kcal: 500, carbs: 58, protein: 26, fat: 18 },
+      { time: "13:20", name: "Pollo, arroz y verduras", kcal: 640, carbs: 78, protein: 46, fat: 14 },
+      { time: "15:30", name: "Snack pre-entreno", kcal: 260, carbs: 60, protein: 6, fat: 4 }
+    ], gymSets: { 0: 2 }, sleep: 7.5, rest: { "Mié": true, "Vie": true }, day: { kind: "Fondo largo", km: 14, zone: "Z2", time: "18:30" },
+    draft: { kind: "Fondo largo", km: 14, zone: "Z2", time: "18:30" } };
+
+  pickPhoto = (e) => {
+    const file = e.target.files && e.target.files[0];
+    if (!file) return;
+    if (this.state.photo) URL.revokeObjectURL(this.state.photo);
+    this.setState({ photo: URL.createObjectURL(file) });
+  };
+
+  componentWillUnmount() {
+    if (this.state.photo) URL.revokeObjectURL(this.state.photo);
+    if (this.state.shot) URL.revokeObjectURL(this.state.shot);
+    clearInterval(this.scanTimer);
+  }
+
+  shoot = (e) => {
+    const file = e.target.files && e.target.files[0];
+    if (!file) return;
+    if (this.state.shot) URL.revokeObjectURL(this.state.shot);
+    this.setState({ shot: URL.createObjectURL(file), logStage: "scan", scanTick: 0 });
+    this.runScan();
+  };
+
+  runScan() {
+    clearInterval(this.scanTimer);
+    this.scanTimer = setInterval(() => {
+      this.setState(s => {
+        if (s.scanTick >= SCAN_STEPS.length - 1) {
+          clearInterval(this.scanTimer);
+          return { logStage: "result", detected: Math.floor(Math.random() * DETECTED.length), portion: 1 };
+        }
+        return { scanTick: s.scanTick + 1 };
+      });
+    }, 700);
+  }
+
+  addMeal(meal) {
+    const now = new Date();
+    const time = String(now.getHours()).padStart(2, "0") + ":" + String(now.getMinutes()).padStart(2, "0");
+    this.setState(s => ({ meals: s.meals.concat([{ ...meal, time }]), logStage: null, shot: null, portion: 1 }));
+  }
+
+
+
+
+  rootRef = (el) => { this.rootEl = el; this.applyAccent(); };
+  applyAccent() {
+    if (!this.rootEl) return;
+    const hex = (this.props.accent || "#7CF03D").replace("#", "");
+    const full = hex.length === 3 ? hex.split("").map(c => c + c).join("") : hex;
+    const n = parseInt(full, 16);
+    this.rootEl.style.setProperty("--ac", "#" + full);
+    this.rootEl.style.setProperty("--ac-rgb", ((n >> 16) & 255) + " " + ((n >> 8) & 255) + " " + (n & 255));
+  }
+  componentDidUpdate() { this.applyAccent(); }
+
+  renderVals() {
+    const st = this.state;
+    const accent = "var(--ac)";
+    const idle = "rgba(242,244,240,.45)";
+    const name = this.props.athleteName ?? "Iván Benítez";
+    const initials = name.trim().split(/\s+/).slice(0, 2).map(w => w[0]).join("").toUpperCase();
+
+    const on = {}, go = {}, tint = {};
+    TABS.forEach(t => {
+      on[t] = st.tab === t;
+      go[t] = () => this.setState({ tab: t });
+      tint[t] = st.tab === t ? accent : idle;
+    });
+    tint.entreno = st.tab === "entreno" ? accent : "rgba(242,244,240,.55)";
+
+    const plan = (this.props.goal || "").indexOf("5 km") === 0 ? BEGINNER : RACE;
+    const weekKey = plan.weeks[st.week] ? st.week : plan.keys[1];
+    const wk = plan.weeks[weekKey];
+    const noop = () => {};
+    const live = st.run !== "idle";
+    const idleLive = { dur: "00:00", pace: "--:--", dist: "0,00" };
+    const dr = st.draft;
+    const pill = (active) => ({
+      bg: active ? "rgb(var(--ac-rgb) / .14)" : "rgba(255,255,255,.04)",
+      border: active ? accent : "rgba(255,255,255,.1)",
+      color: active ? accent : "rgba(242,244,240,.6)"
+    });
+    const mins = (km, zone) => Math.round(km * (zone === "Z4" ? 4.2 : zone === "Z3" ? 4.8 : zone === "Z1" ? 6.4 : 5.6));
+    const CARBS = { Z1: [30, "baja"], Z2: [50, "moderada"], Z3: [70, "moderada-alta"], Z4: [85, "alta"] };
+    const carbsRate = CARBS[st.day.zone][0];
+    const carbsWhy = CARBS[st.day.zone][1];
+    const draftCarbs = CARBS[dr.zone][0];
+    const fluid = st.day.zone === "Z3" || st.day.zone === "Z4" ? 800 : 750;
+    const draftFluid = dr.zone === "Z3" || dr.zone === "Z4" ? 800 : 750;
+    const draftGels = Math.max(1, Math.round(mins(dr.km, dr.zone) / 45));
+    const gels = Math.max(1, Math.round(mins(st.day.km, st.day.zone) / 45));
+    const fuelPlan = [{ label: "20′ agua", bg: "rgba(255,255,255,.06)", color: "rgba(242,244,240,.72)" }]
+      .concat(Array.from({ length: gels }, (_, i) => ({
+        label: (45 * (i + 1)) + "′ " + (i % 2 === 0 ? "gel + sal" : "gel"),
+        bg: "rgb(var(--ac-rgb) / .14)", color: accent
+      })))
+      .concat([{ label: fluid + " ml/h", bg: "rgba(255,255,255,.06)", color: "rgba(242,244,240,.72)" }])
+      .concat([{ label: carbsRate + " g carbos/h", bg: "rgba(255,255,255,.06)", color: "rgba(242,244,240,.72)" }]);
+
+    const zoneN = st.day.zone.slice(1);
+    const totalMin = mins(st.day.km, st.day.zone);
+    const wr = !!st.day.walkRun;
+    const cycles = Math.max(2, Math.round((totalMin - 15) / 5));
+    const totalMl = Math.round(totalMin / 60 * fluid / 50) * 50;
+    const dayGels = Math.max(1, Math.round(totalMin / 45));
+    const dayGelsRef = dayGels;
+    const todaySession = {
+      name: st.day.kind + (wr ? " · Run-Walk-Run" : ""),
+      target: st.day.km + " km · Zona " + zoneN + " · " + Math.floor(totalMin / 60) + " h " + String(totalMin % 60).padStart(2, "0") + " min",
+      when: "Hoy " + st.day.time,
+      blocks: wr
+        ? [["Calentamiento", "10 min de caminata rápida", ""],
+           ["Run-Walk-Run", "4′ de trote / 1′ de caminata", cycles + " ciclos"],
+           ["Vuelta a la calma", "5 min de caminata + estiramientos estáticos", ""]]
+        : [["Calentamiento", "2 km en Zona 1 + estiramiento dinámico", ""],
+           ["Bloque principal", Math.max(1, st.day.km - 3) + " km en " + st.day.zone, Math.max(1, st.day.km - 3) + " km"],
+           ["Vuelta a la calma", "1,5 km suaves + estiramientos de 30 s", ""]],
+      fuel: [dayGels + (dayGels === 1 ? " gel" : " geles"), totalMl + " ml con sales", (dayGels * 300 + 300) + " mg de sodio", carbsRate + " g carbos/h"],
+      tip: "26° y 62% de humedad: el objetivo sube a " + fluid + " ml/h y " + carbsRate + " g de carbos por hora" + (wr ? ". Aprovechá cada pausa de caminata para tomar." : "."),
+      live: { dur: "1:12:34", pace: wr ? "6:04" : "5:12", dist: "9,8", block: 1,
+        next: wr ? "Pausa de caminata + 200 ml" : "Gel + 300 ml con sales",
+        nextIn: "en 4:20", nextPct: "78%",
+        fuelState: Math.round(totalMl * .6) + " de " + totalMl + " ml · 1 de " + dayGels + (dayGels === 1 ? " gel" : " geles") + " · " + carbsRate + " g carbos/h" }
+    };
+    const ses = st.session === "series" ? SESSIONS.series : todaySession;
+
+    const NOW = 8 * 60 + 24;
+    const sessionMin = parseInt(st.day.time.slice(0, 2), 10) * 60 + parseInt(st.day.time.slice(3), 10);
+    const fmtClock = (m) => {
+      const t = ((m % 1440) + 1440) % 1440;
+      return String(Math.floor(t / 60)).padStart(2, "0") + ":" + String(t % 60).padStart(2, "0");
+    };
+    const untilSession = ((sessionMin - NOW) % 1440 + 1440) % 1440;
+    const det = DETECTED[st.detected] || DETECTED[0];
+    const sum = (k) => st.meals.reduce((n, m) => n + (m[k] || 0), 0);
+    const eaten = { kcal: sum("kcal"), carbs: sum("carbs"), protein: sum("protein"), fat: sum("fat") };
+    const TARGET = { kcal: 2410, carbs: 310, protein: 122, fat: 80 };
+    const pct = (a, b) => Math.min(100, Math.round((a / b) * 100)) + "%";
+    const loggedKcal = eaten.kcal.toLocaleString("es-AR");
+    const suggested = [
+      { time: st.day.time, name: "Durante el entreno", detail: dayGelsRef + " geles · " + carbsRate + " g carbos/h", race: true },
+      { time: fmtClock(sessionMin + mins(st.day.km, st.day.zone) + 20), name: "Cena de recuperación", detail: "640 kcal · 25 g proteína · sugerida", pending: true }
+    ];
+    const mealRows = st.meals.map((m, i) => ({
+      time: m.time, name: m.name,
+      detail: m.kcal.toLocaleString("es-AR") + " kcal · " + m.carbs + " g carbos · " + m.protein + " g prote",
+      logged: true, pending: false,
+      bg: "#131511", border: "rgba(255,255,255,.07)", opacity: .72,
+      timeColor: "rgba(242,244,240,.5)", timeWeight: "400",
+      remove: () => this.setState(s => ({ meals: s.meals.filter((_, j) => j !== i) }))
+    })).concat(suggested.map(s2 => ({
+      time: s2.time, name: s2.name, detail: s2.detail,
+      logged: false, pending: !!s2.pending,
+      bg: s2.race ? "rgb(var(--ac-rgb) / .08)" : "#131511",
+      border: s2.race ? "rgb(var(--ac-rgb) / .25)" : "rgba(255,255,255,.09)",
+      opacity: 1,
+      timeColor: s2.race ? accent : "rgba(242,244,240,.6)",
+      timeWeight: s2.race ? "600" : "400",
+      remove: () => {}
+    }))).sort((a, b) => a.time.localeCompare(b.time));
+    const restCount = Object.keys(st.rest).length;
+    const gymTotal = EXERCISES.reduce((n, e) => n + e[2], 0);
+    const gymDone = EXERCISES.reduce((n, e, i) => n + Math.min(st.gymSets[i] || 0, e[2]), 0);
+    const KIND_PHRASE = { "Fondo largo": "tu fondo largo", "Suave": "tu salida suave", "Series": "tus series", "Ritmo": "tu sesión de ritmo" };
+    const preCarbs = Math.round(st.day.km * 4.3);
+    const liters = (Math.round((mins(st.day.km, st.day.zone) / 60) * fluid / 100) / 10).toFixed(1).replace(".", ",");
+    const rows = [
+      { key: "snack", at: sessionMin - 180, title: "Snack pre-entreno", detail: preCarbs + " g carbos · banana + avena", act: "nutricion" },
+      { key: "prep", at: sessionMin - st.lead, title: "Preparar bidones y geles", detail: liters + " L con sales · " + gels + (gels === 1 ? " gel" : " geles") + " · aviso " + st.lead + " min antes" },
+      { key: "gym", at: 12 * 60, title: "Gimnasio · tren superior y core", detail: EXERCISES.length + " ejercicios · 45 min · toca para ver la rutina", act: "gym", gym: true },
+      { key: "session", at: sessionMin },
+      { key: "recovery", at: sessionMin + mins(st.day.km, st.day.zone) + 20, title: "Recuperación", detail: "25 g proteína + " + Math.round(st.day.km * 5.7) + " g carbos en 45 min", act: "nutricion" }
+    ].sort((a, b) => a.at - b.at);
+
+    return {
+      rootRef: this.rootRef,
+      on, go, tint,
+      plan: {
+        subtitle: plan.subtitle, event: plan.event, when: plan.when, weeksLeft: plan.weeksLeft, bars: plan.bars,
+        phases: plan.phases.map(([label, on]) => ({ label, color: on ? accent : "rgba(242,244,240,.45)", weight: on ? "600" : "400" }))
+      },
+      weekChips: plan.keys.map(n => ({
+        label: "S" + n,
+        pick: () => this.setState({ week: n }),
+        bg: weekKey === n ? "rgb(var(--ac-rgb) / .14)" : "#131511",
+        border: weekKey === n ? accent : "rgba(255,255,255,.09)",
+        color: weekKey === n ? accent : "rgba(242,244,240,.5)"
+      })),
+      weekTitle: "Semana " + weekKey + (wk.today >= 0 ? " · en curso" : ""),
+      weekKm: wk.km,
+      weekDays: wk.rows.map(([title, detail], i) => {
+        const done = i < wk.done, today = i === wk.today;
+        const key = title.indexOf("Series") === 0 ? "series" : (title.indexOf("Descanso") === 0 ? null : "hoy");
+        const openable = !!key && !done;
+        return {
+          short: D[i], num: (wk.from + i) + " " + (wk.month || MONTH[weekKey]),
+          title, detail, done, today,
+          bg: today ? "rgb(var(--ac-rgb) / .08)" : "#131511",
+          border: today ? "rgb(var(--ac-rgb) / .25)" : "rgba(255,255,255,.07)",
+          opacity: done ? .6 : 1,
+          cursor: openable ? "pointer" : "default",
+          dayColor: today ? accent : "rgba(242,244,240,.5)",
+          dayWeight: today ? "600" : "400",
+          act: openable ? () => this.setState({ tab: "entreno", session: key === "series" ? "series" : "hoy", run: "idle" }) : noop
+        };
+      }),
+      ses: { ...ses, ...(live ? ses.live : idleLive), fuel: ses.fuel.map(label => ({ label })) },
+      blocks: ses.blocks.map(([label, detail, badge], i) => {
+        const active = live && i === ses.live.block;
+        const past = live && i < ses.live.block;
+        return {
+          label, detail, badge: active ? (badge || "en curso") : (past ? "hecho" : badge),
+          bg: active ? "rgb(var(--ac-rgb) / .1)" : "rgba(255,255,255,.03)",
+          border: active ? "rgb(var(--ac-rgb) / .28)" : "rgba(255,255,255,.07)",
+          opacity: past ? .55 : 1,
+          dot: active ? accent : "rgba(255,255,255,.22)"
+        };
+      }),
+      isIdle: !live,
+      isRunning: live,
+      showNav: st.tab !== "entreno",
+      today: {
+        title: st.day.kind + " · " + st.day.km + " km · " + st.day.zone + (st.day.walkRun ? " · Run-Walk-Run" : ""),
+        time: st.day.time,
+        big: Math.floor(untilSession / 60) + " h " + String(untilSession % 60).padStart(2, "0") + " min",
+        countdown: "para " + (KIND_PHRASE[st.day.kind] || "tu entreno") + " de " + st.day.km + " km · " + st.day.time,
+        note: fluid + " ml/h y " + carbsRate + " g de carbos/h · " + st.day.zone + " es intensidad " + carbsWhy,
+        chips: fuelPlan
+      },
+      agenda: rows.map(r => {
+        const past = r.at < NOW && r.key !== "session";
+        const isPrep = r.key === "prep" && !past;
+        return {
+          time: fmtClock(r.at), title: r.title, detail: past ? r.detail + " — hecho" : r.detail,
+          isSession: r.key === "session", isPlain: r.key !== "session",
+          timeColor: r.key === "session" ? "rgba(242,244,240,.75)" : (isPrep ? accent : "rgba(242,244,240,.45)"),
+          timeWeight: isPrep ? "600" : "400",
+          bg: isPrep ? "rgb(var(--ac-rgb) / .08)" : "#131511",
+          border: isPrep ? "rgb(var(--ac-rgb) / .25)" : (r.gym ? "rgba(255,255,255,.16)" : "rgba(255,255,255,.07)"),
+          opacity: past ? .55 : 1,
+          cursor: r.act ? "pointer" : "default",
+          act: r.act ? go[r.act] : noop
+        };
+      }),
+      gym: {
+        doneSets: gymDone,
+        totalSets: gymTotal,
+        pct: Math.round((gymDone / gymTotal) * 100) + "%",
+        pctLabel: Math.round((gymDone / gymTotal) * 100) + "% hecho",
+        finish: () => this.setState({ tab: "inicio" }),
+        exercises: EXERCISES.map(([name, prescription, sets, tag, why], i) => {
+          const done = st.gymSets[i] || 0;
+          const forRun = tag === "Para correr";
+          return {
+            name, prescription, tag, why,
+            border: done >= sets ? "rgb(var(--ac-rgb) / .28)" : "rgba(255,255,255,.08)",
+            tagBg: forRun ? "rgb(var(--ac-rgb) / .14)" : "rgba(255,255,255,.06)",
+            tagColor: forRun ? accent : "rgba(242,244,240,.55)",
+            sets: Array.from({ length: sets }, (_, j) => {
+              const on = j < done;
+              return {
+                label: on ? "✓" : String(j + 1),
+                bg: on ? "rgb(var(--ac-rgb) / .16)" : "rgba(255,255,255,.04)",
+                border: on ? accent : "rgba(255,255,255,.1)",
+                color: on ? accent : "rgba(242,244,240,.5)",
+                tap: () => this.setState(s => ({ gymSets: { ...s.gymSets, [i]: (s.gymSets[i] || 0) === j + 1 ? j : j + 1 } }))
+              };
+            })
+          };
+        })
+      },
+      wrTrack: dr.walkRun ? accent : "rgba(255,255,255,.14)",
+      wrAlign: dr.walkRun ? "flex-end" : "flex-start",
+      sleep: {
+        value: String(st.sleep).replace(".", ","),
+        less: () => this.setState(s => ({ sleep: Math.max(3, Math.round((s.sleep - 0.5) * 2) / 2) })),
+        more: () => this.setState(s => ({ sleep: Math.min(12, Math.round((s.sleep + 0.5) * 2) / 2) })),
+        note: st.sleep >= 7 ? "Suficiente para asimilar la carga de hoy." : "Menos de 7 h: bajá la intensidad o cambiá el fondo de día.",
+        color: st.sleep >= 7 ? "rgba(242,244,240,.45)" : "rgba(255,170,155,.9)"
+      },
+      rest: {
+        count: restCount,
+        note: restCount >= 2 ? "Dentro de lo recomendado para tu nivel." : "Sumá al menos un día más de descanso.",
+        color: restCount >= 2 ? "rgba(242,244,240,.45)" : "rgba(255,170,155,.9)",
+        days: D.map(label => {
+          const on = !!st.rest[label];
+          return {
+            label: label.slice(0, 1),
+            toggle: () => this.setState(s => {
+              const r = { ...s.rest };
+              if (r[label]) delete r[label]; else r[label] = true;
+              return { rest: r };
+            }),
+            bg: on ? "rgb(var(--ac-rgb) / .14)" : "rgba(255,255,255,.04)",
+            border: on ? accent : "rgba(255,255,255,.1)",
+            color: on ? accent : "rgba(242,244,240,.45)"
+          };
+        })
+      },
+      editing: st.editing,
+      openEdit: () => this.setState(s => ({ editing: true, draft: { ...s.day } })),
+      closeEdit: () => this.setState({ editing: false }),
+      saveEdit: () => this.setState(s => ({ day: { ...s.draft }, editing: false })),
+      resetEdit: () => this.setState({ draft: { kind: "Fondo largo", km: 14, zone: "Z2", time: "18:30" } }),
+      edit: {
+        km: dr.km,
+        kmPct: Math.round(Math.min(100, (dr.km / 30) * 100)) + "%",
+        less: () => this.setState(s => ({ draft: { ...s.draft, km: Math.max(3, s.draft.km - 1) } })),
+        more: () => this.setState(s => ({ draft: { ...s.draft, km: Math.min(30, s.draft.km + 1) } })),
+        kinds: ["Fondo largo", "Suave", "Series", "Ritmo"].map(label => ({
+          label, pick: () => this.setState(s => ({ draft: { ...s.draft, kind: label } })), ...pill(dr.kind === label)
+        })),
+        zones: ["Z1", "Z2", "Z3", "Z4"].map(label => ({
+          label, pick: () => this.setState(s => ({ draft: { ...s.draft, zone: label } })), ...pill(dr.zone === label)
+        })),
+        times: ["06:00", "07:00", "12:00", "17:00", "18:30", "20:00"].map(label => ({
+          label, pick: () => this.setState(s => ({ draft: { ...s.draft, time: label } })), ...pill(dr.time === label)
+        })),
+        recalc: draftFluid + " ml/h · " + draftCarbs + " g de carbos/h · " + draftGels + (draftGels === 1 ? " gel" : " geles") + " · " + (draftGels * 300 + 300) + " mg de sodio · aviso " + st.lead + " min antes, a las " + dr.time,
+        walkRun: st.draft.walkRun,
+        toggleWalkRun: () => this.setState(s => ({ draft: { ...s.draft, walkRun: !s.draft.walkRun } })),
+        wrBox: pill(!!dr.walkRun)
+      },
+      sw: ["prep", "race", "weekly", "private"].reduce((acc, k) => {
+        acc[k] = {
+          toggle: () => this.setState(s => ({ sw: { ...s.sw, [k]: !s.sw[k] } })),
+          track: st.sw[k] ? accent : "rgba(255,255,255,.14)",
+          align: st.sw[k] ? "flex-end" : "flex-start"
+        };
+        return acc;
+      }, {}),
+      leadLabel: st.lead + " min antes",
+      leadOptions: [15, 30, 45, 60].map(n => ({
+        label: n + " min",
+        pick: () => this.setState({ lead: n }),
+        bg: st.lead === n ? "rgb(var(--ac-rgb) / .14)" : "rgba(255,255,255,.04)",
+        border: st.lead === n ? accent : "rgba(255,255,255,.09)",
+        color: st.lead === n ? accent : "rgba(242,244,240,.55)"
+      })),
+      unitOptions: [["metrico", "Métrico · kg · cm"], ["imperial", "Imperial · lb · ft"]].map(([id, label]) => ({
+        label,
+        pick: () => this.setState({ units: id }),
+        bg: st.units === id ? "rgb(var(--ac-rgb) / .14)" : "rgba(255,255,255,.04)",
+        border: st.units === id ? accent : "rgba(255,255,255,.09)",
+        color: st.units === id ? accent : "rgba(242,244,240,.55)"
+      })),
+      exitRun: () => this.setState({ tab: "inicio", run: "idle" }),
+      routeOpacity: st.route ? 1 : 0,
+      toggleRoute: () => this.setState(s => ({ route: !s.route })),
+      routeBtnBg: st.route ? "rgb(var(--ac-rgb) / .14)" : "rgba(19,21,17,.94)",
+      routeBtnBorder: st.route ? "rgb(var(--ac-rgb) / .4)" : "rgba(255,255,255,.12)",
+      routeBtnColor: st.route ? accent : "rgba(242,244,240,.7)",
+      toggleAlerts: () => this.setState(s => ({ alerts: !s.alerts })),
+      alertBtnBg: st.alerts ? "rgb(var(--ac-rgb) / .14)" : "rgba(19,21,17,.94)",
+      alertBtnBorder: st.alerts ? "rgb(var(--ac-rgb) / .4)" : "rgba(255,255,255,.12)",
+      alertBtnColor: st.alerts ? accent : "rgba(242,244,240,.55)",
+      alertLabel: st.alerts ? "Avisos" : "Silencio",
+      showPlay: st.run !== "live",
+      showPause: st.run === "live",
+      mainLabel: st.run === "idle" ? "Iniciar" : (st.run === "live" ? "Pausar" : "Reanudar"),
+      mainAction: () => this.setState(s => ({ run: s.run === "live" ? "paused" : "live" })),
+      runState: st.run === "idle" ? "Listo para salir" : (st.run === "live" ? "En curso" : "En pausa"),
+      runColor: st.run === "live" ? accent : "rgba(242,244,240,.55)",
+      finishRun: () => this.setState({ tab: "inicio", run: "idle" }),
+      totals: {
+        kcal: eaten.kcal.toLocaleString("es-AR"),
+        kcalTarget: TARGET.kcal.toLocaleString("es-AR"),
+        kcalPct: pct(eaten.kcal, TARGET.kcal),
+        left: Math.max(0, TARGET.kcal - eaten.kcal).toLocaleString("es-AR") + " restantes",
+        hint: eaten.kcal > TARGET.kcal
+          ? "Pasaste el objetivo del día: mañana bajamos los carbos si no entrenás fuerte."
+          : "Hoy corrés " + st.day.km + " km: subimos 60 g de carbohidrato respecto de un día de descanso.",
+        macros: [
+          { label: "Carbos " + eaten.carbs + "/" + TARGET.carbs + " g", pct: pct(eaten.carbs, TARGET.carbs), color: accent },
+          { label: "Prote " + eaten.protein + "/" + TARGET.protein + " g", pct: pct(eaten.protein, TARGET.protein), color: "rgb(var(--ac-rgb) / .6)" },
+          { label: "Grasas " + eaten.fat + "/" + TARGET.fat + " g", pct: pct(eaten.fat, TARGET.fat), color: "rgb(var(--ac-rgb) / .35)" }
+        ]
+      },
+      meals: {
+        summary: loggedKcal + " kcal registradas",
+        list: mealRows
+      },
+      openLog: () => this.setState({ logStage: "pick", shot: null, portion: 1 }),
+      closeLog: () => this.setState({ logStage: null }),
+      logOpen: !!st.logStage,
+      log: {
+        title: st.logStage === "result" ? "Detectamos tu comida" : (st.logStage === "pick" ? "¿Qué estás comiendo?" : "Foto del plato"),
+        isPick: st.logStage === "pick",
+        isCamera: st.logStage === "camera",
+        isScanning: st.logStage === "scan",
+        isResult: st.logStage === "result",
+        hasShot: !!st.shot,
+        noShot: !st.shot,
+        shotFull: st.shot ? React.createElement("img", { src: st.shot, alt: "Foto de tu comida", style: { width: "100%", height: "100%", objectFit: "cover", display: "block" } }) : null,
+        shotDim: st.shot ? React.createElement("img", { src: st.shot, alt: "Analizando tu comida", style: { width: "100%", height: "100%", objectFit: "cover", display: "block", opacity: .55 } }) : null,
+        shotThumb: st.shot ? React.createElement("img", { src: st.shot, alt: "Tu comida", style: { width: "100%", height: "100%", objectFit: "cover", display: "block" } }) : null,
+        shootLabel: st.shot ? "Sacar otra" : "Tomar la foto",
+        openCamera: () => this.setState({ logStage: "camera" }),
+        back: () => this.setState({ logStage: "pick" }),
+        retake: () => this.setState({ logStage: "camera", shot: null }),
+        manual: () => this.setState({ logStage: "result", detected: 0, portion: 1 }),
+        shoot: this.shoot,
+        scanY: (20 + st.scanTick * 25) + "%",
+        steps: SCAN_STEPS.map((label, i) => ({
+          label,
+          color: i <= st.scanTick ? "rgba(242,244,240,.85)" : "rgba(242,244,240,.35)",
+          dot: i <= st.scanTick ? accent : "rgba(255,255,255,.2)"
+        })),
+        presets: PRESETS.map(p => ({
+          name: p.name,
+          detail: p.kcal.toLocaleString("es-AR") + " kcal · " + p.carbs + " g carbos · " + p.protein + " g prote",
+          pick: () => this.addMeal(p)
+        })),
+        result: {
+          name: det.name,
+          confidence: det.confidence,
+          kcal: Math.round(det.kcal * st.portion).toLocaleString("es-AR"),
+          carbs: Math.round(det.carbs * st.portion),
+          protein: Math.round(det.protein * st.portion),
+          fat: Math.round(det.fat * st.portion),
+          portion: st.portion === 1 ? "1 plato" : (st.portion === 0.5 ? "1/2 plato" : String(st.portion).replace(".", ",") + " platos"),
+          items: det.items.map(([label, amount]) => ({ label, amount: scaleAmount(amount, st.portion) }))
+        },
+        smaller: () => this.setState(s => ({ portion: Math.max(0.5, Math.round((s.portion - 0.5) * 2) / 2) })),
+        bigger: () => this.setState(s => ({ portion: Math.min(3, Math.round((s.portion + 0.5) * 2) / 2) })),
+        save: () => this.addMeal({
+          name: det.name,
+          kcal: Math.round(det.kcal * st.portion),
+          carbs: Math.round(det.carbs * st.portion),
+          protein: Math.round(det.protein * st.portion),
+          fat: Math.round(det.fat * st.portion),
+          photo: st.shot
+        })
+      },
+      editSport: this.props.onEditSport ?? noop,
+      editGoal: this.props.onEditGoal ?? noop,
+      editDays: this.props.onEditDays ?? noop,
+      logout: this.props.onLogout ?? noop,
+      fullName: name,
+      initials: initials || "IB",
+      photo: st.photo,
+      hasPhoto: !!st.photo,
+      noPhoto: !st.photo,
+      photoAction: st.photo ? "Cambiar foto" : "Agregar foto de perfil",
+      pickPhoto: this.pickPhoto
+    };
+  }
+}
+</script>
+</body>
+</html>

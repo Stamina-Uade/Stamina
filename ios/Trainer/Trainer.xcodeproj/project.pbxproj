@@ -1,0 +1,1042 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 77;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		C0DE000000000000000000A3 /* TrainerCore in Frameworks */ = {isa = PBXBuildFile; productRef = C0DE000000000000000000A2 /* TrainerCore */; };
+		C0DE000000000000000000A4 /* TrainerCore in Embed Frameworks */ = {isa = PBXBuildFile; productRef = C0DE000000000000000000A2 /* TrainerCore */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
+		C0DE000000000000000000A5 /* TrainerCore in Frameworks */ = {isa = PBXBuildFile; productRef = C0DE000000000000000000A2 /* TrainerCore */; };
+		C0DE000000000000000000B3 /* TrainerCore in Frameworks */ = {isa = PBXBuildFile; productRef = C0DE000000000000000000B2 /* TrainerCore */; };
+		C0DE000000000000000000B4 /* TrainerCore in Embed Frameworks */ = {isa = PBXBuildFile; productRef = C0DE000000000000000000B2 /* TrainerCore */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
+		C0DE000000000000000000B5 /* TrainerCore in Frameworks */ = {isa = PBXBuildFile; productRef = C0DE000000000000000000B2 /* TrainerCore */; };
+		C0DE000000000000000000C1 /* TrainerWatch Watch App.app in Embed Watch Content */ = {isa = PBXBuildFile; fileRef = B5F3FEA83051B52600A4659E /* TrainerWatch Watch App.app */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
+/* End PBXBuildFile section */
+
+/* Begin PBXContainerItemProxy section */
+		B5E4E85030517FE7001AB65F /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = B5E4E83730517FE5001AB65F /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = B5E4E83E30517FE5001AB65F;
+			remoteInfo = Trainer;
+		};
+		B5E4E85A30517FE7001AB65F /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = B5E4E83730517FE5001AB65F /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = B5E4E83E30517FE5001AB65F;
+			remoteInfo = Trainer;
+		};
+		B5F3FEB83051B52900A4659E /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = B5E4E83730517FE5001AB65F /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = B5F3FEA73051B52600A4659E;
+			remoteInfo = "TrainerWatch Watch App";
+		};
+		B5F3FEC23051B52900A4659E /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = B5E4E83730517FE5001AB65F /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = B5F3FEA73051B52600A4659E;
+			remoteInfo = "TrainerWatch Watch App";
+		};
+		C0DE000000000000000000C2 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = B5E4E83730517FE5001AB65F /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = B5F3FEA73051B52600A4659E;
+			remoteInfo = "TrainerWatch Watch App";
+		};
+/* End PBXContainerItemProxy section */
+
+/* Begin PBXCopyFilesBuildPhase section */
+		C0DE000000000000000000C4 /* Embed Watch Content */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "$(CONTENTS_FOLDER_PATH)/Watch";
+			dstSubfolderSpec = 16;
+			files = (
+				C0DE000000000000000000C1 /* TrainerWatch Watch App.app in Embed Watch Content */,
+			);
+			name = "Embed Watch Content";
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		C0DE000000000000000000C5 /* Embed Frameworks */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "";
+			dstSubfolderSpec = 10;
+			files = (
+				C0DE000000000000000000A4 /* TrainerCore in Embed Frameworks */,
+			);
+			name = "Embed Frameworks";
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		C0DE000000000000000000C6 /* Embed Frameworks */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "";
+			dstSubfolderSpec = 10;
+			files = (
+				C0DE000000000000000000B4 /* TrainerCore in Embed Frameworks */,
+			);
+			name = "Embed Frameworks";
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXCopyFilesBuildPhase section */
+
+/* Begin PBXFileReference section */
+		B5E4E83F30517FE5001AB65F /* Trainer.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Trainer.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		B5E4E84F30517FE7001AB65F /* TrainerTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = TrainerTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		B5E4E85930517FE7001AB65F /* TrainerUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = TrainerUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		B5F3FEA83051B52600A4659E /* TrainerWatch Watch App.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "TrainerWatch Watch App.app"; sourceTree = BUILT_PRODUCTS_DIR; };
+		B5F3FEB73051B52900A4659E /* TrainerWatch Watch AppTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = "TrainerWatch Watch AppTests.xctest"; sourceTree = BUILT_PRODUCTS_DIR; };
+		B5F3FEC13051B52900A4659E /* TrainerWatch Watch AppUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = "TrainerWatch Watch AppUITests.xctest"; sourceTree = BUILT_PRODUCTS_DIR; };
+/* End PBXFileReference section */
+
+/* Begin PBXFileSystemSynchronizedRootGroup section */
+		B5E4E84130517FE5001AB65F /* Trainer */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			path = Trainer;
+			sourceTree = "<group>";
+		};
+		B5E4E85230517FE7001AB65F /* TrainerTests */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			path = TrainerTests;
+			sourceTree = "<group>";
+		};
+		B5E4E85C30517FE7001AB65F /* TrainerUITests */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			path = TrainerUITests;
+			sourceTree = "<group>";
+		};
+		B5F3FEA93051B52600A4659E /* TrainerWatch */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			path = TrainerWatch;
+			sourceTree = "<group>";
+		};
+		B5F3FEBA3051B52900A4659E /* TrainerWatchTests */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			path = TrainerWatchTests;
+			sourceTree = "<group>";
+		};
+		B5F3FEC43051B52900A4659E /* TrainerWatchUITests */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			path = TrainerWatchUITests;
+			sourceTree = "<group>";
+		};
+/* End PBXFileSystemSynchronizedRootGroup section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		B5E4E83C30517FE5001AB65F /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				C0DE000000000000000000A3 /* TrainerCore in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		B5E4E84C30517FE7001AB65F /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				C0DE000000000000000000A5 /* TrainerCore in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		B5E4E85630517FE7001AB65F /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		B5F3FEA53051B52600A4659E /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				C0DE000000000000000000B3 /* TrainerCore in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		B5F3FEB43051B52900A4659E /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				C0DE000000000000000000B5 /* TrainerCore in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		B5F3FEBE3051B52900A4659E /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+		B5E4E83630517FE5001AB65F = {
+			isa = PBXGroup;
+			children = (
+				B5E4E84130517FE5001AB65F /* Trainer */,
+				B5E4E85230517FE7001AB65F /* TrainerTests */,
+				B5E4E85C30517FE7001AB65F /* TrainerUITests */,
+				B5F3FEA93051B52600A4659E /* TrainerWatch */,
+				B5F3FEBA3051B52900A4659E /* TrainerWatchTests */,
+				B5F3FEC43051B52900A4659E /* TrainerWatchUITests */,
+				B5E4E84030517FE5001AB65F /* Products */,
+			);
+			sourceTree = "<group>";
+		};
+		B5E4E84030517FE5001AB65F /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				B5E4E83F30517FE5001AB65F /* Trainer.app */,
+				B5E4E84F30517FE7001AB65F /* TrainerTests.xctest */,
+				B5E4E85930517FE7001AB65F /* TrainerUITests.xctest */,
+				B5F3FEA83051B52600A4659E /* TrainerWatch Watch App.app */,
+				B5F3FEB73051B52900A4659E /* TrainerWatch Watch AppTests.xctest */,
+				B5F3FEC13051B52900A4659E /* TrainerWatch Watch AppUITests.xctest */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		B5E4E83E30517FE5001AB65F /* Trainer */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = B5E4E86330517FE7001AB65F /* Build configuration list for PBXNativeTarget "Trainer" */;
+			buildPhases = (
+				B5E4E83B30517FE5001AB65F /* Sources */,
+				B5E4E83C30517FE5001AB65F /* Frameworks */,
+				B5E4E83D30517FE5001AB65F /* Resources */,
+				C0DE000000000000000000C5 /* Embed Frameworks */,
+				C0DE000000000000000000C4 /* Embed Watch Content */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				C0DE000000000000000000C3 /* PBXTargetDependency */,
+			);
+			fileSystemSynchronizedGroups = (
+				B5E4E84130517FE5001AB65F /* Trainer */,
+			);
+			name = Trainer;
+			packageProductDependencies = (
+				C0DE000000000000000000A2 /* TrainerCore */,
+			);
+			productName = Trainer;
+			productReference = B5E4E83F30517FE5001AB65F /* Trainer.app */;
+			productType = "com.apple.product-type.application";
+		};
+		B5E4E84E30517FE7001AB65F /* TrainerTests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = B5E4E86630517FE7001AB65F /* Build configuration list for PBXNativeTarget "TrainerTests" */;
+			buildPhases = (
+				B5E4E84B30517FE7001AB65F /* Sources */,
+				B5E4E84C30517FE7001AB65F /* Frameworks */,
+				B5E4E84D30517FE7001AB65F /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				B5E4E85130517FE7001AB65F /* PBXTargetDependency */,
+			);
+			fileSystemSynchronizedGroups = (
+				B5E4E85230517FE7001AB65F /* TrainerTests */,
+			);
+			name = TrainerTests;
+			packageProductDependencies = (
+				C0DE000000000000000000A2 /* TrainerCore */,
+			);
+			productName = TrainerTests;
+			productReference = B5E4E84F30517FE7001AB65F /* TrainerTests.xctest */;
+			productType = "com.apple.product-type.bundle.unit-test";
+		};
+		B5E4E85830517FE7001AB65F /* TrainerUITests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = B5E4E86930517FE7001AB65F /* Build configuration list for PBXNativeTarget "TrainerUITests" */;
+			buildPhases = (
+				B5E4E85530517FE7001AB65F /* Sources */,
+				B5E4E85630517FE7001AB65F /* Frameworks */,
+				B5E4E85730517FE7001AB65F /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				B5E4E85B30517FE7001AB65F /* PBXTargetDependency */,
+			);
+			fileSystemSynchronizedGroups = (
+				B5E4E85C30517FE7001AB65F /* TrainerUITests */,
+			);
+			name = TrainerUITests;
+			packageProductDependencies = (
+			);
+			productName = TrainerUITests;
+			productReference = B5E4E85930517FE7001AB65F /* TrainerUITests.xctest */;
+			productType = "com.apple.product-type.bundle.ui-testing";
+		};
+		B5F3FEA73051B52600A4659E /* TrainerWatch Watch App */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = B5F3FECF3051B52900A4659E /* Build configuration list for PBXNativeTarget "TrainerWatch Watch App" */;
+			buildPhases = (
+				B5F3FEA43051B52600A4659E /* Sources */,
+				B5F3FEA53051B52600A4659E /* Frameworks */,
+				B5F3FEA63051B52600A4659E /* Resources */,
+				C0DE000000000000000000C6 /* Embed Frameworks */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			fileSystemSynchronizedGroups = (
+				B5F3FEA93051B52600A4659E /* TrainerWatch */,
+			);
+			name = "TrainerWatch Watch App";
+			packageProductDependencies = (
+				C0DE000000000000000000B2 /* TrainerCore */,
+			);
+			productName = "TrainerWatch Watch App";
+			productReference = B5F3FEA83051B52600A4659E /* TrainerWatch Watch App.app */;
+			productType = "com.apple.product-type.application";
+		};
+		B5F3FEB63051B52900A4659E /* TrainerWatch Watch AppTests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = B5F3FED03051B52900A4659E /* Build configuration list for PBXNativeTarget "TrainerWatch Watch AppTests" */;
+			buildPhases = (
+				B5F3FEB33051B52900A4659E /* Sources */,
+				B5F3FEB43051B52900A4659E /* Frameworks */,
+				B5F3FEB53051B52900A4659E /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				B5F3FEB93051B52900A4659E /* PBXTargetDependency */,
+			);
+			fileSystemSynchronizedGroups = (
+				B5F3FEBA3051B52900A4659E /* TrainerWatchTests */,
+			);
+			name = "TrainerWatch Watch AppTests";
+			packageProductDependencies = (
+				C0DE000000000000000000B2 /* TrainerCore */,
+			);
+			productName = "TrainerWatch Watch AppTests";
+			productReference = B5F3FEB73051B52900A4659E /* TrainerWatch Watch AppTests.xctest */;
+			productType = "com.apple.product-type.bundle.unit-test";
+		};
+		B5F3FEC03051B52900A4659E /* TrainerWatch Watch AppUITests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = B5F3FED13051B52900A4659E /* Build configuration list for PBXNativeTarget "TrainerWatch Watch AppUITests" */;
+			buildPhases = (
+				B5F3FEBD3051B52900A4659E /* Sources */,
+				B5F3FEBE3051B52900A4659E /* Frameworks */,
+				B5F3FEBF3051B52900A4659E /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				B5F3FEC33051B52900A4659E /* PBXTargetDependency */,
+			);
+			fileSystemSynchronizedGroups = (
+				B5F3FEC43051B52900A4659E /* TrainerWatchUITests */,
+			);
+			name = "TrainerWatch Watch AppUITests";
+			packageProductDependencies = (
+			);
+			productName = "TrainerWatch Watch AppUITests";
+			productReference = B5F3FEC13051B52900A4659E /* TrainerWatch Watch AppUITests.xctest */;
+			productType = "com.apple.product-type.bundle.ui-testing";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		B5E4E83730517FE5001AB65F /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				BuildIndependentTargetsInParallel = 1;
+				LastSwiftUpdateCheck = 1610;
+				LastUpgradeCheck = 1610;
+				TargetAttributes = {
+					B5E4E83E30517FE5001AB65F = {
+						CreatedOnToolsVersion = 16.1;
+					};
+					B5E4E84E30517FE7001AB65F = {
+						CreatedOnToolsVersion = 16.1;
+						TestTargetID = B5E4E83E30517FE5001AB65F;
+					};
+					B5E4E85830517FE7001AB65F = {
+						CreatedOnToolsVersion = 16.1;
+						TestTargetID = B5E4E83E30517FE5001AB65F;
+					};
+					B5F3FEA73051B52600A4659E = {
+						CreatedOnToolsVersion = 16.1;
+					};
+					B5F3FEB63051B52900A4659E = {
+						CreatedOnToolsVersion = 16.1;
+						TestTargetID = B5F3FEA73051B52600A4659E;
+					};
+					B5F3FEC03051B52900A4659E = {
+						CreatedOnToolsVersion = 16.1;
+						TestTargetID = B5F3FEA73051B52600A4659E;
+					};
+				};
+			};
+			buildConfigurationList = B5E4E83A30517FE5001AB65F /* Build configuration list for PBXProject "Trainer" */;
+			developmentRegion = en;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				es,
+				en,
+				fr,
+				Base,
+			);
+			mainGroup = B5E4E83630517FE5001AB65F;
+			minimizedProjectReferenceProxies = 1;
+			packageReferences = (
+				C0DE000000000000000000A1 /* XCLocalSwiftPackageReference "../TrainerCore" */,
+			);
+			preferredProjectObjectVersion = 77;
+			productRefGroup = B5E4E84030517FE5001AB65F /* Products */;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				B5E4E83E30517FE5001AB65F /* Trainer */,
+				B5E4E84E30517FE7001AB65F /* TrainerTests */,
+				B5E4E85830517FE7001AB65F /* TrainerUITests */,
+				B5F3FEA73051B52600A4659E /* TrainerWatch Watch App */,
+				B5F3FEB63051B52900A4659E /* TrainerWatch Watch AppTests */,
+				B5F3FEC03051B52900A4659E /* TrainerWatch Watch AppUITests */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXResourcesBuildPhase section */
+		B5E4E83D30517FE5001AB65F /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		B5E4E84D30517FE7001AB65F /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		B5E4E85730517FE7001AB65F /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		B5F3FEA63051B52600A4659E /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		B5F3FEB53051B52900A4659E /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		B5F3FEBF3051B52900A4659E /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXResourcesBuildPhase section */
+
+/* Begin PBXSourcesBuildPhase section */
+		B5E4E83B30517FE5001AB65F /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		B5E4E84B30517FE7001AB65F /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		B5E4E85530517FE7001AB65F /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		B5F3FEA43051B52600A4659E /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		B5F3FEB33051B52900A4659E /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		B5F3FEBD3051B52900A4659E /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin PBXTargetDependency section */
+		B5E4E85130517FE7001AB65F /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = B5E4E83E30517FE5001AB65F /* Trainer */;
+			targetProxy = B5E4E85030517FE7001AB65F /* PBXContainerItemProxy */;
+		};
+		B5E4E85B30517FE7001AB65F /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = B5E4E83E30517FE5001AB65F /* Trainer */;
+			targetProxy = B5E4E85A30517FE7001AB65F /* PBXContainerItemProxy */;
+		};
+		B5F3FEB93051B52900A4659E /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = B5F3FEA73051B52600A4659E /* TrainerWatch Watch App */;
+			targetProxy = B5F3FEB83051B52900A4659E /* PBXContainerItemProxy */;
+		};
+		B5F3FEC33051B52900A4659E /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = B5F3FEA73051B52600A4659E /* TrainerWatch Watch App */;
+			targetProxy = B5F3FEC23051B52900A4659E /* PBXContainerItemProxy */;
+		};
+		C0DE000000000000000000C3 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = B5F3FEA73051B52600A4659E /* TrainerWatch Watch App */;
+			targetProxy = C0DE000000000000000000C2 /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
+
+/* Begin XCBuildConfiguration section */
+		B5E4E86130517FE7001AB65F /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++20";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = dwarf;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_TESTABILITY = YES;
+				ENABLE_USER_SCRIPT_SANDBOXING = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu17;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"DEBUG=1",
+					"$(inherited)",
+				);
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 16.0;
+				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
+				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
+				MTL_FAST_MATH = YES;
+				ONLY_ACTIVE_ARCH = YES;
+				SDKROOT = iphoneos;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "DEBUG $(inherited)";
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+			};
+			name = Debug;
+		};
+		B5E4E86230517FE7001AB65F /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++20";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				ENABLE_NS_ASSERTIONS = NO;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_USER_SCRIPT_SANDBOXING = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu17;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 16.0;
+				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
+				MTL_ENABLE_DEBUG_INFO = NO;
+				MTL_FAST_MATH = YES;
+				SDKROOT = iphoneos;
+				SWIFT_COMPILATION_MODE = wholemodule;
+				VALIDATE_PRODUCT = YES;
+			};
+			name = Release;
+		};
+		B5E4E86430517FE7001AB65F /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 2;
+				DEVELOPMENT_ASSET_PATHS = "\"Trainer/Preview Content\"";
+				DEVELOPMENT_TEAM = 8PGX254W77;
+				ENABLE_PREVIEWS = YES;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = "Trainer-Info.plist";
+				INFOPLIST_KEY_CFBundleDisplayName = Stamina;
+				INFOPLIST_KEY_CFBundleName = Stamina;
+				INFOPLIST_KEY_NSLocationWhenInUseUsageDescription = "Usamos tu ubicación durante la salida para mostrar el recorrido y medir la distancia.";
+				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
+				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
+				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = UIInterfaceOrientationPortrait;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.tecladus.Trainer;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
+				SUPPORTS_MACCATALYST = NO;
+				SUPPORTS_MAC_DESIGNED_FOR_IPHONE_IPAD = NO;
+				SUPPORTS_XR_DESIGNED_FOR_IPHONE_IPAD = NO;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = 1;
+			};
+			name = Debug;
+		};
+		B5E4E86530517FE7001AB65F /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 2;
+				DEVELOPMENT_ASSET_PATHS = "\"Trainer/Preview Content\"";
+				DEVELOPMENT_TEAM = 8PGX254W77;
+				ENABLE_PREVIEWS = YES;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = "Trainer-Info.plist";
+				INFOPLIST_KEY_CFBundleDisplayName = Stamina;
+				INFOPLIST_KEY_CFBundleName = Stamina;
+				INFOPLIST_KEY_NSLocationWhenInUseUsageDescription = "Usamos tu ubicación durante la salida para mostrar el recorrido y medir la distancia.";
+				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
+				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
+				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = UIInterfaceOrientationPortrait;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.tecladus.Trainer;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
+				SUPPORTS_MACCATALYST = NO;
+				SUPPORTS_MAC_DESIGNED_FOR_IPHONE_IPAD = NO;
+				SUPPORTS_XR_DESIGNED_FOR_IPHONE_IPAD = NO;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = 1;
+			};
+			name = Release;
+		};
+		B5E4E86730517FE7001AB65F /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 2;
+				DEVELOPMENT_TEAM = 8PGX254W77;
+				GENERATE_INFOPLIST_FILE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 16.0;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.tecladus.TrainerTests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = 1;
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/Trainer.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/Trainer";
+			};
+			name = Debug;
+		};
+		B5E4E86830517FE7001AB65F /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 2;
+				DEVELOPMENT_TEAM = 8PGX254W77;
+				GENERATE_INFOPLIST_FILE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 16.0;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.tecladus.TrainerTests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = 1;
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/Trainer.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/Trainer";
+			};
+			name = Release;
+		};
+		B5E4E86A30517FE7001AB65F /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 2;
+				DEVELOPMENT_TEAM = 8PGX254W77;
+				GENERATE_INFOPLIST_FILE = YES;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.tecladus.TrainerUITests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = 1;
+				TEST_TARGET_NAME = Trainer;
+			};
+			name = Debug;
+		};
+		B5E4E86B30517FE7001AB65F /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 2;
+				DEVELOPMENT_TEAM = 8PGX254W77;
+				GENERATE_INFOPLIST_FILE = YES;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.tecladus.TrainerUITests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = 1;
+				TEST_TARGET_NAME = Trainer;
+			};
+			name = Release;
+		};
+		B5F3FEC93051B52900A4659E /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_ENTITLEMENTS = TrainerWatch.entitlements;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 2;
+				DEVELOPMENT_ASSET_PATHS = "\"TrainerWatch/Preview Content\"";
+				DEVELOPMENT_TEAM = 8PGX254W77;
+				ENABLE_PREVIEWS = YES;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = "TrainerWatch-Info.plist";
+				INFOPLIST_KEY_CFBundleDisplayName = Stamina;
+				INFOPLIST_KEY_CFBundleName = Stamina;
+				INFOPLIST_KEY_NSHealthShareUsageDescription = "Guardamos tu entrenamiento en Salud.";
+				INFOPLIST_KEY_NSHealthUpdateUsageDescription = "Leemos el pulso durante tu entrenamiento.";
+				INFOPLIST_KEY_NSLocationWhenInUseUsageDescription = "Usamos tu ubicación durante la salida para medir distancia y dibujar el recorrido.";
+				INFOPLIST_KEY_UISupportedInterfaceOrientations = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown";
+				INFOPLIST_KEY_WKCompanionAppBundleIdentifier = com.tecladus.Trainer;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.tecladus.Trainer.watchkitapp;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = watchos;
+				SKIP_INSTALL = YES;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = 4;
+				WATCHOS_DEPLOYMENT_TARGET = 11.1;
+			};
+			name = Debug;
+		};
+		B5F3FECA3051B52900A4659E /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_ENTITLEMENTS = TrainerWatch.entitlements;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 2;
+				DEVELOPMENT_ASSET_PATHS = "\"TrainerWatch/Preview Content\"";
+				DEVELOPMENT_TEAM = 8PGX254W77;
+				ENABLE_PREVIEWS = YES;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = "TrainerWatch-Info.plist";
+				INFOPLIST_KEY_CFBundleDisplayName = Stamina;
+				INFOPLIST_KEY_CFBundleName = Stamina;
+				INFOPLIST_KEY_NSHealthShareUsageDescription = "Guardamos tu entrenamiento en Salud.";
+				INFOPLIST_KEY_NSHealthUpdateUsageDescription = "Leemos el pulso durante tu entrenamiento.";
+				INFOPLIST_KEY_NSLocationWhenInUseUsageDescription = "Usamos tu ubicación durante la salida para medir distancia y dibujar el recorrido.";
+				INFOPLIST_KEY_UISupportedInterfaceOrientations = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown";
+				INFOPLIST_KEY_WKCompanionAppBundleIdentifier = com.tecladus.Trainer;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.tecladus.Trainer.watchkitapp;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = watchos;
+				SKIP_INSTALL = YES;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = 4;
+				WATCHOS_DEPLOYMENT_TARGET = 11.1;
+			};
+			name = Release;
+		};
+		B5F3FECB3051B52900A4659E /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 2;
+				DEVELOPMENT_TEAM = 8PGX254W77;
+				GENERATE_INFOPLIST_FILE = YES;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = "com.tecladus.TrainerWatch-Watch-AppTests";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = watchos;
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = 4;
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/TrainerWatch Watch App.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/TrainerWatch Watch App";
+				WATCHOS_DEPLOYMENT_TARGET = 11.1;
+			};
+			name = Debug;
+		};
+		B5F3FECC3051B52900A4659E /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 2;
+				DEVELOPMENT_TEAM = 8PGX254W77;
+				GENERATE_INFOPLIST_FILE = YES;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = "com.tecladus.TrainerWatch-Watch-AppTests";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = watchos;
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = 4;
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/TrainerWatch Watch App.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/TrainerWatch Watch App";
+				WATCHOS_DEPLOYMENT_TARGET = 11.1;
+			};
+			name = Release;
+		};
+		B5F3FECD3051B52900A4659E /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 2;
+				DEVELOPMENT_TEAM = 8PGX254W77;
+				GENERATE_INFOPLIST_FILE = YES;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = "com.tecladus.TrainerWatch-Watch-AppUITests";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = watchos;
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = 4;
+				TEST_TARGET_NAME = "TrainerWatch Watch App";
+				WATCHOS_DEPLOYMENT_TARGET = 11.1;
+			};
+			name = Debug;
+		};
+		B5F3FECE3051B52900A4659E /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 2;
+				DEVELOPMENT_TEAM = 8PGX254W77;
+				GENERATE_INFOPLIST_FILE = YES;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = "com.tecladus.TrainerWatch-Watch-AppUITests";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = watchos;
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = 4;
+				TEST_TARGET_NAME = "TrainerWatch Watch App";
+				WATCHOS_DEPLOYMENT_TARGET = 11.1;
+			};
+			name = Release;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		B5E4E83A30517FE5001AB65F /* Build configuration list for PBXProject "Trainer" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				B5E4E86130517FE7001AB65F /* Debug */,
+				B5E4E86230517FE7001AB65F /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		B5E4E86330517FE7001AB65F /* Build configuration list for PBXNativeTarget "Trainer" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				B5E4E86430517FE7001AB65F /* Debug */,
+				B5E4E86530517FE7001AB65F /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		B5E4E86630517FE7001AB65F /* Build configuration list for PBXNativeTarget "TrainerTests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				B5E4E86730517FE7001AB65F /* Debug */,
+				B5E4E86830517FE7001AB65F /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		B5E4E86930517FE7001AB65F /* Build configuration list for PBXNativeTarget "TrainerUITests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				B5E4E86A30517FE7001AB65F /* Debug */,
+				B5E4E86B30517FE7001AB65F /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		B5F3FECF3051B52900A4659E /* Build configuration list for PBXNativeTarget "TrainerWatch Watch App" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				B5F3FEC93051B52900A4659E /* Debug */,
+				B5F3FECA3051B52900A4659E /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		B5F3FED03051B52900A4659E /* Build configuration list for PBXNativeTarget "TrainerWatch Watch AppTests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				B5F3FECB3051B52900A4659E /* Debug */,
+				B5F3FECC3051B52900A4659E /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		B5F3FED13051B52900A4659E /* Build configuration list for PBXNativeTarget "TrainerWatch Watch AppUITests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				B5F3FECD3051B52900A4659E /* Debug */,
+				B5F3FECE3051B52900A4659E /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+/* End XCConfigurationList section */
+
+/* Begin XCLocalSwiftPackageReference section */
+		C0DE000000000000000000A1 /* XCLocalSwiftPackageReference "../TrainerCore" */ = {
+			isa = XCLocalSwiftPackageReference;
+			relativePath = ../TrainerCore;
+		};
+/* End XCLocalSwiftPackageReference section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		C0DE000000000000000000A2 /* TrainerCore */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = C0DE000000000000000000A1 /* XCLocalSwiftPackageReference "../TrainerCore" */;
+			productName = TrainerCore;
+		};
+		C0DE000000000000000000B2 /* TrainerCore */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = C0DE000000000000000000A1 /* XCLocalSwiftPackageReference "../TrainerCore" */;
+			productName = TrainerCore;
+		};
+/* End XCSwiftPackageProductDependency section */
+	};
+	rootObject = B5E4E83730517FE5001AB65F /* Project object */;
+}

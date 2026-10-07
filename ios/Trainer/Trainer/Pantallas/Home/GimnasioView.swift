@@ -1,0 +1,223 @@
+import SwiftUI
+import TrainerCore
+
+/// `gimnasio` — la rutina del día. Se llega desde la agenda de `inicio`, no
+/// desde la barra.
+///
+/// 🪤 Los chips de serie **ya no tildan a ciegas**. `ESPECIFICACION.md` §6.3 lo
+/// dice explícito: el tilde ciego es lo que la captura de serie reemplaza, así
+/// que tocar un chip abre la captura apuntada a esa serie.
+struct GimnasioView: View {
+    @EnvironmentObject private var estado: EstadoHome
+    @State private var captura: DestinoDeCaptura?
+    @State private var mostrandoCatalogo = false
+
+    struct DestinoDeCaptura: Identifiable {
+        let ejercicio: Int
+        let serie: Int
+        var id: String { "\(ejercicio)-\(serie)" }
+    }
+
+    var body: some View {
+        VStack(spacing: 0) {
+            CabeceraSecundaria(titulo: Textos.homeTabGimnasio) {
+                estado.volverDeLaPantallaSecundaria()
+            }
+
+            ScrollView {
+                VStack(alignment: .leading, spacing: TokensEspaciado.e13) {
+                    if estado.rutina.isEmpty {
+                        SinDatosView(problema: estado.contenido.rutina.problema, actualizando: estado.actualizando) {
+                            Task { await estado.actualizar() }
+                        }
+                    } else {
+                        AvisoDeLoGuardado(seccion: estado.contenido.rutina)
+
+                        Text(Textos.gymSubtitulo)
+                            .estilo(.labelCampo, color: Paleta.textoTerciario)
+
+                        tarjetaDeProgreso
+
+                        ForEach(Array(estado.rutina.enumerated()), id: \.element.id) { indice, ejercicio in
+                            TarjetaDeEjercicio(indice: indice, ejercicio: ejercicio) { serie in
+                                captura = DestinoDeCaptura(ejercicio: indice, serie: serie)
+                            }
+                        }
+                    }
+
+                    BotonAgregar(Textos.gymAgregar) { mostrandoCatalogo = true }
+
+                    BotonPrimario(Textos.gymTerminar) {
+                        estado.volverDeLaPantallaSecundaria()
+                    }
+                    .padding(.top, TokensEspaciado.e4)
+                }
+                .padding(.horizontal, TokensEspaciado.e16)
+                .padding(.bottom, TokensEspaciado.e36)
+            }
+        }
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
+        .sheet(item: $captura) { destino in
+            CapturaDeSerieView(indiceDeEjercicio: destino.ejercicio, serieApuntada: destino.serie)
+                .environmentObject(estado)
+        }
+        .sheet(isPresented: $mostrandoCatalogo) {
+            CatalogoDeEjerciciosView().environmentObject(estado)
+        }
+    }
+
+    private var tarjetaDeProgreso: some View {
+        let hechas = estado.seriesHechasDeLaRutina
+        let total = estado.seriesTotalesDeLaRutina
+        let fraccion = Double(hechas) / Double(max(total, 1))
+
+        return VStack(alignment: .leading, spacing: TokensEspaciado.e11) {
+            HStack(alignment: .bottom) {
+                VStack(alignment: .leading, spacing: TokensEspaciado.e2) {
+                    Text("\(hechas) / \(total)").estilo(.marca)
+                    Text(Textos.gymSeriesCompletadas)
+                        .estilo(.notaLegal, color: Paleta.textoTerciario)
+                }
+                Spacer()
+                Text(fraccion, format: .percent.precision(.fractionLength(0)))
+                    .estilo(.labelCampo, color: Paleta.acento)
+            }
+
+            BarraDeProgreso(fraccion: fraccion, descripcion: Textos.gymProgreso(hechas, total))
+
+            Text(Textos.gymNota)
+                .estilo(.notaLegal, color: Paleta.textoTerciario)
+                .fixedSize(horizontal: false, vertical: true)
+        }
+        .padding(TokensEspaciado.e16)
+        .frame(maxWidth: .infinity)
+        .tarjeta()
+    }
+}
+
+/// Una tarjeta de ejercicio, con sus chips de serie.
+struct TarjetaDeEjercicio: View {
+    @EnvironmentObject private var estado: EstadoHome
+    let indice: Int
+    let ejercicio: EjercicioDeGimnasio
+    let alTocarSerie: (Int) -> Void
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: TokensEspaciado.e10) {
+            HStack(alignment: .top, spacing: TokensEspaciado.e10) {
+                VStack(alignment: .leading, spacing: TokensEspaciado.e3) {
+                    Text(ejercicio.nombre).estilo(.tituloCard)
+                    Text(prescripcionLegible)
+                        .estilo(.notaLegal, color: Paleta.textoTerciario)
+                    // La columna PREVIA: con esto la persona elige la carga, que el motor
+                    // no prescribe.
+                    if !seriesPrevias.isEmpty {
+                        Text(Textos.gymPrevia(seriesPrevias))
+                            .estilo(.notaLegal, color: Paleta.textoSecundario)
+                            .fixedSize(horizontal: false, vertical: true)
+                    }
+                }
+                Spacer(minLength: 0)
+                Text(ejercicio.etiqueta)
+                    .estilo(.etiquetaSeccion.enMinusculas,
+                            color: ejercicio.etiqueta == "Para correr" ? Paleta.acento : Paleta.textoSecundario)
+                    .padding(.horizontal, TokensEspaciado.e8)
+                    .padding(.vertical, TokensEspaciado.e4)
+                    .background(ejercicio.etiqueta == "Para correr" ? Paleta.acentoChipActivo : Paleta.superficieHundida)
+                    .clipShape(Capsule())
+            }
+
+            HStack(spacing: TokensEspaciado.e7) {
+                ForEach(Array(ejercicio.prescripcion.series.enumerated()), id: \.element.id) { numero, serie in
+                    ChipDeSerie(numero: numero + 1,
+                                serie: serie,
+                                unidad: ejercicio.prescripcion.unidadDePeso,
+                                hecha: numero < estado.seriesHechas(enEjercicio: ejercicio.id),
+                                unidades: estado.sistemaDeUnidades) {
+                        alTocarSerie(numero)
+                    }
+                }
+            }
+
+            Text(ejercicio.porQue)
+                .estilo(.etiquetaSeccion.enMinusculas, color: Paleta.textoTerciario)
+                .fixedSize(horizontal: false, vertical: true)
+        }
+        .padding(.horizontal, TokensEspaciado.e14)
+        .padding(.vertical, TokensEspaciado.e13)
+        .frame(maxWidth: .infinity)
+        .tarjeta(radio: TokensRadio.card)
+    }
+
+    /// "10 × 12 kg · 8": lo de la vez anterior, serie por serie. Una serie
+    /// salteada no se muestra como si se hubiera hecho.
+    private var seriesPrevias: String {
+        let porTiempo = ejercicio.prescripcion.series.first?.porTiempo ?? false
+        return ejercicio.seriesPrevias.filter { !$0.salteada }.map { previa in
+            let repeticiones = porTiempo ? "\(previa.repeticiones) s" : "\(previa.repeticiones)"
+            guard let gramos = previa.pesoGramos else { return repeticiones }
+            return "\(repeticiones) × \(Formato.peso(gramos, unidades: estado.sistemaDeUnidades))"
+        }
+        .joined(separator: " · ")
+    }
+
+    /// La prescripción se **compone para mostrar** y no se guarda como texto
+    /// (`ESPECIFICACION.md` §6.2).
+    private var prescripcionLegible: String {
+        let series = ejercicio.prescripcion.series
+        guard let primera = series.first else { return "" }
+        let repeticiones = primera.porTiempo ? "\(primera.repeticiones) s" : "\(primera.repeticiones)"
+        var partes = ["\(series.count) × \(repeticiones)"]
+        if let gramos = primera.pesoGramos {
+            partes.append(Formato.peso(gramos, unidades: estado.sistemaDeUnidades))
+        }
+        partes.append(Textos.gymDescanso(ejercicio.prescripcion.descansoSegundos))
+        return partes.joined(separator: " · ")
+    }
+}
+
+/// Un chip de serie. Hecho lleva relleno de acento **y** tilde: nunca sólo color.
+struct ChipDeSerie: View {
+    let numero: Int
+    let serie: SeriePrescrita
+    let unidad: UnidadDePeso?
+    let hecha: Bool
+    let unidades: SistemaDeUnidades
+    let accion: () -> Void
+
+    var body: some View {
+        Button(action: accion) {
+            HStack(spacing: TokensEspaciado.e3) {
+                if hecha {
+                    Image(systemName: "checkmark")
+                        .font(.system(size: TokensTipografia.etiquetaSeccionTamano,
+                                      weight: TokensTipografia.tituloCardPeso))
+                }
+                Text(etiqueta)
+                    .estilo(.etiquetaSeccion.enMinusculas,
+                            color: hecha ? Paleta.acento : Paleta.textoSecundario)
+            }
+            .foregroundStyle(hecha ? Paleta.acento : Paleta.textoSecundario)
+            .frame(maxWidth: .infinity)
+            .frame(height: TokensTamano.objetivoTactilMinimo)
+            .background(hecha ? Paleta.acentoChipActivo : Paleta.superficieHundida)
+            .clipShape(RoundedRectangle(cornerRadius: TokensRadio.celda, style: .continuous))
+            .overlay(
+                RoundedRectangle(cornerRadius: TokensRadio.celda, style: .continuous)
+                    .strokeBorder(hecha ? Paleta.acento : Color.clear, lineWidth: TokensEspaciado.e1)
+            )
+            .contentShape(Rectangle())
+        }
+        .buttonStyle(EstiloPresionado())
+        .accessibilityLabel(Textos.gymSerieNumero(numero))
+        .accessibilityValue(etiqueta)
+        .accessibilityAddTraits(hecha ? [.isButton, .isSelected] : .isButton)
+    }
+
+    private var etiqueta: String {
+        if serie.porTiempo { return "\(serie.repeticiones)s" }
+        guard let gramos = serie.pesoGramos, unidad != nil else { return "\(serie.repeticiones)" }
+        let kg = Int((Double(gramos) / 1000).rounded())
+        return "\(serie.repeticiones)×\(kg)"
+    }
+}

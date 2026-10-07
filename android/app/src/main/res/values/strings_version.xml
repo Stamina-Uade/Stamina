@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- La puerta de versión mínima (AGENTS.md §5.1). values/ es es-AR; values-en/ el inglés. -->
+<resources>
+    <string name="version_obligatoria_titulo">Hay que actualizar la app</string>
+    <string name="version_obligatoria_cuerpo">Esta versión ya no puede seguir. Actualizala desde la tienda para volver a entrar.</string>
+    <string name="version_recomendada_titulo">Hay una versión nueva</string>
+    <string name="version_recomendada_cuerpo">Podés seguir usando esta, pero conviene actualizar.</string>
+    <string name="version_actualizar">Actualizar</string>
+    <string name="version_ahora_no">Ahora no</string>
+    <string name="version_sin_tienda">No se pudo abrir la tienda. Buscá la app en Google Play.</string>
+</resources>

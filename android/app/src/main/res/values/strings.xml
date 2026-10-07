@@ -1,0 +1,9 @@
+<resources>
+    <string name="app_name">Trainer</string>
+    <string name="channel_tracking_name">Sesión en curso</string>
+    <string name="channel_tracking_desc">Muestra las métricas de la sesión mientras entrenás.</string>
+    <string name="channel_alerts_name">Alertas de hidratación y nutrición</string>
+    <string name="channel_alerts_desc">Avisos de agua, sales y geles durante el esfuerzo.</string>
+    <string name="channel_reminders_name">Recordatorios de entrenamiento</string>
+    <string name="channel_reminders_desc">Te avisamos antes de la sesión del día para que llegues preparado.</string>
+</resources>

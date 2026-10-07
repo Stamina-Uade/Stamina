@@ -1,0 +1,12 @@
+{
+  "images" : [
+    {
+      "filename" : "El Tour de Francia.png",
+      "idiom" : "universal"
+    }
+  ],
+  "info" : {
+    "author" : "xcode",
+    "version" : 1
+  }
+}

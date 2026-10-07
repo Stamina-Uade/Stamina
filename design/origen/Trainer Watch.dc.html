@@ -1,0 +1,798 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet data-dc-atomics><meta name="design_doc_mode" content="canvas"><link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;500;600;700&display=swap" rel="stylesheet"><style>:root{--ac:#7CF03D;--ac-rgb:124 240 61}body{margin:0;background:#0A0B09;font-family:Archivo,system-ui,sans-serif}a{color:var(--ac)}a:hover{color:var(--ac)}.wheel{scrollbar-width:none;-ms-overflow-style:none}.wheel::-webkit-scrollbar{display:none}</style></helmet>
+
+<div ref="{{ rootRef }}" style="min-height:100%;background:#0A0B09;color:#F2F4F0;padding:44px 48px 64px;display:flex;flex-direction:column;gap:34px">
+
+  <div style="display:flex;gap:52px;flex-wrap:wrap;max-width:1180px">
+    <div style="display:flex;flex-direction:column;gap:13px;max-width:440px">
+      <div style="display:flex;align-items:center;gap:10px">
+        <div style="width:22px;height:22px;border-radius:6px;background:var(--ac)"></div>
+        <div style="font-size:13px;font-weight:600;letter-spacing:.16em;text-transform:uppercase">Trainer · reloj</div>
+      </div>
+      <div style="font-size:32px;font-weight:600;letter-spacing:-.03em;line-height:1.06">El reloj según tu boceto: abrir, registrar y las cuatro pantallas alrededor del entreno</div>
+      <div style="font-size:13.5px;line-height:1.55;color:rgba(242,244,240,.6);text-wrap:pretty">Las métricas quedan siempre en el centro. Arriba la rutina del día, a la izquierda los controles, a la derecha los avisos y lo que pasó, abajo el mapa con quién te está viendo. Nunca hay que salir del entreno para llegar a nada.</div>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:10px;max-width:280px">
+      <div style="font-size:11px;font-weight:600;letter-spacing:.14em;text-transform:uppercase;color:rgba(242,244,240,.4)">Del boceto al diseño</div>
+      <div style="font-size:12.5px;line-height:1.5;color:rgba(242,244,240,.65)">Ritmo promedio y parcial comparten lugar: se togglean tocando el número.</div>
+      <div style="font-size:12.5px;line-height:1.5;color:rgba(242,244,240,.65)">En la pantalla de avisos, lo que viene va primero y siempre destacado; lo que pasó queda debajo, atenuado.</div>
+      <div style="font-size:12.5px;line-height:1.5;color:rgba(242,244,240,.65)">Si nadie te está viendo, el mapa no muestra nada; con muchos, muestra el contador.</div>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:10px;max-width:250px">
+      <div style="font-size:11px;font-weight:600;letter-spacing:.14em;text-transform:uppercase;color:rgba(242,244,240,.4)">Medidas</div>
+      <div style="font-size:12.5px;line-height:1.55;color:rgba(242,244,240,.55)">396 × 484 (45 mm), esquinas de 78 px, márgenes de 20 px. Texto mínimo 13 px, botones de 56 px de alto, fondo negro puro.</div>
+    </div>
+    <div style="width:170px;flex:none;align-self:flex-start;border-radius:16px;background:#131511;border:1px solid rgba(255,255,255,.1);padding:12px;display:flex;flex-direction:column;gap:9px">
+    <div style="display:flex;align-items:center;justify-content:space-between;gap:6px">
+      <div style="font-size:10px;font-weight:600;letter-spacing:.12em;text-transform:uppercase;color:rgba(242,244,240,.45)">Colores probados</div>
+      <div style="font-size:10px;color:rgba(242,244,240,.35);font-variant-numeric:tabular-nums">{{ swatches.count }}</div>
+    </div>
+    <div style="display:flex;flex-wrap:wrap;gap:7px">
+      <sc-for list="{{ swatches.list }}" as="c" hint-placeholder-count="0">
+        <div style="position:relative;width:36px;height:36px">
+          <div onClick="{{ c.apply }}" title="{{ c.hex }}" style="width:36px;height:36px;border-radius:11px;cursor:pointer;background:{{ c.hex }};border:2px solid {{ c.ring }}"></div>
+          <div onClick="{{ c.remove }}" style="position:absolute;top:-5px;right:-5px;width:15px;height:15px;border-radius:50%;background:#0B0C0A;border:1px solid rgba(255,255,255,.2);display:flex;align-items:center;justify-content:center;font-size:9px;line-height:1;color:rgba(242,244,240,.7);cursor:pointer">×</div>
+        </div>
+      </sc-for>
+    </div>
+    <div style="font-size:11px;color:rgba(242,244,240,.75);font-variant-numeric:tabular-nums;font-family:ui-monospace,Menlo,monospace">{{ swatches.current }}</div>
+    <div style="font-size:10px;line-height:1.4;color:rgba(242,244,240,.4)">Cada hex que escribís en Tweaks se guarda acá. Tocá uno para volver a usarlo.</div>
+    </div>
+
+  </div>
+
+  <div style="display:flex;gap:44px;flex-wrap:wrap;align-items:flex-start">
+
+    <div style="display:flex;flex-direction:column;gap:14px">
+      <div style="display:flex;align-items:baseline;gap:9px"><span style="font:600 10.5px ui-monospace,Menlo,monospace;padding:3px 7px;background:var(--ac);color:#0A0B09;border-radius:5px">Reloj</span><span style="font-size:12px;color:rgba(242,244,240,.55)">Flechas del borde para moverte · doble toque en el botón lateral para desbloquear</span></div>
+
+      <div style="position:relative;width:396px;height:484px;flex:none">
+        <div onDoubleClick="{{ unlock }}" title="Doble toque para desbloquear" style="position:absolute;right:-9px;top:120px;width:9px;height:74px;border-radius:0 6px 6px 0;background:{{ crownBg }};cursor:pointer"></div>
+        <div style="position:absolute;right:-7px;top:214px;width:7px;height:44px;border-radius:0 5px 5px 0;background:#1B1E16"></div>
+        <div style="position:absolute;inset:0;border-radius:78px;background:#000;border:9px solid #15170F;overflow:hidden;display:flex;flex-direction:column;opacity:{{ dim }}">
+          <sc-if value="{{ is.open }}" hint-placeholder-val="{{ true }}">
+            <div class="wheel" style="flex:1;overflow:auto;display:flex;flex-direction:column;gap:12px;padding:22px 20px 26px">
+              <div style="display:flex;flex-direction:column;gap:8px">
+                <div style="font-size:13px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:rgba(242,244,240,.45)">Hoy te toca</div>
+                <div onClick="{{ go.routine }}" style="border-radius:18px;background:#15170F;border:1px solid rgb(var(--ac-rgb) / .28);padding:13px 14px;display:flex;align-items:center;gap:11px;cursor:pointer">
+                  <span style="width:7px;height:7px;border-radius:50%;background:var(--ac);display:block;flex:none"></span>
+                  <div style="flex:1;display:flex;flex-direction:column;gap:2px">
+                    <div style="font-size:16px;font-weight:600;letter-spacing:-.01em">Fondo largo · 14 km</div>
+                    <div style="font-size:13px;color:rgba(242,244,240,.6)">Zona 2 · 18:30 · 2 geles</div>
+                  </div>
+                </div>
+                <div onClick="{{ go.gym }}" style="border-radius:18px;background:#15170F;border:1px solid rgba(255,255,255,.1);padding:13px 14px;display:flex;align-items:center;gap:11px;cursor:pointer">
+                  <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="rgba(242,244,240,.7)" stroke-width="1.8" stroke-linecap="round" style="flex:none"><path d="M4 9v6M8 6.5v11M16 6.5v11M20 9v6M8 12h8"></path></svg>
+                  <div style="flex:1;display:flex;flex-direction:column;gap:2px">
+                    <div style="font-size:15px;font-weight:600">Gimnasio · tren superior</div>
+                    <div style="font-size:13px;color:rgba(242,244,240,.55)">6 ejercicios · 12:00</div>
+                  </div>
+                </div>
+              </div>
+
+              <div onClick="{{ go.metrics }}" style="border-radius:20px;background:var(--ac);color:#000;padding:19px 16px;text-align:center;font-size:18px;font-weight:700;letter-spacing:-.01em;cursor:pointer">Empezar entrenamiento</div>
+
+              <div style="font-size:18px;font-weight:600;letter-spacing:-.02em;padding:2px 2px 0">Registrar</div>
+
+              <sc-for list="{{ sports }}" as="s" hint-placeholder-count="3">
+                <div style="border-radius:18px;background:#15170F;border:1px solid rgba(255,255,255,.08);padding:14px 15px;display:flex;align-items:center;gap:12px">
+                  <div onClick="{{ go.metrics }}" style="flex:1;display:flex;flex-direction:column;gap:3px;cursor:pointer">
+                    <div style="display:flex;align-items:center;gap:8px">{{ s.icon }}<div style="font-size:15px;font-weight:600">{{ s.label }}</div></div>
+                    <div style="font-size:14px;font-weight:600;color:var(--ac)">Inicio</div>
+                  </div>
+                  <div onClick="{{ s.toggleShare }}" style="width:42px;height:42px;border-radius:50%;flex:none;display:flex;align-items:center;justify-content:center;cursor:pointer;background:{{ s.shareBg }};border:1px solid {{ s.shareBorder }}">
+                    <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="color:{{ s.shareColor }}"><path d="M12 20.5s7-5.4 7-11a7 7 0 1 0-14 0c0 5.6 7 11 7 11Z"></path><circle cx="12" cy="9.5" r="2.4"></circle></svg>
+                  </div>
+                  <div onClick="{{ s.toggleRoutine }}" style="width:42px;height:42px;border-radius:50%;flex:none;display:flex;align-items:center;justify-content:center;cursor:pointer;background:{{ s.routineBg }};border:1px solid {{ s.routineBorder }}">
+                    <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="color:{{ s.routineColor }}"><rect x="6" y="3.6" width="12" height="16.8" rx="2.4"></rect><path d="M9.4 8.4h5.2M9.4 12h5.2M9.4 15.6h3"></path></svg>
+                  </div>
+                </div>
+              </sc-for>
+
+              <div style="display:flex;flex-direction:column;gap:5px;padding:2px 4px">
+                <div style="font-size:13px;line-height:1.4;color:rgba(242,244,240,.5)">{{ shareLine }}</div>
+                <div style="font-size:13px;line-height:1.4;color:rgba(242,244,240,.5)">{{ routineLine }}</div>
+              </div>
+            </div>
+          </sc-if>
+
+          <sc-if value="{{ showMetrics }}" hint-placeholder-val="{{ false }}">
+            <div style="flex:1;position:relative;display:flex;flex-direction:column;justify-content:space-between;padding:26px 22px 30px;gap:6px">
+              <div style="display:flex;align-items:center;justify-content:space-between;gap:10px">
+                <div style="width:38px;height:38px;border-radius:11px;background:#15170F;display:flex;align-items:center;justify-content:center;flex:none">
+                  <svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="{{ runColor }}" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><circle cx="14.6" cy="4.4" r="1.9"></circle><path d="M12.4 8.2 9 10.6l1.8 3.4-1.4 6M13.6 7.6l2.4 3.4 3.4.6M10.8 14l-4.6 1.4M15.4 14.6l1.6 5.4"></path></svg>
+                </div>
+                <div style="font-size:28px;font-weight:700;letter-spacing:-.03em;color:{{ runColor }}">{{ runState }}</div>
+              </div>
+
+              <div style="font-size:62px;font-weight:700;letter-spacing:-.045em;line-height:1;font-variant-numeric:tabular-nums">00:34:42</div>
+
+              <div onClick="{{ togglePace }}" style="display:flex;align-items:center;gap:12px;cursor:pointer">
+                <div style="font-size:46px;font-weight:700;letter-spacing:-.04em;line-height:1;font-variant-numeric:tabular-nums">{{ pace.value }}</div>
+                <div style="display:flex;flex-direction:column;font-size:15px;font-weight:500;line-height:1.15;color:rgba(242,244,240,.6)"><div>ritmo</div><div>{{ pace.kind }}</div></div>
+              </div>
+
+              <div style="display:flex;align-items:center;gap:12px">
+                <div style="font-size:46px;font-weight:700;letter-spacing:-.04em;line-height:1;font-variant-numeric:tabular-nums">5,98</div>
+                <div style="font-size:15px;font-weight:500;color:rgba(242,244,240,.6)">km</div>
+              </div>
+
+              <div style="display:flex;align-items:center;gap:12px">
+                <div style="font-size:46px;font-weight:700;letter-spacing:-.04em;line-height:1;font-variant-numeric:tabular-nums">58</div>
+                <svg width="29" height="29" viewBox="0 0 24 24" fill="#FF5A6E"><path d="M12 20.6s-8-5-8-10.4A4.6 4.6 0 0 1 12 6.6a4.6 4.6 0 0 1 8 3.6c0 5.4-8 10.4-8 10.4Z"></path></svg>
+              </div>
+
+              <sc-if value="{{ unlocked }}" hint-placeholder-val="{{ true }}">
+              <div onClick="{{ go.routine }}" style="position:absolute;top:6px;left:50%;transform:translateX(-50%);padding:6px 16px;cursor:pointer">
+                <svg width="26" height="14" viewBox="0 0 26 14" fill="none" stroke="rgba(242,244,240,.45)" stroke-width="2.2" stroke-linecap="round"><path d="M4 10l9-6 9 6"></path></svg>
+              </div>
+              <div onClick="{{ go.map }}" style="position:absolute;bottom:4px;left:50%;transform:translateX(-50%);padding:6px 16px;cursor:pointer">
+                <svg width="26" height="14" viewBox="0 0 26 14" fill="none" stroke="rgba(242,244,240,.45)" stroke-width="2.2" stroke-linecap="round"><path d="M4 4l9 6 9-6"></path></svg>
+              </div>
+              <div onClick="{{ go.controls }}" style="position:absolute;left:2px;top:50%;transform:translateY(-50%);padding:16px 6px;cursor:pointer">
+                <svg width="14" height="26" viewBox="0 0 14 26" fill="none" stroke="rgba(242,244,240,.45)" stroke-width="2.2" stroke-linecap="round"><path d="M10 4l-6 9 6 9"></path></svg>
+              </div>
+              <div onClick="{{ go.events }}" style="position:absolute;right:2px;top:50%;transform:translateY(-50%);padding:16px 6px;cursor:pointer">
+                <svg width="14" height="26" viewBox="0 0 14 26" fill="none" stroke="rgba(242,244,240,.45)" stroke-width="2.2" stroke-linecap="round"><path d="M4 4l6 9-6 9"></path></svg>
+              </div>
+              </sc-if>
+
+              <sc-if value="{{ locked }}" hint-placeholder-val="{{ false }}">
+                <div style="display:flex;align-items:center;gap:9px;padding:11px 13px;border-radius:15px;background:rgb(var(--ac-rgb) / .12);border:1px solid rgb(var(--ac-rgb) / .3)">
+                  <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="var(--ac)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="flex:none"><path d="M12 3.4c3.4 4 5.6 6.8 5.6 9.6a5.6 5.6 0 0 1-11.2 0c0-2.8 2.2-5.6 5.6-9.6Z"></path></svg>
+                  <div style="flex:1;font-size:13px;line-height:1.35;color:rgba(242,244,240,.85)">Pantalla bloqueada · apretá dos veces el botón lateral</div>
+                </div>
+              </sc-if>
+            </div>
+          </sc-if>
+
+          <sc-if value="{{ is.routine }}" hint-placeholder-val="{{ false }}">
+            <div class="wheel" style="flex:1;overflow:auto;display:flex;flex-direction:column;padding:20px 20px 24px;gap:12px">
+              <div style="display:flex;align-items:center;justify-content:space-between;gap:10px">
+                <div style="font-size:13px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:rgba(242,244,240,.45)">Rutina de hoy</div>
+                <div onClick="{{ go.metrics }}" style="width:32px;height:32px;border-radius:50%;background:#15170F;border:1px solid rgba(255,255,255,.12);display:flex;align-items:center;justify-content:center;cursor:pointer;flex:none"><svg width="26" height="14" viewBox="0 0 26 14" fill="none" stroke="rgba(242,244,240,.6)" stroke-width="2.2" stroke-linecap="round"><path d="M4 4l9 6 9-6"></path></svg></div>
+              </div>
+
+              <sc-if value="{{ routineOn }}" hint-placeholder-val="{{ true }}">
+                <div style="display:flex;flex-direction:column;gap:9px">
+                  <div style="border-radius:16px;background:rgb(var(--ac-rgb) / .12);border:1px solid rgb(var(--ac-rgb) / .3);padding:13px 14px;display:flex;flex-direction:column;gap:3px">
+                    <div style="font-size:13px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--ac)">Ahora · bloque 2 de 3</div>
+                    <div style="font-size:17px;font-weight:600;letter-spacing:-.01em">10 km en Zona 2</div>
+                    <div style="font-size:13px;color:rgba(242,244,240,.65)">5:10 a 5:20 · vas 4,2 km del bloque</div>
+                  </div>
+                  <div style="display:flex;align-items:center;gap:11px;padding:12px 13px;border-radius:15px;background:#15170F;opacity:.6">
+                    <div style="flex:1;font-size:14px;font-weight:600">Calentamiento · 2 km</div>
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--ac)" stroke-width="2.6" stroke-linecap="round" style="flex:none"><path d="M4 12.5l5 5 11-11"></path></svg>
+                  </div>
+                  <div style="display:flex;align-items:center;gap:11px;padding:12px 13px;border-radius:15px;background:#15170F">
+                    <div style="flex:1;font-size:14px;font-weight:600">Vuelta a la calma · 1,5 km</div>
+                    <div style="font-size:13px;color:rgba(242,244,240,.45);flex:none">después</div>
+                  </div>
+                </div>
+              </sc-if>
+
+              <sc-if value="{{ routineOff }}" hint-placeholder-val="{{ false }}">
+                <div style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:13px;text-align:center;padding:10px 6px">
+                  <div style="width:52px;height:52px;border-radius:15px;background:#15170F;display:flex;align-items:center;justify-content:center">
+                    <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="rgba(242,244,240,.5)" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="6" y="3.6" width="12" height="16.8" rx="2.4"></rect><path d="M4 4l16 16"></path></svg>
+                  </div>
+                  <div style="font-size:19px;font-weight:600;letter-spacing:-.02em;line-height:1.2">No activaste la rutina<br>para esta salida</div>
+                  <div style="font-size:13px;line-height:1.45;color:rgba(242,244,240,.55)">Corrés libre: seguimos midiendo todo, pero no te vamos a marcar bloques ni ritmos.</div>
+                  <div onClick="{{ activateRoutine }}" style="margin-top:2px;padding:14px 20px;border-radius:18px;background:var(--ac);color:#000;font-size:14px;font-weight:700;cursor:pointer">Activar la rutina</div>
+                </div>
+              </sc-if>
+            </div>
+          </sc-if>
+
+          <sc-if value="{{ is.controls }}" hint-placeholder-val="{{ false }}">
+            <div style="flex:1;display:flex;flex-direction:column;padding:20px 20px 22px;gap:11px">
+              <div style="display:flex;align-items:center;justify-content:space-between;gap:10px">
+                <div style="font-size:13px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:rgba(242,244,240,.45)">Controles</div>
+                <div onClick="{{ go.metrics }}" style="width:32px;height:32px;border-radius:50%;background:#15170F;border:1px solid rgba(255,255,255,.12);display:flex;align-items:center;justify-content:center;cursor:pointer;flex:none"><svg width="13" height="22" viewBox="0 0 14 26" fill="none" stroke="rgba(242,244,240,.6)" stroke-width="2.2" stroke-linecap="round"><path d="M4 4l6 9-6 9"></path></svg></div>
+              </div>
+              <div style="flex:1;display:grid;gridTemplateColumns:1fr 1fr;gap:10px">
+                <div onClick="{{ go.summary }}" style="border-radius:18px;background:rgba(255,140,120,.14);border:1px solid rgba(255,140,120,.4);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:7px;cursor:pointer">
+                  <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="rgba(255,170,155,.95)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M5 3.5v17"></path><path d="M5 4.5h13l-2.6 4 2.6 4H5"></path></svg>
+                  <div style="font-size:14px;font-weight:600;color:rgba(255,170,155,.95)">Finalizar</div>
+                </div>
+                <div onClick="{{ toggleRun }}" style="border-radius:18px;background:var(--ac);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:7px;cursor:pointer">
+                  <sc-if value="{{ paused }}" hint-placeholder-val="{{ true }}">
+                    <svg width="22" height="22" viewBox="0 0 24 24" fill="#000"><path d="M8 5.5v13l11-6.5z"></path></svg>
+                  </sc-if>
+                  <sc-if value="{{ running }}" hint-placeholder-val="{{ false }}">
+                    <svg width="22" height="22" viewBox="0 0 24 24" fill="#000"><rect x="7" y="5.5" width="3.6" height="13" rx="1.2"></rect><rect x="13.4" y="5.5" width="3.6" height="13" rx="1.2"></rect></svg>
+                  </sc-if>
+                  <div style="font-size:14px;font-weight:700;color:#000">{{ runAction }}</div>
+                </div>
+                <div onClick="{{ toggleShare }}" style="border-radius:18px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:7px;padding:8px;text-align:center;cursor:pointer;background:{{ shareBtn.bg }};border:1px solid {{ shareBtn.border }}">
+                  <svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="color:{{ shareBtn.color }}"><path d="M12 20.5s7-5.4 7-11a7 7 0 1 0-14 0c0 5.6 7 11 7 11Z"></path><circle cx="12" cy="9.5" r="2.4"></circle></svg>
+                  <div style="font-size:13px;font-weight:600;line-height:1.25;color:{{ shareBtn.color }}">{{ shareBtn.label }}</div>
+                </div>
+                <div onClick="{{ addLap }}" style="border-radius:18px;background:#15170F;border:1px solid rgba(255,255,255,.1);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:7px;cursor:pointer">
+                  <svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="rgba(242,244,240,.8)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M20 12a8 8 0 1 1-2.6-5.9"></path><path d="M20 4.4V9h-4.6"></path></svg>
+                  <div style="font-size:14px;font-weight:600">Vuelta</div>
+                </div>
+                <div onClick="{{ go.settings }}" style="border-radius:18px;background:#15170F;border:1px solid rgba(255,255,255,.1);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:7px;cursor:pointer">
+                  <svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="rgba(242,244,240,.8)" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3.2"></circle><path d="M19.2 14.6a1.7 1.7 0 0 0 .34 1.87 2 2 0 1 1-2.83 2.83 1.7 1.7 0 0 0-1.87-.34 1.7 1.7 0 0 0-1.03 1.56 2 2 0 1 1-4 0 1.7 1.7 0 0 0-1.03-1.56 1.7 1.7 0 0 0-1.87.34 2 2 0 1 1-2.83-2.83 1.7 1.7 0 0 0 .34-1.87 1.7 1.7 0 0 0-1.56-1.03 2 2 0 1 1 0-4A1.7 1.7 0 0 0 4.6 8.94a1.7 1.7 0 0 0-.34-1.87 2 2 0 1 1 2.83-2.83 1.7 1.7 0 0 0 1.87.34A1.7 1.7 0 0 0 10 3.04a2 2 0 1 1 4 0 1.7 1.7 0 0 0 1.03 1.56 1.7 1.7 0 0 0 1.87-.34 2 2 0 1 1 2.83 2.83 1.7 1.7 0 0 0-.34 1.87 1.7 1.7 0 0 0 1.56 1.03 2 2 0 1 1 0 4 1.7 1.7 0 0 0-1.56 1.03Z"></path></svg>
+                  <div style="font-size:14px;font-weight:600">Ajustes</div>
+                </div>
+                <div onClick="{{ lockScreen }}" style="border-radius:18px;background:#15170F;border:1px solid rgba(255,255,255,.1);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:7px;cursor:pointer">
+                  <svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="rgba(242,244,240,.8)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3.4c3.4 4 5.6 6.8 5.6 9.6a5.6 5.6 0 0 1-11.2 0c0-2.8 2.2-5.6 5.6-9.6Z"></path></svg>
+                  <div style="font-size:14px;font-weight:600">Bloquear</div>
+                </div>
+              </div>
+            </div>
+          </sc-if>
+
+          <sc-if value="{{ is.events }}" hint-placeholder-val="{{ false }}">
+            <div class="wheel" style="flex:1;overflow:auto;display:flex;flex-direction:column;padding:20px 20px 24px;gap:11px">
+              <div style="display:flex;align-items:center;justify-content:space-between;gap:10px">
+                <div style="font-size:13px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:rgba(242,244,240,.45)">Lo que viene</div>
+                <div onClick="{{ go.metrics }}" style="width:32px;height:32px;border-radius:50%;background:#15170F;border:1px solid rgba(255,255,255,.12);display:flex;align-items:center;justify-content:center;cursor:pointer;flex:none"><svg width="13" height="22" viewBox="0 0 14 26" fill="none" stroke="rgba(242,244,240,.6)" stroke-width="2.2" stroke-linecap="round"><path d="M10 4l-6 9 6 9"></path></svg></div>
+              </div>
+
+              <div onClick="{{ go.fuelAlert }}" style="border-radius:16px;background:rgb(var(--ac-rgb) / .12);border:1px solid rgb(var(--ac-rgb) / .3);padding:13px 14px;display:flex;align-items:center;gap:11px;cursor:pointer">
+                <div style="flex:1;display:flex;flex-direction:column;gap:2px">
+                  <div style="font-size:16px;font-weight:600;letter-spacing:-.01em">Gel + 300 ml con sales</div>
+                  <div style="font-size:13px;color:rgba(242,244,240,.6)">minuto 45 del plan</div>
+                </div>
+                <div style="font-size:16px;font-weight:700;color:var(--ac);font-variant-numeric:tabular-nums;flex:none">10:18</div>
+              </div>
+              <div style="border-radius:16px;background:#15170F;border:1px solid rgba(255,255,255,.09);padding:13px 14px;display:flex;align-items:center;gap:11px">
+                <div style="flex:1;font-size:15px;font-weight:600">200 ml de agua</div>
+                <div style="font-size:14px;color:rgba(242,244,240,.5);font-variant-numeric:tabular-nums;flex:none">min 60</div>
+              </div>
+
+              <div style="font-size:13px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:rgba(242,244,240,.45);padding-top:6px">Lo que pasó</div>
+              <sc-for list="{{ past }}" as="p" hint-placeholder-count="3">
+                <div style="display:flex;align-items:center;gap:11px;padding:12px 13px;border-radius:15px;background:#15170F;opacity:.62">
+                  <span style="width:7px;height:7px;border-radius:50%;display:block;flex:none;background:{{ p.dot }}"></span>
+                  <div style="flex:1;display:flex;flex-direction:column;gap:1px">
+                    <div style="font-size:14px;font-weight:600">{{ p.title }}</div>
+                    <div style="font-size:13px;color:rgba(242,244,240,.5)">{{ p.detail }}</div>
+                  </div>
+                  <div style="font-size:13px;color:rgba(242,244,240,.45);font-variant-numeric:tabular-nums;flex:none">{{ p.time }}</div>
+                </div>
+              </sc-for>
+            </div>
+          </sc-if>
+
+          <sc-if value="{{ is.map }}" hint-placeholder-val="{{ false }}">
+            <div style="flex:1;position:relative;overflow:hidden;background:#0F1310">
+              <svg viewBox="0 0 396 484" preserveAspectRatio="xMidYMid slice" style="position:absolute;inset:0;width:100%;height:100%;display:block">
+                <rect x="0" y="0" width="396" height="484" fill="#0F1310"></rect>
+                <path d="M-20 96 L150 30 L310 110 L260 240 L50 220 Z" fill="rgb(var(--ac-rgb) / .05)"></path>
+                <path d="M210 350 L410 290 L430 450 L250 470 Z" fill="rgb(var(--ac-rgb) / .04)"></path>
+                <path d="M-20 430 C 90 396 160 452 270 486 L 420 476" stroke="rgba(96,150,190,.16)" stroke-width="15" fill="none"></path>
+                <g stroke="rgba(255,255,255,.055)" stroke-width="9" fill="none" stroke-linecap="round">
+                  <path d="M-10 250 L410 180"></path>
+                  <path d="M70 -10 L120 494"></path>
+                  <path d="M290 -10 L330 494"></path>
+                  <path d="M-10 396 L410 350"></path>
+                </g>
+                <g stroke="rgba(255,255,255,.03)" stroke-width="4" fill="none" stroke-linecap="round">
+                  <path d="M-10 140 L410 80"></path>
+                  <path d="M-10 320 L410 268"></path>
+                  <path d="M190 -10 L220 494"></path>
+                </g>
+                <path d="M104 400 L118 300 L92 200 L156 150 L286 176 L306 262 L232 300 L216 356" stroke="rgb(var(--ac-rgb) / .22)" stroke-width="14" fill="none" stroke-linecap="round" stroke-linejoin="round"></path>
+                <path d="M104 400 L118 300 L92 200 L156 150 L286 176 L306 262 L232 300 L216 356" stroke="var(--ac)" stroke-width="4.5" fill="none" stroke-linecap="round" stroke-linejoin="round"></path>
+                <circle cx="216" cy="356" r="16" fill="rgb(var(--ac-rgb) / .18)"></circle>
+                <circle cx="216" cy="356" r="8" fill="#F2F4F0" stroke="var(--ac)" stroke-width="2.5"></circle>
+                <circle cx="104" cy="400" r="5" fill="rgba(242,244,240,.55)"></circle>
+              </svg>
+              <div style="position:absolute;inset:0;background:linear-gradient(#000 0%,rgba(0,0,0,.35) 16%,rgba(0,0,0,0) 34%,rgba(0,0,0,0) 62%,rgba(0,0,0,.88) 88%)"></div>
+
+              <div onClick="{{ go.metrics }}" style="position:absolute;top:4px;left:50%;transform:translateX(-50%);padding:8px 18px;cursor:pointer;z-index:2">
+                <svg width="26" height="14" viewBox="0 0 26 14" fill="none" stroke="rgba(242,244,240,.6)" stroke-width="2.2" stroke-linecap="round"><path d="M4 10l9-6 9 6"></path></svg>
+              </div>
+              <div style="position:absolute;top:26px;left:20px;right:20px;display:flex;align-items:center;justify-content:space-between;gap:10px">
+                <div style="width:38px;height:38px;border-radius:11px;background:rgba(0,0,0,.7);border:1px solid rgba(255,255,255,.12);display:flex;align-items:center;justify-content:center;flex:none">
+                  <svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="{{ runColor }}" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><circle cx="14.6" cy="4.4" r="1.9"></circle><path d="M12.4 8.2 9 10.6l1.8 3.4-1.4 6M13.6 7.6l2.4 3.4 3.4.6M10.8 14l-4.6 1.4M15.4 14.6l1.6 5.4"></path></svg>
+                </div>
+                <div style="font-size:26px;font-weight:700;letter-spacing:-.03em;color:{{ runColor }}">{{ runState }}</div>
+              </div>
+
+              <div style="position:absolute;bottom:16px;left:20px;right:20px;display:flex;flex-direction:column;gap:10px">
+                <sc-if value="{{ watchers.some }}" hint-placeholder-val="{{ true }}">
+                  <div style="display:flex;align-items:center;gap:10px;padding:11px 13px;border-radius:16px;background:rgba(0,0,0,.72);border:1px solid rgba(255,255,255,.12)">
+                    <div style="display:flex;flex:none">
+                      <sc-for list="{{ watchers.avatars }}" as="a" hint-placeholder-count="3">
+                        <div style="width:30px;height:30px;border-radius:50%;background:{{ a.bg }};border:2px solid #000;margin-left:{{ a.overlap }};display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;color:#000">{{ a.initials }}</div>
+                      </sc-for>
+                    </div>
+                    <div style="flex:1;font-size:13px;line-height:1.35;color:rgba(242,244,240,.8)">{{ watchers.label }}</div>
+                  </div>
+                </sc-if>
+
+              </div>
+            </div>
+          </sc-if>
+
+          <sc-if value="{{ is.fuelAlert }}" hint-placeholder-val="{{ false }}">
+            <div style="flex:1;display:flex;flex-direction:column;justify-content:space-between;padding:26px 22px 24px;background:var(--ac);color:#000">
+              <div style="display:flex;flex-direction:column;gap:10px">
+                <div style="display:flex;align-items:center;gap:8px">
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#000" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9.5a6 6 0 0 1 12 0c0 4 1.4 5.5 1.4 5.5H4.6S6 13.5 6 9.5Z"></path><path d="M10.2 18.5a2 2 0 0 0 3.6 0"></path></svg>
+                  <div style="font-size:13px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;opacity:.6">Minuto 45</div>
+                </div>
+                <div style="font-size:34px;font-weight:700;letter-spacing:-.03em;line-height:1.05">Gel + 300 ml con sales</div>
+                <div style="font-size:14px;font-weight:500;opacity:.75">Vas 300 mg de sodio. Quedan 40 min de esfuerzo en Z2.</div>
+              </div>
+              <div style="display:flex;flex-direction:column;gap:9px">
+                <div onClick="{{ go.metrics }}" style="background:#000;color:var(--ac);text-align:center;padding:17px;border-radius:20px;font-size:16px;font-weight:700;cursor:pointer">Hecho</div>
+                <div onClick="{{ go.metrics }}" style="text-align:center;padding:14px;border-radius:20px;border:1.5px solid rgba(0,0,0,.3);font-size:14.5px;font-weight:600;cursor:pointer">Recordar en 5 min</div>
+              </div>
+            </div>
+          </sc-if>
+
+          <sc-if value="{{ is.hydrate }}" hint-placeholder-val="{{ false }}">
+            <div style="flex:1;display:flex;flex-direction:column;justify-content:space-between;padding:26px 22px 24px">
+              <div style="display:flex;flex-direction:column;gap:12px">
+                <div style="font-size:13px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--ac)">Hidratación</div>
+                <div style="font-size:34px;font-weight:700;letter-spacing:-.03em;line-height:1.05">Tomá 200 ml</div>
+                <div style="font-size:14px;color:rgba(242,244,240,.6);line-height:1.4">Vas 540 de 900 ml. Con 26° perdés más de lo que sentís.</div>
+                <div style="height:8px;border-radius:4px;background:rgba(255,255,255,.12);overflow:hidden"><div style="width:60%;height:100%;background:var(--ac)"></div></div>
+              </div>
+              <div style="display:flex;flex-direction:column;gap:9px">
+                <div onClick="{{ go.metrics }}" style="background:var(--ac);color:#000;text-align:center;padding:17px;border-radius:20px;font-size:16px;font-weight:700;cursor:pointer">Listo</div>
+                <div onClick="{{ go.metrics }}" style="text-align:center;padding:14px;border-radius:20px;border:1.5px solid rgba(255,255,255,.18);font-size:14.5px;font-weight:600;color:rgba(242,244,240,.7);cursor:pointer">Sin agua encima</div>
+              </div>
+            </div>
+          </sc-if>
+
+          <sc-if value="{{ is.cheer }}" hint-placeholder-val="{{ false }}">
+            <div style="flex:1;display:flex;flex-direction:column;justify-content:space-between;padding:26px 22px 24px">
+              <div style="display:flex;flex-direction:column;gap:13px">
+                <div style="display:flex;align-items:center;gap:10px">
+                  <div style="width:40px;height:40px;border-radius:50%;background:var(--ac);display:flex;align-items:center;justify-content:center;font-size:15px;font-weight:700;color:#000;flex:none">SM</div>
+                  <div style="font-size:13px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:rgba(242,244,240,.5)">Sofía te sigue</div>
+                </div>
+                <div style="font-size:30px;font-weight:700;letter-spacing:-.03em;line-height:1.1">“Dale que faltan 4 km”</div>
+                <div style="font-size:14px;color:rgba(242,244,240,.55);line-height:1.4">Te está viendo en vivo desde el mapa.</div>
+              </div>
+              <div onClick="{{ go.metrics }}" style="text-align:center;padding:16px;border-radius:20px;border:1.5px solid rgba(255,255,255,.18);font-size:15px;font-weight:600;color:rgba(242,244,240,.85);cursor:pointer">Seguir corriendo</div>
+            </div>
+          </sc-if>
+
+          <sc-if value="{{ is.settings }}" hint-placeholder-val="{{ false }}">
+            <div class="wheel" style="flex:1;overflow:auto;display:flex;flex-direction:column;padding:20px 20px 24px;gap:11px">
+              <div style="display:flex;align-items:center;justify-content:space-between;gap:10px">
+                <div style="font-size:13px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:rgba(242,244,240,.45)">Ajustes del entreno</div>
+                <div onClick="{{ go.controls }}" style="width:32px;height:32px;border-radius:50%;background:#15170F;border:1px solid rgba(255,255,255,.12);display:flex;align-items:center;justify-content:center;cursor:pointer;flex:none"><svg width="13" height="22" viewBox="0 0 14 26" fill="none" stroke="rgba(242,244,240,.6)" stroke-width="2.2" stroke-linecap="round"><path d="M4 4l6 9-6 9"></path></svg></div>
+              </div>
+              <div onClick="{{ toggleAlerts }}" style="display:flex;align-items:center;gap:12px;padding:15px;border-radius:17px;background:#15170F;border:1px solid rgba(255,255,255,.09);cursor:pointer">
+                <div style="flex:1;display:flex;flex-direction:column;gap:2px">
+                  <div style="font-size:15px;font-weight:600">Avisos de sales y geles</div>
+                  <div style="font-size:13px;color:rgba(242,244,240,.5)">Vibración doble</div>
+                </div>
+                <div style="width:48px;height:28px;border-radius:999px;padding:3px;flex:none;background:{{ sw.alerts.track }};display:flex;justify-content:{{ sw.alerts.align }}">
+                  <div style="width:22px;height:22px;border-radius:50%;background:#000"></div>
+                </div>
+              </div>
+              <div onClick="{{ toggleRoutineSetting }}" style="display:flex;align-items:center;gap:12px;padding:15px;border-radius:17px;background:#15170F;border:1px solid rgba(255,255,255,.09);cursor:pointer">
+                <div style="flex:1;display:flex;flex-direction:column;gap:2px">
+                  <div style="font-size:15px;font-weight:600">Guía de la rutina</div>
+                  <div style="font-size:13px;color:rgba(242,244,240,.5)">Bloques y ritmos objetivo</div>
+                </div>
+                <div style="width:48px;height:28px;border-radius:999px;padding:3px;flex:none;background:{{ sw.routine.track }};display:flex;justify-content:{{ sw.routine.align }}">
+                  <div style="width:22px;height:22px;border-radius:50%;background:#000"></div>
+                </div>
+              </div>
+              <div onClick="{{ toggleShare }}" style="display:flex;align-items:center;gap:12px;padding:15px;border-radius:17px;background:#15170F;border:1px solid rgba(255,255,255,.09);cursor:pointer">
+                <div style="flex:1;display:flex;flex-direction:column;gap:2px">
+                  <div style="font-size:15px;font-weight:600">Compartir ubicación</div>
+                  <div style="font-size:13px;color:rgba(242,244,240,.5)">{{ watchers.settingLine }}</div>
+                </div>
+                <div style="width:48px;height:28px;border-radius:999px;padding:3px;flex:none;background:{{ sw.share.track }};display:flex;justify-content:{{ sw.share.align }}">
+                  <div style="width:22px;height:22px;border-radius:50%;background:#000"></div>
+                </div>
+              </div>
+              <div onClick="{{ toggleCheers }}" style="display:flex;align-items:center;gap:12px;padding:15px;border-radius:17px;background:#15170F;border:1px solid rgba(255,255,255,.09);cursor:pointer">
+                <div style="flex:1;display:flex;flex-direction:column;gap:2px">
+                  <div style="font-size:15px;font-weight:600">Ánimos de amigos</div>
+                  <div style="font-size:13px;color:rgba(242,244,240,.5)">Mensajes cortos en pantalla</div>
+                </div>
+                <div style="width:48px;height:28px;border-radius:999px;padding:3px;flex:none;background:{{ sw.cheers.track }};display:flex;justify-content:{{ sw.cheers.align }}">
+                  <div style="width:22px;height:22px;border-radius:50%;background:#000"></div>
+                </div>
+              </div>
+            </div>
+          </sc-if>
+
+          <sc-if value="{{ is.summary }}" hint-placeholder-val="{{ false }}">
+            <div class="wheel" style="flex:1;overflow:auto;display:flex;flex-direction:column;padding:22px 22px 26px;gap:13px">
+              <div style="display:flex;flex-direction:column;gap:2px">
+                <div style="font-size:13px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--ac)">Terminado</div>
+                <div style="font-size:24px;font-weight:600;letter-spacing:-.02em">Fondo largo</div>
+              </div>
+              <div style="display:flex;gap:10px">
+                <div style="flex:1;display:flex;flex-direction:column;gap:1px"><div style="font-size:26px;font-weight:700;letter-spacing:-.03em;font-variant-numeric:tabular-nums">14,1</div><div style="font-size:13px;color:rgba(242,244,240,.45)">km</div></div>
+                <div style="flex:1;display:flex;flex-direction:column;gap:1px"><div style="font-size:26px;font-weight:700;letter-spacing:-.03em;font-variant-numeric:tabular-nums">1:23</div><div style="font-size:13px;color:rgba(242,244,240,.45)">tiempo</div></div>
+                <div style="flex:1;display:flex;flex-direction:column;gap:1px"><div style="font-size:26px;font-weight:700;letter-spacing:-.03em;font-variant-numeric:tabular-nums">5:53</div><div style="font-size:13px;color:rgba(242,244,240,.45)">ritmo</div></div>
+              </div>
+              <div style="border-radius:18px;background:#15170F;padding:14px;display:flex;flex-direction:column;gap:9px">
+                <div style="display:flex;align-items:baseline;justify-content:space-between"><div style="font-size:14px;font-weight:600">Reposición</div><div style="font-size:14px;font-weight:600;color:var(--ac)">86%</div></div>
+                <div style="height:6px;border-radius:3px;background:rgba(255,255,255,.12);overflow:hidden"><div style="width:86%;height:100%;background:var(--ac)"></div></div>
+                <div style="font-size:13px;color:rgba(242,244,240,.55);line-height:1.4">1.030 de 1.200 ml · 2 de 2 geles · 900 mg de sodio</div>
+              </div>
+              <div style="border-radius:18px;background:#15170F;padding:14px;display:flex;flex-direction:column;gap:4px">
+                <div style="font-size:14px;font-weight:600">Comé en 45 min</div>
+                <div style="font-size:13px;color:rgba(242,244,240,.55);line-height:1.4">25 g de proteína + 80 g de carbos</div>
+              </div>
+              <div onClick="{{ go.face }}" style="background:var(--ac);color:#000;text-align:center;padding:16px;border-radius:20px;font-size:15.5px;font-weight:700;cursor:pointer">Guardar</div>
+              <div style="text-align:center;font-size:13px;color:rgba(242,244,240,.4)">Se sincroniza con el teléfono</div>
+            </div>
+          </sc-if>
+
+          <sc-if value="{{ is.gym }}" hint-placeholder-val="{{ false }}">
+            <div class="wheel" style="flex:1;overflow:auto;display:flex;flex-direction:column;padding:20px 20px 24px;gap:11px">
+              <div style="display:flex;align-items:center;justify-content:space-between;gap:8px">
+                <div onClick="{{ gym.prev }}" style="width:38px;height:38px;border-radius:50%;flex:none;display:flex;align-items:center;justify-content:center;cursor:pointer;background:#15170F;border:1px solid rgba(255,255,255,.12);opacity:{{ gym.prevOpacity }}">
+                  <svg width="12" height="20" viewBox="0 0 14 26" fill="none" stroke="rgba(242,244,240,.75)" stroke-width="2.2" stroke-linecap="round"><path d="M10 4l-6 9 6 9"></path></svg>
+                </div>
+                <div style="flex:1;text-align:center;font-size:13px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:rgba(242,244,240,.45)">{{ gym.counter }}</div>
+                <div onClick="{{ gym.next }}" style="width:38px;height:38px;border-radius:50%;flex:none;display:flex;align-items:center;justify-content:center;cursor:pointer;background:#15170F;border:1px solid rgba(255,255,255,.12);opacity:{{ gym.nextOpacity }}">
+                  <svg width="12" height="20" viewBox="0 0 14 26" fill="none" stroke="rgba(242,244,240,.75)" stroke-width="2.2" stroke-linecap="round"><path d="M4 4l6 9-6 9"></path></svg>
+                </div>
+              </div>
+              <div style="display:flex;flex-direction:column;gap:3px">
+                <div style="font-size:21px;font-weight:600;letter-spacing:-.02em;line-height:1.15">{{ gym.name }}</div>
+                <div style="font-size:13px;color:{{ gym.tagColor }}">{{ gym.tag }}</div>
+              </div>
+              <div style="display:flex;gap:5px">
+                <sc-for list="{{ gym.dots }}" as="d" hint-placeholder-count="6">
+                  <div onClick="{{ d.go }}" style="flex:1;height:4px;border-radius:2px;cursor:pointer;background:{{ d.bg }}"></div>
+                </sc-for>
+              </div>
+
+              <div style="display:flex;gap:9px">
+                <div style="flex:1;border-radius:16px;background:#15170F;border:1px solid rgba(255,255,255,.1);padding:11px 10px;display:flex;flex-direction:column;gap:8px;align-items:center">
+                  <div style="font-size:13px;color:rgba(242,244,240,.5)">Reps</div>
+                  <div style="font-size:30px;font-weight:700;letter-spacing:-.03em;line-height:1;font-variant-numeric:tabular-nums">{{ gym.reps }}</div>
+                  <div style="display:flex;gap:7px;width:100%">
+                    <div onClick="{{ gym.lessReps }}" style="flex:1;height:38px;border-radius:11px;background:rgba(255,255,255,.06);display:flex;align-items:center;justify-content:center;font-size:19px;cursor:pointer">−</div>
+                    <div onClick="{{ gym.moreReps }}" style="flex:1;height:38px;border-radius:11px;background:rgba(255,255,255,.06);display:flex;align-items:center;justify-content:center;font-size:19px;cursor:pointer">+</div>
+                  </div>
+                </div>
+                <div style="flex:1;border-radius:16px;background:#15170F;border:1px solid rgba(255,255,255,.1);padding:11px 10px;display:flex;flex-direction:column;gap:8px;align-items:center">
+                  <div style="font-size:13px;color:rgba(242,244,240,.5)">{{ gym.weightLabel }}</div>
+                  <div style="font-size:30px;font-weight:700;letter-spacing:-.03em;line-height:1;font-variant-numeric:tabular-nums">{{ gym.weight }}</div>
+                  <div style="display:flex;gap:7px;width:100%">
+                    <div onClick="{{ gym.lessWeight }}" style="flex:1;height:38px;border-radius:11px;background:rgba(255,255,255,.06);display:flex;align-items:center;justify-content:center;font-size:19px;cursor:pointer">−</div>
+                    <div onClick="{{ gym.moreWeight }}" style="flex:1;height:38px;border-radius:11px;background:rgba(255,255,255,.06);display:flex;align-items:center;justify-content:center;font-size:19px;cursor:pointer">+</div>
+                  </div>
+                </div>
+              </div>
+
+              <div style="font-size:13px;color:rgba(242,244,240,.5)">{{ gym.planLine }}</div>
+
+              <div style="display:flex;gap:7px">
+                <sc-for list="{{ gym.sets }}" as="t" hint-placeholder-count="4">
+                  <div onClick="{{ t.tap }}" style="flex:1;height:44px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:15px;font-weight:700;cursor:pointer;background:{{ t.bg }};border:1px solid {{ t.border }};color:{{ t.color }}">{{ t.label }}</div>
+                </sc-for>
+              </div>
+
+              <div style="display:flex;flex-direction:column;align-items:center;gap:2px;padding:6px 0 2px">
+                <div style="font-size:44px;font-weight:700;letter-spacing:-.04em;line-height:1;font-variant-numeric:tabular-nums">0:47</div>
+                <div style="font-size:13px;color:rgba(242,244,240,.5)">de descanso</div>
+              </div>
+
+              <div onClick="{{ gym.doneSet }}" style="background:var(--ac);color:#000;text-align:center;padding:16px;border-radius:20px;font-size:15.5px;font-weight:700;cursor:pointer">Serie hecha</div>
+              <div onClick="{{ go.open }}" style="text-align:center;padding:11px;font-size:13px;font-weight:600;color:rgba(242,244,240,.55);cursor:pointer">Terminar gimnasio</div>
+            </div>
+          </sc-if>
+
+          <sc-if value="{{ is.offline }}" hint-placeholder-val="{{ false }}">
+            <div style="flex:1;display:flex;flex-direction:column;justify-content:space-between;padding:26px 22px 24px">
+              <div style="display:flex;flex-direction:column;gap:12px">
+                <div style="width:46px;height:46px;border-radius:14px;background:#15170F;display:flex;align-items:center;justify-content:center">
+                  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="rgba(242,244,240,.6)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="7" y="2.6" width="10" height="18.8" rx="2.4"></rect><path d="M4 4l16 16"></path></svg>
+                </div>
+                <div style="font-size:24px;font-weight:600;letter-spacing:-.02em;line-height:1.15">Sin teléfono</div>
+                <div style="font-size:14px;line-height:1.45;color:rgba(242,244,240,.6)">Seguimos midiendo con el GPS y el pulso del reloj. Los avisos de sales y geles funcionan igual: el plan ya está descargado. Compartir ubicación queda pausado hasta reconectar.</div>
+              </div>
+              <div onClick="{{ go.open }}" style="text-align:center;padding:16px;border-radius:20px;border:1.5px solid rgba(255,255,255,.18);font-size:15px;font-weight:600;color:rgba(242,244,240,.8);cursor:pointer">Entendido</div>
+            </div>
+          </sc-if>
+
+        </div>
+      </div>
+
+      <div style="width:396px;display:flex;flex-wrap:wrap;gap:5px;padding-top:6px">
+        <sc-for list="{{ rail }}" as="s" hint-placeholder-count="14">
+          <div onClick="{{ s.go }}" style="font-size:10.5px;padding:5px 8px;border-radius:7px;cursor:pointer;background:{{ s.bg }};color:{{ s.color }};border:1px solid {{ s.border }}">{{ s.label }}</div>
+        </sc-for>
+      </div>
+      <div style="width:396px;display:flex;gap:6px">
+        <div onClick="{{ setWatchers.none }}" style="flex:1;text-align:center;font-size:10.5px;padding:6px;border-radius:7px;cursor:pointer;background:{{ wTab.none.bg }};color:{{ wTab.none.color }};border:1px solid {{ wTab.none.border }}">Nadie te ve</div>
+        <div onClick="{{ setWatchers.few }}" style="flex:1;text-align:center;font-size:10.5px;padding:6px;border-radius:7px;cursor:pointer;background:{{ wTab.few.bg }};color:{{ wTab.few.color }};border:1px solid {{ wTab.few.border }}">3 amigos</div>
+        <div onClick="{{ setWatchers.many }}" style="flex:1;text-align:center;font-size:10.5px;padding:6px;border-radius:7px;cursor:pointer;background:{{ wTab.many.bg }};color:{{ wTab.many.color }};border:1px solid {{ wTab.many.border }}">24 personas</div>
+      </div>
+    </div>
+
+    <div style="display:flex;flex-direction:column;gap:16px;max-width:430px">
+      <div style="font-size:11px;font-weight:600;letter-spacing:.14em;text-transform:uppercase;color:rgba(242,244,240,.4)">Cómo se recorre</div>
+      <div style="display:flex;flex-direction:column;gap:12px;border-radius:18px;background:#131511;border:1px solid rgba(255,255,255,.08);padding:18px">
+        <div style="display:flex;gap:12px"><div style="width:78px;flex:none;font-size:12.5px;font-weight:600;color:var(--ac)">Arriba</div><div style="flex:1;font-size:12.5px;line-height:1.5;color:rgba(242,244,240,.65)">Rutina del día. Si no la activó, se lo dice y ofrece activarla ahí mismo.</div></div>
+        <div style="display:flex;gap:12px"><div style="width:78px;flex:none;font-size:12.5px;font-weight:600;color:var(--ac)">Centro</div><div style="flex:1;font-size:12.5px;line-height:1.5;color:rgba(242,244,240,.65)">Estado, tiempo, ritmo, distancia y pulso. Tocá el ritmo para pasar de promedio a parcial.</div></div>
+        <div style="display:flex;gap:12px"><div style="width:78px;flex:none;font-size:12.5px;font-weight:600;color:var(--ac)">Izquierda</div><div style="flex:1;font-size:12.5px;line-height:1.5;color:rgba(242,244,240,.65)">Los seis controles del boceto: finalizar, pausa o reanudar, compartir ubicación, vuelta, ajustes y bloquear.</div></div>
+        <div style="display:flex;gap:12px"><div style="width:78px;flex:none;font-size:12.5px;font-weight:600;color:var(--ac)">Derecha</div><div style="flex:1;font-size:12.5px;line-height:1.5;color:rgba(242,244,240,.65)">Primero lo que viene (gel, agua) con su hora; abajo lo que ya pasó, incluidos los ánimos de amigos y las vueltas.</div></div>
+        <div style="display:flex;gap:12px"><div style="width:78px;flex:none;font-size:12.5px;font-weight:600;color:var(--ac)">Abajo</div><div style="flex:1;font-size:12.5px;line-height:1.5;color:rgba(242,244,240,.65)">Mapa con la ruta y quién te está viendo. Probá los tres estados con los botones bajo el reloj.</div></div>
+        <div style="display:flex;gap:12px"><div style="width:78px;flex:none;font-size:12.5px;font-weight:600;color:var(--ac)">Volver</div><div style="flex:1;font-size:12.5px;line-height:1.5;color:rgba(242,244,240,.65)">Cada pantalla tiene la flecha que apunta al centro, en la dirección contraria a la que entraste. Ningún botón dice “volver a métricas”.</div></div>
+      </div>
+
+      <div style="font-size:11px;font-weight:600;letter-spacing:.14em;text-transform:uppercase;color:rgba(242,244,240,.4)">Decisiones sobre tu boceto</div>
+      <div style="display:flex;flex-direction:column;gap:11px">
+        <div style="font-size:12.5px;line-height:1.5;color:rgba(242,244,240,.6)">Ordené los controles por frecuencia y riesgo: pausa a mano derecha, finalizar arriba a la izquierda en rojo para que no se toque sin querer. Ajustes y bloquear van último.</div>
+        <div style="font-size:12.5px;line-height:1.5;color:rgba(242,244,240,.6)">Los dos íconos de la pantalla de apertura quedan como interruptores por deporte: se ven encendidos o apagados antes de arrancar, sin entrar a ningún menú.</div>
+        <div style="font-size:12.5px;line-height:1.5;color:rgba(242,244,240,.6)">Los ánimos de amigos aparecen a pantalla completa una sola vez y después quedan en la lista de la derecha, para no tapar las métricas dos veces.</div>
+        <div style="font-size:12.5px;line-height:1.5;color:rgba(242,244,240,.6)">Bloquear no tapa nada: seguís viendo las métricas y solo se desactiva el táctil. Se sale con dos toques al botón lateral, que se pinta de verde mientras está bloqueada.</div>
+      </div>
+
+      <div style="font-size:12.5px;line-height:1.55;color:rgba(242,244,240,.45);border-top:1px solid rgba(255,255,255,.08);padding-top:14px">La sesión de hoy y la rutina del gimnasio quedaron arriba del botón verde en la pantalla de apertura: se ve qué toca antes de decidir empezar, y la fila del gimnasio abre su propia pantalla. Pendiente: las fotos de perfil de los amigos son iniciales de color (no puedo generar imágenes); el mapa es un dibujo estilizado hasta enchufar el SDK real. Falta definir la vibración por tipo de aviso y el gesto exacto de desbloqueo.</div>
+    </div>
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;accent&quot;:{&quot;editor&quot;:&quot;text&quot;,&quot;default&quot;:&quot;#7CF03D&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Color de acento (hex, ej. #FF5A1F)&quot;},&quot;alwaysOn&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:false,&quot;tsType&quot;:&quot;boolean&quot;,&quot;section&quot;:&quot;Pantalla siempre encendida&quot;}}">
+const ORDER = ["open","metrics","routine","controls","events","map","fuelAlert","hydrate","cheer","settings","summary","gym","offline"];
+const LABELS = {open:"Abrir la app",metrics:"Métricas",routine:"Rutina",controls:"Controles",events:"Avisos",map:"Mapa",fuelAlert:"Aviso gel",hydrate:"Aviso agua",cheer:"Ánimo",settings:"Ajustes",summary:"Resumen",gym:"Gimnasio",offline:"Sin teléfono"};
+const SPORTS = [
+  ["run", "Carrera (exterior)", "M12.4 8.2 9 10.6l1.8 3.4-1.4 6M13.6 7.6l2.4 3.4 3.4.6M10.8 14l-4.6 1.4M15.4 14.6l1.6 5.4", true],
+  ["bike", "Bicicleta (exterior)", "M6.4 18.4a3 3 0 1 0 0-6 3 3 0 0 0 0 6ZM17.6 18.4a3 3 0 1 0 0-6 3 3 0 0 0 0 6ZM8.4 12.4l3.2-4.6 3 4.2M10.4 7.8h3.4", false],
+  ["trek", "Trekking", "M3.6 19.4h16.8M7.6 19.4l4.4-9 4.4 9M10.2 14.4h3.6", false]
+];
+const PAST = [
+  ["Sofía te mandó ánimo", "“Dale que faltan 4 km”", "min 38", "var(--ac)"],
+  ["Vuelta 1 · 5 km", "26:12 · ritmo 5:14", "min 26", "rgba(255,255,255,.3)"],
+  ["Gel + sales", "Hecho", "min 20", "rgba(255,255,255,.3)"]
+];
+const GYM = [
+  ["Press plano con barra", 8, 45, 4, "General", "kg"],
+  ["Dominadas", 6, 0, 4, "General", "kg extra"],
+  ["Remo con barra", 10, 35, 3, "General", "kg"],
+  ["Sentadilla búlgara", 10, 12, 3, "Para correr", "kg"],
+  ["Elevación de talones", 15, 20, 3, "Para correr", "kg"],
+  ["Plancha frontal", 45, 0, 3, "Para correr", "seg"]
+];
+const AVATARS = [["SM", "var(--ac)"], ["LG", "#8BD6F0"], ["MP", "#F0C93D"]];
+
+class Component extends DCLogic {
+  state = {
+    screen: "open", pace: "avg", running: false, watchers: "few", locked: false,
+    gymIdx: 0, gymEdits: { 0: { sets: 2 } },
+    routine: true, alerts: true, cheers: true,
+    share: { run: true, bike: false, trek: false },
+    routineBySport: { run: true, bike: false, trek: false }
+  };
+
+  icon(path, color) {
+    return React.createElement("svg", { width: 19, height: 19, viewBox: "0 0 24 24", fill: "none", stroke: color, strokeWidth: 1.8, strokeLinecap: "round", strokeLinejoin: "round" },
+      React.createElement("path", { d: path }),
+      path.indexOf("M12.4") === 0 ? React.createElement("circle", { cx: 14.6, cy: 4.4, r: 1.9 }) : null);
+  }
+
+  toggleIn(group, key) {
+    this.setState(s => ({ [group]: { ...s[group], [key]: !s[group][key] } }));
+  }
+
+  pill(on, accent) {
+    return {
+      bg: on ? "rgb(var(--ac-rgb) / .14)" : "rgba(255,255,255,.05)",
+      border: on ? accent : "rgba(255,255,255,.12)",
+      color: on ? accent : "rgba(242,244,240,.55)"
+    };
+  }
+
+  sw(on, accent) {
+    return { track: on ? accent : "rgba(255,255,255,.16)", align: on ? "flex-end" : "flex-start" };
+  }
+
+
+
+
+
+  static KEY = "trainer.accent.history";
+  static MAX = 16;
+  readHistory() {
+    try { return JSON.parse(localStorage.getItem(Component.KEY) || "[]"); } catch (e) { return []; }
+  }
+  writeHistory(list) { try { localStorage.setItem(Component.KEY, JSON.stringify(list)); } catch (e) {} }
+  normHex(v) {
+    const h = String(v || "").trim().replace("#", "");
+    if (!/^[0-9a-f]{3}$|^[0-9a-f]{6}$/i.test(h)) return null;
+    return "#" + (h.length === 3 ? h.split("").map(c => c + c).join("") : h).toUpperCase();
+  }
+  rememberAccent() {
+    const hex = this.normHex(this.props.accent);
+    if (!hex || hex === this.lastRemembered) return;
+    this.lastRemembered = hex;
+    const list = [hex].concat(this.readHistory().filter(h => h !== hex)).slice(0, Component.MAX);
+    this.writeHistory(list);
+    this.forceUpdate();
+  }
+  swatchVals() {
+    const cur = this.normHex(this.overrideAccent || this.props.accent) || "#7CF03D";
+    const list = this.readHistory();
+    return {
+      count: list.length + "/" + Component.MAX,
+      current: cur,
+      list: list.map(hex => ({
+        hex,
+        ring: hex === cur ? "#F2F4F0" : "rgba(255,255,255,.12)",
+        apply: () => { this.overrideAccent = hex; this.applyAccent(); this.forceUpdate(); },
+        remove: () => { this.writeHistory(this.readHistory().filter(h => h !== hex)); this.forceUpdate(); }
+      }))
+    };
+  }
+
+  rootRef = (el) => { this.rootEl = el; this.applyAccent(); this.rememberAccent(); };
+  applyAccent() {
+    if (!this.rootEl) return;
+    const norm = this.normHex(this.overrideAccent || this.props.accent) || "#7CF03D";
+    const full = norm.slice(1);
+    const n = parseInt(full, 16);
+    this.rootEl.style.setProperty("--ac", "#" + full);
+    this.rootEl.style.setProperty("--ac-rgb", ((n >> 16) & 255) + " " + ((n >> 8) & 255) + " " + (n & 255));
+  }
+  componentDidUpdate(prevProps) {
+    if (prevProps && prevProps.accent !== this.props.accent) { this.overrideAccent = null; this.rememberAccent(); }
+    this.applyAccent();
+  }
+
+  renderVals() {
+    const st = this.state;
+    const accent = "var(--ac)";
+    const is = {}, go = {};
+    ORDER.forEach(s => { is[s] = st.screen === s; go[s] = () => this.setState({ screen: s }); });
+
+    const W = {
+      none: { some: false, avatars: [], label: "", settingLine: "Nadie te está viendo ahora" },
+      few: { some: true, avatars: AVATARS, label: "Sofía, Lucas y Martín te están viendo", settingLine: "3 amigos te están viendo" },
+      many: { some: true, avatars: AVATARS, label: "24 personas te están viendo en vivo", settingLine: "24 personas te están viendo" }
+    };
+    const watchers = { ...W[st.watchers] };
+    watchers.avatars = (st.share.run ? watchers.avatars : []).map(([initials, bg], i) => ({ initials, bg, overlap: i === 0 ? "0px" : "-10px" }));
+    if (!st.share.run) { watchers.some = false; watchers.settingLine = "Compartir ubicación apagado"; }
+
+    const shareOn = st.share.run;
+    const sharedCount = Object.keys(st.share).filter(k => st.share[k]).length;
+    const routineCount = Object.keys(st.routineBySport).filter(k => st.routineBySport[k]).length;
+
+    return {
+      rootRef: this.rootRef,
+      swatches: this.swatchVals(),
+      is, go,
+      dim: this.props.alwaysOn ? .45 : 1,
+      showMetrics: st.screen === "metrics",
+      locked: st.locked,
+      unlocked: !st.locked,
+      unlock: () => this.setState({ locked: false }),
+      crownBg: st.locked ? accent : "#26291F",
+      gym: (() => {
+        const i = st.gymIdx;
+        const base = GYM[i];
+        const ed = st.gymEdits[i] || {};
+        const reps = ed.reps ?? base[1], weight = ed.weight ?? base[2], sets = ed.sets ?? 0;
+        const total = base[3], forRun = base[4] === "Para correr";
+        const isTime = base[5] === "seg";
+        const patch = (p) => this.setState(s2 => ({ gymEdits: { ...s2.gymEdits, [i]: { ...(s2.gymEdits[i] || {}), ...p } } }));
+        const changed = reps !== base[1] || weight !== base[2];
+        return {
+          name: base[0],
+          counter: "Ejercicio " + (i + 1) + " de " + GYM.length,
+          tag: forRun ? "Para correr" : "General · no aporta a la carrera",
+          tagColor: forRun ? accent : "rgba(242,244,240,.45)",
+          prev: () => this.setState(s2 => ({ gymIdx: Math.max(0, s2.gymIdx - 1) })),
+          next: () => this.setState(s2 => ({ gymIdx: Math.min(GYM.length - 1, s2.gymIdx + 1) })),
+          prevOpacity: i === 0 ? .3 : 1,
+          nextOpacity: i === GYM.length - 1 ? .3 : 1,
+          dots: GYM.map((g, j) => {
+            const done = (st.gymEdits[j] && st.gymEdits[j].sets || 0) >= g[3];
+            return { go: () => this.setState({ gymIdx: j }), bg: j === i ? accent : (done ? "rgb(var(--ac-rgb) / .45)" : "rgba(255,255,255,.14)") };
+          }),
+          reps: isTime ? reps + "″" : reps,
+          weight: String(weight).replace(".", ","),
+          weightLabel: isTime ? "Pausa (seg)" : (base[5] === "kg extra" ? "Lastre (kg)" : "Peso (kg)"),
+          planLine: "El plan pedía " + (isTime ? base[1] + " seg" : base[1] + " reps") + (base[2] ? " con " + base[2] + " " + (base[5] === "kg extra" ? "kg de lastre" : "kg") : "") + (changed ? " · lo ajustaste a mano" : ""),
+          lessReps: () => patch({ reps: Math.max(1, reps - (isTime ? 5 : 1)) }),
+          moreReps: () => patch({ reps: Math.min(isTime ? 180 : 30, reps + (isTime ? 5 : 1)) }),
+          lessWeight: () => patch({ weight: Math.max(0, weight - 2.5) }),
+          moreWeight: () => patch({ weight: Math.min(200, weight + 2.5) }),
+          doneSet: () => {
+            if (sets + 1 >= total && i < GYM.length - 1) this.setState(s2 => ({ gymEdits: { ...s2.gymEdits, [i]: { ...(s2.gymEdits[i] || {}), sets: total } }, gymIdx: i + 1 }));
+            else patch({ sets: Math.min(total, sets + 1) });
+          },
+          sets: Array.from({ length: total }, (_, k) => {
+            const done = k < sets, current = k === sets;
+            return {
+              label: done ? "✓" : String(k + 1),
+              bg: done ? "rgb(var(--ac-rgb) / .16)" : (current ? "rgb(var(--ac-rgb) / .08)" : "rgba(255,255,255,.05)"),
+              border: done ? accent : (current ? "rgb(var(--ac-rgb) / .45)" : "rgba(255,255,255,.12)"),
+              color: done || current ? accent : "rgba(242,244,240,.5)",
+              tap: () => patch({ sets: done ? k : k + 1 })
+            };
+          })
+        };
+      })(),
+      runState: st.running ? "En curso" : "Pausado",
+      runColor: st.running ? accent : "rgba(242,244,240,.75)",
+      runAction: st.running ? "Pausar" : "Reanudar",
+      paused: !st.running,
+      running: st.running,
+      toggleRun: () => this.setState(s => ({ running: !s.running, screen: "metrics" })),
+      pace: st.pace === "avg"
+        ? { value: "4:42", kind: "promedio" }
+        : { value: "4:58", kind: "parcial" },
+      togglePace: () => this.setState(s => ({ pace: s.pace === "avg" ? "lap" : "avg" })),
+      addLap: () => this.setState({ screen: "metrics", pace: "lap" }),
+      lockScreen: () => this.setState({ screen: "metrics", locked: true }),
+      routineOn: st.routine,
+      routineOff: !st.routine,
+      activateRoutine: () => this.setState({ routine: true }),
+      toggleAlerts: () => this.setState(s => ({ alerts: !s.alerts })),
+      toggleRoutineSetting: () => this.setState(s => ({ routine: !s.routine })),
+      toggleCheers: () => this.setState(s => ({ cheers: !s.cheers })),
+      toggleShare: () => this.toggleIn("share", "run"),
+      sw: {
+        alerts: this.sw(st.alerts, accent),
+        routine: this.sw(st.routine, accent),
+        share: this.sw(shareOn, accent),
+        cheers: this.sw(st.cheers, accent)
+      },
+      shareBtn: {
+        label: shareOn ? "Apagar compartir ubicación" : "Compartir ubicación",
+        ...this.pill(shareOn, accent)
+      },
+      sports: SPORTS.map(([id, label, path]) => {
+        const sOn = st.share[id], rOn = st.routineBySport[id];
+        const sp = this.pill(sOn, accent), rp = this.pill(rOn, accent);
+        return {
+          label,
+          icon: this.icon(path, "rgba(242,244,240,.75)"),
+          toggleShare: () => this.toggleIn("share", id),
+          toggleRoutine: () => this.toggleIn("routineBySport", id),
+          shareBg: sp.bg, shareBorder: sp.border, shareColor: sp.color,
+          routineBg: rp.bg, routineBorder: rp.border, routineColor: rp.color
+        };
+      }),
+      shareLine: sharedCount
+        ? "Compartís ubicación en " + sharedCount + (sharedCount === 1 ? " deporte" : " deportes") + ": tus amigos te ven en vivo."
+        : "Compartir ubicación apagado en todos los deportes.",
+      routineLine: routineCount
+        ? "Con la rutina activada te avisamos qué hacer durante el entreno."
+        : "Sin rutina activada corrés libre: medimos, pero no marcamos bloques.",
+      past: PAST.map(([title, detail, time, dot]) => ({ title, detail, time, dot })),
+      watchers,
+      setWatchers: {
+        none: () => this.setState({ watchers: "none", screen: "map" }),
+        few: () => this.setState({ watchers: "few", screen: "map" }),
+        many: () => this.setState({ watchers: "many", screen: "map" })
+      },
+      wTab: {
+        none: this.pill(st.watchers === "none", accent),
+        few: this.pill(st.watchers === "few", accent),
+        many: this.pill(st.watchers === "many", accent)
+      },
+      rail: ORDER.map(s => ({
+        label: LABELS[s],
+        go: go[s],
+        bg: st.screen === s ? "rgb(var(--ac-rgb) / .14)" : "#131511",
+        border: st.screen === s ? accent : "rgba(255,255,255,.1)",
+        color: st.screen === s ? accent : "#F2F4F0"
+      }))
+    };
+  }
+}
+</script>
+</body>
+</html>

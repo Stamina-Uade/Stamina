@@ -1,0 +1,896 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet data-dc-atomics><meta name="design_doc_mode" content="canvas"><link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;500;600;700&display=swap" rel="stylesheet"><style>:root{--ac:#7CF03D;--ac-rgb:124 240 61}body{margin:0;background:#0A0B09;font-family:Archivo,system-ui,sans-serif}a{color:var(--ac)}a:hover{color:var(--ac)}input,select,button{font-family:inherit}input::placeholder{color:rgba(242,244,240,.32)}.wheel{scrollbar-width:none;-ms-overflow-style:none}.wheel::-webkit-scrollbar{display:none}</style></helmet>
+
+<div ref="{{ rootRef }}" style="min-height:100%;background:#0A0B09;color:#F2F4F0;padding:44px 48px 64px;display:flex;flex-direction:column;gap:36px">
+
+  <div style="display:flex;gap:56px;flex-wrap:wrap;max-width:1180px">
+    <div style="display:flex;flex-direction:column;gap:14px;max-width:420px">
+      <div style="display:flex;align-items:center;gap:10px">
+        <div style="width:22px;height:22px;border-radius:6px;background:var(--ac)"></div>
+        <div style="font-size:13px;font-weight:600;letter-spacing:.16em;text-transform:uppercase">Trainer</div>
+      </div>
+      <div style="font-size:34px;font-weight:600;letter-spacing:-.03em;line-height:1.05">Entrada al producto: onboarding, sesión, registro y Home beta</div>
+      <div style="font-size:13.5px;line-height:1.55;color:rgba(242,244,240,.6);text-wrap:pretty">Deportistas amateur de resistencia entrenan sin saber cuándo hidratarse, cuándo reponer sales o geles, ni qué comer según su carga. El flujo de entrada existe para juntar lo mínimo que permite calcular ese plan: correo validado, nombre, nacimiento, sexo, peso, altura, deporte, nivel, objetivo y disponibilidad horaria.</div>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:11px;max-width:300px">
+      <div style="font-size:11px;font-weight:600;letter-spacing:.14em;text-transform:uppercase;color:rgba(242,244,240,.4)">Decisiones</div>
+      <div style="font-size:12.5px;line-height:1.5;color:rgba(242,244,240,.65)">1. El correo se valida con un código de 6 caracteres antes de pedir cualquier dato del perfil.</div>
+      <div style="font-size:12.5px;line-height:1.5;color:rgba(242,244,240,.65)">2. Una pregunta por pantalla, cada una con su explicación de por qué la pedimos. Arriba solo la barra de avance.</div>
+      <div style="font-size:12.5px;line-height:1.5;color:rgba(242,244,240,.65)">3. Fechas con selectores nativos al idioma: la rueda de nacimiento se ordena según el formato del país y el objetivo se elige en un calendario.</div>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:11px;max-width:290px">
+      <div style="font-size:11px;font-weight:600;letter-spacing:.14em;text-transform:uppercase;color:rgba(242,244,240,.4)">Pendiente</div>
+      <div style="font-size:12.5px;line-height:1.55;color:rgba(242,244,240,.55)">El carousel usa tres fotos de Unsplash (licencia libre, usables en producción); si tenés fotos propias las reemplazo. Faltan el set de íconos, la pantalla de permisos de notificaciones y los estados de error del login. Las pantallas de estadísticas y preview quedan fuera del arranque, accesibles desde los chips para usarlas más adelante.</div>
+    </div>
+    <div style="width:170px;flex:none;align-self:flex-start;border-radius:16px;background:#131511;border:1px solid rgba(255,255,255,.1);padding:12px;display:flex;flex-direction:column;gap:9px">
+    <div style="display:flex;align-items:center;justify-content:space-between;gap:6px">
+      <div style="font-size:10px;font-weight:600;letter-spacing:.12em;text-transform:uppercase;color:rgba(242,244,240,.45)">Colores probados</div>
+      <div style="font-size:10px;color:rgba(242,244,240,.35);font-variant-numeric:tabular-nums">{{ swatches.count }}</div>
+    </div>
+    <div style="display:flex;flex-wrap:wrap;gap:7px">
+      <sc-for list="{{ swatches.list }}" as="c" hint-placeholder-count="0">
+        <div style="position:relative;width:36px;height:36px">
+          <div onClick="{{ c.apply }}" title="{{ c.hex }}" style="width:36px;height:36px;border-radius:11px;cursor:pointer;background:{{ c.hex }};border:2px solid {{ c.ring }}"></div>
+          <div onClick="{{ c.remove }}" style="position:absolute;top:-5px;right:-5px;width:15px;height:15px;border-radius:50%;background:#0B0C0A;border:1px solid rgba(255,255,255,.2);display:flex;align-items:center;justify-content:center;font-size:9px;line-height:1;color:rgba(242,244,240,.7);cursor:pointer">×</div>
+        </div>
+      </sc-for>
+    </div>
+    <div style="font-size:11px;color:rgba(242,244,240,.75);font-variant-numeric:tabular-nums;font-family:ui-monospace,Menlo,monospace">{{ swatches.current }}</div>
+    <div style="font-size:10px;line-height:1.4;color:rgba(242,244,240,.4)">Cada hex que escribís en Tweaks se guarda acá. Tocá uno para volver a usarlo.</div>
+    </div>
+
+  </div>
+
+  <div style="display:flex;gap:40px;flex-wrap:wrap;align-items:flex-start">
+
+    <div style="display:flex;flex-direction:column;gap:14px">
+      <div style="display:flex;align-items:baseline;gap:9px"><span style="font:600 10.5px ui-monospace,Menlo,monospace;padding:3px 7px;background:var(--ac);color:#0A0B09;border-radius:5px">Flujo</span><span style="font-size:12px;color:rgba(242,244,240,.55)">Interactivo — tocá los botones</span></div>
+
+      <div style="width:390px;height:844px;border-radius:44px;background:#000;border:1px solid rgba(255,255,255,.14);overflow:hidden;display:flex;flex-direction:column;position:relative">
+        <div style="height:46px;flex:none;display:flex;align-items:flex-end;justify-content:space-between;padding:0 26px 6px;font-size:12px;font-weight:600;color:#F2F4F0;position:relative;z-index:3;font-variant-numeric:tabular-nums">
+          <span>8:24</span>
+          <span style="display:flex;gap:5px;align-items:center;color:rgba(242,244,240,.75);font-size:11px">5G ▮</span>
+        </div>
+
+        <sc-if value="{{ is.inReg }}" hint-placeholder-val="{{ false }}">
+          <div style="flex:none;padding:6px 22px 12px;display:flex;align-items:center;gap:14px">
+            <div onClick="{{ go.back }}" style="font-size:19px;color:rgba(242,244,240,.65);cursor:pointer;line-height:1">‹</div>
+            <div style="flex:1;height:3px;border-radius:2px;background:rgba(255,255,255,.1);overflow:hidden">
+              <div style="height:100%;background:var(--ac);width:{{ progress }};transition:width .35s ease"></div>
+            </div>
+          </div>
+        </sc-if>
+
+        <div style="flex:1;min-height:0;overflow:hidden;display:flex;flex-direction:column">
+
+          <sc-if value="{{ is.welcome }}" hint-placeholder-val="{{ true }}">
+            <div style="flex:1;display:flex;flex-direction:column;background:#0B0C0A">
+              <div style="flex:1;position:relative;margin-top:-52px;overflow:hidden">
+                <div style="position:absolute;inset:0;opacity:{{ op0 }};transition:opacity .9s ease;background:#151810;overflow:hidden">
+                  <img src="https://images.unsplash.com/photo-1552674605-db6ffd4facb5?w=800&amp;h=1300&amp;fit=crop&amp;q=70" alt="Corredores al amanecer" style="width:100%;height:100%;object-fit:cover;display:block">
+                </div>
+                <div style="position:absolute;inset:0;opacity:{{ op1 }};transition:opacity .9s ease;background:#17130F;overflow:hidden">
+                  <img src="https://images.unsplash.com/photo-1517649763962-0c623066013b?w=800&amp;h=1300&amp;fit=crop&amp;q=70" alt="Pelotón en ruta" style="width:100%;height:100%;object-fit:cover;display:block">
+                </div>
+                <div style="position:absolute;inset:0;opacity:{{ op2 }};transition:opacity .9s ease;background:#101416;overflow:hidden">
+                  <img src="https://images.unsplash.com/photo-1530143311094-34d807799e8f?w=800&amp;h=1300&amp;fit=crop&amp;q=70" alt="Trail en montaña" style="width:100%;height:100%;object-fit:cover;display:block">
+                </div>
+                <div style="position:absolute;inset:0;background:linear-gradient(rgba(11,12,10,.15) 30%,#0B0C0A 94%)"></div>
+              </div>
+              <div style="padding:0 26px 34px;display:flex;flex-direction:column;gap:16px;background:#0B0C0A">
+                <div style="display:flex;align-items:center;gap:9px">
+                  <div style="width:26px;height:26px;border-radius:8px;background:var(--ac)"></div>
+                  <div style="font-size:22px;font-weight:700;letter-spacing:-.02em">Trainer</div>
+                </div>
+                <div style="min-height:132px;display:flex;flex-direction:column;gap:12px">
+                  <div style="font-size:29px;font-weight:600;letter-spacing:-.03em;line-height:1.1;transition:opacity .4s ease;opacity:{{ copyOpacity }}">{{ slideTitle }}</div>
+                  <div style="font-size:13.5px;line-height:1.5;color:rgba(242,244,240,.55);transition:opacity .4s ease;opacity:{{ copyOpacity }}">{{ slideText }}</div>
+                </div>
+                <div style="display:flex;gap:6px;justify-content:center">
+                  <sc-for list="{{ slides }}" as="sl" hint-placeholder-count="3">
+                    <div onClick="{{ sl.pick }}" style="width:26px;height:3px;border-radius:2px;cursor:pointer;background:{{ sl.dot }};transition:background .4s ease"></div>
+                  </sc-for>
+                </div>
+                <div style="display:flex;flex-direction:column;gap:10px;padding-top:4px">
+                  <div onClick="{{ go.regEmail }}" style="background:var(--ac);color:#0B0C0A;text-align:center;padding:15px;border-radius:14px;font-size:14.5px;font-weight:600;cursor:pointer">Crear cuenta gratis</div>
+                  <div onClick="{{ go.login }}" style="text-align:center;padding:12px;font-size:13.5px;font-weight:600;color:var(--ac);cursor:pointer">Ya tengo cuenta</div>
+                </div>
+              </div>
+            </div>
+          </sc-if>
+
+          <sc-if value="{{ is.stats }}" hint-placeholder-val="{{ false }}">
+            <div style="flex:1;display:flex;flex-direction:column;justify-content:space-between;padding:26px 26px 34px;background:#0B0C0A">
+              <div style="display:flex;flex-direction:column;gap:26px">
+                <div style="font-size:26px;font-weight:600;letter-spacing:-.03em;line-height:1.15">El problema no es el entusiasmo</div>
+                <div style="display:flex;flex-direction:column;gap:20px">
+                  <div style="display:flex;flex-direction:column;gap:4px"><div style="font-size:38px;font-weight:700;letter-spacing:-.04em;color:var(--ac);line-height:1;font-variant-numeric:tabular-nums">79,4%</div><div style="font-size:12.5px;color:rgba(242,244,240,.6);line-height:1.45">de quienes dejaron de entrenar lo hizo por falta de tiempo</div></div>
+                  <div style="height:1px;background:rgba(255,255,255,.08)"></div>
+                  <div style="display:flex;flex-direction:column;gap:4px"><div style="font-size:38px;font-weight:700;letter-spacing:-.04em;line-height:1;font-variant-numeric:tabular-nums">30-67%</div><div style="font-size:12.5px;color:rgba(242,244,240,.6);line-height:1.45">de los corredores sufre calambres: pérdidas de 3 a 5% del peso ya generan debilidad y desorientación</div></div>
+                  <div style="height:1px;background:rgba(255,255,255,.08)"></div>
+                  <div style="display:flex;flex-direction:column;gap:4px"><div style="font-size:38px;font-weight:700;letter-spacing:-.04em;line-height:1;font-variant-numeric:tabular-nums">37,7%</div><div style="font-size:12.5px;color:rgba(242,244,240,.6);line-height:1.45">de quienes practican deporte compite en carreras organizadas</div></div>
+                </div>
+              </div>
+              <div style="display:flex;flex-direction:column;gap:12px">
+                <div style="display:flex;gap:6px;justify-content:center"><div style="width:18px;height:3px;border-radius:2px;background:rgba(255,255,255,.2)"></div><div style="width:18px;height:3px;border-radius:2px;background:var(--ac)"></div><div style="width:18px;height:3px;border-radius:2px;background:rgba(255,255,255,.2)"></div></div>
+                <div onClick="{{ go.preview }}" style="background:var(--ac);color:#0B0C0A;text-align:center;padding:15px;border-radius:14px;font-size:14.5px;font-weight:600;cursor:pointer">Seguir</div>
+              </div>
+            </div>
+          </sc-if>
+
+          <sc-if value="{{ is.preview }}" hint-placeholder-val="{{ false }}">
+            <div style="flex:1;display:flex;flex-direction:column;justify-content:space-between;padding:26px 26px 34px;background:#0B0C0A">
+              <div style="display:flex;flex-direction:column;gap:16px;padding-top:14px">
+                <div style="border-radius:18px;background:#131511;border:1px solid rgba(255,255,255,.09);padding:15px;display:flex;flex-direction:column;gap:11px">
+                  <div style="font-size:10px;font-weight:600;letter-spacing:.12em;text-transform:uppercase;color:var(--ac)">Tu plan en carrera</div>
+                  <div style="font-size:17px;font-weight:600;letter-spacing:-.02em">Fondo largo · 14 km · 26°</div>
+                  <div style="display:flex;gap:6px;flex-wrap:wrap">
+                    <div style="font-size:11px;padding:5px 9px;border-radius:999px;background:rgba(255,255,255,.06)">750 ml/h</div>
+                    <div style="font-size:11px;padding:5px 9px;border-radius:999px;background:rgb(var(--ac-rgb) / .14);color:var(--ac)">1 gel c/45′</div>
+                    <div style="font-size:11px;padding:5px 9px;border-radius:999px;background:rgba(255,255,255,.06)">600 mg sodio</div>
+                  </div>
+                </div>
+                <div style="border-radius:18px;background:#131511;border:1px solid rgba(255,255,255,.09);padding:15px;display:flex;flex-direction:column;gap:8px">
+                  <div style="font-size:10px;font-weight:600;letter-spacing:.12em;text-transform:uppercase;color:rgba(242,244,240,.45)">Y antes de salir</div>
+                  <div style="font-size:13px;line-height:1.45;color:rgba(242,244,240,.75)">Aviso 45 min antes para preparar bidones, geles y el snack pre-entreno.</div>
+                </div>
+              </div>
+              <div style="display:flex;flex-direction:column;gap:16px">
+                <div style="font-size:25px;font-weight:600;letter-spacing:-.03em;line-height:1.15;text-align:center">Armemos tu plan en 2 minutos</div>
+                <div onClick="{{ go.regEmail }}" style="background:var(--ac);color:#0B0C0A;text-align:center;padding:15px;border-radius:14px;font-size:14.5px;font-weight:600;cursor:pointer">Empezar</div>
+                <div style="text-align:center;font-size:12.5px;color:rgba(242,244,240,.5)">¿Ya tenés cuenta? <span onClick="{{ go.login }}" style="color:var(--ac);font-weight:600;cursor:pointer">Iniciar sesión</span></div>
+              </div>
+            </div>
+          </sc-if>
+
+          <sc-if value="{{ is.login }}" hint-placeholder-val="{{ false }}">
+            <div style="flex:1;display:flex;flex-direction:column;padding:18px 26px 34px;background:#0B0C0A;gap:20px">
+              <div onClick="{{ go.welcome }}" style="font-size:19px;color:rgba(242,244,240,.6);cursor:pointer;line-height:1">‹</div>
+              <div style="font-size:27px;font-weight:600;letter-spacing:-.03em">Iniciar sesión</div>
+              <div style="display:flex;flex-direction:column;gap:13px">
+                <div style="display:flex;flex-direction:column;gap:7px">
+                  <div style="font-size:11.5px;color:rgba(242,244,240,.5)">Correo electrónico</div>
+                  <input type="email" value="{{ f.loginEmail }}" onChange="{{ set.loginEmail }}" placeholder="tu@mail.com" style="background:#141613;border:1px solid rgba(255,255,255,.12);border-radius:12px;padding:14px;color:#F2F4F0;font-size:14px;outline:none" style-focus="border-color:var(--ac)">
+                </div>
+                <div style="display:flex;flex-direction:column;gap:7px">
+                  <div style="font-size:11.5px;color:rgba(242,244,240,.5)">Contraseña</div>
+                  <input type="password" value="{{ f.loginPass }}" onChange="{{ set.loginPass }}" placeholder="••••••••" style="background:#141613;border:1px solid rgba(255,255,255,.12);border-radius:12px;padding:14px;color:#F2F4F0;font-size:14px;outline:none" style-focus="border-color:var(--ac)">
+                </div>
+                <div onClick="{{ go.fpEmail }}" style="text-align:right;font-size:12px;color:rgba(242,244,240,.5);cursor:pointer">¿Olvidaste tu contraseña?</div>
+                <div onClick="{{ go.home }}" style="background:var(--ac);color:#0B0C0A;text-align:center;padding:15px;border-radius:14px;font-size:14.5px;font-weight:600;cursor:pointer;opacity:{{ loginReady }}">Ingresar</div>
+              </div>
+              <div style="display:flex;align-items:center;gap:12px"><div style="flex:1;height:1px;background:rgba(255,255,255,.09)"></div><div style="font-size:11px;color:rgba(242,244,240,.4)">o</div><div style="flex:1;height:1px;background:rgba(255,255,255,.09)"></div></div>
+              <div style="display:flex;flex-direction:column;gap:10px">
+                <div onClick="{{ go.home }}" style="display:flex;align-items:center;justify-content:center;gap:9px;border:1px solid rgba(255,255,255,.14);border-radius:12px;padding:14px;font-size:13.5px;font-weight:600;cursor:pointer"><span style="width:15px;height:15px;border-radius:50%;background:rgba(242,244,240,.85);display:block"></span>Continuar con Google</div>
+                <div onClick="{{ go.home }}" style="display:flex;align-items:center;justify-content:center;gap:9px;border:1px solid rgba(255,255,255,.14);border-radius:12px;padding:14px;font-size:13.5px;font-weight:600;cursor:pointer"><span style="width:15px;height:15px;border-radius:4px;background:rgba(242,244,240,.85);display:block"></span>Continuar con Apple</div>
+              </div>
+              <div style="margin-top:auto;text-align:center;font-size:12.5px;color:rgba(242,244,240,.5)">¿No tenés cuenta? <span onClick="{{ go.regEmail }}" style="color:var(--ac);font-weight:600;cursor:pointer">Registrate</span></div>
+            </div>
+          </sc-if>
+
+          <sc-if value="{{ is.fpEmail }}" hint-placeholder-val="{{ false }}">
+            <div style="flex:1;display:flex;flex-direction:column;padding:18px 26px 34px;background:#0B0C0A;gap:14px">
+              <div onClick="{{ go.login }}" style="font-size:19px;color:rgba(242,244,240,.6);cursor:pointer;line-height:1">‹</div>
+              <div style="font-size:25px;font-weight:600;letter-spacing:-.03em;line-height:1.2">Recuperar tu contraseña</div>
+              <div style="font-size:13px;line-height:1.55;color:rgba(242,244,240,.6);text-wrap:pretty">Escribí el correo con el que creaste tu cuenta y te enviamos un código para elegir una contraseña nueva. Tu plan de entrenamiento, tus días y tu historial quedan intactos: solo cambia la forma de entrar.</div>
+              <div style="display:flex;flex-direction:column;gap:7px;margin-top:4px">
+                <div style="font-size:11.5px;color:rgba(242,244,240,.5)">Correo electrónico</div>
+                <input type="email" value="{{ f.fpEmail }}" onChange="{{ set.fpEmail }}" placeholder="tu@mail.com" style="background:#141613;border:1px solid rgba(255,255,255,.12);border-radius:12px;padding:15px;color:#F2F4F0;font-size:15px;outline:none" style-focus="border-color:var(--ac)">
+              </div>
+              <div style="font-size:11.5px;line-height:1.4;color:{{ fpEmailHintColor }}">{{ fpEmailHint }}</div>
+              <div style="margin-top:auto;display:flex;flex-direction:column;gap:12px">
+                <div style="font-size:11px;line-height:1.5;color:rgba(242,244,240,.38);text-align:center">Por seguridad, el mensaje se envía aunque el correo no esté registrado.</div>
+                <div onClick="{{ go.fpCode }}" style="background:var(--ac);color:#0B0C0A;text-align:center;padding:15px;border-radius:14px;font-size:14.5px;font-weight:600;cursor:pointer;opacity:{{ fpEmailReady }}">Enviarme el código</div>
+                <div onClick="{{ go.login }}" style="text-align:center;font-size:13px;font-weight:600;color:rgba(242,244,240,.6);cursor:pointer">Volver al inicio de sesión</div>
+              </div>
+            </div>
+          </sc-if>
+
+          <sc-if value="{{ is.fpCode }}" hint-placeholder-val="{{ false }}">
+            <div style="flex:1;display:flex;flex-direction:column;padding:18px 26px 34px;background:#0B0C0A;gap:14px">
+              <div onClick="{{ go.fpEmail }}" style="font-size:19px;color:rgba(242,244,240,.6);cursor:pointer;line-height:1">‹</div>
+              <div style="font-size:25px;font-weight:600;letter-spacing:-.03em;line-height:1.2">Revisá tu correo</div>
+              <div style="font-size:13px;line-height:1.55;color:rgba(242,244,240,.6);text-wrap:pretty">Enviamos un código de 6 caracteres, con números y letras, a <b style="color:#F2F4F0;font-weight:600">{{ fpEmailShown }}</b>. Puede tardar hasta un minuto; si no aparece, revisá spam o correo no deseado. El código vence a los 15 minutos y solo sirve una vez.</div>
+              <input inputMode="text" maxLength="6" autoCapitalize="characters" value="{{ f.fpCode }}" onChange="{{ set.fpCode }}" placeholder="A7K2Q9" style="background:#141613;border:1px solid rgba(255,255,255,.12);border-radius:14px;padding:18px 10px;color:#F2F4F0;font-size:27px;font-weight:600;letter-spacing:.36em;text-align:center;text-transform:uppercase;outline:none;font-variant-numeric:tabular-nums;margin-top:4px" style-focus="border-color:var(--ac)">
+              <div style="display:flex;justify-content:space-between;align-items:center;font-size:12px">
+                <span onClick="{{ go.fpEmail }}" style="color:rgba(242,244,240,.5);cursor:pointer">Cambiar correo</span>
+                <span style="color:var(--ac);font-weight:600">Reenviar en 0:42</span>
+              </div>
+              <div style="margin-top:auto"><div onClick="{{ go.fpNew }}" style="background:var(--ac);color:#0B0C0A;text-align:center;padding:15px;border-radius:14px;font-size:14.5px;font-weight:600;cursor:pointer;opacity:{{ fpCodeReady }}">Verificar código</div></div>
+            </div>
+          </sc-if>
+
+          <sc-if value="{{ is.fpNew }}" hint-placeholder-val="{{ false }}">
+            <div style="flex:1;display:flex;flex-direction:column;padding:18px 26px 34px;background:#0B0C0A;gap:14px">
+              <div onClick="{{ go.fpCode }}" style="font-size:19px;color:rgba(242,244,240,.6);cursor:pointer;line-height:1">‹</div>
+              <div style="font-size:25px;font-weight:600;letter-spacing:-.03em;line-height:1.2">Elegí una contraseña nueva</div>
+              <div style="font-size:13px;line-height:1.55;color:rgba(242,244,240,.6);text-wrap:pretty">Al menos 8 caracteres, con una mayúscula y un número. Cuando la guardes vamos a cerrar la sesión en los otros dispositivos donde hayas entrado.</div>
+              <div style="display:flex;flex-direction:column;gap:13px;margin-top:4px">
+                <div style="display:flex;flex-direction:column;gap:7px">
+                  <div style="font-size:11.5px;color:rgba(242,244,240,.5)">Nueva contraseña</div>
+                  <div style="position:relative;display:flex;align-items:center">
+                    <input type="{{ pwType }}" value="{{ f.fpPass }}" onChange="{{ set.fpPass }}" placeholder="••••••••" style="flex:1;background:#141613;border:1px solid rgba(255,255,255,.12);border-radius:12px;padding:15px 74px 15px 15px;color:#F2F4F0;font-size:15px;outline:none" style-focus="border-color:var(--ac)">
+                    <div onClick="{{ togglePw }}" style="position:absolute;right:14px;font-size:11.5px;font-weight:600;color:rgba(242,244,240,.6);cursor:pointer">{{ pwToggleLabel }}</div>
+                  </div>
+                </div>
+                <div style="display:flex;flex-direction:column;gap:7px">
+                  <div style="font-size:11.5px;color:rgba(242,244,240,.5)">Repetir contraseña</div>
+                  <input type="{{ pwType }}" value="{{ f.fpPass2 }}" onChange="{{ set.fpPass2 }}" placeholder="••••••••" style="background:#141613;border:1px solid {{ pwMatchBorder }};border-radius:12px;padding:15px;color:#F2F4F0;font-size:15px;outline:none">
+                </div>
+              </div>
+              <div style="display:flex;gap:5px;margin-top:2px">
+                <sc-for list="{{ pwBars }}" as="b" hint-placeholder-count="3">
+                  <div style="flex:1;height:3px;border-radius:2px;background:{{ b.color }};transition:background .3s ease"></div>
+                </sc-for>
+              </div>
+              <div style="display:flex;flex-direction:column;gap:6px;margin-top:2px">
+                <sc-for list="{{ pwRules }}" as="r" hint-placeholder-count="3">
+                  <div style="display:flex;align-items:center;gap:8px;font-size:11.5px;color:{{ r.color }}">
+                    <span style="width:5px;height:5px;border-radius:50%;display:block;flex:none;background:{{ r.dot }}"></span>{{ r.label }}
+                  </div>
+                </sc-for>
+              </div>
+              <div style="margin-top:auto"><div onClick="{{ go.fpDone }}" style="background:var(--ac);color:#0B0C0A;text-align:center;padding:15px;border-radius:14px;font-size:14.5px;font-weight:600;cursor:pointer;opacity:{{ fpNewReady }}">Guardar contraseña</div></div>
+            </div>
+          </sc-if>
+
+          <sc-if value="{{ is.fpDone }}" hint-placeholder-val="{{ false }}">
+            <div style="flex:1;display:flex;flex-direction:column;justify-content:space-between;padding:26px 26px 34px;background:#0B0C0A">
+              <div style="display:flex;flex-direction:column;gap:16px;padding-top:26px">
+                <div style="width:52px;height:52px;border-radius:16px;background:var(--ac)"></div>
+                <div style="font-size:28px;font-weight:600;letter-spacing:-.03em;line-height:1.15">Contraseña actualizada</div>
+                <div style="font-size:13.5px;line-height:1.55;color:rgba(242,244,240,.6);text-wrap:pretty">Ya podés entrar con tu contraseña nueva. Cerramos la sesión en los otros dispositivos: si no fuiste vos quien pidió el cambio, escribinos desde este mismo correo.</div>
+                <div style="display:flex;flex-direction:column;gap:9px;border-radius:16px;background:#131511;border:1px solid rgba(255,255,255,.09);padding:15px">
+                  <div style="display:flex;justify-content:space-between;font-size:12.5px;gap:10px"><span style="color:rgba(242,244,240,.5)">Cuenta</span><span style="font-weight:600">{{ fpEmailShown }}</span></div>
+                  <div style="display:flex;justify-content:space-between;font-size:12.5px;gap:10px"><span style="color:rgba(242,244,240,.5)">Cambio hecho</span><span style="font-weight:600">Hoy, 8:24</span></div>
+                </div>
+              </div>
+              <div onClick="{{ go.login }}" style="background:var(--ac);color:#0B0C0A;text-align:center;padding:15px;border-radius:14px;font-size:14.5px;font-weight:600;cursor:pointer">Iniciar sesión</div>
+            </div>
+          </sc-if>
+
+          <sc-if value="{{ is.regEmail }}" hint-placeholder-val="{{ false }}">
+            <div style="flex:1;display:flex;flex-direction:column;padding:12px 26px 34px;background:#0B0C0A;gap:14px">
+              <div style="font-size:25px;font-weight:600;letter-spacing:-.03em;line-height:1.2">Empecemos por tu correo</div>
+              <div style="font-size:13px;line-height:1.55;color:rgba(242,244,240,.6);text-wrap:pretty">Lo validamos antes de pedirte cualquier otro dato, así no completás todo el registro para descubrir al final que había un error de tipeo. Es también la dirección con la que vas a recuperar tu plan si cambiás de teléfono, y la que usamos para el resumen semanal de tu carga de entrenamiento.</div>
+              <input type="email" value="{{ f.email }}" onChange="{{ set.email }}" placeholder="tu@mail.com" style="background:#141613;border:1px solid rgba(255,255,255,.12);border-radius:12px;padding:15px;color:#F2F4F0;font-size:15px;outline:none;margin-top:4px" style-focus="border-color:var(--ac)">
+              <div style="font-size:11.5px;line-height:1.4;color:{{ emailHintColor }}">{{ emailHint }}</div>
+              <div style="margin-top:auto;display:flex;flex-direction:column;gap:12px">
+                <div style="font-size:11px;line-height:1.5;color:rgba(242,244,240,.38);text-align:center">Al continuar aceptás los términos y la política de privacidad. No mandamos publicidad.</div>
+                <div onClick="{{ go.regCode }}" style="background:var(--ac);color:#0B0C0A;text-align:center;padding:15px;border-radius:14px;font-size:14.5px;font-weight:600;cursor:pointer;opacity:{{ emailReady }}">Enviarme el código</div>
+              </div>
+            </div>
+          </sc-if>
+
+          <sc-if value="{{ is.regCode }}" hint-placeholder-val="{{ false }}">
+            <div style="flex:1;display:flex;flex-direction:column;padding:12px 26px 34px;background:#0B0C0A;gap:14px">
+              <div style="font-size:25px;font-weight:600;letter-spacing:-.03em;line-height:1.2">Validá tu correo</div>
+              <div style="font-size:13px;line-height:1.55;color:rgba(242,244,240,.6);text-wrap:pretty">Enviamos un código de 6 caracteres, con números y letras, a <b style="color:#F2F4F0;font-weight:600">{{ emailShown }}</b>. Puede tardar hasta un minuto en llegar; si no aparece, revisá spam o correo no deseado. El código vence a los 15 minutos.</div>
+              <input inputMode="text" maxLength="6" autoCapitalize="characters" value="{{ f.code }}" onChange="{{ set.code }}" placeholder="A7K2Q9" style="background:#141613;border:1px solid rgba(255,255,255,.12);border-radius:14px;padding:18px 10px;color:#F2F4F0;font-size:27px;font-weight:600;letter-spacing:.36em;text-align:center;text-transform:uppercase;outline:none;font-variant-numeric:tabular-nums;margin-top:4px" style-focus="border-color:var(--ac)">
+              <div style="display:flex;justify-content:space-between;align-items:center;font-size:12px">
+                <span onClick="{{ go.regEmail }}" style="color:rgba(242,244,240,.5);cursor:pointer">Cambiar correo</span>
+                <span style="color:var(--ac);font-weight:600">Reenviar en 0:42</span>
+              </div>
+              <div style="margin-top:auto"><div onClick="{{ go.regName }}" style="background:var(--ac);color:#0B0C0A;text-align:center;padding:15px;border-radius:14px;font-size:14.5px;font-weight:600;cursor:pointer;opacity:{{ codeReady }}">Validar</div></div>
+            </div>
+          </sc-if>
+
+          <sc-if value="{{ is.regName }}" hint-placeholder-val="{{ false }}">
+            <div style="flex:1;display:flex;flex-direction:column;padding:12px 26px 34px;background:#0B0C0A;gap:14px">
+              <div style="font-size:25px;font-weight:600;letter-spacing:-.03em;line-height:1.2">Correo validado. ¿Cómo te llamás?</div>
+              <div style="font-size:13px;line-height:1.55;color:rgba(242,244,240,.6);text-wrap:pretty">Usamos tu nombre para hablarte en las notificaciones y en el resumen de cada semana. El apellido solo aparece si algún día compartís tus resultados o te sumás a un grupo de entrenamiento; tu perfil arranca privado.</div>
+              <div style="display:flex;flex-direction:column;gap:13px;margin-top:4px">
+                <div style="display:flex;flex-direction:column;gap:7px"><div style="font-size:11.5px;color:rgba(242,244,240,.5)">Nombre</div><input value="{{ f.name }}" onChange="{{ set.name }}" placeholder="Iván" style="background:#141613;border:1px solid rgba(255,255,255,.12);border-radius:12px;padding:14px;color:#F2F4F0;font-size:15px;outline:none" style-focus="border-color:var(--ac)"></div>
+                <div style="display:flex;flex-direction:column;gap:7px"><div style="font-size:11.5px;color:rgba(242,244,240,.5)">Apellido</div><input value="{{ f.lastName }}" onChange="{{ set.lastName }}" placeholder="Benítez" style="background:#141613;border:1px solid rgba(255,255,255,.12);border-radius:12px;padding:14px;color:#F2F4F0;font-size:15px;outline:none" style-focus="border-color:var(--ac)"></div>
+              </div>
+              <div style="margin-top:auto"><div onClick="{{ go.regBirth }}" style="background:var(--ac);color:#0B0C0A;text-align:center;padding:15px;border-radius:14px;font-size:14.5px;font-weight:600;cursor:pointer;opacity:{{ nameReady }}">Continuar</div></div>
+            </div>
+          </sc-if>
+
+          <sc-if value="{{ is.regBirth }}" hint-placeholder-val="{{ false }}">
+            <div style="flex:1;display:flex;flex-direction:column;padding:12px 26px 34px;background:#0B0C0A;gap:14px">
+              <div style="font-size:25px;font-weight:600;letter-spacing:-.03em;line-height:1.2">{{ greeting }} ¿Cuándo naciste?</div>
+              <div style="font-size:13px;line-height:1.55;color:rgba(242,244,240,.6);text-wrap:pretty">La edad define tus zonas de frecuencia cardíaca, el ritmo de sudoración estimado y cuántas calorías necesitás en semanas de carga alta. También nos deja compararte con tablas de rendimiento de tu categoría.</div>
+              <div style="position:relative;margin-top:6px;border-radius:18px;background:#131511;border:1px solid rgba(255,255,255,.09);overflow:hidden">
+                <div style="position:absolute;left:0;right:0;top:50%;transform:translateY(-50%);height:46px;background:rgb(var(--ac-rgb) / .09);border-top:1px solid rgb(var(--ac-rgb) / .25);border-bottom:1px solid rgb(var(--ac-rgb) / .25);pointerEvents:none"></div>
+                <div style="display:flex;height:238px;position:relative">
+                  <sc-for list="{{ birthCols }}" as="col" hint-placeholder-count="3">
+                    <div class="wheel" ref="{{ col.ref }}" onScroll="{{ col.onScroll }}" style="flex:1;overflow-y:auto;scrollSnapType:y mandatory;padding:96px 0;text-align:center">
+                      <sc-for list="{{ col.items }}" as="it" hint-placeholder-count="7">
+                        <div onClick="{{ it.pick }}" style="height:46px;line-height:46px;cursor:pointer;scrollSnapAlign:center;font-size:{{ it.size }};font-weight:{{ it.weight }};color:{{ it.color }};font-variant-numeric:tabular-nums">{{ it.label }}</div>
+                      </sc-for>
+                    </div>
+                  </sc-for>
+                </div>
+              </div>
+              <div style="font-size:11.5px;color:rgba(242,244,240,.42);text-align:center">{{ birthFormatNote }}</div>
+              <div style="margin-top:auto"><div onClick="{{ go.regSex }}" style="background:var(--ac);color:#0B0C0A;text-align:center;padding:15px;border-radius:14px;font-size:14.5px;font-weight:600;cursor:pointer">Continuar</div></div>
+            </div>
+          </sc-if>
+
+          <sc-if value="{{ is.regSex }}" hint-placeholder-val="{{ false }}">
+            <div style="flex:1;display:flex;flex-direction:column;padding:12px 26px 34px;background:#0B0C0A;gap:14px">
+              <div style="font-size:25px;font-weight:600;letter-spacing:-.03em;line-height:1.2">¿Con qué sexo biológico calculamos tu sudoración?</div>
+              <div style="font-size:13px;line-height:1.55;color:rgba(242,244,240,.6);text-wrap:pretty">Las tasas de sudoración, la pérdida de sodio y el gasto calórico difieren bastante entre hombres y mujeres con el mismo peso y ritmo. Solo lo usamos para el cálculo del plan: no se muestra en tu perfil ni se comparte. Si preferís no responder, aplicamos un promedio.</div>
+              <div style="display:flex;flex-direction:column;gap:10px;margin-top:4px">
+                <sc-for list="{{ sexes }}" as="opt" hint-placeholder-count="3">
+                  <div onClick="{{ opt.pick }}" style="display:flex;align-items:center;gap:12px;padding:16px;border-radius:14px;cursor:pointer;background:{{ opt.bg }};border:1px solid {{ opt.border }}">
+                    <div style="width:9px;height:9px;border-radius:50%;flex:none;background:{{ opt.dot }}"></div>
+                    <div style="display:flex;flex-direction:column;gap:2px">
+                      <div style="font-size:14px;font-weight:600">{{ opt.label }}</div>
+                      <div style="font-size:11.5px;color:rgba(242,244,240,.5)">{{ opt.desc }}</div>
+                    </div>
+                  </div>
+                </sc-for>
+              </div>
+              <div style="margin-top:auto"><div onClick="{{ go.regBody }}" style="background:var(--ac);color:#0B0C0A;text-align:center;padding:15px;border-radius:14px;font-size:14.5px;font-weight:600;cursor:pointer">Continuar</div></div>
+            </div>
+          </sc-if>
+
+          <sc-if value="{{ is.regBody }}" hint-placeholder-val="{{ false }}">
+            <div style="flex:1;display:flex;flex-direction:column;padding:12px 26px 34px;background:#0B0C0A;gap:14px">
+              <div style="font-size:25px;font-weight:600;letter-spacing:-.03em;line-height:1.2">Tu peso y tu altura</div>
+              <div style="font-size:13px;line-height:1.55;color:rgba(242,244,240,.6);text-wrap:pretty">El peso es la base del cálculo: litros de líquido por hora, miligramos de sodio y gramos de carbohidrato que tenés que reponer se estiman por kilo. Con la altura ajustamos el gasto energético en reposo. Podés actualizar ambos cuando quieras desde tu perfil.</div>
+              <div style="display:flex;flex-direction:column;gap:13px;margin-top:4px">
+                <div style="display:flex;flex-direction:column;gap:7px"><div style="font-size:11.5px;color:rgba(242,244,240,.5)">Peso (kg)</div><input inputMode="decimal" value="{{ f.weight }}" onChange="{{ set.weight }}" placeholder="72" style="background:#141613;border:1px solid rgba(255,255,255,.12);border-radius:12px;padding:15px;color:#F2F4F0;font-size:20px;font-weight:600;outline:none;font-variant-numeric:tabular-nums" style-focus="border-color:var(--ac)"></div>
+                <div style="display:flex;flex-direction:column;gap:7px"><div style="font-size:11.5px;color:rgba(242,244,240,.5)">Altura (cm)</div><input inputMode="decimal" value="{{ f.height }}" onChange="{{ set.height }}" placeholder="178" style="background:#141613;border:1px solid rgba(255,255,255,.12);border-radius:12px;padding:15px;color:#F2F4F0;font-size:20px;font-weight:600;outline:none;font-variant-numeric:tabular-nums" style-focus="border-color:var(--ac)"></div>
+              </div>
+              <div style="margin-top:auto"><div onClick="{{ go.regSport }}" style="background:var(--ac);color:#0B0C0A;text-align:center;padding:15px;border-radius:14px;font-size:14.5px;font-weight:600;cursor:pointer;opacity:{{ bodyReady }}">Continuar</div></div>
+            </div>
+          </sc-if>
+
+          <sc-if value="{{ is.regSport }}" hint-placeholder-val="{{ false }}">
+            <div style="flex:1;display:flex;flex-direction:column;padding:12px 26px 34px;background:#0B0C0A;gap:14px">
+              <div style="font-size:25px;font-weight:600;letter-spacing:-.03em;line-height:1.2">¿Cuál es tu deporte principal?</div>
+              <div style="font-size:13px;line-height:1.55;color:rgba(242,244,240,.6);text-wrap:pretty">Cada disciplina consume líquido y carbohidrato de forma distinta: en bici podés tomar más y comer sólido, corriendo conviene fraccionar. Elegí el que más entrenás; después podés sumar los otros desde tu perfil.</div>
+              <div style="display:flex;flex-direction:column;gap:10px;margin-top:4px">
+                <sc-for list="{{ sports }}" as="opt" hint-placeholder-count="4">
+                  <div onClick="{{ opt.pick }}" style="display:flex;align-items:center;gap:12px;padding:15px;border-radius:14px;cursor:pointer;background:{{ opt.bg }};border:1px solid {{ opt.border }}">
+                    <div style="width:9px;height:9px;border-radius:50%;flex:none;background:{{ opt.dot }}"></div>
+                    <div style="display:flex;flex-direction:column;gap:2px">
+                      <div style="font-size:14px;font-weight:600">{{ opt.label }}</div>
+                      <div style="font-size:11.5px;color:rgba(242,244,240,.5)">{{ opt.desc }}</div>
+                    </div>
+                  </div>
+                </sc-for>
+              </div>
+              <div style="margin-top:auto"><div onClick="{{ go.regLevel }}" style="background:var(--ac);color:#0B0C0A;text-align:center;padding:15px;border-radius:14px;font-size:14.5px;font-weight:600;cursor:pointer">Continuar</div></div>
+            </div>
+          </sc-if>
+
+          <sc-if value="{{ is.regLevel }}" hint-placeholder-val="{{ false }}">
+            <div style="flex:1;display:flex;flex-direction:column;padding:12px 26px 34px;background:#0B0C0A;gap:14px">
+              <div style="font-size:25px;font-weight:600;letter-spacing:-.03em;line-height:1.2">¿Hace cuánto entrenás?</div>
+              <div style="font-size:13px;line-height:1.55;color:rgba(242,244,240,.6);text-wrap:pretty">Define desde qué volumen arranca tu plan y cuánto puede crecer por semana sin exponerte a lesiones. Si vuelves después de un parate largo, elegí principiante: siempre se puede subir la carga más adelante.</div>
+              <div style="display:flex;flex-direction:column;gap:10px;margin-top:4px">
+                <sc-for list="{{ levels }}" as="opt" hint-placeholder-count="3">
+                  <div onClick="{{ opt.pick }}" style="display:flex;flex-direction:column;gap:3px;padding:16px;border-radius:14px;cursor:pointer;background:{{ opt.bg }};border:1px solid {{ opt.border }}">
+                    <div style="font-size:14px;font-weight:600">{{ opt.label }}</div>
+                    <div style="font-size:11.5px;color:rgba(242,244,240,.5)">{{ opt.desc }}</div>
+                  </div>
+                </sc-for>
+              </div>
+              <div style="margin-top:auto"><div onClick="{{ go.regGoal }}" style="background:var(--ac);color:#0B0C0A;text-align:center;padding:15px;border-radius:14px;font-size:14.5px;font-weight:600;cursor:pointer">Continuar</div></div>
+            </div>
+          </sc-if>
+
+          <sc-if value="{{ is.regHealth }}" hint-placeholder-val="{{ false }}">
+            <div style="flex:1;display:flex;flex-direction:column;padding:12px 26px 34px;background:#0B0C0A;gap:14px;overflow:auto">
+              <div style="font-size:25px;font-weight:600;letter-spacing:-.03em;line-height:1.2">Antes de arrancar, una sola cosa</div>
+              <div style="font-size:13px;line-height:1.55;color:rgba(242,244,240,.6);text-wrap:pretty">No somos médicos y esta app no reemplaza una consulta. Si tenés alguna condición previa, tomás medicación o hace años que no entrenás, hablá con un profesional antes de empezar el plan.</div>
+              <div style="border-radius:16px;background:#131511;border:1px solid rgba(255,255,255,.09);padding:15px;display:flex;flex-direction:column;gap:10px">
+                <div style="font-size:11px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:rgba(255,170,155,.9)">Pará y consultá si aparece</div>
+                <div style="display:flex;flex-direction:column;gap:8px">
+                  <div style="display:flex;gap:9px;align-items:flex-start"><span style="width:5px;height:5px;border-radius:50%;background:rgba(255,140,120,.9);display:block;flex:none;margin-top:5px"></span><div style="font-size:12.5px;line-height:1.4;color:rgba(242,244,240,.75)">Dolor u opresión en el pecho</div></div>
+                  <div style="display:flex;gap:9px;align-items:flex-start"><span style="width:5px;height:5px;border-radius:50%;background:rgba(255,140,120,.9);display:block;flex:none;margin-top:5px"></span><div style="font-size:12.5px;line-height:1.4;color:rgba(242,244,240,.75)">Dificultad respiratoria grave o mareos</div></div>
+                  <div style="display:flex;gap:9px;align-items:flex-start"><span style="width:5px;height:5px;border-radius:50%;background:rgba(255,140,120,.9);display:block;flex:none;margin-top:5px"></span><div style="font-size:12.5px;line-height:1.4;color:rgba(242,244,240,.75)">Dolor articular que empeora mientras corrés</div></div>
+                </div>
+              </div>
+              <div onClick="{{ toggleHealth }}" style="display:flex;gap:11px;align-items:flex-start;padding:14px;border-radius:14px;cursor:pointer;background:{{ healthBox.bg }};border:1px solid {{ healthBox.border }}">
+                <div style="width:20px;height:20px;border-radius:6px;flex:none;display:flex;align-items:center;justify-content:center;background:{{ healthBox.boxBg }};border:1.5px solid {{ healthBox.boxBorder }}">
+                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#0B0C0A" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round" style="opacity:{{ healthBox.tick }}"><path d="M4 12.5l5 5 11-11"></path></svg>
+                </div>
+                <div style="font-size:12.5px;line-height:1.45;color:rgba(242,244,240,.8)">Entiendo que Trainer da sugerencias generales y que ante cualquier síntoma tengo que parar y consultar.</div>
+              </div>
+              <div style="margin-top:auto"><div onClick="{{ go.regWatch }}" style="background:var(--ac);color:#0B0C0A;text-align:center;padding:15px;border-radius:14px;font-size:14.5px;font-weight:600;cursor:pointer;opacity:{{ healthReady }}">Continuar</div></div>
+            </div>
+          </sc-if>
+
+          <sc-if value="{{ is.regWatch }}" hint-placeholder-val="{{ false }}">
+            <div style="flex:1;display:flex;flex-direction:column;padding:12px 26px 34px;background:#0B0C0A;gap:14px">
+              <div style="font-size:25px;font-weight:600;letter-spacing:-.03em;line-height:1.2">¿Con qué medís tus salidas?</div>
+              <div style="font-size:13px;line-height:1.55;color:rgba(242,244,240,.6);text-wrap:pretty">Si conectás tu reloj o el GPS del teléfono, ajustamos hidratación y geles con el ritmo y la frecuencia cardíaca reales, no con estimaciones. Podés saltear este paso y conectarlo más adelante desde Ajustes.</div>
+              <div style="display:flex;flex-direction:column;gap:10px;margin-top:4px">
+                <sc-for list="{{ devices }}" as="d" hint-placeholder-count="4">
+                  <div onClick="{{ d.pick }}" style="display:flex;align-items:center;gap:12px;padding:15px;border-radius:14px;cursor:pointer;background:{{ d.bg }};border:1px solid {{ d.border }}">
+                    <div style="width:9px;height:9px;border-radius:50%;flex:none;background:{{ d.dot }}"></div>
+                    <div style="display:flex;flex-direction:column;gap:2px">
+                      <div style="font-size:14px;font-weight:600">{{ d.label }}</div>
+                      <div style="font-size:11.5px;color:rgba(242,244,240,.5)">{{ d.desc }}</div>
+                    </div>
+                  </div>
+                </sc-for>
+              </div>
+              <div style="margin-top:auto;display:flex;flex-direction:column;gap:10px">
+                <div onClick="{{ go.regDays }}" style="background:var(--ac);color:#0B0C0A;text-align:center;padding:15px;border-radius:14px;font-size:14.5px;font-weight:600;cursor:pointer">Continuar</div>
+                <div onClick="{{ go.regDays }}" style="text-align:center;padding:6px;font-size:13px;font-weight:600;color:rgba(242,244,240,.55);cursor:pointer">Ahora no</div>
+              </div>
+            </div>
+          </sc-if>
+
+          <sc-if value="{{ is.regGoal }}" hint-placeholder-val="{{ false }}">
+            <div style="flex:1;display:flex;flex-direction:column;padding:12px 26px 34px;background:#0B0C0A;gap:13px;overflow:auto">
+              <div style="font-size:25px;font-weight:600;letter-spacing:-.03em;line-height:1.2">¿Para qué estás entrenando?</div>
+              <div style="font-size:13px;line-height:1.55;color:rgba(242,244,240,.6);text-wrap:pretty">Con la fecha del evento armamos la cuenta regresiva y repartimos las semanas de carga, descarga y afinamiento. Si todavía no tenés carrera elegida, seguí sin fecha: armamos un plan de base y lo ajustamos cuando la definas.</div>
+              <div style="display:flex;flex-direction:column;gap:8px">
+                <div style="font-size:11.5px;color:rgba(242,244,240,.5)">Elegí tu objetivo</div>
+                <sc-for list="{{ goals }}" as="g" hint-placeholder-count="5">
+                  <div onClick="{{ g.pick }}" style="display:flex;align-items:center;gap:11px;padding:13px;border-radius:13px;cursor:pointer;background:{{ g.bg }};border:1px solid {{ g.border }}">
+                    <div style="width:9px;height:9px;border-radius:50%;flex:none;background:{{ g.dot }}"></div>
+                    <div style="flex:1;font-size:13.5px;font-weight:600">{{ g.label }}</div>
+                    <div style="font-size:11px;color:rgba(242,244,240,.45)">{{ g.dist }}</div>
+                  </div>
+                </sc-for>
+              </div>
+              <div style="border-radius:18px;background:#131511;border:1px solid rgba(255,255,255,.09);padding:14px;display:flex;flex-direction:column;gap:11px">
+                <div style="display:flex;align-items:center;justify-content:space-between">
+                  <div onClick="{{ cal.prev }}" style="width:30px;height:30px;border-radius:9px;display:flex;align-items:center;justify-content:center;background:rgba(255,255,255,.05);cursor:pointer;font-size:15px;color:rgba(242,244,240,.7)">‹</div>
+                  <div style="font-size:13.5px;font-weight:600">{{ cal.title }}</div>
+                  <div onClick="{{ cal.next }}" style="width:30px;height:30px;border-radius:9px;display:flex;align-items:center;justify-content:center;background:rgba(255,255,255,.05);cursor:pointer;font-size:15px;color:rgba(242,244,240,.7)">›</div>
+                </div>
+                <div style="display:grid;gridTemplateColumns:repeat(7,1fr);gap:2px">
+                  <sc-for list="{{ cal.weekdays }}" as="w" hint-placeholder-count="7">
+                    <div style="text-align:center;font-size:10px;font-weight:600;color:rgba(242,244,240,.35);text-transform:uppercase;padding-bottom:2px">{{ w.label }}</div>
+                  </sc-for>
+                  <sc-for list="{{ cal.cells }}" as="c" hint-placeholder-count="35">
+                    <div onClick="{{ c.pick }}" style="height:34px;display:flex;align-items:center;justify-content:center;border-radius:9px;font-size:12.5px;font-variant-numeric:tabular-nums;cursor:{{ c.cursor }};background:{{ c.bg }};color:{{ c.color }};font-weight:{{ c.weight }}">{{ c.label }}</div>
+                  </sc-for>
+                </div>
+              </div>
+              <div style="font-size:11.5px;color:{{ goalDateColor }}">{{ goalDateLine }}</div>
+              <div style="margin-top:auto;padding-top:8px"><div onClick="{{ go.regHealth }}" style="background:var(--ac);color:#0B0C0A;text-align:center;padding:15px;border-radius:14px;font-size:14.5px;font-weight:600;cursor:pointer">Continuar</div></div>
+            </div>
+          </sc-if>
+
+          <sc-if value="{{ is.regDays }}" hint-placeholder-val="{{ false }}">
+            <div style="flex:1;display:flex;flex-direction:column;padding:12px 26px 34px;background:#0B0C0A;gap:13px;overflow:auto">
+              <div style="font-size:25px;font-weight:600;letter-spacing:-.03em;line-height:1.2">¿Qué días y a qué hora entrenás?</div>
+              <div style="font-size:13px;line-height:1.55;color:rgba(242,244,240,.6);text-wrap:pretty">Esto no es un dato de perfil: es lo que dispara los avisos. Te escribimos 45 minutos antes de cada sesión para que prepares bidones, geles y el snack previo, y usamos tus horarios para repartir las sesiones largas en los días con más tiempo.</div>
+              <div style="display:flex;gap:6px">
+                <sc-for list="{{ days }}" as="d" hint-placeholder-count="7">
+                  <div onClick="{{ d.toggle }}" style="flex:1;text-align:center;padding:11px 0;border-radius:11px;font-size:12px;font-weight:600;cursor:pointer;background:{{ d.bg }};border:1px solid {{ d.border }};color:{{ d.color }}">{{ d.short }}</div>
+                </sc-for>
+              </div>
+              <div style="display:flex;flex-direction:column;gap:9px;margin-top:2px">
+                <sc-for list="{{ chosenDays }}" as="d" hint-placeholder-count="2">
+                  <div style="display:flex;align-items:center;justify-content:space-between;gap:10px;padding:12px 14px;border-radius:13px;background:#131511;border:1px solid rgba(255,255,255,.09)">
+                    <div style="font-size:13.5px;font-weight:600">{{ d.label }}</div>
+                    <select value="{{ d.time }}" onChange="{{ d.setTime }}" style="background:#0B0C0A;border:1px solid rgba(255,255,255,.14);border-radius:9px;padding:8px 10px;color:#F2F4F0;font-size:13px;outline:none;font-variant-numeric:tabular-nums">
+                      <option value="06:00">06:00</option>
+                      <option value="07:00">07:00</option>
+                      <option value="08:00">08:00</option>
+                      <option value="12:00">12:00</option>
+                      <option value="17:00">17:00</option>
+                      <option value="18:30">18:30</option>
+                      <option value="20:00">20:00</option>
+                    </select>
+                  </div>
+                </sc-for>
+              </div>
+              <div style="display:flex;align-items:center;gap:9px;padding:11px 12px;border-radius:12px;background:rgb(var(--ac-rgb) / .08);border:1px solid rgb(var(--ac-rgb) / .2)">
+                <span style="width:5px;height:5px;border-radius:50%;background:var(--ac);display:block;flex:none"></span>
+                <div style="font-size:11.5px;line-height:1.4;color:rgba(242,244,240,.8)">{{ notifyLine }}</div>
+              </div>
+              <div style="margin-top:auto;padding-top:8px"><div onClick="{{ go.regDone }}" style="background:var(--ac);color:#0B0C0A;text-align:center;padding:15px;border-radius:14px;font-size:14.5px;font-weight:600;cursor:pointer;opacity:{{ daysReady }}">Continuar</div></div>
+            </div>
+          </sc-if>
+
+          <sc-if value="{{ is.regDone }}" hint-placeholder-val="{{ false }}">
+            <div style="flex:1;display:flex;flex-direction:column;justify-content:space-between;padding:26px 26px 34px;background:#0B0C0A">
+              <div style="display:flex;flex-direction:column;gap:16px;padding-top:20px">
+                <div style="width:52px;height:52px;border-radius:16px;background:var(--ac)"></div>
+                <div style="font-size:28px;font-weight:600;letter-spacing:-.03em;line-height:1.15">{{ doneTitle }}</div>
+                <div style="font-size:13.5px;line-height:1.55;color:rgba(242,244,240,.6);text-wrap:pretty">Tu perfil quedó completo. Con estos datos ya calculamos hidratación, sales y carbohidratos para cada sesión, y vas a recibir el aviso de preparación antes de cada entreno.</div>
+                <div style="display:flex;flex-direction:column;gap:9px;border-radius:16px;background:#131511;border:1px solid rgba(255,255,255,.09);padding:15px">
+                  <div style="display:flex;justify-content:space-between;font-size:12.5px;gap:10px"><span style="color:rgba(242,244,240,.5)">Nacimiento</span><span style="font-weight:600">{{ summaryBirth }}</span></div>
+                  <div style="display:flex;justify-content:space-between;font-size:12.5px;gap:10px"><span style="color:rgba(242,244,240,.5)">Deporte</span><span style="font-weight:600">{{ summarySport }}</span></div>
+                  <div style="display:flex;justify-content:space-between;font-size:12.5px;gap:10px"><span style="color:rgba(242,244,240,.5)">Nivel</span><span style="font-weight:600">{{ summaryLevel }}</span></div>
+                  <div style="display:flex;justify-content:space-between;font-size:12.5px;gap:10px"><span style="color:rgba(242,244,240,.5)">Días</span><span style="font-weight:600">{{ summaryDays }}</span></div>
+                  <div style="display:flex;justify-content:space-between;font-size:12.5px;gap:10px"><span style="color:rgba(242,244,240,.5)">Objetivo</span><span style="font-weight:600;text-align:right">{{ summaryGoal }}</span></div>
+                </div>
+              </div>
+              <div onClick="{{ go.home }}" style="background:var(--ac);color:#0B0C0A;text-align:center;padding:15px;border-radius:14px;font-size:14.5px;font-weight:600;cursor:pointer">Ir a mi inicio</div>
+            </div>
+          </sc-if>
+
+          <sc-if value="{{ is.home }}" hint-placeholder-val="{{ false }}">
+            <dc-import name="HomeB" accent="{{ accentHex }}" athleteName="{{ fullName }}" goal="{{ summaryGoal }}" onEditSport="{{ go.regSport }}" onEditGoal="{{ go.regGoal }}" onEditDays="{{ go.regDays }}" onLogout="{{ go.login }}" style="height:100%" hint-size="100%,100%"></dc-import>
+          </sc-if>
+
+        </div>
+      </div>
+
+      <div style="width:390px;display:flex;flex-direction:column;gap:10px">
+        <div style="display:flex;flex-wrap:wrap;gap:5px">
+          <sc-for list="{{ rail }}" as="s" hint-placeholder-count="16">
+            <div onClick="{{ s.go }}" style="font-size:10.5px;padding:5px 8px;border-radius:7px;cursor:pointer;background:{{ s.bg }};color:{{ s.color }};border:1px solid {{ s.border }}">{{ s.label }}</div>
+          </sc-for>
+        </div>
+      </div>
+    </div>
+
+    <div style="display:flex;gap:34px;flex-wrap:wrap">
+      <div id="1b" style="display:flex;flex-direction:column;gap:14px;scroll-margin-top:16px">
+        <div style="display:flex;align-items:baseline;gap:9px"><a href="#1b" style="font:600 10.5px ui-monospace,Menlo,monospace;padding:3px 7px;background:rgba(255,255,255,.1);color:#F2F4F0;border-radius:5px;text-decoration:none">1b</a><span style="font-size:12px;color:rgba(242,244,240,.55)">App — Inicio, Plan, Entreno, Nutrición, Perfil y Ajustes</span></div>
+        <div style="width:390px;height:844px;border-radius:44px;background:#000;border:1px solid rgba(255,255,255,.14);overflow:hidden;display:flex;flex-direction:column">
+          <div style="height:46px;flex:none;display:flex;align-items:flex-end;justify-content:space-between;padding:0 26px 6px;font-size:12px;font-weight:600;font-variant-numeric:tabular-nums"><span>8:24</span><span style="color:rgba(242,244,240,.75);font-size:11px">5G ▮</span></div>
+          <div style="flex:1;min-height:0"><dc-import name="HomeB" accent="{{ accentHex }}" goal="{{ summaryGoal }}" style="height:100%" hint-size="100%,100%"></dc-import></div>
+        </div>
+        <div style="width:390px;font-size:12px;line-height:1.5;color:rgba(242,244,240,.5)">Cinco pestañas navegables: Inicio (agenda del día, con el plan del día editable), Plan (bloque de 12 semanas), Entreno (mapa a pantalla completa, estructura de la sesión y avisos de sales y geles), Nutrición (calorías, macros, hidratación y comidas) y Perfil (foto del usuario, datos y acceso a Ajustes con el engranaje de arriba a la derecha).</div>
+      </div>
+    </div>
+  </div>
+
+  <div style="font-size:12.5px;color:rgba(242,244,240,.45);max-width:640px;line-height:1.6">Próximos pasos posibles: “agregá la pantalla de permisos de notificación”, “diseñá el resumen posterior al entreno”, “armá la pantalla de registrar comida”.</div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;accent&quot;:{&quot;editor&quot;:&quot;text&quot;,&quot;default&quot;:&quot;#7CF03D&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Color de acento (hex, ej. #FF5A1F)&quot;},&quot;locale&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;default&quot;:&quot;auto&quot;,&quot;options&quot;:[&quot;auto&quot;,&quot;es-AR&quot;,&quot;en-US&quot;,&quot;pt-BR&quot;,&quot;ja-JP&quot;],&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Idioma y formato de fecha&quot;}}">
+const ORDER = ["welcome","stats","preview","login","fpEmail","fpCode","fpNew","fpDone","regEmail","regCode","regName","regBirth","regSex","regBody","regSport","regLevel","regGoal","regHealth","regWatch","regDays","regDone","home"];
+const REG = ["regEmail","regCode","regName","regBirth","regSex","regBody","regSport","regLevel","regGoal","regHealth","regWatch","regDays","regDone"];
+const LABELS = {welcome:"Bienvenida",stats:"Problema",preview:"Preview",login:"Login",fpEmail:"Olvidé · mail",fpCode:"Olvidé · código",fpNew:"Nueva clave",fpDone:"Clave lista",regEmail:"Mail",regCode:"Código",regName:"Nombre",regBirth:"Nacimiento",regSex:"Sexo",regBody:"Peso/altura",regSport:"Deporte",regLevel:"Nivel",regGoal:"Objetivo",regHealth:"Salud",regWatch:"Reloj",regDays:"Días",regDone:"Listo",home:"Home"};
+const DAYS = [["Lun","Lunes"],["Mar","Martes"],["Mié","Miércoles"],["Jue","Jueves"],["Vie","Viernes"],["Sáb","Sábado"],["Dom","Domingo"]];
+const SPORTS = [["running","Running","Calle, pista o trail"],["ciclismo","Ciclismo","Ruta, gravel o MTB"],["trekking","Trekking","Montaña y travesías"],["triatlon","Triatlón","Nado, bici y carrera"]];
+const LEVELS = [["principiante","Principiante","Menos de un año entrenando o volviendo después de un parate"],["intermedio","Intermedio","1 a 3 años entrenando de forma regular"],["avanzado","Avanzado","Más de 3 años, con competencias en el calendario"]];
+const GOALS = [["5 km", "5 km · plan de 4 semanas"], ["10 km", "10 km"], ["Media maratón", "21,1 km"], ["Maratón", "42,2 km"], ["Trail de montaña", "25-50 km"], ["Triatlón olímpico", "1,5 / 40 / 10 km"], ["Volver a entrenar sin lesiones", "sin distancia fija"]];
+const DEVICES = [["gps", "GPS del teléfono", "Ritmo y distancia, sin accesorios"], ["garmin", "Reloj Garmin", "Ritmo, pulso y altimetría"], ["apple", "Apple Watch y Salud", "Pulso, pasos y entrenamientos"], ["manual", "Cargo todo a mano", "Estimamos con peso, clima y ritmo objetivo"]];
+const SEXES = [["f","Femenino","Menor tasa de sudoración media y distinta pérdida de sodio"],["m","Masculino","Mayor tasa de sudoración media para el mismo peso y ritmo"],["x","Prefiero no decirlo","Usamos un promedio de ambos para estimar tu plan"]];
+const IMG = (id) => "https://images.unsplash.com/" + id + "?w=800&h=1300&fit=crop&q=70";
+const SLIDES = [
+  { title: "Entrená y comé según la carga del día", text: "Hidratación, sales y geles calculados para cada salida. Sin adivinar y sin planillas.", caption: "Corredores al amanecer", img: IMG("photo-1552674605-db6ffd4facb5"), bg: "#151810" },
+  { title: "Sabé cuándo tomar y cuándo reponer", text: "Avisos durante el esfuerzo según tu peso, el clima y el ritmo al que vas.", caption: "Pelotón en ruta", img: IMG("photo-1517649763962-0c623066013b"), bg: "#17130F" },
+  { title: "Llegá entero al día de la carrera", text: "El plan se ajusta a los días y horarios que realmente tenés libres.", caption: "Trail en montaña", img: IMG("photo-1530143311094-34d807799e8f"), bg: "#101416" }
+];
+
+class Component extends DCLogic {
+  state = {
+    screen: "welcome", slide: 0,
+    email: "", code: "", loginEmail: "", loginPass: "",
+    fpEmail: "", fpCode: "", fpPass: "", fpPass2: "", pwShown: false,
+    name: "", lastName: "", sex: "m", weight: "", height: "", healthOk: false, device: "gps",
+    by: 1998, bm: 5, bd: 24,
+    sport: "running", level: "intermedio", goal: "",
+    goalYear: new Date().getFullYear(), goalMonth: new Date().getMonth(), goalDate: "",
+    days: { Mar: "18:30", Jue: "18:30", Sáb: "07:00" }
+  };
+
+  wheelRefs = {};
+  wheelIndex = {};
+
+  componentDidMount() {
+    this.timer = setInterval(() => this.setState(s => ({ slide: (s.slide + 1) % SLIDES.length })), 4200);
+  }
+  componentWillUnmount() { clearInterval(this.timer); }
+
+  componentDidUpdate(prevProps, prevState) {
+    if (prevProps.accent !== this.props.accent) { this.overrideAccent = null; this.rememberAccent(); }
+    this.applyAccent();
+    if (this.state.screen === "regBirth" && prevState.screen !== "regBirth") this.centerWheels();
+  }
+
+  centerWheels() {
+    this.programmatic = Date.now();
+    Object.keys(this.wheelRefs).forEach(k => {
+      const el = this.wheelRefs[k];
+      if (el) el.scrollTop = (this.wheelIndex[k] || 0) * 46;
+    });
+  }
+
+  wheelRef = (key) => (el) => {
+    const first = !this.wheelRefs[key];
+    this.wheelRefs[key] = el;
+    if (el && first) {
+      this.programmatic = Date.now();
+      requestAnimationFrame(() => { el.scrollTop = (this.wheelIndex[key] || 0) * 46; });
+    }
+  };
+
+  wheelScroll = (key, apply) => (e) => {
+    if (Date.now() - (this.programmatic || 0) < 400) return;
+    const idx = Math.round(e.target.scrollTop / 46);
+    apply(idx);
+  };
+
+  scrollWheelTo(key, idx) {
+    const el = this.wheelRefs[key];
+    this.programmatic = Date.now();
+    if (el) {
+      el.scrollTop = idx * 46;
+      requestAnimationFrame(() => { this.programmatic = Date.now(); el.scrollTop = idx * 46; });
+    }
+  }
+
+  set = (k) => (e) => this.setState({ [k]: e.target.value });
+  goTo = (s) => () => this.setState({ screen: s });
+
+  chip(active) {
+    return active
+      ? { bg: "rgb(var(--ac-rgb) / .14)", border: "var(--ac)", color: "var(--ac)", dot: "var(--ac)" }
+      : { bg: "#131511", border: "rgba(255,255,255,.1)", color: "#F2F4F0", dot: "rgba(255,255,255,.2)" };
+  }
+
+  locale() {
+    return (this.props.locale && this.props.locale !== "auto" ? this.props.locale : (navigator.language || "es-AR"));
+  }
+
+  wheelItem(label, selected) {
+    return {
+      label,
+      size: selected ? "22px" : "17px",
+      weight: selected ? "600" : "400",
+      color: selected ? "#F2F4F0" : "rgba(242,244,240,.34)"
+    };
+  }
+
+  birthColumns() {
+    const loc = this.locale();
+    const st = this.state;
+    const months = [];
+    for (let m = 0; m < 12; m++) months.push(new Intl.DateTimeFormat(loc, { month: "short" }).format(new Date(2000, m, 1)).replace(".", ""));
+    const parts = new Intl.DateTimeFormat(loc).formatToParts(new Date(2000, 0, 2)).filter(p => ["day", "month", "year"].indexOf(p.type) >= 0).map(p => p.type);
+    const order = parts.length === 3 ? parts : ["day", "month", "year"];
+    const col = (key, items, index, apply) => {
+      this.wheelIndex[key] = index;
+      return {
+        key, index,
+        items: items.map((it, i) => ({ ...it, pick: () => { apply(i); this.scrollWheelTo(key, i); } })),
+        ref: this.wheelRef(key),
+        onScroll: this.wheelScroll(key, (i) => { if (i !== index && items[i]) apply(i); })
+      };
+    };
+    const build = {
+      day: () => {
+        const max = new Date(st.by, st.bm + 1, 0).getDate();
+        const items = [];
+        for (let d = 1; d <= max; d++) items.push(this.wheelItem(String(d), d === st.bd));
+        return col("day", items, Math.min(st.bd, max) - 1, (i) => this.setState({ bd: i + 1 }));
+      },
+      month: () => col("month", months.map((label, m) => this.wheelItem(label, m === st.bm)), st.bm, (i) => this.setState({ bm: i })),
+      year: () => {
+        const items = [];
+        const now = new Date().getFullYear();
+        const from = 1945, to = now - 12;
+        for (let y = from; y <= to; y++) items.push(this.wheelItem(String(y), y === st.by));
+        return col("year", items, st.by - from, (i) => this.setState({ by: from + i }));
+      }
+    };
+    return { cols: order.map(k => build[k]()), order, loc, months };
+  }
+
+  calendar() {
+    const loc = this.locale();
+    const st = this.state;
+    const first = new Date(st.goalYear, st.goalMonth, 1);
+    const raw = new Intl.DateTimeFormat(loc, { month: "long", year: "numeric" }).format(first);
+    const title = raw.charAt(0).toUpperCase() + raw.slice(1);
+    const weekdays = [];
+    for (let i = 0; i < 7; i++) weekdays.push({ label: new Intl.DateTimeFormat(loc, { weekday: "narrow" }).format(new Date(2024, 0, 1 + i)) });
+    const lead = (first.getDay() + 6) % 7;
+    const total = new Date(st.goalYear, st.goalMonth + 1, 0).getDate();
+    const cells = [];
+    for (let i = 0; i < lead; i++) cells.push({ label: "", cursor: "default", bg: "transparent", color: "transparent", weight: "400", pick: () => {} });
+    const today = new Date(); today.setHours(0, 0, 0, 0);
+    for (let d = 1; d <= total; d++) {
+      const iso = st.goalYear + "-" + String(st.goalMonth + 1).padStart(2, "0") + "-" + String(d).padStart(2, "0");
+      const date = new Date(st.goalYear, st.goalMonth, d);
+      const past = date < today;
+      const sel = st.goalDate === iso;
+      cells.push({
+        label: String(d),
+        cursor: past ? "default" : "pointer",
+        bg: sel ? "var(--ac)" : "transparent",
+        color: sel ? "#0B0C0A" : (past ? "rgba(242,244,240,.22)" : "rgba(242,244,240,.85)"),
+        weight: sel ? "600" : "400",
+        pick: past ? () => {} : () => this.setState({ goalDate: iso })
+      });
+    }
+    const shift = (n) => () => this.setState(s => {
+      const m = s.goalMonth + n;
+      return { goalMonth: (m + 12) % 12, goalYear: s.goalYear + Math.floor(m / 12) };
+    });
+    return { title, weekdays, cells, prev: shift(-1), next: shift(1) };
+  }
+
+
+
+
+
+  static KEY = "trainer.accent.history";
+  static MAX = 16;
+  readHistory() {
+    try { return JSON.parse(localStorage.getItem(Component.KEY) || "[]"); } catch (e) { return []; }
+  }
+  writeHistory(list) { try { localStorage.setItem(Component.KEY, JSON.stringify(list)); } catch (e) {} }
+  normHex(v) {
+    const h = String(v || "").trim().replace("#", "");
+    if (!/^[0-9a-f]{3}$|^[0-9a-f]{6}$/i.test(h)) return null;
+    return "#" + (h.length === 3 ? h.split("").map(c => c + c).join("") : h).toUpperCase();
+  }
+  rememberAccent() {
+    const hex = this.normHex(this.props.accent);
+    if (!hex || hex === this.lastRemembered) return;
+    this.lastRemembered = hex;
+    const list = [hex].concat(this.readHistory().filter(h => h !== hex)).slice(0, Component.MAX);
+    this.writeHistory(list);
+    this.forceUpdate();
+  }
+  swatchVals() {
+    const cur = this.normHex(this.overrideAccent || this.props.accent) || "#7CF03D";
+    const list = this.readHistory();
+    return {
+      count: list.length + "/" + Component.MAX,
+      current: cur,
+      list: list.map(hex => ({
+        hex,
+        ring: hex === cur ? "#F2F4F0" : "rgba(255,255,255,.12)",
+        apply: () => { this.overrideAccent = hex; this.applyAccent(); this.forceUpdate(); },
+        remove: () => { this.writeHistory(this.readHistory().filter(h => h !== hex)); this.forceUpdate(); }
+      }))
+    };
+  }
+
+  rootRef = (el) => { this.rootEl = el; this.applyAccent(); this.rememberAccent(); };
+  applyAccent() {
+    if (!this.rootEl) return;
+    const norm = this.normHex(this.overrideAccent || this.props.accent) || "#7CF03D";
+    const full = norm.slice(1);
+    const n = parseInt(full, 16);
+    this.rootEl.style.setProperty("--ac", "#" + full);
+    this.rootEl.style.setProperty("--ac-rgb", ((n >> 16) & 255) + " " + ((n >> 8) & 255) + " " + (n & 255));
+  }
+
+  renderVals() {
+    const st = this.state;
+    const accent = "var(--ac)";
+    const is = {};
+    ORDER.forEach(s => { is[s] = st.screen === s; });
+    is.inReg = REG.indexOf(st.screen) >= 0;
+
+
+    const go = { back: () => {
+      const i = REG.indexOf(st.screen);
+      if (i > 0) this.setState({ screen: REG[i - 1] });
+      else this.setState({ screen: "welcome" });
+    }};
+    ORDER.forEach(s => { go[s] = this.goTo(s); });
+
+    const emailOk = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(st.email);
+    const fpEmailOk = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(st.fpEmail);
+    const pwChecks = [
+      { label: "Al menos 8 caracteres", ok: st.fpPass.length >= 8 },
+      { label: "Una letra mayúscula", ok: /[A-ZÁÉÍÓÚÑ]/.test(st.fpPass) },
+      { label: "Un número", ok: /\d/.test(st.fpPass) }
+    ];
+    const pwScore = pwChecks.filter(c => c.ok).length;
+    const pwRulesOk = pwScore === 3;
+    const pwMatch = st.fpPass.length > 0 && st.fpPass === st.fpPass2;
+    const regIdx = Math.max(0, REG.indexOf(st.screen));
+    const chosen = DAYS.filter(d => st.days[d[0]]);
+    const shownName = st.name.trim() || "Iván";
+    const b = this.birthColumns();
+    const loc = b.loc;
+    const birthDate = new Date(st.by, st.bm, st.bd);
+    const orderNote = b.order.map(k => ({ day: "día", month: "mes", year: "año" })[k]).join(" · ");
+
+    let goalDateLine = "Todavía sin fecha: vamos a armar un plan de base.";
+    let goalDateColor = "rgba(242,244,240,.4)";
+    if (st.goalDate) {
+      const gd = new Date(st.goalDate + "T00:00:00");
+      const weeks = Math.max(0, Math.round((gd - new Date()) / 604800000));
+      goalDateLine = new Intl.DateTimeFormat(loc, { day: "numeric", month: "long", year: "numeric" }).format(gd) + " · faltan " + weeks + " semanas";
+      goalDateColor = accent;
+    }
+
+    return {
+      rootRef: this.rootRef,
+      swatches: this.swatchVals(),
+      accentHex: this.overrideAccent || this.props.accent || "#7CF03D",
+      is, go, accent,
+      set: ["email","code","loginEmail","loginPass","fpEmail","fpCode","fpPass","fpPass2","name","lastName","weight","height","goal"]
+        .reduce((acc, k) => { acc[k] = this.set(k); return acc; }, {}),
+      f: st,
+      shownName,
+      fullName: ((st.name.trim() || "Iván") + " " + (st.lastName.trim() || "Benítez")).trim(),
+      slides: SLIDES.map((s, i) => ({
+        caption: s.caption, bg: s.bg, img: s.img,
+        opacity: st.slide === i ? 1 : 0,
+        dot: st.slide === i ? accent : "rgba(255,255,255,.2)",
+        pick: () => this.setState({ slide: i })
+      })),
+      op0: st.slide === 0 ? 1 : 0,
+      op1: st.slide === 1 ? 1 : 0,
+      op2: st.slide === 2 ? 1 : 0,
+      slideTitle: SLIDES[st.slide].title,
+      slideText: SLIDES[st.slide].text,
+      copyOpacity: 1,
+      progress: Math.round(((regIdx + 1) / REG.length) * 100) + "%",
+      emailReady: emailOk ? 1 : .35,
+      emailHint: st.email.length === 0 ? "" : (emailOk ? "Se ve bien. Te mandamos un código de 6 caracteres." : "Ese correo no parece válido: revisá que tenga @ y dominio."),
+      emailHintColor: emailOk ? accent : "rgba(255,140,120,.9)",
+      emailShown: st.email || "tu@mail.com",
+      codeReady: /^[a-z0-9]{6}$/i.test(st.code.trim()) ? 1 : .35,
+      loginReady: st.loginEmail && st.loginPass ? 1 : .35,
+      fpEmailReady: fpEmailOk ? 1 : .35,
+      fpEmailHint: st.fpEmail.length === 0 ? "" : (fpEmailOk ? "Listo. Te mandamos el código a esa dirección." : "Ese correo no parece válido: revisá que tenga @ y dominio."),
+      fpEmailHintColor: fpEmailOk ? accent : "rgba(255,140,120,.9)",
+      fpEmailShown: st.fpEmail || st.loginEmail || "tu@mail.com",
+      fpCodeReady: /^[a-z0-9]{6}$/i.test(st.fpCode.trim()) ? 1 : .35,
+      fpNewReady: pwRulesOk && pwMatch ? 1 : .35,
+      pwType: st.pwShown ? "text" : "password",
+      pwToggleLabel: st.pwShown ? "Ocultar" : "Mostrar",
+      togglePw: () => this.setState(s => ({ pwShown: !s.pwShown })),
+      pwBars: [0, 1, 2].map(i => ({ color: i < pwScore ? (pwScore === 3 ? accent : "rgb(var(--ac-rgb) / .55)") : "rgba(255,255,255,.1)" })),
+      pwRules: pwChecks.map(c => ({
+        label: c.label,
+        color: c.ok ? "rgba(242,244,240,.8)" : "rgba(242,244,240,.4)",
+        dot: c.ok ? accent : "rgba(255,255,255,.2)"
+      })),
+      pwMatchBorder: st.fpPass2.length === 0 ? "rgba(255,255,255,.12)" : (pwMatch ? accent : "rgba(255,140,120,.55)"),
+      nameReady: st.name.trim() && st.lastName.trim() ? 1 : .35,
+      bodyReady: st.weight && st.height ? 1 : .35,
+      daysReady: chosen.length ? 1 : .35,
+      greeting: "¡Hola, " + shownName + "!",
+      doneTitle: "Todo listo, " + shownName,
+      birthCols: b.cols,
+      birthFormatNote: "Orden según tu idioma (" + loc + "): " + orderNote,
+      cal: this.calendar(),
+      goalDateLine, goalDateColor,
+      notifyLine: chosen.length
+        ? "Vas a recibir " + chosen.length + " avisos por semana, 45 min antes de cada sesión."
+        : "Elegí al menos un día para activar los avisos.",
+      summaryBirth: new Intl.DateTimeFormat(loc, { day: "numeric", month: "short", year: "numeric" }).format(birthDate),
+      summarySport: (SPORTS.find(s => s[0] === st.sport) || [])[1] || "—",
+      summaryLevel: (LEVELS.find(l => l[0] === st.level) || [])[1] || "—",
+      summaryDays: chosen.length ? chosen.map(d => d[0]).join(", ") : "—",
+      summaryGoal: st.goal.trim() || "Plan de base",
+      healthReady: st.healthOk ? 1 : .35,
+      toggleHealth: () => this.setState(s => ({ healthOk: !s.healthOk })),
+      healthBox: {
+        bg: st.healthOk ? "rgb(var(--ac-rgb) / .08)" : "#131511",
+        border: st.healthOk ? accent : "rgba(255,255,255,.1)",
+        boxBg: st.healthOk ? accent : "transparent",
+        boxBorder: st.healthOk ? accent : "rgba(255,255,255,.25)",
+        tick: st.healthOk ? 1 : 0
+      },
+      devices: DEVICES.map(([id, label, desc]) => ({ label, desc, pick: () => this.setState({ device: id }), ...this.chip(st.device === id) })),
+      goals: GOALS.map(([label, dist]) => ({ label, dist, pick: () => this.setState({ goal: label }), ...this.chip(st.goal === label) })),
+      sexes: SEXES.map(([id, label, desc]) => ({ id, label, desc, pick: () => this.setState({ sex: id }), ...this.chip(st.sex === id) })),
+      sports: SPORTS.map(([id, label, desc]) => ({ id, label, desc, pick: () => this.setState({ sport: id }), ...this.chip(st.sport === id) })),
+      levels: LEVELS.map(([id, label, desc]) => ({ id, label, desc, pick: () => this.setState({ level: id }), ...this.chip(st.level === id) })),
+      days: DAYS.map(([short, label]) => ({
+        short, label,
+        toggle: () => this.setState(s => {
+          const d = { ...s.days };
+          if (d[short]) delete d[short]; else d[short] = "18:30";
+          return { days: d };
+        }),
+        ...this.chip(!!st.days[short])
+      })),
+      chosenDays: chosen.map(([short, label]) => ({
+        short, label, time: st.days[short],
+        setTime: (e) => { const v = e.target.value; this.setState(s => ({ days: { ...s.days, [short]: v } })); }
+      })),
+      rail: ORDER.map(s => ({ label: LABELS[s], go: this.goTo(s), ...this.chip(st.screen === s) }))
+    };
+  }
+}
+</script>
+</body>
+</html>

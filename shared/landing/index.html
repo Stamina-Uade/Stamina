@@ -1,0 +1,652 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Stamina — Rendimiento y Nutrición Unificados</title>
+    <link rel="icon" type="image/png" href="/assets/logo.png">
+    <meta name="description" content="Stamina unifica el registro de actividad física, el gimnasio y la nutrición inteligente en una sola experiencia móvil de alto rendimiento.">
+    <style>
+        :root {
+            --bg-color: #120224;
+            --bg-elevated: #1B0434;
+            --surface-color: #240647;
+            --surface-hover: #300A5C;
+            --surface-border: rgba(168, 85, 247, 0.28);
+            --accent-green: #59F21B;
+            --accent-green-hover: #68FF2B;
+            --accent-green-glow: rgba(89, 242, 27, 0.3);
+            --accent-violet: #9333EA;
+            --accent-violet-glow: rgba(147, 51, 234, 0.35);
+            --text-primary: #FFFFFF;
+            --text-secondary: #C4B5FD;
+            --text-muted: #8B7AA8;
+            --font-stack: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            background-image: 
+                radial-gradient(circle at 15% 15%, rgba(147, 51, 234, 0.25) 0%, transparent 45%),
+                radial-gradient(circle at 85% 65%, rgba(89, 242, 27, 0.12) 0%, transparent 40%);
+            color: var(--text-primary);
+            font-family: var(--font-stack);
+            line-height: 1.6;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            overflow-x: hidden;
+        }
+
+        .container {
+            max-width: 1140px;
+            margin: 0 auto;
+            padding: 0 24px;
+            width: 100%;
+            position: relative;
+            z-index: 1;
+        }
+
+        /* Navegación */
+        header {
+            padding: 28px 0 16px;
+        }
+
+        .navbar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .brand {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            text-decoration: none;
+        }
+
+        .brand img {
+            width: 44px;
+            height: 44px;
+            border-radius: 12px;
+            border: 2px solid rgba(89, 242, 27, 0.4);
+            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.6);
+        }
+
+        .brand-text {
+            font-size: 1.5rem;
+            font-weight: 900;
+            letter-spacing: 2px;
+            color: var(--text-primary);
+        }
+
+        .brand-text span {
+            color: var(--accent-green);
+        }
+
+        .badge-status {
+            background: rgba(89, 242, 27, 0.12);
+            color: var(--accent-green);
+            border: 1px solid rgba(89, 242, 27, 0.35);
+            padding: 6px 16px;
+            border-radius: 999px;
+            font-size: 0.8rem;
+            font-weight: 700;
+            letter-spacing: 0.8px;
+            text-transform: uppercase;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .pulse-dot {
+            width: 8px;
+            height: 8px;
+            background-color: var(--accent-green);
+            border-radius: 50%;
+            box-shadow: 0 0 10px var(--accent-green);
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0% { transform: scale(0.9); opacity: 0.8; }
+            50% { transform: scale(1.3); opacity: 1; box-shadow: 0 0 14px var(--accent-green); }
+            100% { transform: scale(0.9); opacity: 0.8; }
+        }
+
+        /* Hero */
+        .hero {
+            padding: 60px 0 80px;
+            display: grid;
+            grid-template-columns: 1.15fr 0.85fr;
+            align-items: center;
+            gap: 40px;
+        }
+
+        @media (max-width: 900px) {
+            .hero {
+                grid-template-columns: 1fr;
+                text-align: center;
+                padding: 40px 0 60px;
+            }
+        }
+
+        .hero-content h1 {
+            font-size: clamp(2.4rem, 5vw, 4.2rem);
+            font-weight: 900;
+            line-height: 1.08;
+            letter-spacing: -1.5px;
+            margin-bottom: 24px;
+            color: var(--text-primary);
+        }
+
+        .hero-content h1 .text-green {
+            color: var(--accent-green);
+            display: inline-block;
+        }
+
+        .hero-content p {
+            font-size: clamp(1.05rem, 1.8vw, 1.25rem);
+            color: var(--text-secondary);
+            max-width: 600px;
+            margin-bottom: 36px;
+        }
+
+        @media (max-width: 900px) {
+            .hero-content p {
+                margin-left: auto;
+                margin-right: auto;
+            }
+        }
+
+        .cta-group {
+            display: flex;
+            gap: 16px;
+            flex-wrap: wrap;
+        }
+
+        @media (max-width: 900px) {
+            .cta-group {
+                justify-content: center;
+            }
+        }
+
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            padding: 14px 28px;
+            border-radius: 12px;
+            font-size: 1rem;
+            font-weight: 700;
+            text-decoration: none;
+            transition: all 0.25s ease;
+            cursor: pointer;
+        }
+
+        .btn svg {
+            width: 20px;
+            height: 20px;
+        }
+
+        .btn-primary {
+            background-color: var(--accent-green);
+            color: #0F0221;
+            box-shadow: 0 4px 20px var(--accent-green-glow);
+        }
+
+        .btn-primary:hover {
+            background-color: var(--accent-green-hover);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 26px rgba(89, 242, 27, 0.5);
+        }
+
+        .btn-secondary {
+            background-color: var(--surface-color);
+            color: var(--text-primary);
+            border: 1px solid var(--surface-border);
+        }
+
+        .btn-secondary:hover {
+            background-color: var(--surface-hover);
+            border-color: rgba(168, 85, 247, 0.6);
+            transform: translateY(-2px);
+        }
+
+        /* Mascota en el Hero */
+        .hero-mascot-wrapper {
+            position: relative;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .hero-mascot-bg {
+            position: absolute;
+            width: 380px;
+            height: 380px;
+            background: radial-gradient(circle, rgba(147, 51, 234, 0.45) 0%, rgba(89, 242, 27, 0.15) 50%, transparent 70%);
+            border-radius: 50%;
+            filter: blur(30px);
+            z-index: 0;
+        }
+
+        .hero-mascot-img {
+            position: relative;
+            z-index: 1;
+            width: 100%;
+            max-width: 440px;
+            height: auto;
+            filter: drop-shadow(0 15px 30px rgba(0, 0, 0, 0.6));
+            animation: mascotFloat 5s ease-in-out infinite;
+        }
+
+        @keyframes mascotFloat {
+            0%, 100% { transform: translateY(0px) rotate(0deg); }
+            50% { transform: translateY(-10px) rotate(-1deg); }
+        }
+
+        /* Características */
+        .features {
+            padding: 60px 0 80px;
+        }
+
+        .section-header {
+            text-align: center;
+            margin-bottom: 48px;
+        }
+
+        .section-tag {
+            color: var(--accent-green);
+            font-size: 0.85rem;
+            font-weight: 800;
+            letter-spacing: 1.5px;
+            text-transform: uppercase;
+            margin-bottom: 8px;
+            display: inline-block;
+        }
+
+        .section-title {
+            font-size: clamp(2rem, 3.5vw, 2.8rem);
+            font-weight: 900;
+            letter-spacing: -0.5px;
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+            gap: 24px;
+        }
+
+        .card {
+            background: var(--surface-color);
+            border: 1px solid var(--surface-border);
+            border-radius: 20px;
+            padding: 36px 30px;
+            transition: all 0.25s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .card::before {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: linear-gradient(90deg, var(--accent-violet), var(--accent-green));
+            opacity: 0;
+            transition: opacity 0.25s;
+        }
+
+        .card:hover {
+            border-color: rgba(89, 242, 27, 0.45);
+            transform: translateY(-4px);
+            background: var(--surface-hover);
+        }
+
+        .card:hover::before {
+            opacity: 1;
+        }
+
+        .card-icon {
+            width: 56px;
+            height: 56px;
+            border-radius: 14px;
+            background: rgba(89, 242, 27, 0.12);
+            color: var(--accent-green);
+            border: 1px solid rgba(89, 242, 27, 0.25);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 22px;
+        }
+
+        .card-icon svg {
+            width: 28px;
+            height: 28px;
+        }
+
+        .card h3 {
+            font-size: 1.35rem;
+            font-weight: 800;
+            margin-bottom: 12px;
+            color: var(--text-primary);
+        }
+
+        .card p {
+            color: var(--text-secondary);
+            font-size: 0.96rem;
+            line-height: 1.6;
+        }
+
+        /* Banner Mascota Medalla */
+        .mascot-banner {
+            margin: 40px 0 80px;
+            background: linear-gradient(135deg, #2D0858 0%, #1A0334 100%);
+            border: 1px solid rgba(89, 242, 27, 0.3);
+            border-radius: 24px;
+            padding: 40px 48px;
+            display: grid;
+            grid-template-columns: 240px 1fr;
+            align-items: center;
+            gap: 40px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
+        }
+
+        @media (max-width: 800px) {
+            .mascot-banner {
+                grid-template-columns: 1fr;
+                text-align: center;
+                padding: 36px 24px;
+            }
+        }
+
+        .mascot-banner-img {
+            width: 100%;
+            max-width: 220px;
+            margin: 0 auto;
+            display: block;
+            filter: drop-shadow(0 10px 20px rgba(0, 0, 0, 0.5));
+        }
+
+        .mascot-banner-content h3 {
+            font-size: clamp(1.6rem, 2.5vw, 2.2rem);
+            font-weight: 900;
+            margin-bottom: 14px;
+            color: var(--text-primary);
+        }
+
+        .mascot-banner-content h3 span {
+            color: var(--accent-green);
+        }
+
+        .mascot-banner-content p {
+            color: var(--text-secondary);
+            font-size: 1.05rem;
+            line-height: 1.6;
+            margin-bottom: 20px;
+        }
+
+        .mascot-features-list {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 16px;
+        }
+
+        .mascot-tag {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            background: rgba(147, 51, 234, 0.25);
+            border: 1px solid rgba(168, 85, 247, 0.4);
+            padding: 6px 14px;
+            border-radius: 8px;
+            font-size: 0.88rem;
+            font-weight: 600;
+            color: #E9D5FF;
+        }
+
+        .mascot-tag svg {
+            width: 16px;
+            height: 16px;
+            color: var(--accent-green);
+        }
+
+        /* Plataformas */
+        .platforms {
+            text-align: center;
+            padding: 40px 0 80px;
+            border-top: 1px solid var(--surface-border);
+        }
+
+        .platforms-label {
+            color: var(--text-muted);
+            font-size: 0.85rem;
+            letter-spacing: 1.5px;
+            text-transform: uppercase;
+            font-weight: 800;
+            margin-bottom: 28px;
+        }
+
+        .platform-badges {
+            display: flex;
+            justify-content: center;
+            gap: 36px;
+            flex-wrap: wrap;
+            color: var(--text-secondary);
+            font-weight: 600;
+        }
+
+        .platform-item {
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 0.98rem;
+        }
+
+        .platform-item svg {
+            width: 22px;
+            height: 22px;
+            color: var(--accent-green);
+        }
+
+        /* Footer */
+        footer {
+            margin-top: auto;
+            border-top: 1px solid var(--surface-border);
+            padding: 36px 0;
+            background: #0D011A;
+        }
+
+        .footer-content {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 20px;
+            color: var(--text-muted);
+            font-size: 0.9rem;
+        }
+
+        .footer-links {
+            display: flex;
+            gap: 24px;
+            align-items: center;
+        }
+
+        .footer-links a {
+            color: var(--text-secondary);
+            text-decoration: none;
+            transition: color 0.2s;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .footer-links a svg {
+            width: 16px;
+            height: 16px;
+        }
+
+        .footer-links a:hover {
+            color: var(--accent-green);
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <div class="navbar">
+                <a href="/" class="brand">
+                    <img src="/assets/logo.png" alt="Stamina Logo">
+                    <span class="brand-text">STAMINA<span>.</span></span>
+                </a>
+                <span class="badge-status">
+                    <span class="pulse-dot"></span>
+                    Próximamente
+                </span>
+            </div>
+        </header>
+
+        <section class="hero">
+            <div class="hero-content">
+                <h1>Tu entrenamiento y nutrición.<br><span class="text-green">Totalmente unificados.</span></h1>
+                <p>
+                    Olvidate de alternar entre tres aplicaciones distintas. Stamina une el seguimiento de actividad GPS,
+                    tus rutinas de gimnasio y tu planificación nutricional en una única plataforma inteligente.
+                </p>
+                <div class="cta-group">
+                    <a href="#caracteristicas" class="btn btn-primary">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg>
+                        Descubrí las funciones
+                    </a>
+                    <a href="/health" class="btn btn-secondary">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 12h-4l-3 9L9 3l-3 9H2"></path></svg>
+                        Estado del Servidor
+                    </a>
+                </div>
+            </div>
+            <div class="hero-mascot-wrapper">
+                <div class="hero-mascot-bg"></div>
+                <img src="/assets/mascota-corriendo.png?v=2" alt="Mascota Stamina en carrera" class="hero-mascot-img">
+            </div>
+        </section>
+
+        <section class="features" id="caracteristicas">
+            <div class="section-header">
+                <span class="section-tag">Pilares de Rendimiento</span>
+                <h2 class="section-title">Diseñado para deportistas reales</h2>
+            </div>
+
+            <div class="grid">
+                <div class="card">
+                    <div class="card-icon">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon></svg>
+                    </div>
+                    <h3>GPS & Resistencia</h3>
+                    <p>
+                        Seguimiento continuo de carrera, ciclismo y senderismo con filtros de navegación anti-deriva,
+                        mapas satelitales en vivo y sincronización directa con tu reloj.
+                    </p>
+                </div>
+
+                <div class="card">
+                    <div class="card-icon">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 5v14M18 5v14M2 9v6M22 9v6M6 12h12"></path></svg>
+                    </div>
+                    <h3>Gimnasio & Series</h3>
+                    <p>
+                        Captura de series, pesos y descansos en tiempo real con soporte offline completo.
+                        Rutinas dinámicas calculadas en el servidor y guardadas localmente.
+                    </p>
+                </div>
+
+                <div class="card">
+                    <div class="card-icon">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2a9 9 0 0 1 9 9c0 4.97-4.03 9-9 9A9 9 0 0 1 3 11C3 6.03 7.03 2 12 2z"></path><path d="M12 2c0 5 4 8 9 9"></path><path d="M12 2a9 9 0 0 0-9 9"></path></svg>
+                    </div>
+                    <h3>Nutrición Adaptativa</h3>
+                    <p>
+                        Metas de calorías y macronutrientes calculadas por nuestro motor científico, adaptándose de
+                        forma continua a tu gasto energético y ritmo metabólico.
+                    </p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Banner de la mascota con medalla -->
+        <section class="mascot-banner">
+            <img src="/assets/mascota-medalla.png?v=2" alt="Mascota Stamina Campeón con medalla" class="mascot-banner-img">
+            <div class="mascot-banner-content">
+                <h3>Superá tus marcas personales <span>cada semana</span></h3>
+                <p>
+                    Stamina premia tu consistencia. Ya sea que estés preparando tu primera media maratón o buscando
+                    romper tu récord en sentadillas, la plataforma te acompaña en cada paso hacia el podio.
+                </p>
+                <div class="mascot-features-list">
+                    <div class="mascot-tag">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                        Sobrecarga progresiva
+                    </div>
+                    <div class="mascot-tag">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                        Periodización automática
+                    </div>
+                    <div class="mascot-tag">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                        Sin pérdida de señal
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section class="platforms">
+            <div class="platforms-label">Ecosistema Stamina en desarrollo</div>
+            <div class="platform-badges">
+                <div class="platform-item">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="2" width="14" height="20" rx="2" ry="2"></rect><line x1="12" y1="18" x2="12.01" y2="18"></line></svg>
+                    iOS (iPhone)
+                </div>
+                <div class="platform-item">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="7"></circle><polyline points="12 9 12 12 13.5 13.5"></polyline><path d="M16.51 17.35l-.35 3.83a2 2 0 0 1-2 1.82H9.83a2 2 0 0 1-2-1.82l-.35-3.83m.01-10.7l.35-3.83A2 2 0 0 1 9.83 1h4.35a2 2 0 0 1 2 1.82l.35 3.83"></path></svg>
+                    watchOS (Apple Watch)
+                </div>
+                <div class="platform-item">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="4" width="16" height="16" rx="2"></rect><rect x="9" y="9" width="6" height="6"></rect><line x1="9" y1="1" x2="9" y2="4"></line><line x1="15" y1="1" x2="15" y2="4"></line><line x1="9" y1="20" x2="9" y2="23"></line><line x1="15" y1="20" x2="15" y2="23"></line><line x1="20" y1="9" x2="23" y2="9"></line><line x1="20" y1="14" x2="23" y2="14"></line><line x1="1" y1="9" x2="4" y2="9"></line><line x1="1" y1="14" x2="4" y2="14"></line></svg>
+                    Android
+                </div>
+                <div class="platform-item">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="2" width="20" height="8" rx="2" ry="2"></rect><rect x="2" y="14" width="20" height="8" rx="2" ry="2"></rect><line x1="6" y1="6" x2="6.01" y2="6"></line><line x1="6" y1="18" x2="6.01" y2="18"></line></svg>
+                    Stamina Cloud Engine
+                </div>
+            </div>
+        </section>
+    </div>
+
+    <footer>
+        <div class="container">
+            <div class="footer-content">
+                <div>&copy; 2026 Stamina. Todos los derechos reservados.</div>
+                <div class="footer-links">
+                    <a href="/legal">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>
+                        Avisos Legales y de Salud
+                    </a>
+                    <a href="/health">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 12h-4l-3 9L9 3l-3 9H2"></path></svg>
+                        Estado de Servicios
+                    </a>
+                </div>
+            </div>
+        </div>
+    </footer>
+</body>
+</html>

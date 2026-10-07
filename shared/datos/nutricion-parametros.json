@@ -1,0 +1,117 @@
+{
+  "_meta": {
+    "version": "0.1.0",
+    "fecha": "2026-09-10",
+
+    "_ESTADO": "🛑 PROVISIONAL. NINGÚN VALOR DE ESTE ARCHIVO FUE REVISADO POR UNA PERSONA CON FORMACIÓN.",
+
+    "_que_es_esto": "Los números con los que el servidor arma los objetivos del día: hidratos, proteína y grasa por kg, agua y sodio. Los TOPES DE SEGURIDAD no están acá: están en guardarrailes-nutricion.json y se aplican DESPUÉS, sobre el resultado. Este archivo propone; aquel pone límites.",
+
+    "_de_donde_salen": "Port literal de android/app/src/main/java/com/tecladus/trainer/domain/logic/NutritionCalculator.kt y model/Nutrition.kt (DayLoad), que citan 'consenso ACSM / ISSN' SIN VERIFICAR. docs/PROPUESTA-MOTOR.md §6 decía no portarlos hasta que alguien los revisara; se portan el 2026-09-10 para poder probar la app en staging, con la MISMA traba que los guardarraíles: EN PRODUCCIÓN EL BACKEND NO ARRANCA mientras quede uno en 'provisional'.",
+
+    "_como_se_cambia": "Editá 'valor', poné 'estado' en 'revisado' y llená 'revisado_por', 'revisado_en' y 'fuente'. No hay que tocar código ni desplegar."
+  },
+
+  "valores": {
+    "factor_actividad_no_deportiva": {
+      "valor": 1.35, "unidad": "multiplicador del metabolismo basal", "estado": "provisional",
+      "por_que_este_numero": "NEAT_FACTOR del Kotlin: el gasto del día sin contar el entrenamiento, que se suma aparte.",
+      "fuente": "NutritionCalculator.kt, sin verificar", "revisado_por": null, "revisado_en": null
+    },
+    "carbohidratos_g_kg_descanso": {
+      "valor": 3.5, "unidad": "g por kg de peso", "estado": "provisional",
+      "por_que_este_numero": "DayLoad.REST del Kotlin: día sin entrenamiento o sólo movilidad.",
+      "fuente": "Nutrition.kt, sin verificar", "revisado_por": null, "revisado_en": null
+    },
+    "carbohidratos_g_kg_baja": {
+      "valor": 5.0, "unidad": "g por kg de peso", "estado": "provisional",
+      "por_que_este_numero": "DayLoad.LOW del Kotlin: menos de 60 minutos suaves.",
+      "fuente": "Nutrition.kt, sin verificar", "revisado_por": null, "revisado_en": null
+    },
+    "carbohidratos_g_kg_moderada": {
+      "valor": 6.5, "unidad": "g por kg de peso", "estado": "provisional",
+      "por_que_este_numero": "DayLoad.MODERATE del Kotlin: 60 a 90 minutos, o calidad corta.",
+      "fuente": "Nutrition.kt, sin verificar", "revisado_por": null, "revisado_en": null
+    },
+    "carbohidratos_g_kg_alta": {
+      "valor": 8.5, "unidad": "g por kg de peso", "estado": "provisional",
+      "por_que_este_numero": "DayLoad.HIGH del Kotlin: más de 90 minutos o doble sesión.",
+      "fuente": "Nutrition.kt, sin verificar", "revisado_por": null, "revisado_en": null
+    },
+    "carbohidratos_g_kg_competencia": {
+      "valor": 9.5, "unidad": "g por kg de peso", "estado": "provisional",
+      "por_que_este_numero": "DayLoad.RACE_WEEK del Kotlin: carga de hidratos previa a un evento largo.",
+      "fuente": "Nutrition.kt, sin verificar", "revisado_por": null, "revisado_en": null
+    },
+    "factor_carbohidratos_principiante_carga_alta": {
+      "valor": 0.9, "unidad": "multiplicador", "estado": "provisional",
+      "por_que_este_numero": "El Kotlin baja 10 % los hidratos de un principiante en un día de carga alta.",
+      "fuente": "NutritionCalculator.kt, sin verificar", "revisado_por": null, "revisado_en": null
+    },
+    "proteina_g_kg_base": {
+      "valor": 1.6, "unidad": "g por kg de peso", "estado": "provisional",
+      "por_que_este_numero": "El extremo bajo del rango 1,6-2,0 que cita el Kotlin.",
+      "fuente": "NutritionCalculator.kt, sin verificar", "revisado_por": null, "revisado_en": null
+    },
+    "proteina_g_kg_carga_alta": {
+      "valor": 1.8, "unidad": "g por kg de peso", "estado": "provisional",
+      "por_que_este_numero": "El Kotlin la sube en días de carga alta o de competencia.",
+      "fuente": "NutritionCalculator.kt, sin verificar", "revisado_por": null, "revisado_en": null
+    },
+    "grasa_minima_g_kg": {
+      "valor": 0.8, "unidad": "g por kg de peso", "estado": "provisional",
+      "por_que_este_numero": "Piso de grasa del Kotlin: si no entra, se recortan hidratos y nunca proteína.",
+      "fuente": "NutritionCalculator.kt, sin verificar", "revisado_por": null, "revisado_en": null
+    },
+    "carbohidratos_minimos_g": {
+      "valor": 50, "unidad": "g por día", "estado": "provisional",
+      "por_que_este_numero": "El Kotlin no deja que el recorte de hidratos baje de 50 g.",
+      "fuente": "NutritionCalculator.kt, sin verificar", "revisado_por": null, "revisado_en": null
+    },
+    "agua_ml_kg": {
+      "valor": 35, "unidad": "ml por kg de peso", "estado": "provisional",
+      "por_que_este_numero": "Base diaria de agua del Kotlin, sin contar la sesión.",
+      "fuente": "NutritionCalculator.kt, sin verificar", "revisado_por": null, "revisado_en": null
+    },
+    "agua_ml_por_minuto_de_sesion": {
+      "valor": 12, "unidad": "ml por minuto de entrenamiento", "estado": "provisional",
+      "por_que_este_numero": "Reposición del sudor de la sesión en el Kotlin.",
+      "fuente": "NutritionCalculator.kt, sin verificar", "revisado_por": null, "revisado_en": null
+    },
+    "agua_tope_sesion_ml": {
+      "valor": 3000, "unidad": "ml", "estado": "provisional",
+      "por_que_este_numero": "Tope de la reposición de la sesión en el Kotlin.",
+      "fuente": "NutritionCalculator.kt, sin verificar", "revisado_por": null, "revisado_en": null
+    },
+    "sodio_base_mg": {
+      "valor": 2000, "unidad": "mg por día", "estado": "provisional",
+      "por_que_este_numero": "Base diaria de sodio del Kotlin.",
+      "fuente": "NutritionCalculator.kt, sin verificar", "revisado_por": null, "revisado_en": null
+    },
+    "sodio_mg_por_litro_de_sudor": {
+      "valor": 700, "unidad": "mg por litro", "estado": "provisional",
+      "por_que_este_numero": "SweatSaltiness.MEDIUM del Kotlin. El perfil del contrato no pregunta cuán salado es el sudor, así que se usa el valor medio.",
+      "fuente": "Profile.kt, sin verificar", "revisado_por": null, "revisado_en": null
+    },
+    "minutos_carga_alta": {
+      "valor": 100, "unidad": "minutos", "estado": "provisional",
+      "por_que_este_numero": "classifyDay del Kotlin: desde 100 minutos es carga alta.",
+      "fuente": "NutritionCalculator.kt, sin verificar", "revisado_por": null, "revisado_en": null
+    },
+    "minutos_calidad_carga_alta": {
+      "valor": 80, "unidad": "minutos", "estado": "provisional",
+      "por_que_este_numero": "classifyDay del Kotlin: una sesión de calidad desde 80 minutos también es carga alta.",
+      "fuente": "NutritionCalculator.kt, sin verificar", "revisado_por": null, "revisado_en": null
+    },
+    "minutos_carga_moderada": {
+      "valor": 60, "unidad": "minutos", "estado": "provisional",
+      "por_que_este_numero": "classifyDay del Kotlin: desde 60 minutos es carga moderada.",
+      "fuente": "NutritionCalculator.kt, sin verificar", "revisado_por": null, "revisado_en": null
+    },
+    "minutos_evento_para_carga_de_competencia": {
+      "valor": 90, "unidad": "minutos", "estado": "provisional",
+      "por_que_este_numero": "classifyDay del Kotlin: sólo un evento de 90 minutos o más justifica la carga de hidratos del día anterior y del día del evento.",
+      "fuente": "NutritionCalculator.kt, sin verificar", "revisado_por": null, "revisado_en": null
+    }
+  }
+}

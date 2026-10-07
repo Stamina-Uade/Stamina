@@ -1,0 +1,293 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Acceso y cascarón de la app. values/ es es-AR; values-en/ el inglés. -->
+<resources>
+    <string name="acceso_titulo">Trainer</string>
+    <string name="acceso_bajada">Entrenamiento, comida y plan en un solo lugar.</string>
+    <string name="acceso_email">Correo</string>
+    <string name="acceso_password">Contraseña</string>
+    <string name="acceso_entrar">Entrar</string>
+    <string name="acceso_crear">Crear cuenta</string>
+    <string name="acceso_ya_tengo">Ya tengo cuenta</string>
+    <string name="acceso_no_tengo">No tengo cuenta</string>
+    <string name="acceso_email_ayuda">El que usás todos los días: ahí llega el código.</string>
+    <string name="acceso_codigo_enviado">Te mandamos un código a %1$s. Vence en %2$d minutos.</string>
+    <string name="acceso_falta_paso">El paso siguiente —cargar el código y elegir la contraseña— todavía no está construido.</string>
+    <string name="acceso_servidor">Servidor</string>
+    <string name="acceso_probando">Probando…</string>
+    <string name="acceso_sin_servidor">No hay servidor. Levantá el backend y volvé a probar.</string>
+    <string name="acceso_servidor_ok">Servidor %1$s · base %2$s · redis %3$s</string>
+    <string name="acceso_probar">Probar conexión</string>
+
+    <!-- Los códigos de error del contrato, traducidos. El servidor manda el código;
+         el texto lo pone el cliente (AGENTS.md §5). -->
+    <string name="error_invalid_credentials">Ese correo y esa contraseña no coinciden.</string>
+    <string name="error_email_taken">Ya hay una cuenta con ese correo.</string>
+    <string name="error_rate_limited">Probaste muchas veces seguidas. Esperá un rato.</string>
+    <string name="error_validation_failed">Revisá los datos: algo no tiene el formato esperado.</string>
+    <string name="error_unauthorized">Se venció la sesión. Entrá de nuevo.</string>
+    <string name="error_desconocido">No se pudo. El servidor contestó «%1$s».</string>
+    <string name="error_sin_red">Sin conexión con el servidor.</string>
+    <string name="error_respuesta_rara">El servidor contestó algo inesperado. Es un bug, no vos.</string>
+
+    <!-- Las secciones -->
+    <string name="tab_inicio">Inicio</string>
+    <string name="tab_plan">Plan</string>
+    <string name="tab_gimnasio">Gimnasio</string>
+    <string name="tab_nutricion">Nutrición</string>
+    <string name="tab_perfil">Perfil</string>
+    <string name="seccion_falta_titulo">Todavía no</string>
+    <string name="seccion_falta_cuerpo">Esta sección está diseñada pero no construida. Lo que falta está en %1$s.</string>
+    <string name="seccion_salir">Cerrar sesión</string>
+
+    <!-- ===== Flujo de acceso, fiel a design/origen/Trainer App.dc.html ===== -->
+    <string name="bien_titulo">Trainer</string>
+    <string name="bien_slide1_t">Entrená y comé según la carga del día</string>
+    <string name="bien_slide1_c">Estimaciones de hidratación, sales y geles para cada salida. Sin planillas.</string>
+    <string name="bien_slide2_t">Hidratate y reponé con una guía clara</string>
+    <string name="bien_slide2_c">Sugerencias según tu peso, la duración y la intensidad de cada salida.</string>
+    <string name="bien_slide3_t">Preparate para el día de la carrera</string>
+    <string name="bien_slide3_c">El plan se ajusta a los días y horarios que realmente tenés libres.</string>
+    <string name="bien_crear">Crear cuenta gratis</string>
+    <string name="bien_ya_tengo">Ya tengo cuenta</string>
+    <string name="bien_foto_falta">Falta la foto</string>
+    <string name="bien_ir_a_slide">Ver %1$d de %2$d</string>
+
+    <string name="login_titulo">Iniciar sesión</string>
+    <string name="login_correo">Correo electrónico</string>
+    <string name="login_correo_pista">tu@mail.com</string>
+    <string name="login_clave">Contraseña</string>
+    <string name="login_olvide">¿Olvidaste tu contraseña?</string>
+    <string name="login_entrar">Ingresar</string>
+    <string name="login_o">o</string>
+    <string name="login_google">Continuar con Google</string>
+    <string name="login_apple">Continuar con Apple</string>
+    <string name="login_no_tengo">¿No tenés cuenta?</string>
+    <string name="login_volver">Volver</string>
+
+    <string name="reg_correo_titulo">Empecemos por tu correo</string>
+    <string name="reg_correo_cuerpo">Lo validamos antes de pedirte cualquier otro dato, así no completás todo el registro para descubrir al final que había un error de tipeo. Es también la dirección con la que vas a recuperar tu plan si cambiás de teléfono.</string>
+    <string name="reg_correo_legal">Al continuar aceptás los términos y la política de privacidad. No mandamos publicidad.</string>
+    <string name="reg_correo_enviar">Enviarme el código</string>
+    <string name="reg_correo_mal">Falta el arroba o el dominio.</string>
+
+    <string name="reg_codigo_titulo">Validá tu correo</string>
+    <string name="reg_codigo_cuerpo">Enviamos un código de 6 caracteres, con números y letras, a %1$s. Puede tardar hasta un minuto; si no aparece, revisá spam. Vence a los 15 minutos.</string>
+    <string name="reg_codigo_pista">A7K2Q9</string>
+    <string name="reg_codigo_cambiar">Cambiar correo</string>
+    <string name="reg_codigo_reenviar">Reenviar en %1$s</string>
+    <string name="reg_codigo_reenviar_ya">Reenviar</string>
+    <string name="reg_codigo_validar">Validar</string>
+
+    <string name="reg_clave_titulo">Elegí una contraseña</string>
+    <string name="reg_clave_cuerpo">Al menos %1$d caracteres, con una mayúscula y un número. Es la única contraseña que te vamos a pedir: con ella entrás desde cualquier teléfono.</string>
+    <string name="reg_clave_campo">Nueva contraseña</string>
+    <string name="reg_clave_repetir">Repetir contraseña</string>
+    <string name="reg_clave_no_coincide">Las dos no coinciden.</string>
+    <string name="reg_clave_corta">Le faltan caracteres.</string>
+    <string name="reg_clave_crear">Crear mi cuenta</string>
+    <string name="reg_clave_hueco">Esta pantalla NO está en el diseño: los 13 pasos nunca piden contraseña y el contrato la exige. Es un hueco del diseño, anotado.</string>
+
+    <!-- Los codigos de error del contrato que faltaban -->
+    <string name="error_code_resend_too_soon">Recién te mandamos uno. Esperá un momento antes de pedir otro.</string>
+    <string name="error_invalid_code">Ese código no es. Fijate que sean los 6 caracteres.</string>
+    <string name="error_code_expired">El código venció. Pedí uno nuevo.</string>
+    <string name="error_weak_password">Esa contraseña es fácil de adivinar. Probá una más larga o menos común.</string>
+    <string name="error_invalid_registration_token">Se venció el registro. Empezá de nuevo desde el correo.</string>
+    <string name="error_session_revoked">Se cerró la sesión desde otro lado. Entrá de nuevo.</string>
+    <string name="error_invalid_refresh_token">Se venció la sesión. Entrá de nuevo.</string>
+    <string name="error_conflict">Eso ya estaba hecho.</string>
+    <string name="error_internal">Se rompió algo del lado del servidor. No es culpa tuya.</string>
+    <string name="error_not_found">Esa dirección no existe en el servidor.</string>
+
+    <!-- El encabezado de los 13 pasos -->
+    <string name="reg_progreso">Paso %1$d de %2$d</string>
+    <string name="reg_volver">Volver al paso anterior</string>
+    <string name="reg_correo_campo">Correo electrónico</string>
+    <string name="reg_codigo_campo">Código de 6 caracteres</string>
+    <string name="login_registrate">Registrate</string>
+    <string name="login_social_falta">Google y Apple todavía no: el servidor no tiene ese camino.</string>
+
+    <!-- La pantalla de contraseña, con el diseño de fpNew -->
+    <string name="reg_clave_mostrar">Mostrar</string>
+    <string name="reg_clave_ocultar">Ocultar</string>
+    <string name="reg_clave_regla_largo">Al menos %1$d caracteres</string>
+    <string name="reg_clave_regla_mayuscula">Una letra mayúscula</string>
+    <string name="reg_clave_regla_numero">Un número</string>
+    <string name="reg_clave_fuerza">Fuerza de la contraseña: %1$d de %2$d</string>
+    <string name="reg_clave_coincide">Las dos coinciden</string>
+
+    <!-- El aviso de salud y los terminos. El TEXTO baja de GET /legal:
+         aca solo estan los rotulos de la pantalla. -->
+    <string name="legal_seguir">Entendido, seguir</string>
+    <string name="legal_ver_terminos">Leer los términos y condiciones</string>
+    <string name="legal_volver">Volver</string>
+    <string name="legal_sin_texto">No pudimos traer el aviso de salud. Sin leerlo no se puede crear la cuenta. Probá de nuevo cuando tengas señal.</string>
+    <string name="legal_sin_revisar">Este texto todavía no lo revisó nadie con formación legal. Es un borrador y se va a reemplazar.</string>
+    <string name="error_legal_not_accepted">Hay que aceptar el aviso de salud para crear la cuenta.</string>
+    <string name="error_legal_version_stale">El aviso cambió mientras completabas el registro. Leelo de nuevo, por favor.</string>
+
+    <!-- ===== Códigos de error del contrato que faltaban traducir ===== -->
+    <string name="error_invalid_reset_token">Se venció el pedido de contraseña nueva. Empezá de nuevo desde el correo.</string>
+    <string name="error_bad_request">Ese pedido no tiene la forma que el servidor espera. Es un bug, no vos.</string>
+    <string name="error_profile_incomplete">Falta un dato del perfil para poder armar el plan.</string>
+    <string name="error_service_unavailable">El servidor está con problemas. Probá en un rato.</string>
+
+    <!-- ===== Recuperar la contraseña · fpEmail, fpCode, fpNew, fpDone ===== -->
+    <string name="fp_volver">Volver al paso anterior</string>
+
+    <string name="fp_correo_titulo">Recuperar tu contraseña</string>
+    <string name="fp_correo_cuerpo">Escribí el correo con el que creaste tu cuenta y te enviamos un código para elegir una contraseña nueva. Tu plan de entrenamiento, tus días y tu historial quedan intactos: solo cambia la forma de entrar.</string>
+    <string name="fp_correo_campo">Correo electrónico</string>
+    <string name="fp_correo_anti_enumeracion">Por seguridad, la respuesta es la misma esté o no registrado ese correo.</string>
+    <string name="fp_correo_enviar">Enviarme el código</string>
+    <string name="fp_correo_volver">Volver al inicio de sesión</string>
+
+    <string name="fp_codigo_titulo">Revisá tu correo</string>
+    <string name="fp_codigo_cuerpo">Si %1$s tiene cuenta, le llegó un código de 6 caracteres con números y letras. Puede tardar hasta un minuto; si no aparece, revisá spam o correo no deseado. Vence a los 15 minutos y sirve una sola vez.</string>
+    <string name="fp_codigo_validar">Verificar código</string>
+
+    <string name="fp_clave_titulo">Elegí una contraseña nueva</string>
+    <string name="fp_clave_cuerpo">Al menos %1$d caracteres, con una mayúscula y un número. Cuando la guardes vamos a cerrar la sesión en los otros dispositivos donde hayas entrado.</string>
+    <string name="fp_clave_guardar">Guardar contraseña</string>
+
+    <string name="fp_listo_titulo">Contraseña actualizada</string>
+    <string name="fp_listo_cuerpo">Ya está lista. Cerramos la sesión en los otros dispositivos: si no fuiste vos quien pidió el cambio, escribinos desde este mismo correo.</string>
+    <string name="fp_listo_cuenta">Cuenta</string>
+    <string name="fp_listo_cuando">Cambio hecho</string>
+    <string name="fp_listo_hoy">Hoy, %1$s</string>
+    <string name="fp_listo_entrar">Ir a mi inicio</string>
+
+    <!-- ===== Las once pantallas de perfil · regName … regDone ===== -->
+    <string name="perf_continuar">Continuar</string>
+    <string name="perf_despues">Completar después</string>
+
+    <string name="reg_nombre_titulo">¿Cómo te llamás?</string>
+    <string name="reg_nombre_cuerpo">Tu nombre y apellido van en el correo con el código para validar tu cuenta.</string>
+    <string name="reg_nombre_seguir">Continuar</string>
+    <string name="perfil_objetivos_titulo">Tus objetivos</string>
+    <string name="perfil_objetivos_cantidad">Objetivos activos: %1$d</string>
+    <string name="perfil_objetivos_guardar">Guardar objetivos</string>
+    <string name="perfil_objetivos_error">No se pudieron guardar los objetivos. Intentá de nuevo.</string>
+    <string name="plan_proximo_titulo">¿Cuál es tu próximo plan?</string>
+    <string name="plan_proximo_boton">Elegir objetivo</string>
+    <string name="plan_semanas">%1$d semanas de entrenamiento</string>
+    <string name="perf_nombre_titulo">Correo validado. ¿Cómo te llamás?</string>
+    <string name="perf_nombre_cuerpo">Usamos tu nombre para hablarte en las notificaciones y en el resumen de cada semana. El apellido solo aparece si algún día compartís tus resultados o te sumás a un grupo de entrenamiento; tu perfil arranca privado.</string>
+    <string name="perf_nombre_campo">Nombre</string>
+    <string name="perf_nombre_pista">Iván</string>
+    <string name="perf_apellido_campo">Apellido</string>
+    <string name="perf_apellido_pista">Benítez</string>
+    <string name="perf_apellido_opcional">Podés dejarlo vacío.</string>
+
+    <string name="perf_nacimiento_titulo">¡Hola, %1$s! ¿Cuándo naciste?</string>
+    <string name="perf_nacimiento_cuerpo">La edad define tus zonas de frecuencia cardíaca, el ritmo de sudoración estimado y cuántas calorías necesitás en semanas de carga alta. También nos deja compararte con tablas de rendimiento de tu categoría.</string>
+    <string name="perf_nacimiento_orden">Orden según tu idioma (%1$s): %2$s</string>
+    <string name="perf_parte_dia">día</string>
+    <string name="perf_parte_mes">mes</string>
+    <string name="perf_parte_anio">año</string>
+
+    <string name="perf_sexo_titulo">¿Con qué sexo biológico calculamos tu sudoración?</string>
+    <string name="perf_sexo_cuerpo">Las tasas de sudoración, la pérdida de sodio y el gasto calórico difieren bastante entre hombres y mujeres con el mismo peso y ritmo. Solo lo usamos para el cálculo del plan: no se muestra en tu perfil ni se comparte. Si preferís no responder, aplicamos un promedio.</string>
+    <string name="perf_sexo_femenino">Femenino</string>
+    <string name="perf_sexo_femenino_det">Menor tasa de sudoración media y distinta pérdida de sodio</string>
+    <string name="perf_sexo_masculino">Masculino</string>
+    <string name="perf_sexo_masculino_det">Mayor tasa de sudoración media para el mismo peso y ritmo</string>
+    <string name="perf_sexo_sin_declarar">Prefiero no decirlo</string>
+    <string name="perf_sexo_sin_declarar_det">Usamos un promedio de ambos para estimar tu plan</string>
+
+    <string name="perf_cuerpo_titulo">Tu peso y tu altura</string>
+    <string name="perf_cuerpo_cuerpo">El peso es la base del cálculo: litros de líquido por hora, miligramos de sodio y gramos de carbohidrato que tenés que reponer se estiman por kilo. Con la altura ajustamos el gasto energético en reposo. Podés actualizar ambos cuando quieras desde tu perfil.</string>
+    <string name="perf_peso_campo">Peso (kg)</string>
+    <string name="perf_peso_pista">72</string>
+    <string name="perf_peso_mal">Un peso entre %1$d y %2$d kg.</string>
+    <string name="perf_altura_campo">Altura (cm)</string>
+    <string name="perf_altura_pista">178</string>
+    <string name="perf_altura_mal">Una altura entre %1$d y %2$d cm.</string>
+
+    <string name="perf_deporte_titulo">¿Cuál es tu deporte principal?</string>
+    <string name="perf_deporte_cuerpo">Cada disciplina consume líquido y carbohidrato de forma distinta: en bici podés tomar más y comer sólido, corriendo conviene fraccionar. Elegí el que más entrenás; después podés sumar los otros desde tu perfil.</string>
+    <string name="perf_deporte_running">Running</string>
+    <string name="perf_deporte_running_det">Calle, pista o trail</string>
+    <string name="perf_deporte_ciclismo">Ciclismo</string>
+    <string name="perf_deporte_ciclismo_det">Ruta, gravel o MTB</string>
+    <string name="perf_deporte_trekking">Trekking</string>
+    <string name="perf_deporte_trekking_det">Montaña y travesías</string>
+    <string name="perf_deporte_triatlon">Triatlón</string>
+    <string name="perf_deporte_triatlon_det">Nado, bici y carrera</string>
+
+    <string name="perf_nivel_titulo">¿Hace cuánto entrenás?</string>
+    <string name="perf_nivel_cuerpo">Define desde qué volumen arranca tu plan y cuánto puede crecer por semana sin exponerte a lesiones. Si volvés después de un parate largo, elegí principiante: siempre se puede subir la carga más adelante.</string>
+    <string name="perf_nivel_principiante">Principiante</string>
+    <string name="perf_nivel_principiante_det">Menos de un año entrenando o volviendo después de un parate</string>
+    <string name="perf_nivel_intermedio">Intermedio</string>
+    <string name="perf_nivel_intermedio_det">1 a 3 años entrenando de forma regular</string>
+    <string name="perf_nivel_avanzado">Avanzado</string>
+    <string name="perf_nivel_avanzado_det">Más de 3 años, con competencias en el calendario</string>
+
+    <string name="perf_objetivo_titulo">¿Para qué estás entrenando?</string>
+    <string name="perf_objetivo_cuerpo">Con la fecha del evento armamos la cuenta regresiva y repartimos las semanas de carga, descarga y afinamiento. Si todavía no tenés carrera elegida, seguí sin fecha: armamos un plan de base y lo ajustamos cuando la definas.</string>
+    <string name="perf_obj_5k">5 km</string>
+    <string name="perf_obj_5k_dist">plan de 4 semanas</string>
+    <string name="perf_obj_10k">10 km</string>
+    <string name="perf_obj_10k_dist">10 km</string>
+    <string name="perf_obj_media">Media maratón</string>
+    <string name="perf_obj_media_dist">21,1 km</string>
+    <string name="perf_obj_maraton">Maratón</string>
+    <string name="perf_obj_maraton_dist">42,2 km</string>
+    <string name="perf_obj_trail">Trail de montaña</string>
+    <string name="perf_obj_trail_dist">25-50 km</string>
+    <string name="perf_obj_triatlon">Triatlón olímpico</string>
+    <string name="perf_obj_triatlon_dist">1,5 / 40 / 10 km</string>
+    <string name="perf_obj_volver">Volver a entrenar sin lesiones</string>
+    <string name="perf_obj_volver_dist">sin distancia fija</string>
+    <string name="perf_objetivo_sin_fecha">Todavía sin fecha: vamos a armar un plan de base.</string>
+    <string name="perf_objetivo_quitar_fecha">Seguir sin fecha</string>
+    <string name="perf_cal_anterior">Mes anterior</string>
+    <string name="perf_cal_siguiente">Mes siguiente</string>
+
+    <string name="perf_salud_titulo">Antes de arrancar, una sola cosa</string>
+    <string name="perf_salud_cuerpo">No somos médicos y esta app no reemplaza una consulta. Si tenés alguna condición previa, tomás medicación o hace años que no entrenás, hablá con un profesional antes de empezar el plan.</string>
+    <string name="perf_salud_parar">Pará y consultá si aparece</string>
+    <string name="perf_salud_sintoma_pecho">Dolor u opresión en el pecho</string>
+    <string name="perf_salud_sintoma_aire">Dificultad respiratoria grave o mareos</string>
+    <string name="perf_salud_sintoma_articulacion">Dolor articular que empeora mientras corrés</string>
+    <string name="perf_salud_acepto">Entiendo que Trainer da sugerencias generales y que ante cualquier síntoma tengo que parar y consultar.</string>
+
+    <string name="perf_medicion_titulo">¿Con qué medís tus salidas?</string>
+    <string name="perf_medicion_cuerpo">Si conectás tu reloj o el GPS del teléfono, ajustamos hidratación y geles con el ritmo y la frecuencia cardíaca reales, no con estimaciones. Podés saltear este paso y conectarlo más adelante desde Ajustes.</string>
+    <string name="perf_med_gps">GPS del teléfono</string>
+    <string name="perf_med_gps_det">Ritmo y distancia, sin accesorios</string>
+    <string name="perf_med_garmin">Reloj Garmin</string>
+    <string name="perf_med_garmin_det">Ritmo, pulso y altimetría</string>
+    <string name="perf_med_apple">Apple Watch y Salud</string>
+    <string name="perf_med_apple_det">Pulso, pasos y entrenamientos</string>
+    <string name="perf_med_manual">Cargo todo a mano</string>
+    <string name="perf_med_manual_det">Estimamos con peso, clima y ritmo objetivo</string>
+    <string name="perf_medicion_hueco">Esta respuesta todavía no se guarda: el contrato no tiene dónde. Está anotado como B-006 y no bloquea nada: podés seguir y conectarlo más adelante.</string>
+
+    <string name="perf_dias_titulo">¿Qué días y a qué hora entrenás?</string>
+    <string name="perf_dias_cuerpo">Esto no es un dato de perfil: es lo que dispara los avisos. Te escribimos antes de cada sesión para que prepares bidones, geles y el snack previo, y usamos tus horarios para repartir las sesiones largas en los días con más tiempo.</string>
+    <string name="perf_dias_sin_dias">Elegí al menos un día para activar los avisos.</string>
+
+    <string name="perf_listo_titulo">Todo listo, %1$s</string>
+    <string name="perf_listo_cuerpo">Tu perfil quedó completo. Con estos datos ya calculamos hidratación, sales y carbohidratos para cada sesión, y vas a recibir el aviso de preparación antes de cada entreno.</string>
+    <string name="perf_listo_nacimiento">Nacimiento</string>
+    <string name="perf_listo_deporte">Deporte</string>
+    <string name="perf_listo_nivel">Nivel</string>
+    <string name="perf_listo_dias">Días</string>
+    <string name="perf_listo_objetivo">Objetivo</string>
+    <string name="perf_listo_vacio">—</string>
+    <string name="perf_listo_ir">Ir a mi inicio</string>
+
+    <plurals name="perf_dias_avisos">
+        <item quantity="one">Vas a recibir 1 aviso por semana, %2$d min antes de la sesión.</item>
+        <item quantity="other">Vas a recibir %1$d avisos por semana, %2$d min antes de cada sesión.</item>
+    </plurals>
+    <plurals name="perf_objetivo_con_fecha">
+        <item quantity="one">%1$s · falta 1 semana</item>
+        <item quantity="other">%1$s · faltan %2$d semanas</item>
+    </plurals>
+    <string name="legal_ir_al_login">Ya tengo cuenta, iniciar sesión</string>
+    <string name="perf_nacimiento_sin_elegir">Girá la rueda para elegir tu fecha. La que se ve todavía no es tu respuesta.</string>
+    <string name="perf_objetivo_esta_semana">%1$s · es esta semana</string>
+</resources>

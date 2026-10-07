@@ -1,0 +1,172 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  Los textos de las pantallas de gimnasio. AGENTS.md §10: cero texto que no se
+  pueda traducir. Ninguna cadena vive en el .kt.
+
+  Este values/ es el DEFAULT y está en español rioplatense: es el idioma del
+  producto. values-en/ tiene el inglés. Un teléfono en portugués o japonés cae
+  acá, en español — pt-BR y ja-JP están diseñados (design/nuevo/gimnasio.dc.html
+  los tiene completos) pero NO traducidos en la app: entran en la fase 6g.
+
+  Que el diseño soporte cuatro locales no significa que la app publique cuatro
+  idiomas. Son dos decisiones distintas y sólo está tomada la del diseño.
+-->
+<resources>
+    <!-- Encabezado de la captura de serie -->
+    <string name="gym_contador_ejercicio">Ejercicio %1$d de %2$d</string>
+    <string name="gym_ejercicio_anterior">Ejercicio anterior</string>
+    <string name="gym_ejercicio_siguiente">Ejercicio siguiente</string>
+
+    <!-- Lo que pide el plan -->
+    <string name="gym_el_plan_pide">El plan pide</string>
+    <string name="gym_peso_por_serie">Peso por serie</string>
+    <string name="gym_unidad_reps">reps</string>
+    <string name="gym_unidad_segundos">s</string>
+    <string name="gym_unidad_kilos">kg</string>
+    <string name="gym_peso_corporal">peso corporal</string>
+
+    <!-- El strip de series -->
+    <string name="gym_series">Series</string>
+    <string name="gym_progreso">%1$d/%2$d series</string>
+    <string name="gym_chip_hecha">hecha</string>
+    <string name="gym_chip_ahora">ahora</string>
+    <string name="gym_chip_pendiente">pendiente</string>
+    <string name="gym_chip_salteada">salteada</string>
+    <string name="gym_chip_corrigiendo">corrigiendo</string>
+    <string name="gym_chip_descripcion">Serie %1$d, %2$s. Tocá para corregirla.</string>
+
+    <!-- Los tres casos -->
+    <string name="gym_saltear">Saltear</string>
+    <string name="gym_serie_extra">Serie extra</string>
+
+    <!-- Los campos -->
+    <string name="gym_campo_reps">Repeticiones</string>
+    <string name="gym_campo_segundos">Segundos</string>
+    <string name="gym_campo_peso">Peso (kg)</string>
+    <string name="gym_campo_lastre">Lastre (kg)</string>
+    <string name="gym_campo_pausa">Pausa (seg)</string>
+    <string name="gym_paso_de_a_uno">de a 1</string>
+    <string name="gym_paso_kilos">de a 2,5 kg</string>
+    <string name="gym_paso_segundos">de a 5 s</string>
+    <string name="gym_menos_reps">Una repetición menos</string>
+    <string name="gym_mas_reps">Una repetición más</string>
+    <string name="gym_menos_peso">Bajar el peso</string>
+    <string name="gym_mas_peso">Subir el peso</string>
+
+    <!-- Corregir la anterior -->
+    <string name="gym_anterior_titulo">Serie %1$d</string>
+    <string name="gym_corregir">Corregir</string>
+
+    <!-- El botón que confirma: dice lo que va a guardar -->
+    <string name="gym_confirmar_serie">Serie %1$d hecha</string>
+    <string name="gym_confirmar_correccion">Corregir la serie %1$d</string>
+    <string name="gym_valores_reps_peso">%1$s × %2$s</string>
+    <string name="gym_valores_solo_reps">%1$s</string>
+    <string name="gym_ejercicio_completo">Ejercicio completo</string>
+    <string name="gym_ir_al_siguiente">Ir al ejercicio siguiente</string>
+    <string name="gym_terminar">Terminar la sesión de gimnasio</string>
+
+    <!-- Descanso -->
+    <string name="gym_descanso">Descanso</string>
+    <string name="gym_descanso_mas">+%1$d s</string>
+    <string name="gym_descanso_saltar">Saltar</string>
+    <string name="gym_descanso_terminado">Se terminó el descanso</string>
+
+    <!-- Teclado numérico -->
+    <string name="gym_teclado_listo">Listo</string>
+    <string name="gym_teclado_borrar">Borrar</string>
+    <string name="gym_teclado_coma">,</string>
+
+    <!--
+      TODO(catalogo): rutina de ejemplo, SOLO para poder mirar la pantalla en un
+      telefono. El catalogo de ejercicios es DATO y viene del servidor (AGENTS.md
+      §9.1): tiene que poder ir de 50 a 500 entradas sin desplegar la app, asi que
+      estos nombres NO pueden quedar como recursos. Se borran en el commit que
+      conecte GET /ejercicios.
+    -->
+    <string name="gym_demo_press">Press plano con barra</string>
+    <string name="gym_demo_dominadas">Dominadas</string>
+    <string name="gym_demo_remo">Remo con barra</string>
+    <string name="gym_demo_bulgara">Sentadilla búlgara</string>
+    <string name="gym_demo_talones">Elevación de talones</string>
+    <string name="gym_demo_plancha">Plancha</string>
+
+    <!-- ===== La tabla de series (rediseño del 2026-09-08: una fila por serie) ===== -->
+    <string name="gym_col_serie">Serie</string>
+    <string name="gym_col_previa">Previa</string>
+    <string name="gym_col_kg">Kg</string>
+    <string name="gym_col_reps">Reps</string>
+    <string name="gym_col_seg">Seg</string>
+    <string name="gym_sin_previa">—</string>
+    <string name="gym_previa_valores">%1$s × %2$s</string>
+    <string name="gym_marcar">Marcar la serie %1$d como hecha</string>
+    <string name="gym_desmarcar">Desmarcar la serie %1$d</string>
+    <string name="gym_editar_carga">Peso de la serie %1$d</string>
+    <string name="gym_editar_reps">Repeticiones de la serie %1$d</string>
+    <string name="gym_anadir_serie">Añadir serie</string>
+
+    <!-- Acciones del ejercicio -->
+    <string name="gym_accion_tutorial">Tutorial</string>
+    <string name="gym_accion_reemplazar">Reemplazar</string>
+    <string name="gym_accion_notas">Notas</string>
+    <string name="gym_accion_descanso">Descanso</string>
+    <string name="gym_accion_sin_hacer">Todavía no está hecho</string>
+
+    <!-- El hueco de la animación -->
+    <string name="gym_animacion_falta">Falta la animación</string>
+    <string name="gym_animacion_detalle">El lugar ya está medido. Faltan los archivos.</string>
+    <string name="gym_ir_a_ejercicio">Ir a %1$s</string>
+
+    <!-- Pantalla de antes de entrenar -->
+    <string name="gym_rutina_titulo">Tren superior y core</string>
+    <string name="gym_rutina_resumen">%1$d ejercicios · %2$d min</string>
+    <string name="gym_distribucion">Distribución</string>
+    <string name="gym_empezar">Empezar entrenamiento</string>
+    <string name="gym_prescripcion_reps">%1$d series × %2$d reps</string>
+    <string name="gym_prescripcion_tiempo">%1$d series × %2$d s</string>
+    <string name="gym_reemplazar_ejercicio">Reemplazar %1$s</string>
+    <string name="gym_sesion_cronometro">Sesión</string>
+    <string name="gym_terminar_corto">Terminar</string>
+    <string name="gym_volver">Volver a la rutina</string>
+
+    <!-- TODO(catalogo): los musculos tambien son dato del servidor. Ver la nota de arriba. -->
+    <string name="gym_musculo_pecho">Pecho</string>
+    <string name="gym_musculo_espalda">Espalda</string>
+    <string name="gym_musculo_cuadriceps">Cuádriceps</string>
+    <string name="gym_musculo_gluteos">Glúteos</string>
+    <string name="gym_musculo_gemelos">Gemelos</string>
+    <string name="gym_musculo_core">Core</string>
+    <string name="gym_porcentaje">%1$d %%</string>
+    <string name="gym_lista_ejercicios">Ejercicios</string>
+    <string name="gym_prescripcion_rango">%1$d series × %2$d–%3$d reps</string>
+    <!-- Borrar una serie: gesto + boton + deshacer -->
+    <string name="gym_opciones_serie">Opciones de la serie %1$d</string>
+    <string name="gym_menu_serie">Serie %1$d</string>
+    <string name="gym_borrar_serie">Borrar la serie</string>
+    <string name="gym_saltear_serie">Saltear la serie</string>
+    <string name="gym_borrar">Borrar</string>
+    <string name="gym_serie_borrada">Serie borrada</string>
+    <string name="gym_deshacer">Deshacer</string>
+    <string name="gym_cerrar">Cerrar</string>
+    <string name="gym_como_se_borra">Arrastrá para borrar · o tocá el número</string>
+    <!-- Descanso configurable -->
+    <string name="gym_descanso_chip">%1$s</string>
+    <string name="gym_descanso_titulo">Descanso entre series</string>
+    <string name="gym_descanso_sin">Sin descanso</string>
+    <string name="gym_descanso_opcion">%1$s</string>
+
+    <!-- La rutina de verdad: lo que se ve cuando no la hay, y el aviso de sincronización -->
+    <string name="gym_buscando_titulo">Buscando la rutina de hoy…</string>
+    <string name="gym_sin_rutina_sin_red_titulo">No hay una rutina de hoy guardada</string>
+    <string name="gym_sin_rutina_sin_red_detalle">Y no hay conexión para bajarla. Cuando vuelva la señal, aparece sola.</string>
+    <string name="gym_sin_rutina_perfil_titulo">Tu plan necesita más datos del perfil</string>
+    <string name="gym_sin_rutina_perfil_detalle">Falta el objetivo, el nivel, el deporte, la zona horaria o los días de entrenamiento.</string>
+    <string name="gym_sin_rutina_titulo">No se pudo traer la rutina de hoy</string>
+    <string name="gym_sin_rutina_detalle">El servidor contestó algo que la app no esperaba. Probá de nuevo en un rato.</string>
+    <string name="gym_rutina_vacia_titulo">Hoy no hay ejercicios</string>
+    <string name="gym_rutina_vacia_detalle">La rutina de hoy no trae ejercicios.</string>
+    <string name="gym_reintentar">Reintentar</string>
+    <string name="gym_rutina_resumen_sin_minutos">%1$d ejercicios</string>
+    <string name="gym_aviso_sin_conexion">Sin conexión: es la rutina guardada. Lo que registres queda en el teléfono.</string>
+    <string name="gym_aviso_sin_subir">%1$d series sin subir. Suben solas cuando haya señal.</string>
+</resources>

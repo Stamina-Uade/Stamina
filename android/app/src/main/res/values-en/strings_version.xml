@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="version_obligatoria_titulo">This app needs an update</string>
+    <string name="version_obligatoria_cuerpo">This version can\'t continue. Update it from the store to get back in.</string>
+    <string name="version_recomendada_titulo">A new version is available</string>
+    <string name="version_recomendada_cuerpo">You can keep using this one, but updating is a good idea.</string>
+    <string name="version_actualizar">Update</string>
+    <string name="version_ahora_no">Not now</string>
+    <string name="version_sin_tienda">Couldn\'t open the store. Look for the app on Google Play.</string>
+</resources>

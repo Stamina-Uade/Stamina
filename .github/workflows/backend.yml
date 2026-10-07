@@ -1,0 +1,100 @@
+# .github/workflows/backend.yml
+#
+# AGENTS.md §1.1 y §13: el CI compila SÓLO lo que cambió. Sin el filtro por path,
+# un commit que toca una coma del README dispara cuatro builds y se come los
+# minutos del mes.
+#
+# 🛑 Este job NO despliega. §13: "se compila afuera, se despliega adentro", y el
+# despliegue todavía no existe — falta todo lo de docs/INFRA-EXTERNA.md.
+
+name: backend
+
+on:
+  push:
+    paths:
+      - "backend/**"
+      - "shared/api/**"
+      # El backend LEE estos archivos al arrancar y en los tests: guardarraíles,
+      # parámetros de nutrición, textos legales y el catálogo (AGENTS.md §9).
+      - "shared/datos/**"
+      - "scripts/generar-esquemas.mjs"
+      - "package.json"
+      - ".github/workflows/backend.yml"
+  pull_request:
+    paths:
+      - "backend/**"
+      - "shared/api/**"
+      - "shared/datos/**"
+      - "scripts/generar-esquemas.mjs"
+      - "package.json"
+      - ".github/workflows/backend.yml"
+
+jobs:
+  test:
+    # Runner HOSTED, no el self-hosted del EC2: ahí viven HonneLink y KARPLAST, y
+    # un build les come CPU, RAM y disco (§2.3.4).
+    runs-on: ubuntu-latest
+
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_USER: trainer
+          POSTGRES_PASSWORD: trainer
+          POSTGRES_DB: trainer_db
+        ports: ["5432:5432"]
+        options: >-
+          --health-cmd "pg_isready -U trainer -d trainer_db"
+          --health-interval 5s --health-timeout 3s --health-retries 10
+      redis:
+        image: redis:7-alpine
+        ports: ["6379:6379"]
+        options: >-
+          --health-cmd "redis-cli ping"
+          --health-interval 5s --health-timeout 3s --health-retries 10
+
+    env:
+      NODE_ENV: test
+      DATABASE_URL: postgres://trainer:trainer@localhost:5432/trainer_db
+      REDIS_URL: redis://localhost:6379
+      REDIS_DB: "3"
+      REDIS_PREFIX: "trainer-ci:"
+      JWT_SECRET: solo-para-ci-un-secreto-de-mas-de-32-bytes-de-largo
+      MAIL_PROVIDER: log
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: npm
+          cache-dependency-path: |
+            package-lock.json
+            backend/package-lock.json
+
+      # El contrato es la fuente de verdad de los cuatro clientes (§4.2): si no
+      # valida, no vale la pena compilar nada.
+      - name: Validar el contrato
+        run: |
+          npm ci
+          npx --yes @redocly/cli@1 lint --config shared/api/.redocly.yaml shared/api/openapi.yaml
+
+      - name: Instalar
+        working-directory: backend
+        run: npm ci
+
+      # `build` corre el generador, así que esto también verifica que el código
+      # siga compilando contra el contrato ACTUAL. Si alguien cambia openapi.yaml y
+      # rompe un esquema, falla acá y no en producción.
+      - name: Compilar (genera los esquemas desde el contrato)
+        working-directory: backend
+        run: npm run build
+
+      - name: Migrar
+        working-directory: backend
+        run: npm run migrar
+
+      - name: Tests
+        working-directory: backend
+        run: node --test dist/test/*.test.js

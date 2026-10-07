@@ -1,0 +1,85 @@
+# .gitattributes — AGENTS.md §10.3
+#
+# El repositorio se trabaja desde Windows y desde macOS. Sin esto, cada commit
+# reescribe archivos enteros por los finales de linea y los diffs se vuelven
+# ilegibles. En el repositorio SIEMPRE se guarda LF.
+
+* text=auto eol=lf
+
+# --- Excepciones que TIENEN que ser CRLF -------------------------------------
+# Los .bat/.cmd de Windows fallan con LF.
+*.bat  text eol=crlf
+*.cmd  text eol=crlf
+
+# --- Excepciones que TIENEN que ser LF ---------------------------------------
+# §10.3: "Los scripts .sh tienen que ser LF o el servidor los rechaza con un
+# error que no menciona los saltos de linea."
+*.sh      text eol=lf
+gradlew   text eol=lf
+*.bash    text eol=lf
+
+# --- Codigo y configuracion (explicito, para no depender de la heuristica) ----
+*.kt      text eol=lf diff=kotlin
+*.kts     text eol=lf diff=kotlin
+*.java    text eol=lf diff=java
+*.swift   text eol=lf diff=swift
+*.md      text eol=lf diff=markdown
+*.yaml    text eol=lf
+*.yml     text eol=lf
+*.json    text eol=lf
+*.xml     text eol=lf
+*.sql     text eol=lf
+*.toml    text eol=lf
+*.properties text eol=lf
+*.pro     text eol=lf
+*.svg     text eol=lf
+.gitignore      text eol=lf
+.gitattributes  text eol=lf
+.editorconfig   text eol=lf
+
+# Xcode: se guarda como texto LF. La mitigacion de conflictos de merge sigue
+# SIN DECIDIR (AGENTS.md §10.3, hueco abierto): no se fija aca una estrategia
+# de merge hasta que esa decision este escrita en docs/decisiones/.
+*.pbxproj        text eol=lf
+*.xcscheme       text eol=lf
+*.plist          text eol=lf
+
+# --- Binarios: nunca se tocan ni se intenta diffearlos ------------------------
+*.png   binary
+*.jpg   binary
+*.jpeg  binary
+*.gif   binary
+*.webp  binary
+*.ico   binary
+*.icns  binary
+*.pdf   binary
+*.ttf   binary
+*.otf   binary
+*.woff  binary
+*.woff2 binary
+*.zip   binary
+*.gz    binary
+*.tgz   binary
+*.7z    binary
+*.jar   binary
+*.aar   binary
+*.war   binary
+*.apk   binary
+*.aab   binary
+*.ipa   binary
+*.so    binary
+*.dylib binary
+*.a     binary
+*.class binary
+*.dex   binary
+*.mp3   binary
+*.mp4   binary
+*.mov   binary
+*.webm  binary
+*.jks      binary
+*.keystore binary
+*.p12      binary
+*.cer      binary
+*.mobileprovision binary
+*.car   binary
+*.xcuserstate binary

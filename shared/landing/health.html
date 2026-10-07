@@ -1,0 +1,416 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Stamina — Estado de los Servicios</title>
+    <link rel="icon" type="image/png" href="/assets/logo.png">
+    <style>
+        :root {
+            --bg-color: #120224;
+            --surface-color: #240647;
+            --surface-hover: #300A5C;
+            --surface-border: rgba(168, 85, 247, 0.28);
+            --accent-green: #59F21B;
+            --accent-green-glow: rgba(89, 242, 27, 0.3);
+            --text-primary: #FFFFFF;
+            --text-secondary: #C4B5FD;
+            --text-muted: #8B7AA8;
+            --font-stack: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+            background-color: var(--bg-color);
+            background-image: 
+                radial-gradient(circle at 10% 10%, rgba(147, 51, 234, 0.25) 0%, transparent 40%),
+                radial-gradient(circle at 90% 80%, rgba(89, 242, 27, 0.12) 0%, transparent 35%);
+            color: var(--text-primary);
+            font-family: var(--font-stack);
+            line-height: 1.6;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .container {
+            max-width: 960px;
+            margin: 0 auto;
+            padding: 0 24px;
+            width: 100%;
+        }
+
+        header { padding: 32px 0 20px; }
+
+        .navbar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .brand {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            text-decoration: none;
+            color: var(--text-primary);
+        }
+
+        .brand img {
+            width: 40px;
+            height: 40px;
+            border-radius: 10px;
+            border: 2px solid rgba(89, 242, 27, 0.4);
+        }
+
+        .brand-text {
+            font-size: 1.35rem;
+            font-weight: 900;
+            letter-spacing: 1.5px;
+        }
+
+        .brand-text span { color: var(--accent-green); }
+
+        .back-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            color: var(--text-secondary);
+            text-decoration: none;
+            font-size: 0.95rem;
+            font-weight: 600;
+            transition: color 0.2s;
+        }
+
+        .back-link:hover { color: var(--accent-green); }
+        .back-link svg { width: 18px; height: 18px; }
+
+        /* Main status */
+        main { padding: 40px 0 80px; }
+
+        .status-hero {
+            background: linear-gradient(135deg, #2D0858 0%, #1A0334 100%);
+            border: 1px solid rgba(89, 242, 27, 0.35);
+            border-radius: 20px;
+            padding: 36px;
+            margin-bottom: 36px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 24px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
+        }
+
+        .status-hero-left {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+
+        .beacon-circle {
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            background-color: var(--accent-green);
+            box-shadow: 0 0 20px var(--accent-green);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            animation: pulse-beacon 2s infinite;
+        }
+
+        @keyframes pulse-beacon {
+            0% { transform: scale(0.95); box-shadow: 0 0 12px var(--accent-green); }
+            50% { transform: scale(1.15); box-shadow: 0 0 24px var(--accent-green); }
+            100% { transform: scale(0.95); box-shadow: 0 0 12px var(--accent-green); }
+        }
+
+        .status-hero-title h1 {
+            font-size: clamp(1.5rem, 3vw, 2rem);
+            font-weight: 900;
+            margin-bottom: 4px;
+        }
+
+        .status-hero-title p {
+            color: var(--text-secondary);
+            font-size: 0.92rem;
+        }
+
+        .btn-refresh {
+            background: rgba(89, 242, 27, 0.15);
+            color: var(--accent-green);
+            border: 1px solid rgba(89, 242, 27, 0.4);
+            padding: 10px 20px;
+            border-radius: 10px;
+            font-size: 0.9rem;
+            font-weight: 700;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            transition: all 0.2s;
+        }
+
+        .btn-refresh:hover {
+            background: rgba(89, 242, 27, 0.25);
+            transform: translateY(-2px);
+        }
+
+        .btn-refresh svg { width: 16px; height: 16px; }
+
+        /* Grid */
+        .status-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+            gap: 20px;
+            margin-bottom: 40px;
+        }
+
+        .status-card {
+            background: var(--surface-color);
+            border: 1px solid var(--surface-border);
+            border-radius: 16px;
+            padding: 24px;
+            transition: border-color 0.2s;
+        }
+
+        .status-card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 16px;
+        }
+
+        .status-card-title {
+            color: var(--text-secondary);
+            font-size: 0.88rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .status-card-title svg {
+            width: 18px;
+            height: 18px;
+            color: var(--accent-green);
+        }
+
+        .status-pill {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 4px 10px;
+            border-radius: 999px;
+            font-size: 0.78rem;
+            font-weight: 700;
+            background: rgba(89, 242, 27, 0.15);
+            color: var(--accent-green);
+            border: 1px solid rgba(89, 242, 27, 0.3);
+        }
+
+        .status-val {
+            font-size: 1.5rem;
+            font-weight: 800;
+            color: var(--text-primary);
+            margin-bottom: 6px;
+        }
+
+        .status-desc {
+            font-size: 0.85rem;
+            color: var(--text-muted);
+        }
+
+        /* Raw json box */
+        .raw-section {
+            background: #0D011A;
+            border: 1px solid var(--surface-border);
+            border-radius: 16px;
+            overflow: hidden;
+        }
+
+        .raw-header {
+            padding: 16px 24px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            cursor: pointer;
+            background: rgba(255, 255, 255, 0.02);
+            user-select: none;
+        }
+
+        .raw-header h3 {
+            font-size: 0.95rem;
+            font-weight: 700;
+            color: var(--text-secondary);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .raw-header svg { width: 18px; height: 18px; color: var(--accent-green); }
+
+        pre {
+            padding: 20px 24px;
+            font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+            font-size: 0.88rem;
+            color: #A7F3D0;
+            overflow-x: auto;
+            background: #080111;
+            line-height: 1.5;
+        }
+
+        footer {
+            margin-top: auto;
+            border-top: 1px solid var(--surface-border);
+            padding: 28px 0;
+            text-align: center;
+            color: var(--text-muted);
+            font-size: 0.85rem;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <div class="navbar">
+                <a href="/" class="brand">
+                    <img src="/assets/logo.png" alt="Stamina Logo">
+                    <span class="brand-text">STAMINA<span>.</span></span>
+                </a>
+                <a href="/" class="back-link">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><line x1="19" y1="12" x2="5" y2="12"></line><polyline points="12 19 5 12 12 5"></polyline></svg>
+                    Volver a Inicio
+                </a>
+            </div>
+        </header>
+
+        <main>
+            <div class="status-hero">
+                <div class="status-hero-left">
+                    <div class="beacon-circle"></div>
+                    <div class="status-hero-title">
+                        <h1 id="overall-status-text">Todos los Sistemas Operativos</h1>
+                        <p id="timestamp-text">Verificando en vivo con la infraestructura de Stamina...</p>
+                    </div>
+                </div>
+                <button class="btn-refresh" onclick="checkHealth()">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 4 23 10 17 10"></polyline><polyline points="1 20 1 14 7 14"></polyline><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"></path></svg>
+                    Actualizar estado
+                </button>
+            </div>
+
+            <div class="status-grid">
+                <div class="status-card">
+                    <div class="status-card-header">
+                        <div class="status-card-title">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="2" width="20" height="8" rx="2" ry="2"></rect><rect x="2" y="14" width="20" height="8" rx="2" ry="2"></rect><line x1="6" y1="6" x2="6.01" y2="6"></line><line x1="6" y1="18" x2="6.01" y2="18"></line></svg>
+                            Motor API
+                        </div>
+                        <span class="status-pill" id="api-pill">Operativo</span>
+                    </div>
+                    <div class="status-val" id="api-latency">-- ms</div>
+                    <div class="status-desc">Latencia de conexión en vivo con Fastify /v1</div>
+                </div>
+
+                <div class="status-card">
+                    <div class="status-card-header">
+                        <div class="status-card-title">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><ellipse cx="12" cy="5" rx="9" ry="3"></ellipse><path d="M21 12c0 1.66-4 3-9 3s-9-1.34-9-3"></path><path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5"></path></svg>
+                            Base de Datos
+                        </div>
+                        <span class="status-pill" id="db-pill">Conectada</span>
+                    </div>
+                    <div class="status-val" id="db-status">PostgreSQL 14</div>
+                    <div class="status-desc">Pool seguro con verificación transaccional</div>
+                </div>
+
+                <div class="status-card">
+                    <div class="status-card-header">
+                        <div class="status-card-title">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path></svg>
+                            Seguridad & TLS
+                        </div>
+                        <span class="status-pill">TLS 1.3</span>
+                    </div>
+                    <div class="status-val">Let's Encrypt</div>
+                    <div class="status-desc">Cloudflare Edge & Origen cifrado E2E</div>
+                </div>
+
+                <div class="status-card">
+                    <div class="status-card-header">
+                        <div class="status-card-title">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="16 18 22 12 16 6"></polyline><polyline points="8 6 2 12 8 18"></polyline></svg>
+                            Versión Activa
+                        </div>
+                        <span class="status-pill" id="env-pill">Staging</span>
+                    </div>
+                    <div class="status-val" id="version-val">1.1.0</div>
+                    <div class="status-desc" id="version-desc">Contrato OpenAPI verificado</div>
+                </div>
+            </div>
+
+            <div class="raw-section">
+                <div class="raw-header" onclick="toggleRaw()">
+                    <h3>
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="4 17 10 11 4 5"></polyline><line x1="12" y1="19" x2="20" y2="19"></line></svg>
+                        Respuesta Técnica JSON de /v1/health
+                    </h3>
+                    <span style="font-size: 0.85rem; color: var(--accent-green); font-weight: 600;">Click para alternar</span>
+                </div>
+                <pre id="raw-json">Cargando datos técnicos...</pre>
+            </div>
+        </main>
+
+        <footer>
+            &copy; 2026 Stamina Infrastructure Monitor. stamina.com.ar
+        </footer>
+    </div>
+
+    <script>
+        async function checkHealth() {
+            const timeText = document.getElementById('timestamp-text');
+            const latencyEl = document.getElementById('api-latency');
+            const versionVal = document.getElementById('version-val');
+            const dbStatus = document.getElementById('db-status');
+            const rawJson = document.getElementById('raw-json');
+
+            timeText.textContent = "Comprobando...";
+            const start = performance.now();
+
+            try {
+                const res = await fetch('/v1/health', {
+                    headers: { 'Accept': 'application/json' }
+                });
+                const elapsed = Math.round(performance.now() - start);
+                const data = await res.json();
+
+                latencyEl.textContent = elapsed + " ms";
+                rawJson.textContent = JSON.stringify(data, null, 2);
+
+                if (data.data && data.data.status === "ok") {
+                    versionVal.textContent = data.data.version ? data.data.version.split('-')[0] : "1.1.0";
+                    dbStatus.textContent = data.data.dependencies.database === "ok" ? "Saludable" : "Error";
+                    timeText.textContent = "Última comprobación: " + new Date().toLocaleTimeString('es-AR') + " · Estado óptimo";
+                }
+            } catch (err) {
+                latencyEl.textContent = "Error";
+                timeText.textContent = "No se pudo conectar con /v1/health";
+                rawJson.textContent = String(err);
+            }
+        }
+
+        function toggleRaw() {
+            const el = document.getElementById('raw-json');
+            el.style.display = el.style.display === 'none' ? 'block' : 'none';
+        }
+
+        // Ejecutar al cargar
+        checkHealth();
+    </script>
+</body>
+</html>

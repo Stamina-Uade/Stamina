@@ -1,0 +1,109 @@
+{
+  "data": [
+    {
+      "id": "abduccion-cadera-maquina",
+      "name": "Abducción de cadera en máquina",
+      "pattern": "cadera",
+      "equipment": "maquina",
+      "side": "bilateral",
+      "unit": "reps",
+      "muscles": [
+        {
+          "id": "abductor",
+          "role": "principal"
+        },
+        {
+          "id": "gluteo",
+          "role": "secundario"
+        }
+      ],
+      "substitutes": [
+        {
+          "id": "curl-nordico",
+          "kind": "mismo_patron"
+        },
+        {
+          "id": "puente-gluteo",
+          "kind": "mismo_patron"
+        },
+        {
+          "id": "buenos-dias",
+          "kind": "mismo_patron"
+        }
+      ],
+      "joints": [
+        "cadera"
+      ]
+    },
+    {
+      "id": "aduccion-cadera-maquina",
+      "name": "Aducción de cadera en máquina",
+      "pattern": "cadera",
+      "equipment": "maquina",
+      "side": "bilateral",
+      "unit": "reps",
+      "muscles": [
+        {
+          "id": "aductor",
+          "role": "principal"
+        }
+      ],
+      "substitutes": [
+        {
+          "id": "curl-nordico",
+          "kind": "mismo_patron"
+        },
+        {
+          "id": "puente-gluteo",
+          "kind": "mismo_patron"
+        },
+        {
+          "id": "buenos-dias",
+          "kind": "mismo_patron"
+        }
+      ],
+      "joints": [
+        "cadera"
+      ]
+    },
+    {
+      "id": "aperturas-mancuernas",
+      "name": "Aperturas con mancuernas",
+      "pattern": "empuje-horizontal",
+      "equipment": "mancuernas",
+      "side": "bilateral",
+      "unit": "reps",
+      "muscles": [
+        {
+          "id": "pectoral",
+          "role": "principal"
+        },
+        {
+          "id": "deltoides-anterior",
+          "role": "secundario"
+        }
+      ],
+      "substitutes": [
+        {
+          "id": "flexiones",
+          "kind": "mismo_patron"
+        },
+        {
+          "id": "flexiones-inclinadas",
+          "kind": "mismo_patron"
+        },
+        {
+          "id": "flexiones-diamante",
+          "kind": "mismo_patron"
+        }
+      ],
+      "joints": [
+        "hombro"
+      ]
+    }
+  ],
+  "pagination": {
+    "next_cursor": "WyJhcGVydHVyYXMtbWFuY3Vlcm5hcyJd",
+    "has_more": true
+  }
+}

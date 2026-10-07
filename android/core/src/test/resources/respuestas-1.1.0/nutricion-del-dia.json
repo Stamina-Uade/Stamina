@@ -1,0 +1,35 @@
+{
+  "data": {
+    "date_ms": 1789009200000,
+    "consumed": {
+      "kcal": 420,
+      "carbs_g": 72,
+      "protein_g": 12,
+      "fat_g": 9
+    },
+    "meals": [
+      {
+        "id": "063349d2-0a4b-45c5-9cf6-c54d692ea7ad",
+        "eaten_at_ms": 1789033542979,
+        "name": "Avena con banana",
+        "kcal": 420,
+        "carbs_g": 72,
+        "protein_g": 12,
+        "fat_g": 9,
+        "created_at_ms": 1789033544452,
+        "updated_at_ms": 1789033544452
+      }
+    ],
+    "targets": {
+      "kcal": 2750,
+      "carbs_g": 360,
+      "protein_g": 115,
+      "fat_g": 94,
+      "water_ml": 3132,
+      "sodium_mg": 2428,
+      "day_load": "baja",
+      "adjusted": false,
+      "provisional": true
+    }
+  }
+}

@@ -1,0 +1,109 @@
+{
+  "_meta": {
+    "version": "0.1.0",
+    "fecha": "2026-09-08",
+
+    "_ESTADO": "🛑 PROVISIONAL. NINGUN VALOR DE ESTE ARCHIVO FUE REVISADO POR UNA PERSONA CON FORMACION.",
+
+    "_que_es_esto": "Todos los numeros que AGENTS.md 9.2 exige y que 'se hacen cumplir en el servidor'. Estan aca y NO en el codigo para que cambiarlos sea editar un archivo, no tocar logica ni volver a desplegar.",
+
+    "_quien_los_puso": "El agente, el 2026-09-08, a pedido de Ivan, para poder construir y probar sin quedar bloqueado. NO SON UNA RECOMENDACION. Ni el agente ni Ivan tienen formacion para fijarlos.",
+
+    "_criterio_con_el_que_se_eligieron": "ERRAR PARA EL LADO SEGURO. Donde habia duda se eligio el valor MAS RESTRICTIVO, no el mas comodo. Si el numero esta mal, el error es que la app le niegue a alguien un objetivo agresivo, no que se lo conceda. Un profesional probablemente los AFLOJE; eso es una decision informada. Al reves seria un dano.",
+
+    "_como_se_cambia": "1) Edita 'valor'. 2) Poné 'estado' en 'revisado'. 3) Llena 'revisado_por', 'revisado_en' y 'fuente'. Nada mas. No hay que tocar codigo ni desplegar de nuevo.",
+
+    "_que_pasa_mientras_no_se_revisen": "EL BACKEND SE NIEGA A ARRANCAR EN PRODUCCION si queda un solo valor en 'provisional'. En desarrollo y en tests arranca igual, con un aviso. Es lo que hace que estos numeros no puedan llegar a una persona real por descuido.",
+
+    "_lo_que_NO_esta_y_no_se_invento": "Los telefonos y recursos de ayuda por pais. Un numero de ayuda equivocado es un dano directo, asi que la lista esta VACIA y hay que llenarla con fuentes oficiales."
+  },
+
+  "valores": {
+    "piso_calorico_absoluto_kcal": {
+      "valor": 1500,
+      "unidad": "kcal por dia",
+      "estado": "provisional",
+      "por_que_este_numero": "Las cifras que se citan habitualmente como piso en contextos de consumo son 1200 para mujeres y 1500 para varones. Se toma 1500 PARA TODO EL MUNDO, que es el mas alto de los dos, o sea el mas protector. No es una recomendacion clinica: es un tope de seguridad puesto alto a proposito.",
+      "fuente": null,
+      "revisado_por": null,
+      "revisado_en": null
+    },
+
+    "piso_calorico_relativo_bmr": {
+      "valor": 1.2,
+      "unidad": "multiplicador del metabolismo basal",
+      "estado": "provisional",
+      "por_que_este_numero": "El codigo Android original usa 1.15. Se sube a 1.2 por el criterio de errar para el lado seguro. OJO: un piso relativo NO alcanza solo, porque no protege a quien tiene un basal bajo. Por eso convive con el piso absoluto y GANA EL MAYOR DE LOS DOS.",
+      "fuente": "android/app/.../NutritionCalculator.kt, sin verificar",
+      "revisado_por": null,
+      "revisado_en": null
+    },
+
+    "techo_deficit_kcal": {
+      "valor": 400,
+      "unidad": "kcal por dia bajo el mantenimiento",
+      "estado": "provisional",
+      "por_que_este_numero": "El codigo Android original usa 500. Se baja a 400 por el mismo criterio.",
+      "fuente": "android/app/.../NutritionCalculator.kt, sin verificar",
+      "revisado_por": null,
+      "revisado_en": null
+    },
+
+    "techo_deficit_pct": {
+      "valor": 0.10,
+      "unidad": "fraccion del mantenimiento",
+      "estado": "provisional",
+      "por_que_este_numero": "El codigo Android original usa 0.15. Se baja a 0.10. Se aplica el MENOR entre este y techo_deficit_kcal.",
+      "fuente": "android/app/.../NutritionCalculator.kt, sin verificar",
+      "revisado_por": null,
+      "revisado_en": null
+    },
+
+    "ritmo_max_perdida_pct_semana": {
+      "valor": 0.005,
+      "unidad": "fraccion del peso corporal por semana",
+      "estado": "provisional",
+      "por_que_este_numero": "El rango que se cita habitualmente es 0.5 % a 1 % del peso corporal por semana. Se toma el extremo bajo.",
+      "fuente": null,
+      "revisado_por": null,
+      "revisado_en": null
+    },
+
+    "imc_objetivo_minimo": {
+      "valor": 18.5,
+      "unidad": "kg/m2",
+      "estado": "provisional",
+      "por_que_este_numero": "18.5 es el limite de bajo peso en la clasificacion de IMC de la OMS. Es un dato de clasificacion, ampliamente publicado. Que se use como DISPARADOR de la respuesta de apoyo si es una decision de producto, y esa parte no esta revisada.",
+      "fuente": "clasificacion de IMC de la OMS",
+      "revisado_por": null,
+      "revisado_en": null
+    },
+
+    "edad_minima": {
+      "valor": 18,
+      "unidad": "anios",
+      "estado": "provisional",
+      "por_que_este_numero": "9.2: menores 'o estan fuera del alcance del producto, o tienen un flujo propio revisado por alguien con formacion. Lo que NO es una opcion es que caigan en el flujo generico.' Sin ese flujo, la unica salida segura es dejarlos afuera.",
+      "politica": "fuera_de_alcance",
+      "fuente": null,
+      "revisado_por": null,
+      "revisado_en": null
+    },
+
+    "embarazo_lactancia": {
+      "valor": "fuera_de_alcance",
+      "unidad": null,
+      "estado": "provisional",
+      "por_que_este_numero": "Mismo razonamiento que edad_minima. Sin un flujo propio revisado, la unica salida segura es no dar objetivos calorICos en estos casos.",
+      "fuente": null,
+      "revisado_por": null,
+      "revisado_en": null
+    }
+  },
+
+  "recursos_de_ayuda": {
+    "_ESTADO": "🛑 VACIO A PROPOSITO. Un telefono de ayuda equivocado es un dano directo. Estos NO se inventan: se copian de la fuente oficial de cada pais.",
+    "_como_se_llena": "Una entrada por pais, con nombre, telefono o web, horario y la fuente oficial de donde salio.",
+    "por_pais": {}
+  }
+}

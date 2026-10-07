@@ -1,0 +1,140 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- English (en-US). The default in values/ is Argentine Spanish. -->
+<resources>
+    <string name="gym_contador_ejercicio">Exercise %1$d of %2$d</string>
+    <string name="gym_ejercicio_anterior">Previous exercise</string>
+    <string name="gym_ejercicio_siguiente">Next exercise</string>
+
+    <string name="gym_el_plan_pide">The plan asks for</string>
+    <string name="gym_peso_por_serie">Weight per set</string>
+    <string name="gym_unidad_reps">reps</string>
+    <string name="gym_unidad_segundos">s</string>
+    <string name="gym_unidad_kilos">kg</string>
+    <string name="gym_peso_corporal">bodyweight</string>
+
+    <string name="gym_series">Sets</string>
+    <string name="gym_progreso">%1$d/%2$d sets</string>
+    <string name="gym_chip_hecha">done</string>
+    <string name="gym_chip_ahora">now</string>
+    <string name="gym_chip_pendiente">to do</string>
+    <string name="gym_chip_salteada">skipped</string>
+    <string name="gym_chip_corrigiendo">fixing</string>
+    <string name="gym_chip_descripcion">Set %1$d, %2$s. Tap to fix it.</string>
+
+    <string name="gym_saltear">Skip</string>
+    <string name="gym_serie_extra">Extra set</string>
+
+    <string name="gym_campo_reps">Reps</string>
+    <string name="gym_campo_segundos">Seconds</string>
+    <string name="gym_campo_peso">Weight (kg)</string>
+    <string name="gym_campo_lastre">Added weight (kg)</string>
+    <string name="gym_campo_pausa">Pause (sec)</string>
+    <string name="gym_paso_de_a_uno">1 at a time</string>
+    <string name="gym_paso_kilos">2.5 kg at a time</string>
+    <string name="gym_paso_segundos">5 s at a time</string>
+    <string name="gym_menos_reps">One rep fewer</string>
+    <string name="gym_mas_reps">One more rep</string>
+    <string name="gym_menos_peso">Lower the weight</string>
+    <string name="gym_mas_peso">Raise the weight</string>
+
+    <string name="gym_anterior_titulo">Set %1$d</string>
+    <string name="gym_corregir">Fix</string>
+
+    <string name="gym_confirmar_serie">Set %1$d done</string>
+    <string name="gym_confirmar_correccion">Fix set %1$d</string>
+    <string name="gym_valores_reps_peso">%1$s × %2$s</string>
+    <string name="gym_valores_solo_reps">%1$s</string>
+    <string name="gym_ejercicio_completo">Exercise complete</string>
+    <string name="gym_ir_al_siguiente">Go to the next exercise</string>
+    <string name="gym_terminar">Finish the gym session</string>
+
+    <string name="gym_descanso">Rest</string>
+    <string name="gym_descanso_mas">+%1$d s</string>
+    <string name="gym_descanso_saltar">Skip</string>
+    <string name="gym_descanso_terminado">Rest is over</string>
+
+    <string name="gym_teclado_listo">Done</string>
+    <string name="gym_teclado_borrar">Delete</string>
+    <string name="gym_teclado_coma">.</string>
+
+    <!-- TODO(catalog): demo routine only, see the note in values/. -->
+    <string name="gym_demo_press">Barbell bench press</string>
+    <string name="gym_demo_dominadas">Pull-ups</string>
+    <string name="gym_demo_remo">Barbell row</string>
+    <string name="gym_demo_bulgara">Bulgarian split squat</string>
+    <string name="gym_demo_talones">Calf raise</string>
+    <string name="gym_demo_plancha">Plank</string>
+
+    <!-- ===== The set table ===== -->
+    <string name="gym_col_serie">Set</string>
+    <string name="gym_col_previa">Previous</string>
+    <string name="gym_col_kg">Kg</string>
+    <string name="gym_col_reps">Reps</string>
+    <string name="gym_col_seg">Sec</string>
+    <string name="gym_sin_previa">—</string>
+    <string name="gym_previa_valores">%1$s × %2$s</string>
+    <string name="gym_marcar">Mark set %1$d as done</string>
+    <string name="gym_desmarcar">Unmark set %1$d</string>
+    <string name="gym_editar_carga">Weight for set %1$d</string>
+    <string name="gym_editar_reps">Reps for set %1$d</string>
+    <string name="gym_anadir_serie">Add set</string>
+
+    <string name="gym_accion_tutorial">Tutorial</string>
+    <string name="gym_accion_reemplazar">Replace</string>
+    <string name="gym_accion_notas">Notes</string>
+    <string name="gym_accion_descanso">Rest</string>
+    <string name="gym_accion_sin_hacer">Not built yet</string>
+
+    <string name="gym_animacion_falta">Animation missing</string>
+    <string name="gym_animacion_detalle">The space is measured. The files are missing.</string>
+    <string name="gym_ir_a_ejercicio">Go to %1$s</string>
+
+    <string name="gym_rutina_titulo">Upper body and core</string>
+    <string name="gym_rutina_resumen">%1$d exercises · %2$d min</string>
+    <string name="gym_distribucion">Split</string>
+    <string name="gym_empezar">Start workout</string>
+    <string name="gym_prescripcion_reps">%1$d sets × %2$d reps</string>
+    <string name="gym_prescripcion_tiempo">%1$d sets × %2$d s</string>
+    <string name="gym_reemplazar_ejercicio">Replace %1$s</string>
+    <string name="gym_sesion_cronometro">Session</string>
+    <string name="gym_terminar_corto">Finish</string>
+    <string name="gym_volver">Back to the routine</string>
+
+    <string name="gym_musculo_pecho">Chest</string>
+    <string name="gym_musculo_espalda">Back</string>
+    <string name="gym_musculo_cuadriceps">Quads</string>
+    <string name="gym_musculo_gluteos">Glutes</string>
+    <string name="gym_musculo_gemelos">Calves</string>
+    <string name="gym_musculo_core">Core</string>
+    <string name="gym_porcentaje">%1$d %%</string>
+    <string name="gym_lista_ejercicios">Exercises</string>
+    <string name="gym_prescripcion_rango">%1$d sets × %2$d–%3$d reps</string>
+    <string name="gym_opciones_serie">Options for set %1$d</string>
+    <string name="gym_menu_serie">Set %1$d</string>
+    <string name="gym_borrar_serie">Delete the set</string>
+    <string name="gym_saltear_serie">Skip the set</string>
+    <string name="gym_borrar">Delete</string>
+    <string name="gym_serie_borrada">Set deleted</string>
+    <string name="gym_deshacer">Undo</string>
+    <string name="gym_cerrar">Close</string>
+    <string name="gym_como_se_borra">Swipe to delete · or tap the number</string>
+    <string name="gym_descanso_chip">%1$s</string>
+    <string name="gym_descanso_titulo">Rest between sets</string>
+    <string name="gym_descanso_sin">No rest</string>
+    <string name="gym_descanso_opcion">%1$s</string>
+
+    <!-- The real workout: what shows when there is none, and the sync notice -->
+    <string name="gym_buscando_titulo">Looking for today’s workout…</string>
+    <string name="gym_sin_rutina_sin_red_titulo">No workout for today saved</string>
+    <string name="gym_sin_rutina_sin_red_detalle">And there’s no connection to download it. It will show up on its own when you’re back online.</string>
+    <string name="gym_sin_rutina_perfil_titulo">Your plan needs more profile details</string>
+    <string name="gym_sin_rutina_perfil_detalle">Your goal, level, sport, time zone or training days are missing.</string>
+    <string name="gym_sin_rutina_titulo">Couldn’t load today’s workout</string>
+    <string name="gym_sin_rutina_detalle">The server answered something the app didn’t expect. Try again in a while.</string>
+    <string name="gym_rutina_vacia_titulo">No exercises today</string>
+    <string name="gym_rutina_vacia_detalle">Today’s workout has no exercises.</string>
+    <string name="gym_reintentar">Try again</string>
+    <string name="gym_rutina_resumen_sin_minutos">%1$d exercises</string>
+    <string name="gym_aviso_sin_conexion">Offline: this is the saved workout. What you log stays on the phone.</string>
+    <string name="gym_aviso_sin_subir">%1$d sets not uploaded yet. They’ll upload on their own when you’re online.</string>
+</resources>

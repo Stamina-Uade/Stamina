@@ -1,0 +1,2788 @@
+{
+  "data": {
+    "motor_version": "1.0.0",
+    "input_hash": "088782e3539055c0e9d6471fbaf6d24ab7cd4a5d16e2a623044c4fbd55d232c0",
+    "generated_at_ms": 1789033541989,
+    "timezone": "America/Argentina/Buenos_Aires",
+    "locale": "es-AR",
+    "start_date_ms": 1789009200000,
+    "event_date_ms": 1795057200000,
+    "total_weeks": 11,
+    "goal": "media_maraton",
+    "phases": [
+      {
+        "phase": "base",
+        "first_week": 1,
+        "last_week": 5
+      },
+      {
+        "phase": "construccion",
+        "first_week": 6,
+        "last_week": 7
+      },
+      {
+        "phase": "pico",
+        "first_week": 8,
+        "last_week": 9
+      },
+      {
+        "phase": "afinamiento",
+        "first_week": 10,
+        "last_week": 10
+      },
+      {
+        "phase": "carrera",
+        "first_week": 11,
+        "last_week": 11
+      }
+    ],
+    "weeks": [
+      {
+        "number": 1,
+        "phase": "base",
+        "start_date_ms": 1789009200000,
+        "is_deload": false,
+        "planned_duration_min": 225,
+        "planned_distance_m": 28400,
+        "done_sessions": 0,
+        "done_distance_m": 0
+      },
+      {
+        "number": 2,
+        "phase": "base",
+        "start_date_ms": 1789614000000,
+        "is_deload": false,
+        "planned_duration_min": 248,
+        "planned_distance_m": 32100,
+        "done_sessions": 0,
+        "done_distance_m": 0
+      },
+      {
+        "number": 3,
+        "phase": "base",
+        "start_date_ms": 1790218800000,
+        "is_deload": false,
+        "planned_duration_min": 271,
+        "planned_distance_m": 35200,
+        "done_sessions": 0,
+        "done_distance_m": 0
+      },
+      {
+        "number": 4,
+        "phase": "base",
+        "start_date_ms": 1790823600000,
+        "is_deload": true,
+        "planned_duration_min": 221,
+        "planned_distance_m": 28000,
+        "done_sessions": 0,
+        "done_distance_m": 0
+      },
+      {
+        "number": 5,
+        "phase": "base",
+        "start_date_ms": 1791428400000,
+        "is_deload": false,
+        "planned_duration_min": 315,
+        "planned_distance_m": 41800,
+        "done_sessions": 0,
+        "done_distance_m": 0
+      },
+      {
+        "number": 6,
+        "phase": "construccion",
+        "start_date_ms": 1792033200000,
+        "is_deload": false,
+        "planned_duration_min": 338,
+        "planned_distance_m": 46800,
+        "done_sessions": 0,
+        "done_distance_m": 0
+      },
+      {
+        "number": 7,
+        "phase": "construccion",
+        "start_date_ms": 1792638000000,
+        "is_deload": false,
+        "planned_duration_min": 362,
+        "planned_distance_m": 50500,
+        "done_sessions": 0,
+        "done_distance_m": 0
+      },
+      {
+        "number": 8,
+        "phase": "pico",
+        "start_date_ms": 1793242800000,
+        "is_deload": false,
+        "planned_duration_min": 382,
+        "planned_distance_m": 52100,
+        "done_sessions": 0,
+        "done_distance_m": 0
+      },
+      {
+        "number": 9,
+        "phase": "pico",
+        "start_date_ms": 1793847600000,
+        "is_deload": false,
+        "planned_duration_min": 366,
+        "planned_distance_m": 49700,
+        "done_sessions": 0,
+        "done_distance_m": 0
+      },
+      {
+        "number": 10,
+        "phase": "afinamiento",
+        "start_date_ms": 1794452400000,
+        "is_deload": false,
+        "planned_duration_min": 209,
+        "planned_distance_m": 26200,
+        "done_sessions": 0,
+        "done_distance_m": 0
+      },
+      {
+        "number": 11,
+        "phase": "carrera",
+        "start_date_ms": 1795057200000,
+        "is_deload": false,
+        "planned_duration_min": 121,
+        "planned_distance_m": 21097,
+        "done_sessions": 0,
+        "done_distance_m": 0
+      }
+    ],
+    "days": [
+      {
+        "date_ms": 1789009200000,
+        "day_index": 0,
+        "weekday": 4,
+        "week_number": 1,
+        "phase": "base",
+        "type": "suave",
+        "sport": "running",
+        "duration_min": 51,
+        "is_deload_week": false,
+        "title": "Running suave (51 min)",
+        "detail": "Rodaje continuo en zona aeróbica. Deberías poder mantener una conversación completa. Cerrá con 4 progresiones de 20 segundos.\nZona Z2 Base aeróbica (109-127 ppm) · Ritmo 6:54 - 7:34 min/km\nAgua a demanda (800 ml/h). No hacen falta geles.",
+        "reasons": [
+          {
+            "code": "suave_en_los_dias_restantes",
+            "text": "Tus otros días son suaves: la mayor parte del volumen va en zona aeróbica."
+          },
+          {
+            "code": "fase_base",
+            "text": "Fase de base: construir volumen aeróbico y resistir sin fatiga."
+          }
+        ],
+        "done": false,
+        "scheduled_minute_of_day": 1140,
+        "distance_m": 7100,
+        "zone": "z2",
+        "hr_low_bpm": 109,
+        "hr_high_bpm": 127,
+        "pace_low_s_per_km": 414,
+        "pace_high_s_per_km": 454,
+        "estimated_kcal": 529,
+        "fueling": {
+          "fluid_ml_per_hour": 800,
+          "fluid_total_ml": 680,
+          "sodium_mg_per_hour": 0,
+          "sodium_total_mg": 0,
+          "carbs_g_per_hour": 25,
+          "carbs_total_g": 21,
+          "gels": 1,
+          "pre_fluid_ml": 432,
+          "pre_carbs_g": 36,
+          "post_fluid_ml": 769,
+          "post_carbs_g": 72,
+          "post_protein_g": 22
+        }
+      },
+      {
+        "date_ms": 1789095600000,
+        "day_index": 1,
+        "weekday": 5,
+        "week_number": 1,
+        "phase": "base",
+        "type": "descanso",
+        "sport": "otro",
+        "duration_min": 0,
+        "is_deload_week": false,
+        "title": "Descanso",
+        "detail": "Día libre. Movilidad suave, elongación y buen descanso nocturno: la adaptación ocurre cuando descansás, no mientras entrenás.\nDía de menor carga: bajá los hidratos y sostené la proteína e hidratación.",
+        "reasons": [
+          {
+            "code": "dia_no_elegido",
+            "text": "No es uno de los días que elegiste para entrenar: toca descansar."
+          },
+          {
+            "code": "fase_base",
+            "text": "Fase de base: construir volumen aeróbico y resistir sin fatiga."
+          }
+        ],
+        "done": false,
+        "estimated_kcal": 0
+      },
+      {
+        "date_ms": 1789182000000,
+        "day_index": 2,
+        "weekday": 6,
+        "week_number": 1,
+        "phase": "base",
+        "type": "fuerza",
+        "sport": "fuerza",
+        "duration_min": 35,
+        "is_deload_week": false,
+        "title": "Fuerza para corredores (35 min)",
+        "detail": "Circuito de fuerza: sentadillas, estocadas, puente de glúteo, plancha y trabajo excéntrico de gemelos e isquiotibiales. 3 series x 10-12 repeticiones. Reduce el riesgo de lesión por sobrecarga.\nZona Z2 Base aeróbica (109-127 ppm)\nProteína dentro de la hora posterior (22 g).",
+        "reasons": [
+          {
+            "code": "fuerza_antes_del_fondo",
+            "text": "La fuerza va al día libre más cercano antes del fondo."
+          },
+          {
+            "code": "fase_base",
+            "text": "Fase de base: construir volumen aeróbico y resistir sin fatiga."
+          }
+        ],
+        "done": false,
+        "scheduled_minute_of_day": 540,
+        "zone": "z2",
+        "hr_low_bpm": 109,
+        "hr_high_bpm": 127,
+        "estimated_kcal": 220,
+        "fueling": {
+          "fluid_ml_per_hour": 466,
+          "fluid_total_ml": 271,
+          "sodium_mg_per_hour": 0,
+          "sodium_total_mg": 0,
+          "carbs_g_per_hour": 0,
+          "carbs_total_g": 0,
+          "gels": 0,
+          "pre_fluid_ml": 432,
+          "pre_carbs_g": 36,
+          "post_fluid_ml": 300,
+          "post_carbs_g": 72,
+          "post_protein_g": 22
+        }
+      },
+      {
+        "date_ms": 1789268400000,
+        "day_index": 3,
+        "weekday": 7,
+        "week_number": 1,
+        "phase": "base",
+        "type": "fondo",
+        "sport": "running",
+        "duration_min": 91,
+        "is_deload_week": false,
+        "title": "Running: fondo largo (91 min)",
+        "detail": "Fondo continuo a ritmo cómodo. Es la sesión clave de la semana: usála también para ensayar tu estrategia de hidratación y geles tal como la usarías en carrera.\nZona Z2 Base aeróbica (109-127 ppm) · Ritmo 6:34 - 7:19 min/km\nLlevá 1213 ml, 75 g de hidratos y 723 mg de sodio.",
+        "reasons": [
+          {
+            "code": "fondo_en_fin_de_semana",
+            "text": "El fondo largo va al fin de semana."
+          },
+          {
+            "code": "fase_base",
+            "text": "Fase de base: construir volumen aeróbico y resistir sin fatiga."
+          }
+        ],
+        "done": false,
+        "scheduled_minute_of_day": 510,
+        "distance_m": 13100,
+        "zone": "z2",
+        "hr_low_bpm": 109,
+        "hr_high_bpm": 127,
+        "pace_low_s_per_km": 394,
+        "pace_high_s_per_km": 439,
+        "estimated_kcal": 977,
+        "fueling": {
+          "fluid_ml_per_hour": 800,
+          "fluid_total_ml": 1213,
+          "sodium_mg_per_hour": 477,
+          "sodium_total_mg": 723,
+          "carbs_g_per_hour": 50,
+          "carbs_total_g": 75,
+          "gels": 3,
+          "pre_fluid_ml": 432,
+          "pre_carbs_g": 86,
+          "post_fluid_ml": 1372,
+          "post_carbs_g": 72,
+          "post_protein_g": 22
+        }
+      },
+      {
+        "date_ms": 1789354800000,
+        "day_index": 4,
+        "weekday": 1,
+        "week_number": 1,
+        "phase": "base",
+        "type": "descanso",
+        "sport": "otro",
+        "duration_min": 0,
+        "is_deload_week": false,
+        "title": "Descanso",
+        "detail": "Día libre. Movilidad suave, elongación y buen descanso nocturno: la adaptación ocurre cuando descansás, no mientras entrenás.\nDía de menor carga: bajá los hidratos y sostené la proteína e hidratación.",
+        "reasons": [
+          {
+            "code": "dia_no_elegido",
+            "text": "No es uno de los días que elegiste para entrenar: toca descansar."
+          },
+          {
+            "code": "fase_base",
+            "text": "Fase de base: construir volumen aeróbico y resistir sin fatiga."
+          }
+        ],
+        "done": false,
+        "estimated_kcal": 0
+      },
+      {
+        "date_ms": 1789441200000,
+        "day_index": 5,
+        "weekday": 2,
+        "week_number": 1,
+        "phase": "base",
+        "type": "fartlek",
+        "sport": "running",
+        "duration_min": 48,
+        "is_deload_week": false,
+        "title": "Fartlek · Running (48 min)",
+        "detail": "15 min suaves + 20 min de juego de ritmos (1 min fuerte / 2 min suave) + 10 min de vuelta a la calma.\nZona Z3 Tempo (127-145 ppm) · Ritmo 5:30 - 6:15 min/km\nAgua a demanda (800 ml/h). No hacen falta geles.",
+        "reasons": [
+          {
+            "code": "calidad_con_mas_descanso_previo",
+            "text": "La sesión de calidad va al día con más descanso antes."
+          },
+          {
+            "code": "fase_base",
+            "text": "Fase de base: construir volumen aeróbico y resistir sin fatiga."
+          }
+        ],
+        "done": false,
+        "scheduled_minute_of_day": 1140,
+        "distance_m": 8200,
+        "zone": "z3",
+        "hr_low_bpm": 127,
+        "hr_high_bpm": 145,
+        "pace_low_s_per_km": 330,
+        "pace_high_s_per_km": 375,
+        "estimated_kcal": 611,
+        "fueling": {
+          "fluid_ml_per_hour": 800,
+          "fluid_total_ml": 640,
+          "sodium_mg_per_hour": 0,
+          "sodium_total_mg": 0,
+          "carbs_g_per_hour": 25,
+          "carbs_total_g": 20,
+          "gels": 1,
+          "pre_fluid_ml": 432,
+          "pre_carbs_g": 36,
+          "post_fluid_ml": 1064,
+          "post_carbs_g": 72,
+          "post_protein_g": 22
+        }
+      },
+      {
+        "date_ms": 1789527600000,
+        "day_index": 6,
+        "weekday": 3,
+        "week_number": 1,
+        "phase": "base",
+        "type": "descanso",
+        "sport": "otro",
+        "duration_min": 0,
+        "is_deload_week": false,
+        "title": "Descanso",
+        "detail": "Día libre. Movilidad suave, elongación y buen descanso nocturno: la adaptación ocurre cuando descansás, no mientras entrenás.\nDía de menor carga: bajá los hidratos y sostené la proteína e hidratación.",
+        "reasons": [
+          {
+            "code": "dia_no_elegido",
+            "text": "No es uno de los días que elegiste para entrenar: toca descansar."
+          },
+          {
+            "code": "fase_base",
+            "text": "Fase de base: construir volumen aeróbico y resistir sin fatiga."
+          }
+        ],
+        "done": false,
+        "estimated_kcal": 0
+      },
+      {
+        "date_ms": 1789614000000,
+        "day_index": 7,
+        "weekday": 4,
+        "week_number": 2,
+        "phase": "base",
+        "type": "suave",
+        "sport": "running",
+        "duration_min": 57,
+        "is_deload_week": false,
+        "title": "Running suave (57 min)",
+        "detail": "Rodaje continuo en zona aeróbica. Deberías poder mantener una conversación completa. Cerrá con 4 progresiones de 20 segundos.\nZona Z2 Base aeróbica (109-127 ppm) · Ritmo 6:54 - 7:34 min/km\nAgua a demanda (800 ml/h). No hacen falta geles.",
+        "reasons": [
+          {
+            "code": "suave_en_los_dias_restantes",
+            "text": "Tus otros días son suaves: la mayor parte del volumen va en zona aeróbica."
+          },
+          {
+            "code": "fase_base",
+            "text": "Fase de base: construir volumen aeróbico y resistir sin fatiga."
+          }
+        ],
+        "done": false,
+        "scheduled_minute_of_day": 1140,
+        "distance_m": 7900,
+        "zone": "z2",
+        "hr_low_bpm": 109,
+        "hr_high_bpm": 127,
+        "pace_low_s_per_km": 414,
+        "pace_high_s_per_km": 454,
+        "estimated_kcal": 589,
+        "fueling": {
+          "fluid_ml_per_hour": 800,
+          "fluid_total_ml": 760,
+          "sodium_mg_per_hour": 0,
+          "sodium_total_mg": 0,
+          "carbs_g_per_hour": 25,
+          "carbs_total_g": 23,
+          "gels": 1,
+          "pre_fluid_ml": 432,
+          "pre_carbs_g": 36,
+          "post_fluid_ml": 859,
+          "post_carbs_g": 72,
+          "post_protein_g": 22
+        }
+      },
+      {
+        "date_ms": 1789700400000,
+        "day_index": 8,
+        "weekday": 5,
+        "week_number": 2,
+        "phase": "base",
+        "type": "descanso",
+        "sport": "otro",
+        "duration_min": 0,
+        "is_deload_week": false,
+        "title": "Descanso",
+        "detail": "Día libre. Movilidad suave, elongación y buen descanso nocturno: la adaptación ocurre cuando descansás, no mientras entrenás.\nDía de menor carga: bajá los hidratos y sostené la proteína e hidratación.",
+        "reasons": [
+          {
+            "code": "dia_no_elegido",
+            "text": "No es uno de los días que elegiste para entrenar: toca descansar."
+          },
+          {
+            "code": "fase_base",
+            "text": "Fase de base: construir volumen aeróbico y resistir sin fatiga."
+          }
+        ],
+        "done": false,
+        "estimated_kcal": 0
+      },
+      {
+        "date_ms": 1789786800000,
+        "day_index": 9,
+        "weekday": 6,
+        "week_number": 2,
+        "phase": "base",
+        "type": "fuerza",
+        "sport": "fuerza",
+        "duration_min": 35,
+        "is_deload_week": false,
+        "title": "Fuerza para corredores (35 min)",
+        "detail": "Circuito de fuerza: sentadillas, estocadas, puente de glúteo, plancha y trabajo excéntrico de gemelos e isquiotibiales. 3 series x 10-12 repeticiones. Reduce el riesgo de lesión por sobrecarga.\nZona Z2 Base aeróbica (109-127 ppm)\nProteína dentro de la hora posterior (22 g).",
+        "reasons": [
+          {
+            "code": "fuerza_antes_del_fondo",
+            "text": "La fuerza va al día libre más cercano antes del fondo."
+          },
+          {
+            "code": "fase_base",
+            "text": "Fase de base: construir volumen aeróbico y resistir sin fatiga."
+          }
+        ],
+        "done": false,
+        "scheduled_minute_of_day": 540,
+        "zone": "z2",
+        "hr_low_bpm": 109,
+        "hr_high_bpm": 127,
+        "estimated_kcal": 220,
+        "fueling": {
+          "fluid_ml_per_hour": 466,
+          "fluid_total_ml": 271,
+          "sodium_mg_per_hour": 0,
+          "sodium_total_mg": 0,
+          "carbs_g_per_hour": 0,
+          "carbs_total_g": 0,
+          "gels": 0,
+          "pre_fluid_ml": 432,
+          "pre_carbs_g": 36,
+          "post_fluid_ml": 300,
+          "post_carbs_g": 72,
+          "post_protein_g": 22
+        }
+      },
+      {
+        "date_ms": 1789873200000,
+        "day_index": 10,
+        "weekday": 7,
+        "week_number": 2,
+        "phase": "base",
+        "type": "fondo",
+        "sport": "running",
+        "duration_min": 102,
+        "is_deload_week": false,
+        "title": "Running: fondo largo (102 min)",
+        "detail": "Fondo continuo a ritmo cómodo. Es la sesión clave de la semana: usála también para ensayar tu estrategia de hidratación y geles tal como la usarías en carrera.\nZona Z2 Base aeróbica (109-127 ppm) · Ritmo 6:34 - 7:19 min/km\nLlevá 1360 ml, 85 g de hidratos y 810 mg de sodio.",
+        "reasons": [
+          {
+            "code": "fondo_en_fin_de_semana",
+            "text": "El fondo largo va al fin de semana."
+          },
+          {
+            "code": "fase_base",
+            "text": "Fase de base: construir volumen aeróbico y resistir sin fatiga."
+          }
+        ],
+        "done": false,
+        "scheduled_minute_of_day": 510,
+        "distance_m": 14700,
+        "zone": "z2",
+        "hr_low_bpm": 109,
+        "hr_high_bpm": 127,
+        "pace_low_s_per_km": 394,
+        "pace_high_s_per_km": 439,
+        "estimated_kcal": 1096,
+        "fueling": {
+          "fluid_ml_per_hour": 800,
+          "fluid_total_ml": 1360,
+          "sodium_mg_per_hour": 477,
+          "sodium_total_mg": 810,
+          "carbs_g_per_hour": 50,
+          "carbs_total_g": 85,
+          "gels": 4,
+          "pre_fluid_ml": 432,
+          "pre_carbs_g": 86,
+          "post_fluid_ml": 1537,
+          "post_carbs_g": 72,
+          "post_protein_g": 22
+        }
+      },
+      {
+        "date_ms": 1789959600000,
+        "day_index": 11,
+        "weekday": 1,
+        "week_number": 2,
+        "phase": "base",
+        "type": "descanso",
+        "sport": "otro",
+        "duration_min": 0,
+        "is_deload_week": false,
+        "title": "Descanso",
+        "detail": "Día libre. Movilidad suave, elongación y buen descanso nocturno: la adaptación ocurre cuando descansás, no mientras entrenás.\nDía de menor carga: bajá los hidratos y sostené la proteína e hidratación.",
+        "reasons": [
+          {
+            "code": "dia_no_elegido",
+            "text": "No es uno de los días que elegiste para entrenar: toca descansar."
+          },
+          {
+            "code": "fase_base",
+            "text": "Fase de base: construir volumen aeróbico y resistir sin fatiga."
+          }
+        ],
+        "done": false,
+        "estimated_kcal": 0
+      },
+      {
+        "date_ms": 1790046000000,
+        "day_index": 12,
+        "weekday": 2,
+        "week_number": 2,
+        "phase": "base",
+        "type": "cuestas",
+        "sport": "running",
+        "duration_min": 54,
+        "is_deload_week": false,
+        "title": "Cuestas · Running (54 min)",
+        "detail": "15 min de entrada en calor + 7 x 60 seg en subida al 5-8% bajando trotando + 10 min suaves. Trabaja fuerza específica sin impacto excesivo.\nZona Z4 Umbral (145-163 ppm) · Ritmo 5:26 - 5:56 min/km\nAgua a demanda (800 ml/h). No hacen falta geles.",
+        "reasons": [
+          {
+            "code": "calidad_con_mas_descanso_previo",
+            "text": "La sesión de calidad va al día con más descanso antes."
+          },
+          {
+            "code": "fase_base",
+            "text": "Fase de base: construir volumen aeróbico y resistir sin fatiga."
+          }
+        ],
+        "done": false,
+        "scheduled_minute_of_day": 1140,
+        "distance_m": 9500,
+        "zone": "z4",
+        "hr_low_bpm": 145,
+        "hr_high_bpm": 163,
+        "pace_low_s_per_km": 326,
+        "pace_high_s_per_km": 356,
+        "estimated_kcal": 708,
+        "fueling": {
+          "fluid_ml_per_hour": 800,
+          "fluid_total_ml": 720,
+          "sodium_mg_per_hour": 0,
+          "sodium_total_mg": 0,
+          "carbs_g_per_hour": 25,
+          "carbs_total_g": 22,
+          "gels": 1,
+          "pre_fluid_ml": 432,
+          "pre_carbs_g": 36,
+          "post_fluid_ml": 1197,
+          "post_carbs_g": 72,
+          "post_protein_g": 22
+        }
+      },
+      {
+        "date_ms": 1790132400000,
+        "day_index": 13,
+        "weekday": 3,
+        "week_number": 2,
+        "phase": "base",
+        "type": "descanso",
+        "sport": "otro",
+        "duration_min": 0,
+        "is_deload_week": false,
+        "title": "Descanso",
+        "detail": "Día libre. Movilidad suave, elongación y buen descanso nocturno: la adaptación ocurre cuando descansás, no mientras entrenás.\nDía de menor carga: bajá los hidratos y sostené la proteína e hidratación.",
+        "reasons": [
+          {
+            "code": "dia_no_elegido",
+            "text": "No es uno de los días que elegiste para entrenar: toca descansar."
+          },
+          {
+            "code": "fase_base",
+            "text": "Fase de base: construir volumen aeróbico y resistir sin fatiga."
+          }
+        ],
+        "done": false,
+        "estimated_kcal": 0
+      },
+      {
+        "date_ms": 1790218800000,
+        "day_index": 14,
+        "weekday": 4,
+        "week_number": 3,
+        "phase": "base",
+        "type": "suave",
+        "sport": "running",
+        "duration_min": 63,
+        "is_deload_week": false,
+        "title": "Running suave (63 min)",
+        "detail": "Rodaje continuo en zona aeróbica. Deberías poder mantener una conversación completa. Cerrá con 4 progresiones de 20 segundos.\nZona Z2 Base aeróbica (109-127 ppm) · Ritmo 6:54 - 7:34 min/km\nLlevá 840 ml, 26 g de hidratos y 500 mg de sodio.",
+        "reasons": [
+          {
+            "code": "suave_en_los_dias_restantes",
+            "text": "Tus otros días son suaves: la mayor parte del volumen va en zona aeróbica."
+          },
+          {
+            "code": "fase_base",
+            "text": "Fase de base: construir volumen aeróbico y resistir sin fatiga."
+          }
+        ],
+        "done": false,
+        "scheduled_minute_of_day": 1140,
+        "distance_m": 8700,
+        "zone": "z2",
+        "hr_low_bpm": 109,
+        "hr_high_bpm": 127,
+        "pace_low_s_per_km": 414,
+        "pace_high_s_per_km": 454,
+        "estimated_kcal": 648,
+        "fueling": {
+          "fluid_ml_per_hour": 800,
+          "fluid_total_ml": 840,
+          "sodium_mg_per_hour": 477,
+          "sodium_total_mg": 500,
+          "carbs_g_per_hour": 25,
+          "carbs_total_g": 26,
+          "gels": 2,
+          "pre_fluid_ml": 432,
+          "pre_carbs_g": 86,
+          "post_fluid_ml": 950,
+          "post_carbs_g": 72,
+          "post_protein_g": 22
+        }
+      },
+      {
+        "date_ms": 1790305200000,
+        "day_index": 15,
+        "weekday": 5,
+        "week_number": 3,
+        "phase": "base",
+        "type": "descanso",
+        "sport": "otro",
+        "duration_min": 0,
+        "is_deload_week": false,
+        "title": "Descanso",
+        "detail": "Día libre. Movilidad suave, elongación y buen descanso nocturno: la adaptación ocurre cuando descansás, no mientras entrenás.\nDía de menor carga: bajá los hidratos y sostené la proteína e hidratación.",
+        "reasons": [
+          {
+            "code": "dia_no_elegido",
+            "text": "No es uno de los días que elegiste para entrenar: toca descansar."
+          },
+          {
+            "code": "fase_base",
+            "text": "Fase de base: construir volumen aeróbico y resistir sin fatiga."
+          }
+        ],
+        "done": false,
+        "estimated_kcal": 0
+      },
+      {
+        "date_ms": 1790391600000,
+        "day_index": 16,
+        "weekday": 6,
+        "week_number": 3,
+        "phase": "base",
+        "type": "fuerza",
+        "sport": "fuerza",
+        "duration_min": 35,
+        "is_deload_week": false,
+        "title": "Fuerza para corredores (35 min)",
+        "detail": "Circuito de fuerza: sentadillas, estocadas, puente de glúteo, plancha y trabajo excéntrico de gemelos e isquiotibiales. 3 series x 10-12 repeticiones. Reduce el riesgo de lesión por sobrecarga.\nZona Z2 Base aeróbica (109-127 ppm)\nProteína dentro de la hora posterior (22 g).",
+        "reasons": [
+          {
+            "code": "fuerza_antes_del_fondo",
+            "text": "La fuerza va al día libre más cercano antes del fondo."
+          },
+          {
+            "code": "fase_base",
+            "text": "Fase de base: construir volumen aeróbico y resistir sin fatiga."
+          }
+        ],
+        "done": false,
+        "scheduled_minute_of_day": 540,
+        "zone": "z2",
+        "hr_low_bpm": 109,
+        "hr_high_bpm": 127,
+        "estimated_kcal": 220,
+        "fueling": {
+          "fluid_ml_per_hour": 466,
+          "fluid_total_ml": 271,
+          "sodium_mg_per_hour": 0,
+          "sodium_total_mg": 0,
+          "carbs_g_per_hour": 0,
+          "carbs_total_g": 0,
+          "gels": 0,
+          "pre_fluid_ml": 432,
+          "pre_carbs_g": 36,
+          "post_fluid_ml": 300,
+          "post_carbs_g": 72,
+          "post_protein_g": 22
+        }
+      },
+      {
+        "date_ms": 1790478000000,
+        "day_index": 17,
+        "weekday": 7,
+        "week_number": 3,
+        "phase": "base",
+        "type": "fondo",
+        "sport": "running",
+        "duration_min": 113,
+        "is_deload_week": false,
+        "title": "Running: fondo largo (113 min)",
+        "detail": "Fondo continuo a ritmo cómodo. Es la sesión clave de la semana: usála también para ensayar tu estrategia de hidratación y geles tal como la usarías en carrera.\nZona Z2 Base aeróbica (109-127 ppm) · Ritmo 6:34 - 7:19 min/km\nLlevá 1506 ml, 94 g de hidratos y 898 mg de sodio.",
+        "reasons": [
+          {
+            "code": "fondo_en_fin_de_semana",
+            "text": "El fondo largo va al fin de semana."
+          },
+          {
+            "code": "fase_base",
+            "text": "Fase de base: construir volumen aeróbico y resistir sin fatiga."
+          }
+        ],
+        "done": false,
+        "scheduled_minute_of_day": 510,
+        "distance_m": 16300,
+        "zone": "z2",
+        "hr_low_bpm": 109,
+        "hr_high_bpm": 127,
+        "pace_low_s_per_km": 394,
+        "pace_high_s_per_km": 439,
+        "estimated_kcal": 1215,
+        "fueling": {
+          "fluid_ml_per_hour": 800,
+          "fluid_total_ml": 1506,
+          "sodium_mg_per_hour": 477,
+          "sodium_total_mg": 898,
+          "carbs_g_per_hour": 50,
+          "carbs_total_g": 94,
+          "gels": 4,
+          "pre_fluid_ml": 432,
+          "pre_carbs_g": 86,
+          "post_fluid_ml": 1703,
+          "post_carbs_g": 72,
+          "post_protein_g": 22
+        }
+      },
+      {
+        "date_ms": 1790564400000,
+        "day_index": 18,
+        "weekday": 1,
+        "week_number": 3,
+        "phase": "base",
+        "type": "descanso",
+        "sport": "otro",
+        "duration_min": 0,
+        "is_deload_week": false,
+        "title": "Descanso",
+        "detail": "Día libre. Movilidad suave, elongación y buen descanso nocturno: la adaptación ocurre cuando descansás, no mientras entrenás.\nDía de menor carga: bajá los hidratos y sostené la proteína e hidratación.",
+        "reasons": [
+          {
+            "code": "dia_no_elegido",
+            "text": "No es uno de los días que elegiste para entrenar: toca descansar."
+          },
+          {
+            "code": "fase_base",
+            "text": "Fase de base: construir volumen aeróbico y resistir sin fatiga."
+          }
+        ],
+        "done": false,
+        "estimated_kcal": 0
+      },
+      {
+        "date_ms": 1790650800000,
+        "day_index": 19,
+        "weekday": 2,
+        "week_number": 3,
+        "phase": "base",
+        "type": "fartlek",
+        "sport": "running",
+        "duration_min": 60,
+        "is_deload_week": false,
+        "title": "Fartlek · Running (60 min)",
+        "detail": "15 min suaves + 20 min de juego de ritmos (1 min fuerte / 2 min suave) + 10 min de vuelta a la calma.\nZona Z3 Tempo (127-145 ppm) · Ritmo 5:30 - 6:15 min/km\nLlevá 800 ml, 25 g de hidratos y 597 mg de sodio.",
+        "reasons": [
+          {
+            "code": "calidad_con_mas_descanso_previo",
+            "text": "La sesión de calidad va al día con más descanso antes."
+          },
+          {
+            "code": "fase_base",
+            "text": "Fase de base: construir volumen aeróbico y resistir sin fatiga."
+          }
+        ],
+        "done": false,
+        "scheduled_minute_of_day": 1140,
+        "distance_m": 10200,
+        "zone": "z3",
+        "hr_low_bpm": 127,
+        "hr_high_bpm": 145,
+        "pace_low_s_per_km": 330,
+        "pace_high_s_per_km": 375,
+        "estimated_kcal": 760,
+        "fueling": {
+          "fluid_ml_per_hour": 800,
+          "fluid_total_ml": 800,
+          "sodium_mg_per_hour": 597,
+          "sodium_total_mg": 597,
+          "carbs_g_per_hour": 25,
+          "carbs_total_g": 25,
+          "gels": 1,
+          "pre_fluid_ml": 432,
+          "pre_carbs_g": 86,
+          "post_fluid_ml": 1330,
+          "post_carbs_g": 72,
+          "post_protein_g": 22
+        }
+      },
+      {
+        "date_ms": 1790737200000,
+        "day_index": 20,
+        "weekday": 3,
+        "week_number": 3,
+        "phase": "base",
+        "type": "descanso",
+        "sport": "otro",
+        "duration_min": 0,
+        "is_deload_week": false,
+        "title": "Descanso",
+        "detail": "Día libre. Movilidad suave, elongación y buen descanso nocturno: la adaptación ocurre cuando descansás, no mientras entrenás.\nDía de menor carga: bajá los hidratos y sostené la proteína e hidratación.",
+        "reasons": [
+          {
+            "code": "dia_no_elegido",
+            "text": "No es uno de los días que elegiste para entrenar: toca descansar."
+          },
+          {
+            "code": "fase_base",
+            "text": "Fase de base: construir volumen aeróbico y resistir sin fatiga."
+          }
+        ],
+        "done": false,
+        "estimated_kcal": 0
+      },
+      {
+        "date_ms": 1790823600000,
+        "day_index": 21,
+        "weekday": 4,
+        "week_number": 4,
+        "phase": "base",
+        "type": "suave",
+        "sport": "running",
+        "duration_min": 50,
+        "is_deload_week": true,
+        "title": "Running suave (50 min)",
+        "detail": "Rodaje continuo en zona aeróbica. Deberías poder mantener una conversación completa. Cerrá con 4 progresiones de 20 segundos.\nZona Z2 Base aeróbica (109-127 ppm) · Ritmo 6:54 - 7:34 min/km\nAgua a demanda (800 ml/h). No hacen falta geles.",
+        "reasons": [
+          {
+            "code": "suave_en_los_dias_restantes",
+            "text": "Tus otros días son suaves: la mayor parte del volumen va en zona aeróbica."
+          },
+          {
+            "code": "fase_base",
+            "text": "Fase de base: construir volumen aeróbico y resistir sin fatiga."
+          },
+          {
+            "code": "semana_de_descarga",
+            "text": "Semana de descarga: cada 4 semanas baja el volumen, para que el cuerpo asimile lo entrenado."
+          }
+        ],
+        "done": false,
+        "scheduled_minute_of_day": 1140,
+        "distance_m": 6900,
+        "zone": "z2",
+        "hr_low_bpm": 109,
+        "hr_high_bpm": 127,
+        "pace_low_s_per_km": 414,
+        "pace_high_s_per_km": 454,
+        "estimated_kcal": 514,
+        "fueling": {
+          "fluid_ml_per_hour": 800,
+          "fluid_total_ml": 666,
+          "sodium_mg_per_hour": 0,
+          "sodium_total_mg": 0,
+          "carbs_g_per_hour": 25,
+          "carbs_total_g": 20,
+          "gels": 1,
+          "pre_fluid_ml": 432,
+          "pre_carbs_g": 36,
+          "post_fluid_ml": 754,
+          "post_carbs_g": 72,
+          "post_protein_g": 22
+        }
+      },
+      {
+        "date_ms": 1790910000000,
+        "day_index": 22,
+        "weekday": 5,
+        "week_number": 4,
+        "phase": "base",
+        "type": "descanso",
+        "sport": "otro",
+        "duration_min": 0,
+        "is_deload_week": true,
+        "title": "Descanso",
+        "detail": "Día libre. Movilidad suave, elongación y buen descanso nocturno: la adaptación ocurre cuando descansás, no mientras entrenás.\nDía de menor carga: bajá los hidratos y sostené la proteína e hidratación.",
+        "reasons": [
+          {
+            "code": "dia_no_elegido",
+            "text": "No es uno de los días que elegiste para entrenar: toca descansar."
+          },
+          {
+            "code": "fase_base",
+            "text": "Fase de base: construir volumen aeróbico y resistir sin fatiga."
+          },
+          {
+            "code": "semana_de_descarga",
+            "text": "Semana de descarga: cada 4 semanas baja el volumen, para que el cuerpo asimile lo entrenado."
+          }
+        ],
+        "done": false,
+        "estimated_kcal": 0
+      },
+      {
+        "date_ms": 1790996400000,
+        "day_index": 23,
+        "weekday": 6,
+        "week_number": 4,
+        "phase": "base",
+        "type": "fuerza",
+        "sport": "fuerza",
+        "duration_min": 35,
+        "is_deload_week": true,
+        "title": "Fuerza para corredores (35 min)",
+        "detail": "Circuito de fuerza: sentadillas, estocadas, puente de glúteo, plancha y trabajo excéntrico de gemelos e isquiotibiales. 3 series x 10-12 repeticiones. Reduce el riesgo de lesión por sobrecarga.\nZona Z2 Base aeróbica (109-127 ppm)\nProteína dentro de la hora posterior (22 g).",
+        "reasons": [
+          {
+            "code": "fuerza_antes_del_fondo",
+            "text": "La fuerza va al día libre más cercano antes del fondo."
+          },
+          {
+            "code": "fase_base",
+            "text": "Fase de base: construir volumen aeróbico y resistir sin fatiga."
+          },
+          {
+            "code": "semana_de_descarga",
+            "text": "Semana de descarga: cada 4 semanas baja el volumen, para que el cuerpo asimile lo entrenado."
+          }
+        ],
+        "done": false,
+        "scheduled_minute_of_day": 540,
+        "zone": "z2",
+        "hr_low_bpm": 109,
+        "hr_high_bpm": 127,
+        "estimated_kcal": 220,
+        "fueling": {
+          "fluid_ml_per_hour": 466,
+          "fluid_total_ml": 271,
+          "sodium_mg_per_hour": 0,
+          "sodium_total_mg": 0,
+          "carbs_g_per_hour": 0,
+          "carbs_total_g": 0,
+          "gels": 0,
+          "pre_fluid_ml": 432,
+          "pre_carbs_g": 36,
+          "post_fluid_ml": 300,
+          "post_carbs_g": 72,
+          "post_protein_g": 22
+        }
+      },
+      {
+        "date_ms": 1791082800000,
+        "day_index": 24,
+        "weekday": 7,
+        "week_number": 4,
+        "phase": "base",
+        "type": "fondo",
+        "sport": "running",
+        "duration_min": 89,
+        "is_deload_week": true,
+        "title": "Running: fondo largo (89 min)",
+        "detail": "Fondo continuo a ritmo cómodo. Es la sesión clave de la semana: usála también para ensayar tu estrategia de hidratación y geles tal como la usarías en carrera.\nZona Z2 Base aeróbica (109-127 ppm) · Ritmo 6:34 - 7:19 min/km\nLlevá 1186 ml, 74 g de hidratos y 707 mg de sodio.",
+        "reasons": [
+          {
+            "code": "fondo_en_fin_de_semana",
+            "text": "El fondo largo va al fin de semana."
+          },
+          {
+            "code": "fase_base",
+            "text": "Fase de base: construir volumen aeróbico y resistir sin fatiga."
+          },
+          {
+            "code": "semana_de_descarga",
+            "text": "Semana de descarga: cada 4 semanas baja el volumen, para que el cuerpo asimile lo entrenado."
+          }
+        ],
+        "done": false,
+        "scheduled_minute_of_day": 510,
+        "distance_m": 12800,
+        "zone": "z2",
+        "hr_low_bpm": 109,
+        "hr_high_bpm": 127,
+        "pace_low_s_per_km": 394,
+        "pace_high_s_per_km": 439,
+        "estimated_kcal": 954,
+        "fueling": {
+          "fluid_ml_per_hour": 800,
+          "fluid_total_ml": 1186,
+          "sodium_mg_per_hour": 477,
+          "sodium_total_mg": 707,
+          "carbs_g_per_hour": 50,
+          "carbs_total_g": 74,
+          "gels": 3,
+          "pre_fluid_ml": 432,
+          "pre_carbs_g": 86,
+          "post_fluid_ml": 1341,
+          "post_carbs_g": 72,
+          "post_protein_g": 22
+        }
+      },
+      {
+        "date_ms": 1791169200000,
+        "day_index": 25,
+        "weekday": 1,
+        "week_number": 4,
+        "phase": "base",
+        "type": "descanso",
+        "sport": "otro",
+        "duration_min": 0,
+        "is_deload_week": true,
+        "title": "Descanso",
+        "detail": "Día libre. Movilidad suave, elongación y buen descanso nocturno: la adaptación ocurre cuando descansás, no mientras entrenás.\nDía de menor carga: bajá los hidratos y sostené la proteína e hidratación.",
+        "reasons": [
+          {
+            "code": "dia_no_elegido",
+            "text": "No es uno de los días que elegiste para entrenar: toca descansar."
+          },
+          {
+            "code": "fase_base",
+            "text": "Fase de base: construir volumen aeróbico y resistir sin fatiga."
+          },
+          {
+            "code": "semana_de_descarga",
+            "text": "Semana de descarga: cada 4 semanas baja el volumen, para que el cuerpo asimile lo entrenado."
+          }
+        ],
+        "done": false,
+        "estimated_kcal": 0
+      },
+      {
+        "date_ms": 1791255600000,
+        "day_index": 26,
+        "weekday": 2,
+        "week_number": 4,
+        "phase": "base",
+        "type": "cuestas",
+        "sport": "running",
+        "duration_min": 47,
+        "is_deload_week": true,
+        "title": "Cuestas · Running (47 min)",
+        "detail": "15 min de entrada en calor + 6 x 60 seg en subida al 5-8% bajando trotando + 10 min suaves. Trabaja fuerza específica sin impacto excesivo.\nZona Z4 Umbral (145-163 ppm) · Ritmo 5:26 - 5:56 min/km\nAgua a demanda (800 ml/h). No hacen falta geles.",
+        "reasons": [
+          {
+            "code": "calidad_con_mas_descanso_previo",
+            "text": "La sesión de calidad va al día con más descanso antes."
+          },
+          {
+            "code": "fase_base",
+            "text": "Fase de base: construir volumen aeróbico y resistir sin fatiga."
+          },
+          {
+            "code": "semana_de_descarga",
+            "text": "Semana de descarga: cada 4 semanas baja el volumen, para que el cuerpo asimile lo entrenado."
+          }
+        ],
+        "done": false,
+        "scheduled_minute_of_day": 1140,
+        "distance_m": 8300,
+        "zone": "z4",
+        "hr_low_bpm": 145,
+        "hr_high_bpm": 163,
+        "pace_low_s_per_km": 326,
+        "pace_high_s_per_km": 356,
+        "estimated_kcal": 619,
+        "fueling": {
+          "fluid_ml_per_hour": 800,
+          "fluid_total_ml": 626,
+          "sodium_mg_per_hour": 0,
+          "sodium_total_mg": 0,
+          "carbs_g_per_hour": 25,
+          "carbs_total_g": 19,
+          "gels": 1,
+          "pre_fluid_ml": 432,
+          "pre_carbs_g": 36,
+          "post_fluid_ml": 1042,
+          "post_carbs_g": 72,
+          "post_protein_g": 22
+        }
+      },
+      {
+        "date_ms": 1791342000000,
+        "day_index": 27,
+        "weekday": 3,
+        "week_number": 4,
+        "phase": "base",
+        "type": "descanso",
+        "sport": "otro",
+        "duration_min": 0,
+        "is_deload_week": true,
+        "title": "Descanso",
+        "detail": "Día libre. Movilidad suave, elongación y buen descanso nocturno: la adaptación ocurre cuando descansás, no mientras entrenás.\nDía de menor carga: bajá los hidratos y sostené la proteína e hidratación.",
+        "reasons": [
+          {
+            "code": "dia_no_elegido",
+            "text": "No es uno de los días que elegiste para entrenar: toca descansar."
+          },
+          {
+            "code": "fase_base",
+            "text": "Fase de base: construir volumen aeróbico y resistir sin fatiga."
+          },
+          {
+            "code": "semana_de_descarga",
+            "text": "Semana de descarga: cada 4 semanas baja el volumen, para que el cuerpo asimile lo entrenado."
+          }
+        ],
+        "done": false,
+        "estimated_kcal": 0
+      },
+      {
+        "date_ms": 1791428400000,
+        "day_index": 28,
+        "weekday": 4,
+        "week_number": 5,
+        "phase": "base",
+        "type": "suave",
+        "sport": "running",
+        "duration_min": 75,
+        "is_deload_week": false,
+        "title": "Running suave (75 min)",
+        "detail": "Rodaje continuo en zona aeróbica. Deberías poder mantener una conversación completa. Cerrá con 4 progresiones de 20 segundos.\nZona Z2 Base aeróbica (109-127 ppm) · Ritmo 6:54 - 7:34 min/km\nLlevá 1000 ml, 62 g de hidratos y 596 mg de sodio.",
+        "reasons": [
+          {
+            "code": "suave_en_los_dias_restantes",
+            "text": "Tus otros días son suaves: la mayor parte del volumen va en zona aeróbica."
+          },
+          {
+            "code": "fase_base",
+            "text": "Fase de base: construir volumen aeróbico y resistir sin fatiga."
+          }
+        ],
+        "done": false,
+        "scheduled_minute_of_day": 1140,
+        "distance_m": 10400,
+        "zone": "z2",
+        "hr_low_bpm": 109,
+        "hr_high_bpm": 127,
+        "pace_low_s_per_km": 414,
+        "pace_high_s_per_km": 454,
+        "estimated_kcal": 775,
+        "fueling": {
+          "fluid_ml_per_hour": 800,
+          "fluid_total_ml": 1000,
+          "sodium_mg_per_hour": 477,
+          "sodium_total_mg": 596,
+          "carbs_g_per_hour": 50,
+          "carbs_total_g": 62,
+          "gels": 3,
+          "pre_fluid_ml": 432,
+          "pre_carbs_g": 86,
+          "post_fluid_ml": 1130,
+          "post_carbs_g": 72,
+          "post_protein_g": 22
+        }
+      },
+      {
+        "date_ms": 1791514800000,
+        "day_index": 29,
+        "weekday": 5,
+        "week_number": 5,
+        "phase": "base",
+        "type": "descanso",
+        "sport": "otro",
+        "duration_min": 0,
+        "is_deload_week": false,
+        "title": "Descanso",
+        "detail": "Día libre. Movilidad suave, elongación y buen descanso nocturno: la adaptación ocurre cuando descansás, no mientras entrenás.\nDía de menor carga: bajá los hidratos y sostené la proteína e hidratación.",
+        "reasons": [
+          {
+            "code": "dia_no_elegido",
+            "text": "No es uno de los días que elegiste para entrenar: toca descansar."
+          },
+          {
+            "code": "fase_base",
+            "text": "Fase de base: construir volumen aeróbico y resistir sin fatiga."
+          }
+        ],
+        "done": false,
+        "estimated_kcal": 0
+      },
+      {
+        "date_ms": 1791601200000,
+        "day_index": 30,
+        "weekday": 6,
+        "week_number": 5,
+        "phase": "base",
+        "type": "fuerza",
+        "sport": "fuerza",
+        "duration_min": 35,
+        "is_deload_week": false,
+        "title": "Fuerza para corredores (35 min)",
+        "detail": "Circuito de fuerza: sentadillas, estocadas, puente de glúteo, plancha y trabajo excéntrico de gemelos e isquiotibiales. 3 series x 10-12 repeticiones. Reduce el riesgo de lesión por sobrecarga.\nZona Z2 Base aeróbica (109-127 ppm)\nProteína dentro de la hora posterior (22 g).",
+        "reasons": [
+          {
+            "code": "fuerza_antes_del_fondo",
+            "text": "La fuerza va al día libre más cercano antes del fondo."
+          },
+          {
+            "code": "fase_base",
+            "text": "Fase de base: construir volumen aeróbico y resistir sin fatiga."
+          }
+        ],
+        "done": false,
+        "scheduled_minute_of_day": 540,
+        "zone": "z2",
+        "hr_low_bpm": 109,
+        "hr_high_bpm": 127,
+        "estimated_kcal": 220,
+        "fueling": {
+          "fluid_ml_per_hour": 466,
+          "fluid_total_ml": 271,
+          "sodium_mg_per_hour": 0,
+          "sodium_total_mg": 0,
+          "carbs_g_per_hour": 0,
+          "carbs_total_g": 0,
+          "gels": 0,
+          "pre_fluid_ml": 432,
+          "pre_carbs_g": 36,
+          "post_fluid_ml": 300,
+          "post_carbs_g": 72,
+          "post_protein_g": 22
+        }
+      },
+      {
+        "date_ms": 1791687600000,
+        "day_index": 31,
+        "weekday": 7,
+        "week_number": 5,
+        "phase": "base",
+        "type": "fondo",
+        "sport": "running",
+        "duration_min": 134,
+        "is_deload_week": false,
+        "title": "Running: fondo largo (134 min)",
+        "detail": "Fondo continuo a ritmo cómodo. Es la sesión clave de la semana: usála también para ensayar tu estrategia de hidratación y geles tal como la usarías en carrera.\nZona Z2 Base aeróbica (109-127 ppm) · Ritmo 6:34 - 7:19 min/km\nLlevá 1786 ml, 111 g de hidratos y 1420 mg de sodio.",
+        "reasons": [
+          {
+            "code": "fondo_en_fin_de_semana",
+            "text": "El fondo largo va al fin de semana."
+          },
+          {
+            "code": "fase_base",
+            "text": "Fase de base: construir volumen aeróbico y resistir sin fatiga."
+          }
+        ],
+        "done": false,
+        "scheduled_minute_of_day": 510,
+        "distance_m": 19300,
+        "zone": "z2",
+        "hr_low_bpm": 109,
+        "hr_high_bpm": 127,
+        "pace_low_s_per_km": 394,
+        "pace_high_s_per_km": 439,
+        "estimated_kcal": 1439,
+        "fueling": {
+          "fluid_ml_per_hour": 800,
+          "fluid_total_ml": 1786,
+          "sodium_mg_per_hour": 636,
+          "sodium_total_mg": 1420,
+          "carbs_g_per_hour": 50,
+          "carbs_total_g": 111,
+          "gels": 5,
+          "pre_fluid_ml": 432,
+          "pre_carbs_g": 86,
+          "post_fluid_ml": 2020,
+          "post_carbs_g": 72,
+          "post_protein_g": 22
+        }
+      },
+      {
+        "date_ms": 1791774000000,
+        "day_index": 32,
+        "weekday": 1,
+        "week_number": 5,
+        "phase": "base",
+        "type": "descanso",
+        "sport": "otro",
+        "duration_min": 0,
+        "is_deload_week": false,
+        "title": "Descanso",
+        "detail": "Día libre. Movilidad suave, elongación y buen descanso nocturno: la adaptación ocurre cuando descansás, no mientras entrenás.\nDía de menor carga: bajá los hidratos y sostené la proteína e hidratación.",
+        "reasons": [
+          {
+            "code": "dia_no_elegido",
+            "text": "No es uno de los días que elegiste para entrenar: toca descansar."
+          },
+          {
+            "code": "fase_base",
+            "text": "Fase de base: construir volumen aeróbico y resistir sin fatiga."
+          }
+        ],
+        "done": false,
+        "estimated_kcal": 0
+      },
+      {
+        "date_ms": 1791860400000,
+        "day_index": 33,
+        "weekday": 2,
+        "week_number": 5,
+        "phase": "base",
+        "type": "fartlek",
+        "sport": "running",
+        "duration_min": 71,
+        "is_deload_week": false,
+        "title": "Fartlek · Running (71 min)",
+        "detail": "15 min suaves + 20 min de juego de ritmos (1 min fuerte / 2 min suave) + 10 min de vuelta a la calma.\nZona Z3 Tempo (127-145 ppm) · Ritmo 5:30 - 6:15 min/km\nLlevá 946 ml, 29 g de hidratos y 706 mg de sodio.",
+        "reasons": [
+          {
+            "code": "calidad_con_mas_descanso_previo",
+            "text": "La sesión de calidad va al día con más descanso antes."
+          },
+          {
+            "code": "fase_base",
+            "text": "Fase de base: construir volumen aeróbico y resistir sin fatiga."
+          }
+        ],
+        "done": false,
+        "scheduled_minute_of_day": 1140,
+        "distance_m": 12100,
+        "zone": "z3",
+        "hr_low_bpm": 127,
+        "hr_high_bpm": 145,
+        "pace_low_s_per_km": 330,
+        "pace_high_s_per_km": 375,
+        "estimated_kcal": 902,
+        "fueling": {
+          "fluid_ml_per_hour": 800,
+          "fluid_total_ml": 946,
+          "sodium_mg_per_hour": 597,
+          "sodium_total_mg": 706,
+          "carbs_g_per_hour": 25,
+          "carbs_total_g": 29,
+          "gels": 2,
+          "pre_fluid_ml": 432,
+          "pre_carbs_g": 86,
+          "post_fluid_ml": 1574,
+          "post_carbs_g": 72,
+          "post_protein_g": 22
+        }
+      },
+      {
+        "date_ms": 1791946800000,
+        "day_index": 34,
+        "weekday": 3,
+        "week_number": 5,
+        "phase": "base",
+        "type": "descanso",
+        "sport": "otro",
+        "duration_min": 0,
+        "is_deload_week": false,
+        "title": "Descanso",
+        "detail": "Día libre. Movilidad suave, elongación y buen descanso nocturno: la adaptación ocurre cuando descansás, no mientras entrenás.\nDía de menor carga: bajá los hidratos y sostené la proteína e hidratación.",
+        "reasons": [
+          {
+            "code": "dia_no_elegido",
+            "text": "No es uno de los días que elegiste para entrenar: toca descansar."
+          },
+          {
+            "code": "fase_base",
+            "text": "Fase de base: construir volumen aeróbico y resistir sin fatiga."
+          }
+        ],
+        "done": false,
+        "estimated_kcal": 0
+      },
+      {
+        "date_ms": 1792033200000,
+        "day_index": 35,
+        "weekday": 4,
+        "week_number": 6,
+        "phase": "construccion",
+        "type": "suave",
+        "sport": "running",
+        "duration_min": 81,
+        "is_deload_week": false,
+        "title": "Running suave (81 min)",
+        "detail": "Rodaje continuo en zona aeróbica. Deberías poder mantener una conversación completa. Cerrá con 4 progresiones de 20 segundos.\nZona Z2 Base aeróbica (109-127 ppm) · Ritmo 6:54 - 7:34 min/km\nLlevá 1080 ml, 67 g de hidratos y 643 mg de sodio.",
+        "reasons": [
+          {
+            "code": "suave_en_los_dias_restantes",
+            "text": "Tus otros días son suaves: la mayor parte del volumen va en zona aeróbica."
+          },
+          {
+            "code": "fase_construccion",
+            "text": "Fase de construcción: sumar calidad con umbral, series y ritmo objetivo."
+          }
+        ],
+        "done": false,
+        "scheduled_minute_of_day": 1140,
+        "distance_m": 11200,
+        "zone": "z2",
+        "hr_low_bpm": 109,
+        "hr_high_bpm": 127,
+        "pace_low_s_per_km": 414,
+        "pace_high_s_per_km": 454,
+        "estimated_kcal": 835,
+        "fueling": {
+          "fluid_ml_per_hour": 800,
+          "fluid_total_ml": 1080,
+          "sodium_mg_per_hour": 477,
+          "sodium_total_mg": 643,
+          "carbs_g_per_hour": 50,
+          "carbs_total_g": 67,
+          "gels": 3,
+          "pre_fluid_ml": 432,
+          "pre_carbs_g": 86,
+          "post_fluid_ml": 1221,
+          "post_carbs_g": 72,
+          "post_protein_g": 22
+        }
+      },
+      {
+        "date_ms": 1792119600000,
+        "day_index": 36,
+        "weekday": 5,
+        "week_number": 6,
+        "phase": "construccion",
+        "type": "descanso",
+        "sport": "otro",
+        "duration_min": 0,
+        "is_deload_week": false,
+        "title": "Descanso",
+        "detail": "Día libre. Movilidad suave, elongación y buen descanso nocturno: la adaptación ocurre cuando descansás, no mientras entrenás.\nDía de menor carga: bajá los hidratos y sostené la proteína e hidratación.",
+        "reasons": [
+          {
+            "code": "dia_no_elegido",
+            "text": "No es uno de los días que elegiste para entrenar: toca descansar."
+          },
+          {
+            "code": "fase_construccion",
+            "text": "Fase de construcción: sumar calidad con umbral, series y ritmo objetivo."
+          }
+        ],
+        "done": false,
+        "estimated_kcal": 0
+      },
+      {
+        "date_ms": 1792206000000,
+        "day_index": 37,
+        "weekday": 6,
+        "week_number": 6,
+        "phase": "construccion",
+        "type": "fuerza",
+        "sport": "fuerza",
+        "duration_min": 35,
+        "is_deload_week": false,
+        "title": "Fuerza para corredores (35 min)",
+        "detail": "Circuito de fuerza: sentadillas, estocadas, puente de glúteo, plancha y trabajo excéntrico de gemelos e isquiotibiales. 3 series x 10-12 repeticiones. Reduce el riesgo de lesión por sobrecarga.\nZona Z2 Base aeróbica (109-127 ppm)\nProteína dentro de la hora posterior (22 g).",
+        "reasons": [
+          {
+            "code": "fuerza_antes_del_fondo",
+            "text": "La fuerza va al día libre más cercano antes del fondo."
+          },
+          {
+            "code": "fase_construccion",
+            "text": "Fase de construcción: sumar calidad con umbral, series y ritmo objetivo."
+          }
+        ],
+        "done": false,
+        "scheduled_minute_of_day": 540,
+        "zone": "z2",
+        "hr_low_bpm": 109,
+        "hr_high_bpm": 127,
+        "estimated_kcal": 220,
+        "fueling": {
+          "fluid_ml_per_hour": 466,
+          "fluid_total_ml": 271,
+          "sodium_mg_per_hour": 0,
+          "sodium_total_mg": 0,
+          "carbs_g_per_hour": 0,
+          "carbs_total_g": 0,
+          "gels": 0,
+          "pre_fluid_ml": 432,
+          "pre_carbs_g": 36,
+          "post_fluid_ml": 300,
+          "post_carbs_g": 72,
+          "post_protein_g": 22
+        }
+      },
+      {
+        "date_ms": 1792292400000,
+        "day_index": 38,
+        "weekday": 7,
+        "week_number": 6,
+        "phase": "construccion",
+        "type": "fondo",
+        "sport": "running",
+        "duration_min": 145,
+        "is_deload_week": false,
+        "title": "Running: fondo largo (145 min)",
+        "detail": "Fondo continuo a ritmo cómodo. Es la sesión clave de la semana: usála también para ensayar tu estrategia de hidratación y geles tal como la usarías en carrera.\nZona Z2 Base aeróbica (109-127 ppm) · Ritmo 6:34 - 7:19 min/km\nLlevá 1933 ml, 120 g de hidratos y 1537 mg de sodio.",
+        "reasons": [
+          {
+            "code": "fondo_en_fin_de_semana",
+            "text": "El fondo largo va al fin de semana."
+          },
+          {
+            "code": "fase_construccion",
+            "text": "Fase de construcción: sumar calidad con umbral, series y ritmo objetivo."
+          }
+        ],
+        "done": false,
+        "scheduled_minute_of_day": 510,
+        "distance_m": 20900,
+        "zone": "z2",
+        "hr_low_bpm": 109,
+        "hr_high_bpm": 127,
+        "pace_low_s_per_km": 394,
+        "pace_high_s_per_km": 439,
+        "estimated_kcal": 1558,
+        "fueling": {
+          "fluid_ml_per_hour": 800,
+          "fluid_total_ml": 1933,
+          "sodium_mg_per_hour": 636,
+          "sodium_total_mg": 1537,
+          "carbs_g_per_hour": 50,
+          "carbs_total_g": 120,
+          "gels": 5,
+          "pre_fluid_ml": 432,
+          "pre_carbs_g": 86,
+          "post_fluid_ml": 2185,
+          "post_carbs_g": 72,
+          "post_protein_g": 22
+        }
+      },
+      {
+        "date_ms": 1792378800000,
+        "day_index": 39,
+        "weekday": 1,
+        "week_number": 6,
+        "phase": "construccion",
+        "type": "descanso",
+        "sport": "otro",
+        "duration_min": 0,
+        "is_deload_week": false,
+        "title": "Descanso",
+        "detail": "Día libre. Movilidad suave, elongación y buen descanso nocturno: la adaptación ocurre cuando descansás, no mientras entrenás.\nDía de menor carga: bajá los hidratos y sostené la proteína e hidratación.",
+        "reasons": [
+          {
+            "code": "dia_no_elegido",
+            "text": "No es uno de los días que elegiste para entrenar: toca descansar."
+          },
+          {
+            "code": "fase_construccion",
+            "text": "Fase de construcción: sumar calidad con umbral, series y ritmo objetivo."
+          }
+        ],
+        "done": false,
+        "estimated_kcal": 0
+      },
+      {
+        "date_ms": 1792465200000,
+        "day_index": 40,
+        "weekday": 2,
+        "week_number": 6,
+        "phase": "construccion",
+        "type": "series",
+        "sport": "running",
+        "duration_min": 77,
+        "is_deload_week": false,
+        "title": "Series / VO2 · Running (77 min)",
+        "detail": "15 min de entrada en calor + 10 x 3 min fuertes con 2 min de trote de recuperación + 10 min de vuelta a la calma.\nZona Z5 VO2 máx (163-182 ppm) · Ritmo 5:06 - 5:24 min/km\nLlevá 1026 ml, 64 g de hidratos y 766 mg de sodio.",
+        "reasons": [
+          {
+            "code": "calidad_con_mas_descanso_previo",
+            "text": "La sesión de calidad va al día con más descanso antes."
+          },
+          {
+            "code": "fase_construccion",
+            "text": "Fase de construcción: sumar calidad con umbral, series y ritmo objetivo."
+          }
+        ],
+        "done": false,
+        "scheduled_minute_of_day": 1140,
+        "distance_m": 14700,
+        "zone": "z5",
+        "hr_low_bpm": 163,
+        "hr_high_bpm": 182,
+        "pace_low_s_per_km": 306,
+        "pace_high_s_per_km": 324,
+        "estimated_kcal": 1096,
+        "fueling": {
+          "fluid_ml_per_hour": 800,
+          "fluid_total_ml": 1026,
+          "sodium_mg_per_hour": 597,
+          "sodium_total_mg": 766,
+          "carbs_g_per_hour": 50,
+          "carbs_total_g": 64,
+          "gels": 3,
+          "pre_fluid_ml": 432,
+          "pre_carbs_g": 86,
+          "post_fluid_ml": 1707,
+          "post_carbs_g": 72,
+          "post_protein_g": 22
+        }
+      },
+      {
+        "date_ms": 1792551600000,
+        "day_index": 41,
+        "weekday": 3,
+        "week_number": 6,
+        "phase": "construccion",
+        "type": "descanso",
+        "sport": "otro",
+        "duration_min": 0,
+        "is_deload_week": false,
+        "title": "Descanso",
+        "detail": "Día libre. Movilidad suave, elongación y buen descanso nocturno: la adaptación ocurre cuando descansás, no mientras entrenás.\nDía de menor carga: bajá los hidratos y sostené la proteína e hidratación.",
+        "reasons": [
+          {
+            "code": "dia_no_elegido",
+            "text": "No es uno de los días que elegiste para entrenar: toca descansar."
+          },
+          {
+            "code": "fase_construccion",
+            "text": "Fase de construcción: sumar calidad con umbral, series y ritmo objetivo."
+          }
+        ],
+        "done": false,
+        "estimated_kcal": 0
+      },
+      {
+        "date_ms": 1792638000000,
+        "day_index": 42,
+        "weekday": 4,
+        "week_number": 7,
+        "phase": "construccion",
+        "type": "suave",
+        "sport": "running",
+        "duration_min": 88,
+        "is_deload_week": false,
+        "title": "Running suave (88 min)",
+        "detail": "Rodaje continuo en zona aeróbica. Deberías poder mantener una conversación completa. Cerrá con 4 progresiones de 20 segundos.\nZona Z2 Base aeróbica (109-127 ppm) · Ritmo 6:54 - 7:34 min/km\nLlevá 1173 ml, 73 g de hidratos y 699 mg de sodio.",
+        "reasons": [
+          {
+            "code": "suave_en_los_dias_restantes",
+            "text": "Tus otros días son suaves: la mayor parte del volumen va en zona aeróbica."
+          },
+          {
+            "code": "fase_construccion",
+            "text": "Fase de construcción: sumar calidad con umbral, series y ritmo objetivo."
+          }
+        ],
+        "done": false,
+        "scheduled_minute_of_day": 1140,
+        "distance_m": 12200,
+        "zone": "z2",
+        "hr_low_bpm": 109,
+        "hr_high_bpm": 127,
+        "pace_low_s_per_km": 414,
+        "pace_high_s_per_km": 454,
+        "estimated_kcal": 910,
+        "fueling": {
+          "fluid_ml_per_hour": 800,
+          "fluid_total_ml": 1173,
+          "sodium_mg_per_hour": 477,
+          "sodium_total_mg": 699,
+          "carbs_g_per_hour": 50,
+          "carbs_total_g": 73,
+          "gels": 3,
+          "pre_fluid_ml": 432,
+          "pre_carbs_g": 86,
+          "post_fluid_ml": 1326,
+          "post_carbs_g": 72,
+          "post_protein_g": 22
+        }
+      },
+      {
+        "date_ms": 1792724400000,
+        "day_index": 43,
+        "weekday": 5,
+        "week_number": 7,
+        "phase": "construccion",
+        "type": "descanso",
+        "sport": "otro",
+        "duration_min": 0,
+        "is_deload_week": false,
+        "title": "Descanso",
+        "detail": "Día libre. Movilidad suave, elongación y buen descanso nocturno: la adaptación ocurre cuando descansás, no mientras entrenás.\nDía de menor carga: bajá los hidratos y sostené la proteína e hidratación.",
+        "reasons": [
+          {
+            "code": "dia_no_elegido",
+            "text": "No es uno de los días que elegiste para entrenar: toca descansar."
+          },
+          {
+            "code": "fase_construccion",
+            "text": "Fase de construcción: sumar calidad con umbral, series y ritmo objetivo."
+          }
+        ],
+        "done": false,
+        "estimated_kcal": 0
+      },
+      {
+        "date_ms": 1792810800000,
+        "day_index": 44,
+        "weekday": 6,
+        "week_number": 7,
+        "phase": "construccion",
+        "type": "fuerza",
+        "sport": "fuerza",
+        "duration_min": 35,
+        "is_deload_week": false,
+        "title": "Fuerza para corredores (35 min)",
+        "detail": "Circuito de fuerza: sentadillas, estocadas, puente de glúteo, plancha y trabajo excéntrico de gemelos e isquiotibiales. 3 series x 10-12 repeticiones. Reduce el riesgo de lesión por sobrecarga.\nZona Z2 Base aeróbica (109-127 ppm)\nProteína dentro de la hora posterior (22 g).",
+        "reasons": [
+          {
+            "code": "fuerza_antes_del_fondo",
+            "text": "La fuerza va al día libre más cercano antes del fondo."
+          },
+          {
+            "code": "fase_construccion",
+            "text": "Fase de construcción: sumar calidad con umbral, series y ritmo objetivo."
+          }
+        ],
+        "done": false,
+        "scheduled_minute_of_day": 540,
+        "zone": "z2",
+        "hr_low_bpm": 109,
+        "hr_high_bpm": 127,
+        "estimated_kcal": 220,
+        "fueling": {
+          "fluid_ml_per_hour": 466,
+          "fluid_total_ml": 271,
+          "sodium_mg_per_hour": 0,
+          "sodium_total_mg": 0,
+          "carbs_g_per_hour": 0,
+          "carbs_total_g": 0,
+          "gels": 0,
+          "pre_fluid_ml": 432,
+          "pre_carbs_g": 36,
+          "post_fluid_ml": 300,
+          "post_carbs_g": 72,
+          "post_protein_g": 22
+        }
+      },
+      {
+        "date_ms": 1792897200000,
+        "day_index": 45,
+        "weekday": 7,
+        "week_number": 7,
+        "phase": "construccion",
+        "type": "fondo",
+        "sport": "running",
+        "duration_min": 156,
+        "is_deload_week": false,
+        "title": "Running: fondo largo (156 min)",
+        "detail": "Fondo continuo a ritmo cómodo. Es la sesión clave de la semana: usála también para ensayar tu estrategia de hidratación y geles tal como la usarías en carrera.\nZona Z2 Base aeróbica (109-127 ppm) · Ritmo 6:34 - 7:19 min/km\nLlevá 2080 ml, 182 g de hidratos y 1653 mg de sodio.",
+        "reasons": [
+          {
+            "code": "fondo_en_fin_de_semana",
+            "text": "El fondo largo va al fin de semana."
+          },
+          {
+            "code": "fase_construccion",
+            "text": "Fase de construcción: sumar calidad con umbral, series y ritmo objetivo."
+          }
+        ],
+        "done": false,
+        "scheduled_minute_of_day": 510,
+        "distance_m": 22500,
+        "zone": "z2",
+        "hr_low_bpm": 109,
+        "hr_high_bpm": 127,
+        "pace_low_s_per_km": 394,
+        "pace_high_s_per_km": 439,
+        "estimated_kcal": 1678,
+        "fueling": {
+          "fluid_ml_per_hour": 800,
+          "fluid_total_ml": 2080,
+          "sodium_mg_per_hour": 636,
+          "sodium_total_mg": 1653,
+          "carbs_g_per_hour": 70,
+          "carbs_total_g": 182,
+          "gels": 8,
+          "pre_fluid_ml": 432,
+          "pre_carbs_g": 144,
+          "post_fluid_ml": 2351,
+          "post_carbs_g": 72,
+          "post_protein_g": 22
+        }
+      },
+      {
+        "date_ms": 1792983600000,
+        "day_index": 46,
+        "weekday": 1,
+        "week_number": 7,
+        "phase": "construccion",
+        "type": "descanso",
+        "sport": "otro",
+        "duration_min": 0,
+        "is_deload_week": false,
+        "title": "Descanso",
+        "detail": "Día libre. Movilidad suave, elongación y buen descanso nocturno: la adaptación ocurre cuando descansás, no mientras entrenás.\nDía de menor carga: bajá los hidratos y sostené la proteína e hidratación.",
+        "reasons": [
+          {
+            "code": "dia_no_elegido",
+            "text": "No es uno de los días que elegiste para entrenar: toca descansar."
+          },
+          {
+            "code": "fase_construccion",
+            "text": "Fase de construcción: sumar calidad con umbral, series y ritmo objetivo."
+          }
+        ],
+        "done": false,
+        "estimated_kcal": 0
+      },
+      {
+        "date_ms": 1793070000000,
+        "day_index": 47,
+        "weekday": 2,
+        "week_number": 7,
+        "phase": "construccion",
+        "type": "series",
+        "sport": "running",
+        "duration_min": 83,
+        "is_deload_week": false,
+        "title": "Series / VO2 · Running (83 min)",
+        "detail": "15 min de entrada en calor + 10 x 3 min fuertes con 2 min de trote de recuperación + 10 min de vuelta a la calma.\nZona Z5 VO2 máx (163-182 ppm) · Ritmo 5:06 - 5:24 min/km\nLlevá 1106 ml, 69 g de hidratos y 825 mg de sodio.",
+        "reasons": [
+          {
+            "code": "calidad_con_mas_descanso_previo",
+            "text": "La sesión de calidad va al día con más descanso antes."
+          },
+          {
+            "code": "fase_construccion",
+            "text": "Fase de construcción: sumar calidad con umbral, series y ritmo objetivo."
+          }
+        ],
+        "done": false,
+        "scheduled_minute_of_day": 1140,
+        "distance_m": 15800,
+        "zone": "z5",
+        "hr_low_bpm": 163,
+        "hr_high_bpm": 182,
+        "pace_low_s_per_km": 306,
+        "pace_high_s_per_km": 324,
+        "estimated_kcal": 1178,
+        "fueling": {
+          "fluid_ml_per_hour": 800,
+          "fluid_total_ml": 1106,
+          "sodium_mg_per_hour": 597,
+          "sodium_total_mg": 825,
+          "carbs_g_per_hour": 50,
+          "carbs_total_g": 69,
+          "gels": 3,
+          "pre_fluid_ml": 432,
+          "pre_carbs_g": 86,
+          "post_fluid_ml": 1840,
+          "post_carbs_g": 72,
+          "post_protein_g": 22
+        }
+      },
+      {
+        "date_ms": 1793156400000,
+        "day_index": 48,
+        "weekday": 3,
+        "week_number": 7,
+        "phase": "construccion",
+        "type": "descanso",
+        "sport": "otro",
+        "duration_min": 0,
+        "is_deload_week": false,
+        "title": "Descanso",
+        "detail": "Día libre. Movilidad suave, elongación y buen descanso nocturno: la adaptación ocurre cuando descansás, no mientras entrenás.\nDía de menor carga: bajá los hidratos y sostené la proteína e hidratación.",
+        "reasons": [
+          {
+            "code": "dia_no_elegido",
+            "text": "No es uno de los días que elegiste para entrenar: toca descansar."
+          },
+          {
+            "code": "fase_construccion",
+            "text": "Fase de construcción: sumar calidad con umbral, series y ritmo objetivo."
+          }
+        ],
+        "done": false,
+        "estimated_kcal": 0
+      },
+      {
+        "date_ms": 1793242800000,
+        "day_index": 49,
+        "weekday": 4,
+        "week_number": 8,
+        "phase": "pico",
+        "type": "suave",
+        "sport": "running",
+        "duration_min": 93,
+        "is_deload_week": false,
+        "title": "Running suave (93 min)",
+        "detail": "Rodaje continuo en zona aeróbica. Deberías poder mantener una conversación completa. Cerrá con 4 progresiones de 20 segundos.\nZona Z2 Base aeróbica (109-127 ppm) · Ritmo 6:54 - 7:34 min/km\nLlevá 1240 ml, 77 g de hidratos y 739 mg de sodio.",
+        "reasons": [
+          {
+            "code": "suave_en_los_dias_restantes",
+            "text": "Tus otros días son suaves: la mayor parte del volumen va en zona aeróbica."
+          },
+          {
+            "code": "fase_pico",
+            "text": "Fase de pico: la carga más específica del evento."
+          }
+        ],
+        "done": false,
+        "scheduled_minute_of_day": 1140,
+        "distance_m": 12900,
+        "zone": "z2",
+        "hr_low_bpm": 109,
+        "hr_high_bpm": 127,
+        "pace_low_s_per_km": 414,
+        "pace_high_s_per_km": 454,
+        "estimated_kcal": 962,
+        "fueling": {
+          "fluid_ml_per_hour": 800,
+          "fluid_total_ml": 1240,
+          "sodium_mg_per_hour": 477,
+          "sodium_total_mg": 739,
+          "carbs_g_per_hour": 50,
+          "carbs_total_g": 77,
+          "gels": 4,
+          "pre_fluid_ml": 432,
+          "pre_carbs_g": 86,
+          "post_fluid_ml": 1402,
+          "post_carbs_g": 72,
+          "post_protein_g": 22
+        }
+      },
+      {
+        "date_ms": 1793329200000,
+        "day_index": 50,
+        "weekday": 5,
+        "week_number": 8,
+        "phase": "pico",
+        "type": "descanso",
+        "sport": "otro",
+        "duration_min": 0,
+        "is_deload_week": false,
+        "title": "Descanso",
+        "detail": "Día libre. Movilidad suave, elongación y buen descanso nocturno: la adaptación ocurre cuando descansás, no mientras entrenás.\nDía de menor carga: bajá los hidratos y sostené la proteína e hidratación.",
+        "reasons": [
+          {
+            "code": "dia_no_elegido",
+            "text": "No es uno de los días que elegiste para entrenar: toca descansar."
+          },
+          {
+            "code": "fase_pico",
+            "text": "Fase de pico: la carga más específica del evento."
+          }
+        ],
+        "done": false,
+        "estimated_kcal": 0
+      },
+      {
+        "date_ms": 1793415600000,
+        "day_index": 51,
+        "weekday": 6,
+        "week_number": 8,
+        "phase": "pico",
+        "type": "fuerza",
+        "sport": "fuerza",
+        "duration_min": 35,
+        "is_deload_week": false,
+        "title": "Fuerza para corredores (35 min)",
+        "detail": "Circuito de fuerza: sentadillas, estocadas, puente de glúteo, plancha y trabajo excéntrico de gemelos e isquiotibiales. 3 series x 10-12 repeticiones. Reduce el riesgo de lesión por sobrecarga.\nZona Z2 Base aeróbica (109-127 ppm)\nProteína dentro de la hora posterior (22 g).",
+        "reasons": [
+          {
+            "code": "fuerza_antes_del_fondo",
+            "text": "La fuerza va al día libre más cercano antes del fondo."
+          },
+          {
+            "code": "fase_pico",
+            "text": "Fase de pico: la carga más específica del evento."
+          }
+        ],
+        "done": false,
+        "scheduled_minute_of_day": 540,
+        "zone": "z2",
+        "hr_low_bpm": 109,
+        "hr_high_bpm": 127,
+        "estimated_kcal": 220,
+        "fueling": {
+          "fluid_ml_per_hour": 466,
+          "fluid_total_ml": 271,
+          "sodium_mg_per_hour": 0,
+          "sodium_total_mg": 0,
+          "carbs_g_per_hour": 0,
+          "carbs_total_g": 0,
+          "gels": 0,
+          "pre_fluid_ml": 432,
+          "pre_carbs_g": 36,
+          "post_fluid_ml": 300,
+          "post_carbs_g": 72,
+          "post_protein_g": 22
+        }
+      },
+      {
+        "date_ms": 1793502000000,
+        "day_index": 52,
+        "weekday": 7,
+        "week_number": 8,
+        "phase": "pico",
+        "type": "fondo",
+        "sport": "running",
+        "duration_min": 166,
+        "is_deload_week": false,
+        "title": "Running: fondo largo (166 min)",
+        "detail": "Fondo continuo a ritmo cómodo. Es la sesión clave de la semana: usála también para ensayar tu estrategia de hidratación y geles tal como la usarías en carrera.\nZona Z2 Base aeróbica (109-127 ppm) · Ritmo 6:34 - 7:19 min/km\nLlevá 2213 ml, 193 g de hidratos y 1759 mg de sodio.",
+        "reasons": [
+          {
+            "code": "fondo_en_fin_de_semana",
+            "text": "El fondo largo va al fin de semana."
+          },
+          {
+            "code": "fase_pico",
+            "text": "Fase de pico: la carga más específica del evento."
+          }
+        ],
+        "done": false,
+        "scheduled_minute_of_day": 510,
+        "distance_m": 23900,
+        "zone": "z2",
+        "hr_low_bpm": 109,
+        "hr_high_bpm": 127,
+        "pace_low_s_per_km": 394,
+        "pace_high_s_per_km": 439,
+        "estimated_kcal": 1782,
+        "fueling": {
+          "fluid_ml_per_hour": 800,
+          "fluid_total_ml": 2213,
+          "sodium_mg_per_hour": 636,
+          "sodium_total_mg": 1759,
+          "carbs_g_per_hour": 70,
+          "carbs_total_g": 193,
+          "gels": 8,
+          "pre_fluid_ml": 432,
+          "pre_carbs_g": 144,
+          "post_fluid_ml": 2502,
+          "post_carbs_g": 72,
+          "post_protein_g": 22
+        }
+      },
+      {
+        "date_ms": 1793588400000,
+        "day_index": 53,
+        "weekday": 1,
+        "week_number": 8,
+        "phase": "pico",
+        "type": "descanso",
+        "sport": "otro",
+        "duration_min": 0,
+        "is_deload_week": false,
+        "title": "Descanso",
+        "detail": "Día libre. Movilidad suave, elongación y buen descanso nocturno: la adaptación ocurre cuando descansás, no mientras entrenás.\nDía de menor carga: bajá los hidratos y sostené la proteína e hidratación.",
+        "reasons": [
+          {
+            "code": "dia_no_elegido",
+            "text": "No es uno de los días que elegiste para entrenar: toca descansar."
+          },
+          {
+            "code": "fase_pico",
+            "text": "Fase de pico: la carga más específica del evento."
+          }
+        ],
+        "done": false,
+        "estimated_kcal": 0
+      },
+      {
+        "date_ms": 1793674800000,
+        "day_index": 54,
+        "weekday": 2,
+        "week_number": 8,
+        "phase": "pico",
+        "type": "ritmo_carrera",
+        "sport": "running",
+        "duration_min": 88,
+        "is_deload_week": false,
+        "title": "Ritmo de carrera · Running (88 min)",
+        "detail": "15 min de entrada en calor + 35 min a ritmo objetivo de carrera + 10 min suaves. Ensayá con la ropa y los geles que vas a usar el día del evento.\nZona Z3 Tempo (127-145 ppm) · Ritmo 5:37 - 5:53 min/km\nLlevá 1173 ml, 73 g de hidratos y 875 mg de sodio.",
+        "reasons": [
+          {
+            "code": "calidad_con_mas_descanso_previo",
+            "text": "La sesión de calidad va al día con más descanso antes."
+          },
+          {
+            "code": "fase_pico",
+            "text": "Fase de pico: la carga más específica del evento."
+          }
+        ],
+        "done": false,
+        "scheduled_minute_of_day": 1140,
+        "distance_m": 15300,
+        "zone": "z3",
+        "hr_low_bpm": 127,
+        "hr_high_bpm": 145,
+        "pace_low_s_per_km": 337,
+        "pace_high_s_per_km": 353,
+        "estimated_kcal": 1141,
+        "fueling": {
+          "fluid_ml_per_hour": 800,
+          "fluid_total_ml": 1173,
+          "sodium_mg_per_hour": 597,
+          "sodium_total_mg": 875,
+          "carbs_g_per_hour": 50,
+          "carbs_total_g": 73,
+          "gels": 3,
+          "pre_fluid_ml": 432,
+          "pre_carbs_g": 86,
+          "post_fluid_ml": 1951,
+          "post_carbs_g": 72,
+          "post_protein_g": 22
+        }
+      },
+      {
+        "date_ms": 1793761200000,
+        "day_index": 55,
+        "weekday": 3,
+        "week_number": 8,
+        "phase": "pico",
+        "type": "descanso",
+        "sport": "otro",
+        "duration_min": 0,
+        "is_deload_week": false,
+        "title": "Descanso",
+        "detail": "Día libre. Movilidad suave, elongación y buen descanso nocturno: la adaptación ocurre cuando descansás, no mientras entrenás.\nDía de menor carga: bajá los hidratos y sostené la proteína e hidratación.",
+        "reasons": [
+          {
+            "code": "dia_no_elegido",
+            "text": "No es uno de los días que elegiste para entrenar: toca descansar."
+          },
+          {
+            "code": "fase_pico",
+            "text": "Fase de pico: la carga más específica del evento."
+          }
+        ],
+        "done": false,
+        "estimated_kcal": 0
+      },
+      {
+        "date_ms": 1793847600000,
+        "day_index": 56,
+        "weekday": 4,
+        "week_number": 9,
+        "phase": "pico",
+        "type": "suave",
+        "sport": "running",
+        "duration_min": 89,
+        "is_deload_week": false,
+        "title": "Running suave (89 min)",
+        "detail": "Rodaje continuo en zona aeróbica. Deberías poder mantener una conversación completa. Cerrá con 4 progresiones de 20 segundos.\nZona Z2 Base aeróbica (109-127 ppm) · Ritmo 6:54 - 7:34 min/km\nLlevá 1186 ml, 74 g de hidratos y 707 mg de sodio.",
+        "reasons": [
+          {
+            "code": "suave_en_los_dias_restantes",
+            "text": "Tus otros días son suaves: la mayor parte del volumen va en zona aeróbica."
+          },
+          {
+            "code": "fase_pico",
+            "text": "Fase de pico: la carga más específica del evento."
+          }
+        ],
+        "done": false,
+        "scheduled_minute_of_day": 1140,
+        "distance_m": 12300,
+        "zone": "z2",
+        "hr_low_bpm": 109,
+        "hr_high_bpm": 127,
+        "pace_low_s_per_km": 414,
+        "pace_high_s_per_km": 454,
+        "estimated_kcal": 917,
+        "fueling": {
+          "fluid_ml_per_hour": 800,
+          "fluid_total_ml": 1186,
+          "sodium_mg_per_hour": 477,
+          "sodium_total_mg": 707,
+          "carbs_g_per_hour": 50,
+          "carbs_total_g": 74,
+          "gels": 3,
+          "pre_fluid_ml": 432,
+          "pre_carbs_g": 86,
+          "post_fluid_ml": 1341,
+          "post_carbs_g": 72,
+          "post_protein_g": 22
+        }
+      },
+      {
+        "date_ms": 1793934000000,
+        "day_index": 57,
+        "weekday": 5,
+        "week_number": 9,
+        "phase": "pico",
+        "type": "descanso",
+        "sport": "otro",
+        "duration_min": 0,
+        "is_deload_week": false,
+        "title": "Descanso",
+        "detail": "Día libre. Movilidad suave, elongación y buen descanso nocturno: la adaptación ocurre cuando descansás, no mientras entrenás.\nDía de menor carga: bajá los hidratos y sostené la proteína e hidratación.",
+        "reasons": [
+          {
+            "code": "dia_no_elegido",
+            "text": "No es uno de los días que elegiste para entrenar: toca descansar."
+          },
+          {
+            "code": "fase_pico",
+            "text": "Fase de pico: la carga más específica del evento."
+          }
+        ],
+        "done": false,
+        "estimated_kcal": 0
+      },
+      {
+        "date_ms": 1794020400000,
+        "day_index": 58,
+        "weekday": 6,
+        "week_number": 9,
+        "phase": "pico",
+        "type": "fuerza",
+        "sport": "fuerza",
+        "duration_min": 35,
+        "is_deload_week": false,
+        "title": "Fuerza para corredores (35 min)",
+        "detail": "Circuito de fuerza: sentadillas, estocadas, puente de glúteo, plancha y trabajo excéntrico de gemelos e isquiotibiales. 3 series x 10-12 repeticiones. Reduce el riesgo de lesión por sobrecarga.\nZona Z2 Base aeróbica (109-127 ppm)\nProteína dentro de la hora posterior (22 g).",
+        "reasons": [
+          {
+            "code": "fuerza_antes_del_fondo",
+            "text": "La fuerza va al día libre más cercano antes del fondo."
+          },
+          {
+            "code": "fase_pico",
+            "text": "Fase de pico: la carga más específica del evento."
+          }
+        ],
+        "done": false,
+        "scheduled_minute_of_day": 540,
+        "zone": "z2",
+        "hr_low_bpm": 109,
+        "hr_high_bpm": 127,
+        "estimated_kcal": 220,
+        "fueling": {
+          "fluid_ml_per_hour": 466,
+          "fluid_total_ml": 271,
+          "sodium_mg_per_hour": 0,
+          "sodium_total_mg": 0,
+          "carbs_g_per_hour": 0,
+          "carbs_total_g": 0,
+          "gels": 0,
+          "pre_fluid_ml": 432,
+          "pre_carbs_g": 36,
+          "post_fluid_ml": 300,
+          "post_carbs_g": 72,
+          "post_protein_g": 22
+        }
+      },
+      {
+        "date_ms": 1794106800000,
+        "day_index": 59,
+        "weekday": 7,
+        "week_number": 9,
+        "phase": "pico",
+        "type": "fondo",
+        "sport": "running",
+        "duration_min": 158,
+        "is_deload_week": false,
+        "title": "Running: fondo largo (158 min)",
+        "detail": "Fondo continuo a ritmo cómodo. Es la sesión clave de la semana: usála también para ensayar tu estrategia de hidratación y geles tal como la usarías en carrera.\nZona Z2 Base aeróbica (109-127 ppm) · Ritmo 6:34 - 7:19 min/km\nLlevá 2106 ml, 184 g de hidratos y 1674 mg de sodio.",
+        "reasons": [
+          {
+            "code": "fondo_en_fin_de_semana",
+            "text": "El fondo largo va al fin de semana."
+          },
+          {
+            "code": "fase_pico",
+            "text": "Fase de pico: la carga más específica del evento."
+          }
+        ],
+        "done": false,
+        "scheduled_minute_of_day": 510,
+        "distance_m": 22800,
+        "zone": "z2",
+        "hr_low_bpm": 109,
+        "hr_high_bpm": 127,
+        "pace_low_s_per_km": 394,
+        "pace_high_s_per_km": 439,
+        "estimated_kcal": 1700,
+        "fueling": {
+          "fluid_ml_per_hour": 800,
+          "fluid_total_ml": 2106,
+          "sodium_mg_per_hour": 636,
+          "sodium_total_mg": 1674,
+          "carbs_g_per_hour": 70,
+          "carbs_total_g": 184,
+          "gels": 8,
+          "pre_fluid_ml": 432,
+          "pre_carbs_g": 144,
+          "post_fluid_ml": 2381,
+          "post_carbs_g": 72,
+          "post_protein_g": 22
+        }
+      },
+      {
+        "date_ms": 1794193200000,
+        "day_index": 60,
+        "weekday": 1,
+        "week_number": 9,
+        "phase": "pico",
+        "type": "descanso",
+        "sport": "otro",
+        "duration_min": 0,
+        "is_deload_week": false,
+        "title": "Descanso",
+        "detail": "Día libre. Movilidad suave, elongación y buen descanso nocturno: la adaptación ocurre cuando descansás, no mientras entrenás.\nDía de menor carga: bajá los hidratos y sostené la proteína e hidratación.",
+        "reasons": [
+          {
+            "code": "dia_no_elegido",
+            "text": "No es uno de los días que elegiste para entrenar: toca descansar."
+          },
+          {
+            "code": "fase_pico",
+            "text": "Fase de pico: la carga más específica del evento."
+          }
+        ],
+        "done": false,
+        "estimated_kcal": 0
+      },
+      {
+        "date_ms": 1794279600000,
+        "day_index": 61,
+        "weekday": 2,
+        "week_number": 9,
+        "phase": "pico",
+        "type": "ritmo_carrera",
+        "sport": "running",
+        "duration_min": 84,
+        "is_deload_week": false,
+        "title": "Ritmo de carrera · Running (84 min)",
+        "detail": "15 min de entrada en calor + 34 min a ritmo objetivo de carrera + 10 min suaves. Ensayá con la ropa y los geles que vas a usar el día del evento.\nZona Z3 Tempo (127-145 ppm) · Ritmo 5:37 - 5:53 min/km\nLlevá 1120 ml, 70 g de hidratos y 835 mg de sodio.",
+        "reasons": [
+          {
+            "code": "calidad_con_mas_descanso_previo",
+            "text": "La sesión de calidad va al día con más descanso antes."
+          },
+          {
+            "code": "fase_pico",
+            "text": "Fase de pico: la carga más específica del evento."
+          }
+        ],
+        "done": false,
+        "scheduled_minute_of_day": 1140,
+        "distance_m": 14600,
+        "zone": "z3",
+        "hr_low_bpm": 127,
+        "hr_high_bpm": 145,
+        "pace_low_s_per_km": 337,
+        "pace_high_s_per_km": 353,
+        "estimated_kcal": 1089,
+        "fueling": {
+          "fluid_ml_per_hour": 800,
+          "fluid_total_ml": 1120,
+          "sodium_mg_per_hour": 597,
+          "sodium_total_mg": 835,
+          "carbs_g_per_hour": 50,
+          "carbs_total_g": 70,
+          "gels": 3,
+          "pre_fluid_ml": 432,
+          "pre_carbs_g": 86,
+          "post_fluid_ml": 1863,
+          "post_carbs_g": 72,
+          "post_protein_g": 22
+        }
+      },
+      {
+        "date_ms": 1794366000000,
+        "day_index": 62,
+        "weekday": 3,
+        "week_number": 9,
+        "phase": "pico",
+        "type": "descanso",
+        "sport": "otro",
+        "duration_min": 0,
+        "is_deload_week": false,
+        "title": "Descanso",
+        "detail": "Día libre. Movilidad suave, elongación y buen descanso nocturno: la adaptación ocurre cuando descansás, no mientras entrenás.\nDía de menor carga: bajá los hidratos y sostené la proteína e hidratación.",
+        "reasons": [
+          {
+            "code": "dia_no_elegido",
+            "text": "No es uno de los días que elegiste para entrenar: toca descansar."
+          },
+          {
+            "code": "fase_pico",
+            "text": "Fase de pico: la carga más específica del evento."
+          }
+        ],
+        "done": false,
+        "estimated_kcal": 0
+      },
+      {
+        "date_ms": 1794452400000,
+        "day_index": 63,
+        "weekday": 4,
+        "week_number": 10,
+        "phase": "afinamiento",
+        "type": "suave",
+        "sport": "running",
+        "duration_min": 47,
+        "is_deload_week": false,
+        "title": "Running suave (47 min)",
+        "detail": "Rodaje continuo en zona aeróbica. Deberías poder mantener una conversación completa. Cerrá con 4 progresiones de 20 segundos.\nZona Z2 Base aeróbica (109-127 ppm) · Ritmo 6:54 - 7:34 min/km\nAgua a demanda (800 ml/h). No hacen falta geles.",
+        "reasons": [
+          {
+            "code": "suave_en_los_dias_restantes",
+            "text": "Tus otros días son suaves: la mayor parte del volumen va en zona aeróbica."
+          },
+          {
+            "code": "fase_afinamiento",
+            "text": "Afinamiento: bajar el volumen, mantener la intensidad y llegar fresco."
+          }
+        ],
+        "done": false,
+        "scheduled_minute_of_day": 1140,
+        "distance_m": 6500,
+        "zone": "z2",
+        "hr_low_bpm": 109,
+        "hr_high_bpm": 127,
+        "pace_low_s_per_km": 414,
+        "pace_high_s_per_km": 454,
+        "estimated_kcal": 484,
+        "fueling": {
+          "fluid_ml_per_hour": 800,
+          "fluid_total_ml": 626,
+          "sodium_mg_per_hour": 0,
+          "sodium_total_mg": 0,
+          "carbs_g_per_hour": 25,
+          "carbs_total_g": 19,
+          "gels": 1,
+          "pre_fluid_ml": 432,
+          "pre_carbs_g": 36,
+          "post_fluid_ml": 708,
+          "post_carbs_g": 72,
+          "post_protein_g": 22
+        }
+      },
+      {
+        "date_ms": 1794538800000,
+        "day_index": 64,
+        "weekday": 5,
+        "week_number": 10,
+        "phase": "afinamiento",
+        "type": "descanso",
+        "sport": "otro",
+        "duration_min": 0,
+        "is_deload_week": false,
+        "title": "Descanso",
+        "detail": "Día libre. Movilidad suave, elongación y buen descanso nocturno: la adaptación ocurre cuando descansás, no mientras entrenás.\nDía de menor carga: bajá los hidratos y sostené la proteína e hidratación.",
+        "reasons": [
+          {
+            "code": "dia_no_elegido",
+            "text": "No es uno de los días que elegiste para entrenar: toca descansar."
+          },
+          {
+            "code": "fase_afinamiento",
+            "text": "Afinamiento: bajar el volumen, mantener la intensidad y llegar fresco."
+          }
+        ],
+        "done": false,
+        "estimated_kcal": 0
+      },
+      {
+        "date_ms": 1794625200000,
+        "day_index": 65,
+        "weekday": 6,
+        "week_number": 10,
+        "phase": "afinamiento",
+        "type": "fuerza",
+        "sport": "fuerza",
+        "duration_min": 35,
+        "is_deload_week": false,
+        "title": "Fuerza para corredores (35 min)",
+        "detail": "Circuito de fuerza: sentadillas, estocadas, puente de glúteo, plancha y trabajo excéntrico de gemelos e isquiotibiales. 3 series x 10-12 repeticiones. Reduce el riesgo de lesión por sobrecarga.\nZona Z2 Base aeróbica (109-127 ppm)\nProteína dentro de la hora posterior (22 g).",
+        "reasons": [
+          {
+            "code": "fuerza_antes_del_fondo",
+            "text": "La fuerza va al día libre más cercano antes del fondo."
+          },
+          {
+            "code": "fase_afinamiento",
+            "text": "Afinamiento: bajar el volumen, mantener la intensidad y llegar fresco."
+          }
+        ],
+        "done": false,
+        "scheduled_minute_of_day": 540,
+        "zone": "z2",
+        "hr_low_bpm": 109,
+        "hr_high_bpm": 127,
+        "estimated_kcal": 220,
+        "fueling": {
+          "fluid_ml_per_hour": 466,
+          "fluid_total_ml": 271,
+          "sodium_mg_per_hour": 0,
+          "sodium_total_mg": 0,
+          "carbs_g_per_hour": 0,
+          "carbs_total_g": 0,
+          "gels": 0,
+          "pre_fluid_ml": 432,
+          "pre_carbs_g": 36,
+          "post_fluid_ml": 300,
+          "post_carbs_g": 72,
+          "post_protein_g": 22
+        }
+      },
+      {
+        "date_ms": 1794711600000,
+        "day_index": 66,
+        "weekday": 7,
+        "week_number": 10,
+        "phase": "afinamiento",
+        "type": "fondo",
+        "sport": "running",
+        "duration_min": 83,
+        "is_deload_week": false,
+        "title": "Running: fondo largo (83 min)",
+        "detail": "Fondo continuo a ritmo cómodo. Es la sesión clave de la semana: usála también para ensayar tu estrategia de hidratación y geles tal como la usarías en carrera.\nZona Z2 Base aeróbica (109-127 ppm) · Ritmo 6:34 - 7:19 min/km\nLlevá 1106 ml, 69 g de hidratos y 659 mg de sodio.",
+        "reasons": [
+          {
+            "code": "fondo_en_fin_de_semana",
+            "text": "El fondo largo va al fin de semana."
+          },
+          {
+            "code": "fase_afinamiento",
+            "text": "Afinamiento: bajar el volumen, mantener la intensidad y llegar fresco."
+          }
+        ],
+        "done": false,
+        "scheduled_minute_of_day": 510,
+        "distance_m": 12000,
+        "zone": "z2",
+        "hr_low_bpm": 109,
+        "hr_high_bpm": 127,
+        "pace_low_s_per_km": 394,
+        "pace_high_s_per_km": 439,
+        "estimated_kcal": 895,
+        "fueling": {
+          "fluid_ml_per_hour": 800,
+          "fluid_total_ml": 1106,
+          "sodium_mg_per_hour": 477,
+          "sodium_total_mg": 659,
+          "carbs_g_per_hour": 50,
+          "carbs_total_g": 69,
+          "gels": 3,
+          "pre_fluid_ml": 432,
+          "pre_carbs_g": 86,
+          "post_fluid_ml": 1251,
+          "post_carbs_g": 72,
+          "post_protein_g": 22
+        }
+      },
+      {
+        "date_ms": 1794798000000,
+        "day_index": 67,
+        "weekday": 1,
+        "week_number": 10,
+        "phase": "afinamiento",
+        "type": "descanso",
+        "sport": "otro",
+        "duration_min": 0,
+        "is_deload_week": false,
+        "title": "Descanso",
+        "detail": "Día libre. Movilidad suave, elongación y buen descanso nocturno: la adaptación ocurre cuando descansás, no mientras entrenás.\nDía de menor carga: bajá los hidratos y sostené la proteína e hidratación.",
+        "reasons": [
+          {
+            "code": "dia_no_elegido",
+            "text": "No es uno de los días que elegiste para entrenar: toca descansar."
+          },
+          {
+            "code": "fase_afinamiento",
+            "text": "Afinamiento: bajar el volumen, mantener la intensidad y llegar fresco."
+          }
+        ],
+        "done": false,
+        "estimated_kcal": 0
+      },
+      {
+        "date_ms": 1794884400000,
+        "day_index": 68,
+        "weekday": 2,
+        "week_number": 10,
+        "phase": "afinamiento",
+        "type": "ritmo_carrera",
+        "sport": "running",
+        "duration_min": 44,
+        "is_deload_week": false,
+        "title": "Ritmo de carrera · Running (44 min)",
+        "detail": "15 min de entrada en calor + 18 min a ritmo objetivo de carrera + 10 min suaves. Ensayá con la ropa y los geles que vas a usar el día del evento.\nZona Z3 Tempo (127-145 ppm) · Ritmo 5:37 - 5:53 min/km\nAgua a demanda (800 ml/h). No hacen falta geles.",
+        "reasons": [
+          {
+            "code": "calidad_con_mas_descanso_previo",
+            "text": "La sesión de calidad va al día con más descanso antes."
+          },
+          {
+            "code": "fase_afinamiento",
+            "text": "Afinamiento: bajar el volumen, mantener la intensidad y llegar fresco."
+          }
+        ],
+        "done": false,
+        "scheduled_minute_of_day": 1140,
+        "distance_m": 7700,
+        "zone": "z3",
+        "hr_low_bpm": 127,
+        "hr_high_bpm": 145,
+        "pace_low_s_per_km": 337,
+        "pace_high_s_per_km": 353,
+        "estimated_kcal": 574,
+        "fueling": {
+          "fluid_ml_per_hour": 800,
+          "fluid_total_ml": 586,
+          "sodium_mg_per_hour": 0,
+          "sodium_total_mg": 0,
+          "carbs_g_per_hour": 0,
+          "carbs_total_g": 0,
+          "gels": 0,
+          "pre_fluid_ml": 432,
+          "pre_carbs_g": 36,
+          "post_fluid_ml": 976,
+          "post_carbs_g": 72,
+          "post_protein_g": 22
+        }
+      },
+      {
+        "date_ms": 1794970800000,
+        "day_index": 69,
+        "weekday": 3,
+        "week_number": 10,
+        "phase": "afinamiento",
+        "type": "descanso",
+        "sport": "otro",
+        "duration_min": 0,
+        "is_deload_week": false,
+        "title": "Descanso",
+        "detail": "Día libre. Movilidad suave, elongación y buen descanso nocturno: la adaptación ocurre cuando descansás, no mientras entrenás.\nDía de menor carga: bajá los hidratos y sostené la proteína e hidratación.",
+        "reasons": [
+          {
+            "code": "dia_no_elegido",
+            "text": "No es uno de los días que elegiste para entrenar: toca descansar."
+          },
+          {
+            "code": "fase_afinamiento",
+            "text": "Afinamiento: bajar el volumen, mantener la intensidad y llegar fresco."
+          }
+        ],
+        "done": false,
+        "estimated_kcal": 0
+      },
+      {
+        "date_ms": 1795057200000,
+        "day_index": 70,
+        "weekday": 4,
+        "week_number": 11,
+        "phase": "carrera",
+        "type": "carrera",
+        "sport": "running",
+        "duration_min": 121,
+        "is_deload_week": false,
+        "title": "¡Media maratón (21K)! Día del evento",
+        "detail": "Objetivo: Media maratón (21K). Ritmo estimado 5:45 min/km para un tiempo aproximado de 2 h 1 min. Salí conservador los primeros kilómetros y respetá el plan de hidratación desde el minuto uno.\nEn carrera: 800 ml/h, 891 mg de sodio/h y 50 g de hidratos/h. Desayuno 3 h antes con 86 g de hidratos.",
+        "reasons": [
+          {
+            "code": "dia_del_evento",
+            "text": "Es la fecha que elegiste para tu evento."
+          },
+          {
+            "code": "objetivo_media_maraton",
+            "text": "Tu objetivo: media maratón (21K)."
+          }
+        ],
+        "done": false,
+        "scheduled_minute_of_day": 1140,
+        "distance_m": 21097,
+        "zone": "z4",
+        "hr_low_bpm": 145,
+        "hr_high_bpm": 163,
+        "pace_low_s_per_km": 337,
+        "pace_high_s_per_km": 353,
+        "estimated_kcal": 1573,
+        "fueling": {
+          "fluid_ml_per_hour": 800,
+          "fluid_total_ml": 1613,
+          "sodium_mg_per_hour": 891,
+          "sodium_total_mg": 1796,
+          "carbs_g_per_hour": 50,
+          "carbs_total_g": 100,
+          "gels": 4,
+          "pre_fluid_ml": 432,
+          "pre_carbs_g": 86,
+          "post_fluid_ml": 3199,
+          "post_carbs_g": 72,
+          "post_protein_g": 22
+        }
+      }
+    ]
+  }
+}

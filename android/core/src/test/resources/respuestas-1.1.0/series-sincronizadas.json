@@ -1,0 +1,32 @@
+{
+  "data": {
+    "session_id": "gym-2026-09-10",
+    "updated_at_ms": 1789033543346,
+    "sets": [
+      {
+        "exercise_id": "estocada-deficit",
+        "number": 1,
+        "done": true,
+        "reps": 10,
+        "skipped": false,
+        "is_extra": false,
+        "recorded_at_ms": 1789033482979,
+        "received_at_ms": 1789033543346,
+        "device": "telefono",
+        "weight_g": 12000
+      },
+      {
+        "exercise_id": "estocada-deficit",
+        "number": 2,
+        "done": false,
+        "reps": 8,
+        "skipped": false,
+        "is_extra": false,
+        "recorded_at_ms": 1789033542979,
+        "received_at_ms": 1789033543346,
+        "device": "reloj"
+      }
+    ],
+    "date_ms": 1789009200000
+  }
+}

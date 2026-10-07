@@ -1,0 +1,1733 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<!-- El runtime vive en design/origen/ y NO se porta (design/ESPECIFICACION.md §1.2):
+     se referencia desde ahi, en solo lectura, para poder abrir este archivo en un
+     navegador. support.js baja React de unpkg.com, asi que hace falta red la
+     primera vez. origen/ no se toca. -->
+<script src="../origen/support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet data-dc-atomics><meta name="design_doc_mode" content="canvas"><link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;500;600;700&display=swap" rel="stylesheet"><style>:root{--ac:#7CF03D;--ac-rgb:124 240 61}body{margin:0;background:#0A0B09;font-family:Archivo,system-ui,sans-serif}a{color:var(--ac)}a:hover{color:var(--ac)}input,select,button{font-family:inherit}input::placeholder{color:rgba(242,244,240,.5)}.wheel{scrollbar-width:none;-ms-overflow-style:none}.wheel::-webkit-scrollbar{display:none}</style></helmet>
+
+<div ref="{{ rootRef }}" style="min-height:100%;background:#0A0B09;color:#F2F4F0;padding:44px 48px 64px;display:flex;flex-direction:column;gap:36px">
+
+  <div style="display:flex;gap:52px;flex-wrap:wrap;max-width:1240px">
+    <div style="display:flex;flex-direction:column;gap:14px;max-width:430px">
+      <div style="display:flex;align-items:center;gap:10px">
+        <div style="width:22px;height:22px;border-radius:6px;background:var(--ac)"></div>
+        <div style="font-size:13px;font-weight:600;letter-spacing:.16em;text-transform:uppercase">Trainer · gimnasio</div>
+      </div>
+      <div style="font-size:33px;font-weight:600;letter-spacing:-.03em;line-height:1.06">Las tres piezas que al gimnasio le faltaban: catálogo, captura de serie y descanso</div>
+      <div style="font-size:13.5px;line-height:1.55;color:rgba(242,244,240,.6);text-wrap:pretty">La sesión de gimnasio es la hermana de la salida en vivo: se está adentro de algo que está pasando ahora. La pantalla que más se toca es la captura de serie, y su medida de éxito es una sola: <b style="color:#F2F4F0;font-weight:600">un tap por serie</b> cuando la serie salió como estaba prescrita.</div>
+      <div style="font-size:12.5px;line-height:1.55;color:rgba(242,244,240,.5)">Este archivo NO está en <code style="font-family:ui-monospace,Menlo,monospace;font-size:11.5px">design/origen/</code>, que está congelado: es diseño autorado después del <code style="font-family:ui-monospace,Menlo,monospace;font-size:11.5px">.zip</code>. Por eso no puede importar HomeB ni ser importado por él —<code style="font-family:ui-monospace,Menlo,monospace;font-size:11.5px">dc-import</code> sólo resuelve archivos hermanos— y el enganche está <b style="color:#F2F4F0;font-weight:600">escrito</b>, acá al costado y en ESPECIFICACION.md, en vez de estar cableado.</div>
+    </div>
+
+    <div style="display:flex;flex-direction:column;gap:11px;max-width:290px">
+      <div style="font-size:11px;font-weight:600;letter-spacing:.14em;text-transform:uppercase;color:rgba(242,244,240,.5)">Decisiones</div>
+      <div style="font-size:12.5px;line-height:1.5;color:rgba(242,244,240,.65)">1. El botón primario <b style="color:#F2F4F0;font-weight:600">dice lo que va a guardar</b> ("Serie 3 hecha · 8 × 45 kg"). Confirmar es un tap y no es a ciegas.</div>
+      <div style="font-size:12.5px;line-height:1.5;color:rgba(242,244,240,.65)">2. Precarga determinística: si la prescripción varía el peso serie por serie, gana el valor prescrito de esa serie; si es igual en todas, gana la última serie hecha. Nunca se adivina una progresión.</div>
+      <div style="font-size:12.5px;line-height:1.5;color:rgba(242,244,240,.65)">3. Cualquier serie ya hecha se corrige tocándola: los dos steppers se reapuntan a ella y el botón cambia de texto. No navega, no abre modal, no corta el descanso.</div>
+      <div style="font-size:12.5px;line-height:1.5;color:rgba(242,244,240,.65)">4. Serie fallida, salteada y extra son estados normales del strip, no errores. El chip guarda <b style="color:#F2F4F0;font-weight:600">las repeticiones que hiciste</b>, no un tilde: el dato dice más que el símbolo y no juzga.</div>
+      <div style="font-size:12.5px;line-height:1.5;color:rgba(242,244,240,.65)">5. La prescripción es una lista de series, no una cadena de texto. El string se compone para mostrar con <code style="font-family:ui-monospace,Menlo,monospace;font-size:11.5px">Intl</code> y no se guarda nunca.</div>
+    </div>
+
+    <div style="display:flex;flex-direction:column;gap:11px;max-width:290px">
+      <div style="font-size:11px;font-weight:600;letter-spacing:.14em;text-transform:uppercase;color:rgba(242,244,240,.5)">Restricciones, verificadas</div>
+      <div style="font-size:12.5px;line-height:1.5;color:rgba(242,244,240,.65)"><b style="color:var(--ac);font-weight:600">48 px</b> de alto mínimo en todo lo accionable, sin excepciones: <b style="color:#F2F4F0;font-weight:600">34 de 34</b> lo declaran, ninguno estimado. Los chips del riel de abajo no cuentan: son del lienzo, no del producto.</div>
+      <div style="font-size:12.5px;line-height:1.5;color:rgba(242,244,240,.65)"><b style="color:var(--ac);font-weight:600">Contraste AA</b> calculado con la fórmula WCAG 2.1 componiendo cada alfa sobre su fondo real. La tabla está abajo. El texto al 45 % del diseño viejo (4.20:1) no se usa: el mínimo acá es 4.90:1.</div>
+      <div style="font-size:12.5px;line-height:1.5;color:rgba(242,244,240,.65)"><b style="color:var(--ac);font-weight:600">Nada sólo por color</b>: cada estado del strip lleva forma, número y texto además del tinte.</div>
+      <div style="font-size:12.5px;line-height:1.5;color:rgba(242,244,240,.65)"><b style="color:var(--ac);font-weight:600">Cuatro locales</b>: es-AR, en-US, pt-BR y ja-JP. Cero texto pegado al markup — todo sale de la tabla de strings y los números de <code style="font-family:ui-monospace,Menlo,monospace;font-size:11.5px">Intl</code>. Cambiá el locale arriba y la pantalla cambia entera.</div>
+      <div style="font-size:12.5px;line-height:1.5;color:rgba(242,244,240,.65)"><b style="color:var(--ac);font-weight:600">Tokens</b>: ningún color, radio ni fuente fuera de <code style="font-family:ui-monospace,Menlo,monospace;font-size:11.5px">shared/design/tokens.json</code>. Estas pantallas necesitaron <b style="color:#F2F4F0;font-weight:600">cinco roles nuevos</b>, agregados al archivo en la 0.3.0: cuatro ya estaban sueltos en el diseño del <code style="font-family:ui-monospace,Menlo,monospace;font-size:11.5px">.zip</code> sin extraer, y <code style="font-family:ui-monospace,Menlo,monospace;font-size:11.5px">borde_significante</code> es nuevo y existe por accesibilidad. El acento entra por el parámetro y nunca está escrito a mano en una pantalla.</div>
+    </div>
+
+    <div style="display:flex;flex-direction:column;gap:11px;max-width:280px">
+      <div style="font-size:11px;font-weight:600;letter-spacing:.14em;text-transform:uppercase;color:rgba(242,244,240,.5)">Pendiente</div>
+      <div style="font-size:12.5px;line-height:1.55;color:rgba(242,244,240,.6);text-wrap:pretty">Las traducciones al portugués y al japonés las escribí yo y <b style="color:#F2F4F0;font-weight:600">no las revisó un hablante nativo</b>: sirven para probar que el layout aguanta el largo, no para publicar.</div>
+      <div style="font-size:12.5px;line-height:1.55;color:rgba(242,244,240,.6);text-wrap:pretty">Que el diseño soporte cuatro locales <b style="color:#F2F4F0;font-weight:600">no</b> significa que la app publique cuatro idiomas. Eso es una decisión de producto que todavía no está tomada (AGENTS.md §10 sigue con el hueco).</div>
+      <div style="font-size:12.5px;line-height:1.55;color:rgba(242,244,240,.6);text-wrap:pretty">Falta el set de íconos del producto: los de acá son de trazo, dibujados a mano en la grilla de 24, y se reemplazan cuando exista el set.</div>
+      <div style="font-size:12.5px;line-height:1.55;color:rgba(242,244,240,.6);text-wrap:pretty">El aviso del descanso con la app en segundo plano está diseñado; que cada plataforma pueda actualizar la cuenta regresiva en la notificación hay que <b style="color:#F2F4F0;font-weight:600">verificarlo en la fase 6</b>, no darlo por hecho.</div>
+    </div>
+  </div>
+
+  <div style="display:flex;gap:40px;flex-wrap:wrap;align-items:flex-start">
+
+    <div style="display:flex;flex-direction:column;gap:14px">
+      <div style="display:flex;align-items:baseline;gap:9px"><span style="font:600 10.5px ui-monospace,Menlo,monospace;padding:3px 7px;background:var(--ac);color:#0A0B09;border-radius:5px">Flujo</span><span style="font-size:12px;color:rgba(242,244,240,.6)">Interactivo — los steppers, el strip y el cronómetro andan de verdad</span></div>
+
+      <div style="width:390px;height:844px;border-radius:44px;background:#000;border:1px solid rgba(255,255,255,.14);overflow:hidden;display:flex;flex-direction:column;position:relative">
+        <div style="height:46px;flex:none;background:#0B0C0A"></div>
+        <div style="flex:1;min-height:0;background:#0B0C0A;display:flex;flex-direction:column;overflow:hidden">
+
+          <sc-if value="{{ is.catalogo }}" hint-placeholder-val="{{ false }}">
+            <div style="flex:none;padding:4px 18px 12px;display:flex;flex-direction:column;gap:12px">
+              <div style="display:flex;align-items:center;gap:10px">
+                <div onClick="{{ go.serie }}" style="width:48px;height:48px;margin-left:-12px;border-radius:14px;display:flex;align-items:center;justify-content:center;cursor:pointer;flex:none">
+                  <svg width="11" height="19" viewBox="0 0 14 26" fill="none" stroke="rgba(242,244,240,.6)" stroke-width="2.2" stroke-linecap="round"><path d="M10 4l-6 9 6 9"></path></svg>
+                </div>
+                <div style="flex:1;font-size:20px;font-weight:600;letter-spacing:-.02em">{{ t.catalogoTitulo }}</div>
+              </div>
+              <label style="min-height:56px;border-radius:14px;background:#141613;border:1px solid rgba(255,255,255,.12);display:flex;align-items:center;gap:10px;padding:0 14px;cursor:text">
+                <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="rgba(242,244,240,.6)" stroke-width="1.9" stroke-linecap="round" style="flex:none"><circle cx="11" cy="11" r="6.6"></circle><path d="M16 16l4.4 4.4"></path></svg>
+                <input value="{{ q }}" onInput="{{ setQ }}" placeholder="{{ t.buscarPlaceholder }}" style="flex:1;min-width:0;align-self:stretch;height:56px;background:transparent;border:0;outline:0;color:#F2F4F0;font-size:14.5px;padding:0">
+                <sc-if value="{{ hayQ }}" hint-placeholder-val="{{ false }}">
+                  <div onClick="{{ limpiarQ }}" style="width:48px;height:48px;margin-right:-14px;display:flex;align-items:center;justify-content:center;cursor:pointer;flex:none">
+                    <div style="width:24px;height:24px;border-radius:50%;background:rgba(255,255,255,.12);display:flex;align-items:center;justify-content:center">
+                      <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="rgba(242,244,240,.85)" stroke-width="2.6" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"></path></svg>
+                    </div>
+                  </div>
+                </sc-if>
+              </label>
+              <div style="display:flex;gap:8px">
+                <div onClick="{{ go.catalogoFiltros }}" style="height:48px;flex:1;border-radius:14px;display:flex;align-items:center;justify-content:center;gap:8px;cursor:pointer;background:{{ filtros.bg }};border:1px solid {{ filtros.borde }};color:{{ filtros.color }}">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round"><path d="M3.5 6.5h17M6.5 12h11M10 17.5h4"></path></svg>
+                  <div style="font-size:13.5px;font-weight:600">{{ filtros.label }}</div>
+                </div>
+                <div onClick="{{ toggleSinEquipo }}" style="height:48px;flex:1;border-radius:14px;display:flex;align-items:center;justify-content:center;gap:7px;cursor:pointer;background:{{ sinEquipo.bg }};border:1px solid {{ sinEquipo.borde }};color:{{ sinEquipo.color }}">
+                  <sc-if value="{{ sinEquipo.activo }}" hint-placeholder-val="{{ false }}">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" style="flex:none"><path d="M4.5 12.5l5 5 10-11"></path></svg>
+                  </sc-if>
+                  <div style="font-size:13.5px;font-weight:600">{{ t.sinEquipo }}</div>
+                </div>
+              </div>
+              <div style="font-size:12.5px;color:rgba(242,244,240,.6);font-variant-numeric:tabular-nums">{{ resultados.linea }}</div>
+            </div>
+
+            <div class="wheel" style="flex:1;min-height:0;overflow:auto;padding:0 18px;display:flex;flex-direction:column;gap:9px">
+              <sc-for list="{{ resultados.lista }}" as="e" hint-placeholder-count="5">
+                <div onClick="{{ e.abrir }}" style="flex:none;min-height:72px;border-radius:15px;background:#131511;border:1px solid rgba(255,255,255,.09);padding:13px 14px;display:flex;align-items:center;gap:12px;cursor:pointer">
+                  <div style="flex:1;display:flex;flex-direction:column;gap:4px">
+                    <div style="font-size:14px;font-weight:600;line-height:1.25">{{ e.nombre }}</div>
+                    <div style="font-size:12px;color:rgba(242,244,240,.6);line-height:1.35">{{ e.meta }}</div>
+                  </div>
+                  <sc-if value="{{ e.enRutina }}" hint-placeholder-val="{{ false }}">
+                    <div style="flex:none;font-size:11px;font-weight:600;padding:5px 9px;border-radius:999px;background:rgb(var(--ac-rgb) / .14);border:1px solid var(--ac);color:var(--ac)">{{ t.yaEnRutina }}</div>
+                  </sc-if>
+                  <svg width="9" height="16" viewBox="0 0 14 26" fill="none" stroke="rgba(242,244,240,.5)" stroke-width="2.2" stroke-linecap="round" style="flex:none"><path d="M4 4l6 9-6 9"></path></svg>
+                </div>
+              </sc-for>
+              <div onClick="{{ go.catalogoVacio }}" style="flex:none;min-height:48px;display:flex;align-items:center;justify-content:center;padding:14px;font-size:13px;color:rgba(242,244,240,.6);cursor:pointer">{{ t.noEstaLoQueBusco }}</div>
+              <div style="height:20px;flex:none"></div>
+            </div>
+          </sc-if>
+
+          <sc-if value="{{ is.catalogoFiltros }}" hint-placeholder-val="{{ false }}">
+            <div style="flex:1;display:flex;flex-direction:column;justify-content:flex-end;background:rgba(6,7,5,.78)">
+              <div style="border-radius:22px 22px 0 0;background:rgba(19,21,17,.94);border-top:1px solid rgba(255,255,255,.12);padding:16px 18px 26px;display:flex;flex-direction:column;gap:15px;max-height:88%">
+                <div style="display:flex;align-items:center;justify-content:space-between;gap:12px">
+                  <div style="font-size:17px;font-weight:600">{{ t.filtrar }}</div>
+                  <div onClick="{{ limpiarFiltros }}" style="height:48px;min-width:48px;display:flex;align-items:center;justify-content:flex-end;padding:0 4px;font-size:13px;font-weight:600;color:var(--ac);cursor:pointer">{{ t.limpiar }}</div>
+                </div>
+                <div class="wheel" style="flex:1;min-height:0;overflow:auto;display:flex;flex-direction:column;gap:15px">
+                  <sc-for list="{{ gruposFiltro }}" as="g" hint-placeholder-count="2">
+                    <div style="display:flex;flex-direction:column;gap:9px">
+                      <div style="font-size:10.5px;font-weight:600;letter-spacing:.14em;text-transform:uppercase;color:rgba(242,244,240,.6)">{{ g.titulo }}</div>
+                      <div style="display:flex;flex-wrap:wrap;gap:8px">
+                        <sc-for list="{{ g.opciones }}" as="o" hint-placeholder-count="6">
+                          <div onClick="{{ o.toggle }}" style="height:48px;display:flex;align-items:center;gap:7px;padding:0 14px;border-radius:14px;cursor:pointer;background:{{ o.bg }};border:1px solid {{ o.borde }};color:{{ o.color }}">
+                            <sc-if value="{{ o.activo }}" hint-placeholder-val="{{ false }}">
+                              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" style="flex:none"><path d="M4.5 12.5l5 5 10-11"></path></svg>
+                            </sc-if>
+                            <div style="font-size:13.5px;font-weight:600">{{ o.label }}</div>
+                          </div>
+                        </sc-for>
+                      </div>
+                    </div>
+                  </sc-for>
+                </div>
+                <div onClick="{{ go.catalogo }}" style="height:56px;border-radius:16px;background:var(--ac);color:#0B0C0A;display:flex;align-items:center;justify-content:center;font-size:15px;font-weight:700;cursor:pointer">{{ resultados.verBoton }}</div>
+              </div>
+            </div>
+          </sc-if>
+
+          <sc-if value="{{ is.catalogoVacio }}" hint-placeholder-val="{{ false }}">
+            <div style="flex:1;display:flex;flex-direction:column;padding:4px 18px 26px;gap:14px">
+              <div style="display:flex;align-items:center;gap:10px">
+                <div onClick="{{ go.catalogo }}" style="width:48px;height:48px;margin-left:-12px;border-radius:14px;display:flex;align-items:center;justify-content:center;cursor:pointer;flex:none">
+                  <svg width="11" height="19" viewBox="0 0 14 26" fill="none" stroke="rgba(242,244,240,.6)" stroke-width="2.2" stroke-linecap="round"><path d="M10 4l-6 9 6 9"></path></svg>
+                </div>
+                <div style="flex:1;font-size:20px;font-weight:600;letter-spacing:-.02em">{{ t.catalogoTitulo }}</div>
+              </div>
+              <div style="border-radius:18px;background:#131511;border:1px solid rgba(255,255,255,.09);padding:18px;display:flex;flex-direction:column;gap:10px">
+                <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="rgba(242,244,240,.6)" stroke-width="1.7" stroke-linecap="round"><circle cx="11" cy="11" r="6.6"></circle><path d="M16 16l4.4 4.4"></path><path d="M8.6 11h4.8"></path></svg>
+                <div style="font-size:17px;font-weight:600;line-height:1.3">{{ t.vacioTitulo }}</div>
+                <div style="font-size:13px;line-height:1.55;color:rgba(242,244,240,.6)">{{ t.vacioCuerpo }}</div>
+              </div>
+              <div style="display:flex;flex-direction:column;gap:9px">
+                <sc-for list="{{ salidasVacio }}" as="s" hint-placeholder-count="3">
+                  <div onClick="{{ s.act }}" style="min-height:64px;border-radius:15px;background:#131511;border:1px solid {{ s.borde }};padding:13px 14px;display:flex;align-items:center;gap:12px;cursor:pointer">
+                    <div style="flex:1;display:flex;flex-direction:column;gap:3px">
+                      <div style="font-size:14px;font-weight:600">{{ s.titulo }}</div>
+                      <div style="font-size:12px;line-height:1.4;color:rgba(242,244,240,.6)">{{ s.detalle }}</div>
+                    </div>
+                    <svg width="9" height="16" viewBox="0 0 14 26" fill="none" stroke="rgba(242,244,240,.5)" stroke-width="2.2" stroke-linecap="round" style="flex:none"><path d="M4 4l6 9-6 9"></path></svg>
+                  </div>
+                </sc-for>
+              </div>
+              <div style="font-size:12px;line-height:1.5;color:rgba(242,244,240,.5)">{{ t.vacioNota }}</div>
+            </div>
+          </sc-if>
+
+          <sc-if value="{{ is.ficha }}" hint-placeholder-val="{{ false }}">
+            <div class="wheel" style="flex:1;min-height:0;overflow:auto;padding:4px 18px 26px;display:flex;flex-direction:column;gap:13px">
+              <div style="display:flex;align-items:center;gap:10px">
+                <div onClick="{{ go.catalogo }}" style="width:48px;height:48px;margin-left:-12px;border-radius:14px;display:flex;align-items:center;justify-content:center;cursor:pointer;flex:none">
+                  <svg width="11" height="19" viewBox="0 0 14 26" fill="none" stroke="rgba(242,244,240,.6)" stroke-width="2.2" stroke-linecap="round"><path d="M10 4l-6 9 6 9"></path></svg>
+                </div>
+                <div style="flex:1;font-size:20px;font-weight:600;letter-spacing:-.02em;line-height:1.2">{{ ficha.nombre }}</div>
+              </div>
+
+              <div style="display:flex;flex-wrap:wrap;gap:7px">
+                <sc-for list="{{ ficha.chips }}" as="c" hint-placeholder-count="3">
+                  <div style="font-size:12px;font-weight:600;padding:7px 11px;border-radius:999px;background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.14);color:rgba(242,244,240,.85)">{{ c }}</div>
+                </sc-for>
+              </div>
+
+              <div style="border-radius:18px;background:#131511;border:1px solid rgba(255,255,255,.09);padding:15px;display:flex;flex-direction:column;gap:11px">
+                <div style="font-size:10.5px;font-weight:600;letter-spacing:.14em;text-transform:uppercase;color:rgba(242,244,240,.6)">{{ t.musculos }}</div>
+                <sc-for list="{{ ficha.musculos }}" as="m" hint-placeholder-count="2">
+                  <div style="display:flex;align-items:center;gap:10px">
+                    <div style="width:8px;height:8px;border-radius:50%;flex:none;background:{{ m.punto }};border:1px solid {{ m.borde }}"></div>
+                    <div style="flex:1;font-size:13.5px">{{ m.nombre }}</div>
+                    <div style="font-size:12px;color:rgba(242,244,240,.6);font-weight:600">{{ m.rol }}</div>
+                  </div>
+                </sc-for>
+              </div>
+
+              <div style="border-radius:18px;background:#131511;border:1px solid rgba(255,255,255,.09);padding:15px;display:flex;flex-direction:column;gap:10px">
+                <div style="font-size:10.5px;font-weight:600;letter-spacing:.14em;text-transform:uppercase;color:rgba(242,244,240,.6)">{{ t.comoSeHace }}</div>
+                <sc-for list="{{ ficha.pasos }}" as="p" hint-placeholder-count="3">
+                  <div style="display:flex;gap:11px;align-items:flex-start">
+                    <div style="width:22px;height:22px;border-radius:8px;flex:none;background:rgb(var(--ac-rgb) / .14);border:1px solid var(--ac);color:var(--ac);display:flex;align-items:center;justify-content:center;font-size:11.5px;font-weight:700;font-variant-numeric:tabular-nums">{{ p.n }}</div>
+                    <div style="flex:1;font-size:13px;line-height:1.5;color:rgba(242,244,240,.85)">{{ p.texto }}</div>
+                  </div>
+                </sc-for>
+              </div>
+
+              <div style="border-radius:18px;background:#131511;border:1px solid rgba(255,255,255,.09);padding:15px;display:flex;flex-direction:column;gap:8px">
+                <div style="font-size:10.5px;font-weight:600;letter-spacing:.14em;text-transform:uppercase;color:rgba(242,244,240,.6)">{{ t.porQue }}</div>
+                <div style="font-size:13px;line-height:1.55;color:rgba(242,244,240,.85)">{{ ficha.porQue }}</div>
+              </div>
+
+              <div onClick="{{ go.sustitutos }}" style="min-height:60px;border-radius:16px;background:#131511;border:1px solid rgba(255,255,255,.14);padding:0 15px;display:flex;align-items:center;gap:12px;cursor:pointer">
+                <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="var(--ac)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="flex:none"><path d="M4 8h13l-3-3"></path><path d="M20 16H7l3 3"></path></svg>
+                <div style="flex:1;display:flex;flex-direction:column;gap:2px">
+                  <div style="font-size:14px;font-weight:600">{{ t.verSustitutos }}</div>
+                  <div style="font-size:12px;color:rgba(242,244,240,.6)">{{ ficha.sustitutosLinea }}</div>
+                </div>
+                <svg width="9" height="16" viewBox="0 0 14 26" fill="none" stroke="rgba(242,244,240,.5)" stroke-width="2.2" stroke-linecap="round" style="flex:none"><path d="M4 4l6 9-6 9"></path></svg>
+              </div>
+
+              <div onClick="{{ agregarDesdeFicha }}" style="min-height:56px;border-radius:16px;background:var(--ac);color:#0B0C0A;display:flex;align-items:center;justify-content:center;font-size:15px;font-weight:700;cursor:pointer">{{ ficha.botonAgregar }}</div>
+            </div>
+          </sc-if>
+
+          <sc-if value="{{ is.sustitutos }}" hint-placeholder-val="{{ false }}">
+            <div class="wheel" style="flex:1;min-height:0;overflow:auto;padding:4px 18px 26px;display:flex;flex-direction:column;gap:13px">
+              <div style="display:flex;align-items:center;gap:10px">
+                <div onClick="{{ go.ficha }}" style="width:48px;height:48px;margin-left:-12px;border-radius:14px;display:flex;align-items:center;justify-content:center;cursor:pointer;flex:none">
+                  <svg width="11" height="19" viewBox="0 0 14 26" fill="none" stroke="rgba(242,244,240,.6)" stroke-width="2.2" stroke-linecap="round"><path d="M10 4l-6 9 6 9"></path></svg>
+                </div>
+                <div style="flex:1;display:flex;flex-direction:column;gap:2px">
+                  <div style="font-size:20px;font-weight:600;letter-spacing:-.02em">{{ t.sustitutosTitulo }}</div>
+                  <div style="font-size:12.5px;color:rgba(242,244,240,.6)">{{ ficha.nombre }}</div>
+                </div>
+              </div>
+              <div style="font-size:13px;line-height:1.55;color:rgba(242,244,240,.6)">{{ t.sustitutosCuerpo }}</div>
+              <sc-for list="{{ sustitutos }}" as="s" hint-placeholder-count="3">
+                <div onClick="{{ s.usar }}" style="min-height:80px;border-radius:16px;background:#131511;border:1px solid rgba(255,255,255,.09);padding:14px;display:flex;flex-direction:column;gap:7px;cursor:pointer">
+                  <div style="display:flex;align-items:center;gap:10px">
+                    <div style="flex:1;font-size:14.5px;font-weight:600">{{ s.nombre }}</div>
+                    <div style="font-size:11.5px;font-weight:600;padding:5px 9px;border-radius:999px;flex:none;background:{{ s.gradoBg }};border:1px solid {{ s.gradoBorde }};color:{{ s.gradoColor }}">{{ s.grado }}</div>
+                  </div>
+                  <div style="font-size:12.5px;line-height:1.45;color:rgba(242,244,240,.6)">{{ s.motivo }}</div>
+                </div>
+              </sc-for>
+              <div style="font-size:12px;line-height:1.5;color:rgba(242,244,240,.5)">{{ t.sustitutosNota }}</div>
+            </div>
+          </sc-if>
+
+          <!-- ============ ANTES DE ENTRENAR ============ -->
+          <sc-if value="{{ is.rutina }}" hint-placeholder-val="{{ false }}">
+            <div style="flex:1;min-height:0;display:flex;flex-direction:column">
+              <div class="wheel" style="flex:1;min-height:0;overflow:auto;padding:6px 18px 0;display:flex;flex-direction:column;gap:16px">
+                <div style="display:flex;flex-direction:column;gap:4px">
+                  <div style="font-size:25px;font-weight:600;letter-spacing:-.03em;line-height:1.2">{{ rutina.titulo }}</div>
+                  <div style="font-size:13px;color:rgba(242,244,240,.6)">{{ rutina.resumen }}</div>
+                </div>
+
+                <div style="display:flex;flex-direction:column;gap:8px">
+                  <div style="font-size:10.5px;font-weight:600;letter-spacing:.14em;text-transform:uppercase;color:rgba(242,244,240,.6)">{{ rutina.distribucionLabel }}</div>
+                  <div style="display:flex;gap:8px;overflow:auto">
+                    <sc-for list="{{ distribucion }}" as="d" hint-placeholder-count="6">
+                      <div style="flex:none;min-width:62px;border-radius:16px;background:#131511;border:1px solid rgba(255,255,255,.09);padding:10px 12px;display:flex;flex-direction:column;align-items:center;gap:4px">
+                        <div style="font-size:16px;font-weight:700;color:var(--ac);font-variant-numeric:tabular-nums">{{ d.pct }}</div>
+                        <div style="font-size:11px;color:rgba(242,244,240,.6)">{{ d.musculo }}</div>
+                      </div>
+                    </sc-for>
+                  </div>
+                </div>
+
+                <div style="display:flex;flex-direction:column;gap:8px">
+                  <div style="font-size:10.5px;font-weight:600;letter-spacing:.14em;text-transform:uppercase;color:rgba(242,244,240,.6)">{{ rutina.listaLabel }}</div>
+                  <sc-for list="{{ listaEjercicios }}" as="e" hint-placeholder-count="6">
+                    <div onClick="{{ e.ir }}" style="min-height:64px;border-radius:16px;background:#131511;border:1px solid rgba(255,255,255,.09);padding:10px 12px;display:flex;align-items:center;gap:12px;cursor:pointer">
+                      <div style="width:48px;height:48px;flex:none;border-radius:999px;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.09);display:flex;align-items:center;justify-content:center;font-size:16px;font-weight:700;color:rgba(242,244,240,.6);font-variant-numeric:tabular-nums">{{ e.n }}</div>
+                      <div style="flex:1;min-width:0;display:flex;flex-direction:column;gap:2px">
+                        <div style="font-size:12px;color:rgba(242,244,240,.6)">{{ e.prescripcion }}</div>
+                        <div style="font-size:14px;font-weight:600">{{ e.nombre }}</div>
+                      </div>
+                    </div>
+                  </sc-for>
+                </div>
+                <div style="height:8px;flex:none"></div>
+              </div>
+              <div style="flex:none;padding:0 18px 22px">
+                <div onClick="{{ rutina.empezarTap }}" style="min-height:56px;border-radius:18px;background:var(--ac);color:#0B0C0A;display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:16px;font-weight:700">{{ rutina.empezar }}</div>
+              </div>
+            </div>
+          </sc-if>
+
+          <!-- ============ ENTRENANDO · LA TABLA DE SERIES ============ -->
+          <sc-if value="{{ is.captura }}" hint-placeholder-val="{{ true }}">
+            <div style="flex:1;min-height:0;display:flex;flex-direction:column;position:relative">
+
+              <!-- barra de sesion: el cronometro de la sesion, o el descanso cuando corre -->
+              <div style="flex:none;display:flex;align-items:center;gap:8px;padding:2px 18px 10px">
+                <div style="flex:1;min-width:0;display:flex;flex-direction:column;gap:1px">
+                  <div style="font-size:10.5px;font-weight:600;letter-spacing:.14em;text-transform:uppercase;color:{{ sesion.rotuloColor }}">{{ sesion.rotulo }}</div>
+                  <div style="font-size:34px;font-weight:700;letter-spacing:-.04em;line-height:1;font-variant-numeric:tabular-nums;color:{{ sesion.color }}">{{ sesion.reloj }}</div>
+                </div>
+                <sc-if value="{{ sesion.enDescanso }}" hint-placeholder-val="{{ false }}">
+                  <div onClick="{{ sesion.mas30 }}" style="height:48px;padding:0 11px;border-radius:13px;border:1px solid rgba(255,255,255,.38);display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:13px;font-weight:600;font-variant-numeric:tabular-nums;flex:none">{{ sesion.mas30Label }}</div>
+                </sc-if>
+                <sc-if value="{{ sesion.enDescanso }}" hint-placeholder-val="{{ false }}">
+                  <div onClick="{{ sesion.saltar }}" style="height:48px;padding:0 11px;border-radius:13px;border:1px solid rgba(255,255,255,.38);display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:13px;font-weight:600;flex:none">{{ sesion.saltarLabel }}</div>
+                </sc-if>
+                <div onClick="{{ sesion.terminar }}" style="height:48px;padding:0 13px;border-radius:13px;border:1px solid rgba(255,255,255,.38);display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:13px;font-weight:600;flex:none">{{ sesion.terminarLabel }}</div>
+              </div>
+
+              <div class="wheel" style="flex:1;min-height:0;overflow:auto;padding:0 18px 0;display:flex;flex-direction:column;gap:12px">
+
+                <!-- carrusel: se salta de ejercicio sin volver atras -->
+                <div style="display:flex;gap:8px;overflow:auto;flex:none">
+                  <sc-for list="{{ carrusel }}" as="c" hint-placeholder-count="6">
+                    <div onClick="{{ c.ir }}" style="width:48px;height:48px;flex:none;border-radius:999px;background:{{ c.bg }};border:{{ c.borde }};display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:16px;font-weight:700;color:{{ c.color }};font-variant-numeric:tabular-nums">{{ c.n }}</div>
+                  </sc-for>
+                </div>
+
+                <!-- el hueco de la animacion: reservado y medido, con lo que falta escrito -->
+                <div style="height:168px;flex:none;border-radius:18px;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.09);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;padding:20px;text-align:center">
+                  <div style="font-size:13px;font-weight:600;color:rgba(242,244,240,.6)">{{ animacion.titulo }}</div>
+                  <div style="font-size:11px;line-height:1.35;color:rgba(242,244,240,.5)">{{ animacion.cuerpo }}</div>
+                </div>
+
+                <div style="display:flex;flex-direction:column;gap:9px">
+                  <div style="font-size:19px;font-weight:600;letter-spacing:-.02em;line-height:1.2">{{ ej.nombre }}</div>
+                  <div style="display:flex;gap:8px;overflow:auto">
+                    <sc-for list="{{ acciones }}" as="a" hint-placeholder-count="3">
+                      <div style="flex:none;height:48px;padding:0 14px;border-radius:999px;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.09);display:flex;align-items:center;font-size:13px;font-weight:600;color:rgba(242,244,240,.34)">{{ a.label }}</div>
+                    </sc-for>
+                  </div>
+                </div>
+
+                <!-- LA TABLA. Cada celda y cada tilde miden 48: la referencia los
+                     tiene en 23-33 y AGENTS.md 10.1 no hace excepciones. -->
+                <div style="display:flex;flex-direction:column;gap:6px">
+                  <div style="display:flex;gap:6px;align-items:center;padding:0 4px">
+                    <div style="width:26px;font-size:10px;font-weight:600;letter-spacing:.12em;text-transform:uppercase;color:rgba(242,244,240,.6)">{{ cols.serie }}</div>
+                    <div style="flex:1;font-size:10px;font-weight:600;letter-spacing:.12em;text-transform:uppercase;color:rgba(242,244,240,.6)">{{ cols.previa }}</div>
+                    <div style="width:62px;font-size:10px;font-weight:600;letter-spacing:.12em;text-transform:uppercase;color:rgba(242,244,240,.6)">{{ cols.carga }}</div>
+                    <div style="width:56px;font-size:10px;font-weight:600;letter-spacing:.12em;text-transform:uppercase;color:rgba(242,244,240,.6)">{{ cols.reps }}</div>
+                    <div style="width:48px;flex:none"></div>
+                  </div>
+
+                  <sc-for list="{{ tabla }}" as="s" hint-placeholder-count="4">
+                    <div style="position:relative;border-radius:9px;overflow:hidden">
+                      <!-- lo que aparece al arrastrar. Es TAMBIEN un boton: el gesto
+                           no puede ser la unica forma de borrar (WCAG 2.5.1). -->
+                      <div onClick="{{ s.borrar }}" style="position:absolute;inset:0;display:flex;align-items:center;justify-content:flex-end;padding-right:14px;background:rgba(255,140,120,.14);border:1px solid rgba(255,140,120,.4);border-radius:9px;cursor:pointer;font-size:13px;font-weight:600;color:rgba(255,140,120,.9)">{{ s.borrarLabel }}</div>
+                      <div onClick="{{ s.abrirBorrar }}" style="position:relative;transform:translateX({{ s.desplazada }});display:flex;gap:6px;align-items:center;background:{{ s.bg }};border-radius:9px;padding:4px;cursor:grab">
+                        <div style="width:26px;text-align:center;font-size:14px;font-weight:600;color:{{ s.nColor }};font-variant-numeric:tabular-nums">{{ s.n }}</div>
+                        <div style="flex:1;min-width:0;font-size:12px;color:rgba(242,244,240,.5);font-variant-numeric:tabular-nums">{{ s.previa }}</div>
+                        <div onClick="{{ s.editarCarga }}" style="width:62px;height:48px;border-radius:12px;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.12);display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:16px;font-weight:700;font-variant-numeric:tabular-nums">{{ s.carga }}</div>
+                        <div onClick="{{ s.editarReps }}" style="width:56px;height:48px;border-radius:12px;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.12);display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:16px;font-weight:700;font-variant-numeric:tabular-nums">{{ s.reps }}</div>
+                        <div onClick="{{ s.alternar }}" style="width:48px;height:48px;flex:none;border-radius:12px;background:{{ s.tildeBg }};border:1px solid {{ s.tildeBorde }};display:flex;align-items:center;justify-content:center;cursor:pointer">
+                          <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="{{ s.tildeColor }}" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12l5 6L20 6"></path></svg>
+                        </div>
+                      </div>
+                    </div>
+                  </sc-for>
+
+                  <div onClick="{{ agregar.tap }}" style="min-height:48px;border-radius:14px;border:1px solid rgba(255,255,255,.38);display:flex;align-items:center;justify-content:center;gap:7px;cursor:pointer;color:rgba(242,244,240,.85)">
+                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M12 5v14M5 12h14"></path></svg>
+                    <div style="font-size:13px;font-weight:600">{{ agregar.label }}</div>
+                  </div>
+                </div>
+
+                <div style="height:10px;flex:none"></div>
+              </div>
+
+              <!-- deshacer. Borrar sin deshacer es destructivo. -->
+              <sc-if value="{{ deshacer.visible }}" hint-placeholder-val="{{ false }}">
+                <div style="flex:none;margin:0 18px 18px;border-radius:14px;background:#1C1F1A;border:1px solid rgba(255,255,255,.14);padding:6px 8px 6px 14px;display:flex;align-items:center;gap:10px">
+                  <div style="flex:1;font-size:13px">{{ deshacer.texto }}</div>
+                  <div onClick="{{ deshacer.tap }}" style="height:48px;padding:0 14px;display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:13.5px;font-weight:600;color:var(--ac)">{{ deshacer.label }}</div>
+                </div>
+              </sc-if>
+
+              <sc-if value="{{ teclado.abierto }}" hint-placeholder-val="{{ false }}">
+                <div style="position:absolute;inset:0;z-index:6;background:rgba(6,7,5,.78);display:flex;flex-direction:column;justify-content:flex-end">
+                  <div style="border-radius:22px 22px 0 0;background:rgba(19,21,17,.94);border-top:1px solid rgba(255,255,255,.12);padding:16px 18px 26px;display:flex;flex-direction:column;gap:13px">
+                    <div style="display:flex;align-items:center;gap:12px">
+                      <div style="flex:1;font-size:12.5px;color:rgba(242,244,240,.6)">{{ teclado.label }}</div>
+                      <div onClick="{{ teclado.cerrar }}" style="height:48px;min-width:48px;display:flex;align-items:center;justify-content:flex-end;padding:0 4px;font-size:13.5px;font-weight:600;color:var(--ac);cursor:pointer">{{ t.listo }}</div>
+                    </div>
+                    <div style="height:60px;border-radius:14px;background:#141613;border:1px solid var(--ac);display:flex;align-items:center;justify-content:center;font-size:32px;font-weight:700;letter-spacing:-.03em;font-variant-numeric:tabular-nums">{{ teclado.valor }}</div>
+                    <div style="display:grid;gridTemplateColumns:1fr 1fr 1fr;gap:8px">
+                      <sc-for list="{{ teclado.teclas }}" as="k" hint-placeholder-count="12">
+                        <div onClick="{{ k.tap }}" style="height:56px;border-radius:14px;background:{{ k.bg }};border:1px solid rgba(255,255,255,.14);display:flex;align-items:center;justify-content:center;font-size:21px;font-weight:600;cursor:pointer;font-variant-numeric:tabular-nums">{{ k.label }}</div>
+                      </sc-for>
+                    </div>
+                  </div>
+                </div>
+              </sc-if>
+            </div>
+          </sc-if>
+
+          <sc-if value="{{ is.casos }}" hint-placeholder-val="{{ false }}">
+            <div class="wheel" style="flex:1;min-height:0;overflow:auto;padding:4px 18px 26px;display:flex;flex-direction:column;gap:13px">
+              <div style="display:flex;align-items:center;gap:10px">
+                <div onClick="{{ go.serie }}" style="width:48px;height:48px;margin-left:-12px;border-radius:14px;display:flex;align-items:center;justify-content:center;cursor:pointer;flex:none">
+                  <svg width="11" height="19" viewBox="0 0 14 26" fill="none" stroke="rgba(242,244,240,.6)" stroke-width="2.2" stroke-linecap="round"><path d="M10 4l-6 9 6 9"></path></svg>
+                </div>
+                <div style="flex:1;font-size:20px;font-weight:600;letter-spacing:-.02em;line-height:1.2">{{ t.casosTitulo }}</div>
+              </div>
+              <div style="font-size:13px;line-height:1.55;color:rgba(242,244,240,.6)">{{ t.casosCuerpo }}</div>
+              <sc-for list="{{ casos }}" as="c" hint-placeholder-count="3">
+                <div style="border-radius:18px;background:#131511;border:1px solid rgba(255,255,255,.09);padding:15px;display:flex;flex-direction:column;gap:11px">
+                  <div style="font-size:14.5px;font-weight:600">{{ c.titulo }}</div>
+                  <div style="display:flex;gap:6px;align-items:stretch">
+                    <sc-for list="{{ c.strip }}" as="s" hint-placeholder-count="4">
+                      <div style="flex:1;min-width:0;height:52px;border-radius:13px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:1px;background:{{ s.bg }};border:{{ s.borde }};color:{{ s.color }}">
+                        <div style="font-size:15px;font-weight:700;line-height:1.1;font-variant-numeric:tabular-nums">{{ s.valor }}</div>
+                        <div style="font-size:9px;font-weight:600;line-height:1.1;color:{{ s.subColor }}">{{ s.sub }}</div>
+                      </div>
+                    </sc-for>
+                  </div>
+                  <div style="font-size:12.5px;line-height:1.5;color:rgba(242,244,240,.85)">{{ c.como }}</div>
+                  <div style="font-size:12px;line-height:1.45;color:rgba(242,244,240,.6);border-top:1px solid rgba(255,255,255,.09);padding-top:9px">{{ c.regla }}</div>
+                </div>
+              </sc-for>
+            </div>
+          </sc-if>
+
+          <sc-if value="{{ is.descansoFondo }}" hint-placeholder-val="{{ false }}">
+            <div style="flex:1;display:flex;flex-direction:column;background:#000;padding:22px 18px 26px;gap:16px">
+              <div style="display:flex;flex-direction:column;align-items:center;gap:3px;padding-top:14px">
+                <div style="font-size:62px;font-weight:700;letter-spacing:-.04em;line-height:1;font-variant-numeric:tabular-nums;color:#F2F4F0">{{ fondo.hora }}</div>
+                <div style="font-size:14px;color:rgba(242,244,240,.6)">{{ fondo.fecha }}</div>
+              </div>
+
+              <div style="border-radius:20px;background:rgba(19,21,17,.94);border:1px solid var(--ac);padding:15px;display:flex;flex-direction:column;gap:12px">
+                <div style="display:flex;align-items:center;gap:9px">
+                  <div style="width:26px;height:26px;border-radius:8px;background:var(--ac);display:flex;align-items:center;justify-content:center;flex:none">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#0B0C0A" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="13" r="7.6"></circle><path d="M12 9.4V13l2.4 1.6"></path><path d="M9.4 2.6h5.2"></path></svg>
+                  </div>
+                  <div style="flex:1;font-size:12.5px;font-weight:600;color:rgba(242,244,240,.85)">Trainer</div>
+                  <div style="font-size:12px;color:rgba(242,244,240,.6)">{{ fondo.hace }}</div>
+                </div>
+                <div style="display:flex;align-items:center;gap:12px">
+                  <div style="flex:1;display:flex;flex-direction:column;gap:3px">
+                    <div style="font-size:15px;font-weight:600">{{ fondo.titulo }}</div>
+                    <div style="font-size:13px;color:rgba(242,244,240,.85);line-height:1.35">{{ fondo.cuerpo }}</div>
+                  </div>
+                  <div style="flex:none;font-size:34px;font-weight:700;letter-spacing:-.03em;line-height:1;font-variant-numeric:tabular-nums;color:var(--ac)">{{ fondo.reloj }}</div>
+                </div>
+                <div style="display:flex;gap:8px;border-top:1px solid rgba(255,255,255,.14);padding-top:11px">
+                  <div style="flex:1;height:48px;border-radius:13px;border:1px solid rgba(255,255,255,.38);display:flex;align-items:center;justify-content:center;font-size:13.5px;font-weight:600">{{ fondo.mas30 }}</div>
+                  <div style="flex:1;height:48px;border-radius:13px;border:1px solid rgba(255,255,255,.38);display:flex;align-items:center;justify-content:center;font-size:13.5px;font-weight:600">{{ t.saltarDescanso }}</div>
+                </div>
+              </div>
+
+              <div style="border-radius:18px;background:#131511;border:1px solid rgba(255,255,255,.09);padding:14px;display:flex;flex-direction:column;gap:9px">
+                <div style="font-size:10.5px;font-weight:600;letter-spacing:.14em;text-transform:uppercase;color:rgba(242,244,240,.6)">{{ t.quePasaAca }}</div>
+                <sc-for list="{{ fondoNotas }}" as="n" hint-placeholder-count="4">
+                  <div style="display:flex;gap:9px;align-items:flex-start">
+                    <div style="width:5px;height:5px;border-radius:50%;background:var(--ac);flex:none;margin-top:7px"></div>
+                    <div style="flex:1;font-size:12.5px;line-height:1.5;color:rgba(242,244,240,.85)">{{ n }}</div>
+                  </div>
+                </sc-for>
+              </div>
+            </div>
+          </sc-if>
+
+          <sc-if value="{{ is.descansoFin }}" hint-placeholder-val="{{ false }}">
+            <div style="flex:1;display:flex;flex-direction:column;justify-content:space-between;background:#0B0C0A;padding:26px 20px 26px">
+              <div style="display:flex;flex-direction:column;gap:17px;padding-top:34px">
+                <div style="width:64px;height:64px;border-radius:20px;background:rgb(var(--ac-rgb) / .14);border:1px solid var(--ac);display:flex;align-items:center;justify-content:center">
+                  <svg width="34" height="34" viewBox="0 0 24 24" fill="none" stroke="var(--ac)" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="13" r="7.6"></circle><path d="M12 9.4V13l2.4 1.6"></path><path d="M9.4 2.6h5.2"></path></svg>
+                </div>
+                <div style="font-size:29px;font-weight:600;letter-spacing:-.03em;line-height:1.12">{{ t.finTitulo }}</div>
+                <div style="font-size:14px;line-height:1.55;color:rgba(242,244,240,.85)">{{ fin.cuerpo }}</div>
+                <div style="display:flex;align-items:center;gap:9px">
+                  <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="rgba(242,244,240,.6)" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" style="flex:none"><path d="M8.5 4.5h7l1.6 15h-10z"></path><path d="M11 8.5v7M13 8.5v7"></path></svg>
+                  <div style="font-size:12.5px;color:rgba(242,244,240,.6)">{{ t.finVibra }}</div>
+                </div>
+              </div>
+              <div style="display:flex;flex-direction:column;gap:9px">
+                <div onClick="{{ go.serie }}" style="min-height:64px;border-radius:18px;background:var(--ac);color:#0B0C0A;display:flex;align-items:center;justify-content:center;font-size:16px;font-weight:700;cursor:pointer;padding:10px 14px;text-align:center">{{ fin.boton }}</div>
+                <div onClick="{{ fin.mas30 }}" style="min-height:48px;border-radius:16px;border:1px solid rgba(255,255,255,.38);display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:600;cursor:pointer">{{ fondo.mas30 }}</div>
+              </div>
+            </div>
+          </sc-if>
+
+        </div>
+      </div>
+
+      <div style="width:390px;display:flex;flex-direction:column;gap:10px">
+        <div style="display:flex;flex-wrap:wrap;gap:5px">
+          <sc-for list="{{ rail }}" as="s" hint-placeholder-count="12">
+            <div onClick="{{ s.go }}" style="font-size:10.5px;padding:5px 8px;border-radius:7px;cursor:pointer;background:{{ s.bg }};color:{{ s.color }};border:1px solid {{ s.border }}">{{ s.label }}</div>
+          </sc-for>
+        </div>
+        <div style="font-size:12px;line-height:1.5;color:rgba(242,244,240,.55)">Los chips son del lienzo, no del producto: en la app no existe esta barra. Sirven para revisar cada estado sin tener que reproducir la sesión entera.</div>
+      </div>
+    </div>
+
+    <div style="display:flex;flex-direction:column;gap:26px;max-width:430px">
+
+      <div style="display:flex;flex-direction:column;gap:13px">
+        <div style="display:flex;align-items:baseline;gap:9px"><span style="font:600 10.5px ui-monospace,Menlo,monospace;padding:3px 7px;background:rgba(255,255,255,.1);color:#F2F4F0;border-radius:5px">Enganche</span><span style="font-size:12px;color:rgba(242,244,240,.6)">Desde dónde se entra y a dónde se vuelve</span></div>
+        <div style="font-size:12.5px;line-height:1.55;color:rgba(242,244,240,.6);text-wrap:pretty">Este archivo no puede importar <code style="font-family:ui-monospace,Menlo,monospace;font-size:11.5px">HomeB</code> ni ser importado por él: <code style="font-family:ui-monospace,Menlo,monospace;font-size:11.5px">dc-import</code> resuelve sólo hermanos en la misma carpeta —verificado en <code style="font-family:ui-monospace,Menlo,monospace;font-size:11.5px">support.js</code>, <code style="font-family:ui-monospace,Menlo,monospace;font-size:11.5px">COMPONENT_DIR = "."</code>— y <code style="font-family:ui-monospace,Menlo,monospace;font-size:11.5px">design/origen/</code> está congelado. Así que la navegación está escrita acá, punto por punto, para que la fase 6 no tenga que adivinarla.</div>
+
+        <div style="border-radius:16px;background:#131511;border:1px solid rgba(255,255,255,.1);padding:15px;display:flex;flex-direction:column;gap:13px">
+          <div style="font-size:10.5px;font-weight:600;letter-spacing:.14em;text-transform:uppercase;color:rgba(242,244,240,.6)">Entradas</div>
+          <sc-for list="{{ enganche }}" as="e" hint-placeholder-count="5">
+            <div style="display:flex;flex-direction:column;gap:4px;border-left:2px solid {{ e.barra }};padding-left:11px">
+              <div style="font-size:13px;font-weight:600;line-height:1.35">{{ e.desde }}</div>
+              <div style="font-size:12.5px;line-height:1.5;color:rgba(242,244,240,.7)">{{ e.hacia }}</div>
+              <div style="font-size:11.5px;line-height:1.45;color:rgba(242,244,240,.6);font-family:ui-monospace,Menlo,monospace">{{ e.ref }}</div>
+            </div>
+          </sc-for>
+        </div>
+
+        <div style="border-radius:16px;background:#131511;border:1px solid rgba(255,255,255,.1);padding:15px;display:flex;flex-direction:column;gap:13px">
+          <div style="font-size:10.5px;font-weight:600;letter-spacing:.14em;text-transform:uppercase;color:rgba(242,244,240,.6)">Salidas</div>
+          <sc-for list="{{ salidas }}" as="s" hint-placeholder-count="4">
+            <div style="display:flex;flex-direction:column;gap:4px;border-left:2px solid rgba(255,255,255,.2);padding-left:11px">
+              <div style="font-size:13px;font-weight:600;line-height:1.35">{{ s.desde }}</div>
+              <div style="font-size:12.5px;line-height:1.5;color:rgba(242,244,240,.7)">{{ s.hacia }}</div>
+            </div>
+          </sc-for>
+        </div>
+      </div>
+
+      <div style="display:flex;flex-direction:column;gap:13px">
+        <div style="display:flex;align-items:baseline;gap:9px"><span style="font:600 10.5px ui-monospace,Menlo,monospace;padding:3px 7px;background:rgba(255,255,255,.1);color:#F2F4F0;border-radius:5px">Contraste</span><span style="font-size:12px;color:rgba(242,244,240,.6)">WCAG 2.1, cada alfa compuesto sobre su fondo real</span></div>
+        <div style="border-radius:16px;background:#131511;border:1px solid rgba(255,255,255,.1);padding:15px;display:flex;flex-direction:column;gap:9px">
+          <sc-for list="{{ contraste }}" as="c" hint-placeholder-count="8">
+            <div style="display:flex;align-items:baseline;gap:10px">
+              <div style="flex:1;font-size:12px;line-height:1.4;color:rgba(242,244,240,.85)">{{ c.rol }}</div>
+              <div style="flex:none;font-size:12.5px;font-weight:700;font-variant-numeric:tabular-nums;color:{{ c.color }}">{{ c.ratio }}</div>
+              <div style="flex:none;width:34px;text-align:right;font-size:11px;font-weight:600;color:{{ c.color }}">{{ c.aa }}</div>
+            </div>
+          </sc-for>
+          <div style="font-size:11.5px;line-height:1.5;color:rgba(242,244,240,.6);border-top:1px solid rgba(255,255,255,.09);padding-top:10px">Los bordes que <b style="color:#F2F4F0;font-weight:600">significan algo</b> (serie hecha, serie actual, serie corrigiéndose, chip elegido, campo en foco) van en acento —12.59:1— o en el token <code style="font-family:ui-monospace,Menlo,monospace;font-size:11px">borde_significante</code>, blanco al 38 %, que da 3.58 sobre superficie, 3.52 sobre fondo, 3.54 sobre superficie alterna y 3.26 sobre el relleno hundido: los cuatro por encima del 3.0 que WCAG 1.4.11 pide para componentes. Los bordes decorativos de card siguen en el 9-12 % del diseño original: es deuda heredada y está anotada como tal, no deuda nueva.</div>
+        </div>
+      </div>
+
+      <div style="display:flex;flex-direction:column;gap:13px">
+        <div style="display:flex;align-items:baseline;gap:9px"><span style="font:600 10.5px ui-monospace,Menlo,monospace;padding:3px 7px;background:rgba(255,255,255,.1);color:#F2F4F0;border-radius:5px">Abierto</span><span style="font-size:12px;color:rgba(242,244,240,.6)">Lo que este diseño NO resuelve</span></div>
+        <div style="border-radius:16px;background:#131511;border:1px solid rgba(255,255,255,.1);padding:15px;display:flex;flex-direction:column;gap:11px">
+          <sc-for list="{{ abierto }}" as="a" hint-placeholder-count="6">
+            <div style="display:flex;gap:10px;align-items:flex-start">
+              <div style="width:5px;height:5px;border-radius:50%;background:rgba(255,140,120,.9);flex:none;margin-top:7px"></div>
+              <div style="flex:1;font-size:12.5px;line-height:1.5;color:rgba(242,244,240,.85)">{{ a }}</div>
+            </div>
+          </sc-for>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1560,"height":1180},"accent":{"editor":"text","default":"#7CF03D","tsType":"string","section":"Color de acento (hex, ej. #FF5A1F)"},"locale":{"editor":"enum","default":"auto","options":["auto","es-AR","en-US","pt-BR","ja-JP"],"tsType":"string","section":"Idioma y formato de numero"},"variaPeso":{"editor":"boolean","default":true,"tsType":"boolean","section":"Ejercicio 1 con peso en rampa (para ver la regla de precarga)"}}'>
+
+/* ---------------------------------------------------------------------------
+   design/nuevo/gimnasio.dc.html — las tres piezas de gimnasio (fase 2B)
+
+   NO es design/origen/: es diseno autorado despues del .zip. origen/ esta
+   congelado (AGENTS.md 10.1) y por eso este archivo no importa HomeB ni es
+   importado por el: dc-import resuelve solo hermanos de la misma carpeta.
+   El enganche con HomeB esta ESCRITO en el lienzo y en design/ESPECIFICACION.md.
+
+   Regla de la casa: ningun texto visible esta pegado al markup. Todo sale de
+   STR, y los numeros de Intl. pt-BR y ja-JP los escribi yo y NO los reviso un
+   hablante nativo: sirven para probar que el layout aguanta el largo.
+--------------------------------------------------------------------------- */
+
+const LOCALES = ["es-AR", "en-US", "pt-BR", "ja-JP"];
+
+const STR = {
+  "es-AR": {
+    rutinaTitulo: "Tren superior y core", distribucion: "Distribución muscular", listaEjercicios: "Ejercicios",
+    empezar: "Empezar entrenamiento", tiempoDeSesion: "Tiempo de sesión", terminarCorto: "Terminar",
+    colSerie: "Serie", colPrevia: "Previa", colKg: "Kg", colSeg: "Seg", colReps: "Reps",
+    anadirSerie: "Añadir serie", borrar: "Borrar", serieBorrada: "Serie borrada", deshacer: "Deshacer",
+    animacionFalta: "Falta la animación",
+    animacionDetalle: "El lugar está reservado y medido: la animación entra acá sin rediseñar nada. Faltan los archivos y decidir de dónde salen.",
+    accionTutorial: "Tutorial", accionReemplazar: "Reemplazar", accionNotas: "Notas",
+    accionSinHacer: "Todavía no está hecho", arrastrarParaBorrar: "Arrastrá la fila hacia la izquierda, o usá este botón",
+    catalogoTitulo: "Catálogo", buscarPlaceholder: "Buscar ejercicio o músculo",
+    sinEquipo: "Sin equipo", filtrar: "Filtrar", limpiar: "Limpiar", listo: "Listo",
+    yaEnRutina: "En tu rutina", noEstaLoQueBusco: "No está lo que busco",
+    vacioTitulo: "No encontramos ese ejercicio", vacioCuerpo: "El catálogo se actualiza desde el servidor, así que puede aparecer más adelante sin que tengas que actualizar la app.",
+    vacioNota: "Un ejercicio libre queda registrado en tu sesión pero no entra al catálogo ni al motor del plan.",
+    musculos: "Músculos", comoSeHace: "Cómo se hace", porQue: "Por qué está en tu plan",
+    verSustitutos: "Ver sustitutos", sustitutosTitulo: "Sustitutos",
+    sustitutosCuerpo: "Mismo patrón de movimiento, con lo que tengas a mano. El plan no cambia de forma.",
+    sustitutosNota: "El filtro por equipamiento y por lesiones declaradas lo hace el servidor: acá sólo se muestra lo que ya pasó ese filtro.",
+    elPlanPide: "El plan pide", pesoPorSerie: "Peso por serie", series: "Series",
+    saltearSerie: "Saltear", serieExtra: "Serie extra", saltarDescanso: "Saltar",
+    hecha: "hecha", ahora: "ahora", pendiente: "pendiente", salteada: "salteada", extra: "extra",
+    reps: "Repeticiones", segundos: "Segundos", peso: "Peso (kg)", lastre: "Lastre (kg)", pausa: "Pausa (seg)",
+    corregir: "Corregir", descansoRotulo: "Descanso", descansoTerminado: "Descanso terminado",
+    casosTitulo: "Lo que pasa en toda sesión", casosCuerpo: "Fallar una serie, saltearla o meter una de más no son errores del sistema: son cómo se entrena. Los tres se resuelven en la misma pantalla, sin salir.",
+    finTitulo: "Se terminó el descanso", finVibra: "Vibra y suena, aunque el teléfono esté en silencio",
+    quePasaAca: "Qué tiene que pasar acá", musculo: "Músculo", equipamiento: "Equipamiento",
+    primario: "principal", secundario: "secundario",
+    unidadReps: "reps", unidadSeg: "s", pesoCorporal: "peso corporal",
+    kg: "kg", gradoAlto: "más cercano", gradoMedio: "sirve", ahoraCorto: "ahora",
+    rutinaDeHoy: "la rutina de hoy", irSerieSiguiente: "Ir a la serie siguiente",
+    salidaAmpliarT: "Ampliar los filtros", salidaAmpliarD: "Sacar el filtro de equipamiento y buscar por patrón de movimiento.",
+    salidaLibreT: "Usar un ejercicio libre", salidaLibreD: "Escribís el nombre y lo registrás sólo en esta sesión.",
+    salidaSugerirT: "Sugerir que lo agreguemos", salidaSugerirD: "La sugerencia nos llega. Si se aprueba aparece sin actualizar la app.",
+    corrigiendo: "corrigiendo", ejercicioCompleto: "Ejercicio completo", siguienteEjercicio: "Ir al ejercicio siguiente", terminarGimnasio: "Terminar la sesión de gimnasio"
+  },
+  "en-US": {
+    rutinaTitulo: "Upper body and core", distribucion: "Muscle split", listaEjercicios: "Exercises",
+    empezar: "Start workout", tiempoDeSesion: "Session time", terminarCorto: "Finish",
+    colSerie: "Set", colPrevia: "Previous", colKg: "Kg", colSeg: "Sec", colReps: "Reps",
+    anadirSerie: "Add set", borrar: "Delete", serieBorrada: "Set deleted", deshacer: "Undo",
+    animacionFalta: "Animation missing",
+    animacionDetalle: "The space is reserved and measured: the animation drops in here with no redesign. The files are missing, and so is the decision about where they come from.",
+    accionTutorial: "Tutorial", accionReemplazar: "Replace", accionNotas: "Notes",
+    accionSinHacer: "Not built yet", arrastrarParaBorrar: "Swipe the row left, or use this button",
+    catalogoTitulo: "Catalog", buscarPlaceholder: "Search exercise or muscle",
+    sinEquipo: "No equipment", filtrar: "Filter", limpiar: "Clear", listo: "Done",
+    yaEnRutina: "In your routine", noEstaLoQueBusco: "I can't find what I need",
+    vacioTitulo: "We couldn't find that exercise", vacioCuerpo: "The catalog updates from the server, so it may show up later without you having to update the app.",
+    vacioNota: "A free-form exercise is recorded in your session but does not join the catalog or the plan engine.",
+    musculos: "Muscles", comoSeHace: "How to do it", porQue: "Why it's in your plan",
+    verSustitutos: "See substitutes", sustitutosTitulo: "Substitutes",
+    sustitutosCuerpo: "Same movement pattern, with whatever you have. The plan keeps its shape.",
+    sustitutosNota: "Filtering by equipment and declared injuries happens on the server: this list already passed that filter.",
+    elPlanPide: "The plan asks for", pesoPorSerie: "Weight per set", series: "Sets",
+    saltearSerie: "Skip", serieExtra: "Extra set", saltarDescanso: "Skip",
+    hecha: "done", ahora: "now", pendiente: "pending", salteada: "skipped", extra: "extra",
+    reps: "Reps", segundos: "Seconds", peso: "Weight (kg)", lastre: "Added (kg)", pausa: "Rest (sec)",
+    corregir: "Fix", descansoRotulo: "Rest", descansoTerminado: "Rest is over",
+    casosTitulo: "What happens every session", casosCuerpo: "Missing reps, skipping a set or adding one are not system errors: that is how training goes. All three are handled on this screen, without leaving it.",
+    finTitulo: "Rest is over", finVibra: "Vibrates and sounds, even on silent",
+    quePasaAca: "What has to happen here", musculo: "Muscle", equipamiento: "Equipment",
+    primario: "primary", secundario: "secondary",
+    unidadReps: "reps", unidadSeg: "s", pesoCorporal: "bodyweight",
+    kg: "kg", gradoAlto: "closest", gradoMedio: "workable", ahoraCorto: "now",
+    rutinaDeHoy: "today's routine", irSerieSiguiente: "Go to the next set",
+    salidaAmpliarT: "Widen the filters", salidaAmpliarD: "Drop the equipment filter and search by movement pattern.",
+    salidaLibreT: "Use a free-form exercise", salidaLibreD: "Type a name and log it for this session only.",
+    salidaSugerirT: "Suggest it for the catalog", salidaSugerirD: "Your suggestion reaches us. If approved it appears without an app update.",
+    corrigiendo: "editing", ejercicioCompleto: "Exercise complete", siguienteEjercicio: "Go to the next exercise", terminarGimnasio: "Finish the gym session"
+  },
+  "pt-BR": {
+    rutinaTitulo: "Superiores e core", distribucion: "Distribuição muscular", listaEjercicios: "Exercícios",
+    empezar: "Começar treino", tiempoDeSesion: "Tempo de sessão", terminarCorto: "Terminar",
+    colSerie: "Série", colPrevia: "Anterior", colKg: "Kg", colSeg: "Seg", colReps: "Reps",
+    anadirSerie: "Adicionar série", borrar: "Apagar", serieBorrada: "Série apagada", deshacer: "Desfazer",
+    animacionFalta: "Falta a animação",
+    animacionDetalle: "O lugar está reservado e medido: a animação entra aqui sem redesenhar nada. Faltam os arquivos e decidir de onde saem.",
+    accionTutorial: "Tutorial", accionReemplazar: "Substituir", accionNotas: "Notas",
+    accionSinHacer: "Ainda não está feito", arrastrarParaBorrar: "Arraste a linha para a esquerda, ou use este botão",
+    catalogoTitulo: "Catálogo", buscarPlaceholder: "Buscar exercício ou músculo",
+    sinEquipo: "Sem equipamento", filtrar: "Filtrar", limpiar: "Limpar", listo: "Pronto",
+    yaEnRutina: "Na sua rotina", noEstaLoQueBusco: "Não achei o que procuro",
+    vacioTitulo: "Não encontramos esse exercício", vacioCuerpo: "O catálogo é atualizado pelo servidor, então pode aparecer depois sem precisar atualizar o aplicativo.",
+    vacioNota: "Um exercício livre fica registrado na sua sessão, mas não entra no catálogo nem no motor do plano.",
+    musculos: "Músculos", comoSeHace: "Como fazer", porQue: "Por que está no seu plano",
+    verSustitutos: "Ver substitutos", sustitutosTitulo: "Substitutos",
+    sustitutosCuerpo: "Mesmo padrão de movimento, com o que você tiver. O plano não muda de forma.",
+    sustitutosNota: "O filtro por equipamento e por lesões declaradas é feito no servidor: aqui aparece só o que já passou por ele.",
+    elPlanPide: "O plano pede", pesoPorSerie: "Peso por série", series: "Séries",
+    saltearSerie: "Pular", serieExtra: "Série extra", saltarDescanso: "Pular",
+    hecha: "feita", ahora: "agora", pendiente: "pendente", salteada: "pulada", extra: "extra",
+    reps: "Repetições", segundos: "Segundos", peso: "Peso (kg)", lastre: "Carga (kg)", pausa: "Pausa (seg)",
+    corregir: "Corrigir", descansoRotulo: "Descanso", descansoTerminado: "Descanso terminou",
+    casosTitulo: "O que acontece em toda sessão", casosCuerpo: "Falhar uma série, pular ou fazer uma a mais não são erros do sistema: é assim que se treina. Os três se resolvem nesta tela, sem sair dela.",
+    finTitulo: "O descanso terminou", finVibra: "Vibra e toca, mesmo no silencioso",
+    quePasaAca: "O que tem que acontecer aqui", musculo: "Músculo", equipamiento: "Equipamento",
+    primario: "principal", secundario: "secundário",
+    unidadReps: "reps", unidadSeg: "s", pesoCorporal: "peso corporal",
+    kg: "kg", gradoAlto: "mais próximo", gradoMedio: "serve", ahoraCorto: "agora",
+    rutinaDeHoy: "rotina de hoje", irSerieSiguiente: "Ir para a próxima série",
+    salidaAmpliarT: "Ampliar os filtros", salidaAmpliarD: "Tirar o filtro de equipamento e buscar pelo padrão de movimento.",
+    salidaLibreT: "Usar um exercício livre", salidaLibreD: "Você escreve o nome e registra só nesta sessão.",
+    salidaSugerirT: "Sugerir para o catálogo", salidaSugerirD: "A sugestão chega até nós. Se aprovada, aparece sem atualizar o app.",
+    corrigiendo: "corrigindo", ejercicioCompleto: "Exercício completo", siguienteEjercicio: "Ir para o próximo exercício", terminarGimnasio: "Terminar a sessão de academia"
+  },
+  "ja-JP": {
+    rutinaTitulo: "上半身と体幹", distribucion: "筋群の配分", listaEjercicios: "種目",
+    empezar: "トレーニングを開始", tiempoDeSesion: "セッション時間", terminarCorto: "終了",
+    colSerie: "セット", colPrevia: "前回", colKg: "kg", colSeg: "秒", colReps: "回数",
+    anadirSerie: "セットを追加", borrar: "削除", serieBorrada: "セットを削除しました", deshacer: "元に戻す",
+    animacionFalta: "アニメーションがありません",
+    animacionDetalle: "場所は確保して寸法も決めてあります。ファイルが揃えば、設計を変えずにここに入ります。ファイルと、どこから入手するかの判断が未定です。",
+    accionTutorial: "解説", accionReemplazar: "差し替え", accionNotas: "メモ",
+    accionSinHacer: "未実装", arrastrarParaBorrar: "行を左にスワイプするか、このボタンを使ってください",
+    catalogoTitulo: "種目カタログ", buscarPlaceholder: "種目や部位で検索",
+    sinEquipo: "器具なし", filtrar: "絞り込み", limpiar: "クリア", listo: "完了",
+    yaEnRutina: "今日のメニュー", noEstaLoQueBusco: "探している種目がない",
+    vacioTitulo: "その種目は見つかりませんでした", vacioCuerpo: "カタログはサーバーから更新されます。アプリを更新しなくても、あとから追加されることがあります。",
+    vacioNota: "自由入力の種目はセッションには記録されますが、カタログにもプラン生成にも入りません。",
+    musculos: "使う筋肉", comoSeHace: "やり方", porQue: "プランに入っている理由",
+    verSustitutos: "代替種目を見る", sustitutosTitulo: "代替種目",
+    sustitutosCuerpo: "同じ動作パターンで、手元にある器具で。プランの構造は変わりません。",
+    sustitutosNota: "器具と申告済みのケガによる絞り込みはサーバー側で行います。ここに出るのは通過したものだけです。",
+    elPlanPide: "プランの指定", pesoPorSerie: "セットごとの重量", series: "セット",
+    saltearSerie: "スキップ", serieExtra: "追加セット", saltarDescanso: "スキップ",
+    hecha: "完了", ahora: "実行中", pendiente: "未実施", salteada: "スキップ", extra: "追加",
+    reps: "回数", segundos: "秒", peso: "重量 (kg)", lastre: "加重 (kg)", pausa: "休憩 (秒)",
+    corregir: "修正", descansoRotulo: "休憩", descansoTerminado: "休憩終了",
+    casosTitulo: "毎回のセッションで起きること", casosCuerpo: "回数が届かない、セットを飛ばす、1セット足す。どれもシステムのエラーではなく、トレーニングそのものです。三つともこの画面から離れずに解決します。",
+    finTitulo: "休憩が終わりました", finVibra: "マナーモードでも振動と音で知らせます",
+    quePasaAca: "ここで起きるべきこと", musculo: "部位", equipamiento: "器具",
+    primario: "主働筋", secundario: "協働筋",
+    unidadReps: "回", unidadSeg: "秒", pesoCorporal: "自重",
+    kg: "kg", gradoAlto: "近い", gradoMedio: "代用可", ahoraCorto: "今",
+    rutinaDeHoy: "今日のメニュー", irSerieSiguiente: "次のセットへ",
+    salidaAmpliarT: "絞り込みを広げる", salidaAmpliarD: "器具の条件を外し、同じ動作パターンで探します。",
+    salidaLibreT: "自由入力の種目を使う", salidaLibreD: "名前を入力して、このセッションだけ記録します。",
+    salidaSugerirT: "カタログへの追加を提案する", salidaSugerirD: "提案は運営に届きます。承認されればアプリの更新なしで反映されます。",
+    corrigiendo: "修正中", ejercicioCompleto: "この種目は完了", siguienteEjercicio: "次の種目へ", terminarGimnasio: "ジムのセッションを終了"
+  }
+};
+
+/* Frases con numero adentro: funciones, no concatenacion. El orden de las
+   palabras cambia por idioma y una plantilla con %s lo respeta; un "Serie " + n
+   no. */
+const FRASE = {
+  "es-AR": {
+    nEjerciciosNMin: (n, m) => n + " ejercicios · " + m + " min",
+    nSeriesNReps: (n, r) => n + " series × " + r + " reps",
+    nSeriesNSeg: (n, sg) => n + " series × " + sg + " s",
+    nSeriesRango: (n, a, b) => n + " series × " + a + "–" + b + " reps",
+    ejercicioNdeM: (n, m) => "Ejercicio " + n + " de " + m,
+    seriesNdeM: (n, m) => n + " de " + m + " series",
+    serieNHecha: (n) => "Serie " + n + " hecha",
+    guardarSerieN: (n) => "Guardar serie " + n,
+    serieNAnterior: (n) => "Serie " + n + ", la anterior",
+    verNEjercicios: (n) => "Ver " + n + " ejercicios",
+    resultadosN: (n) => n + " ejercicios",
+    elPlanPedia: (s) => "El plan pedía " + s,
+    sustitutosN: (n) => n + " sustitutos para tu equipamiento",
+    masNSeg: (n) => "+" + n + " s",
+    agregarA: (s) => "Agregar a " + s,
+    quedanNSeries: (n) => "Quedan " + n + " series de este ejercicio"
+  },
+  "en-US": {
+    nEjerciciosNMin: (n, m) => n + " exercises · " + m + " min",
+    nSeriesNReps: (n, r) => n + " sets × " + r + " reps",
+    nSeriesNSeg: (n, sg) => n + " sets × " + sg + " s",
+    nSeriesRango: (n, a, b) => n + " sets × " + a + "–" + b + " reps",
+    ejercicioNdeM: (n, m) => "Exercise " + n + " of " + m,
+    seriesNdeM: (n, m) => n + " of " + m + " sets",
+    serieNHecha: (n) => "Set " + n + " done",
+    guardarSerieN: (n) => "Save set " + n,
+    serieNAnterior: (n) => "Set " + n + ", the previous one",
+    verNEjercicios: (n) => "Show " + n + " exercises",
+    resultadosN: (n) => n + " exercises",
+    elPlanPedia: (s) => "The plan asked for " + s,
+    sustitutosN: (n) => n + " substitutes for your equipment",
+    masNSeg: (n) => "+" + n + "s",
+    agregarA: (s) => "Add to " + s,
+    quedanNSeries: (n) => n + " sets left in this exercise"
+  },
+  "pt-BR": {
+    nEjerciciosNMin: (n, m) => n + " exercícios · " + m + " min",
+    nSeriesNReps: (n, r) => n + " séries × " + r + " reps",
+    nSeriesNSeg: (n, sg) => n + " séries × " + sg + " s",
+    nSeriesRango: (n, a, b) => n + " séries × " + a + "–" + b + " reps",
+    ejercicioNdeM: (n, m) => "Exercício " + n + " de " + m,
+    seriesNdeM: (n, m) => n + " de " + m + " séries",
+    serieNHecha: (n) => "Série " + n + " feita",
+    guardarSerieN: (n) => "Salvar série " + n,
+    serieNAnterior: (n) => "Série " + n + ", a anterior",
+    verNEjercicios: (n) => "Ver " + n + " exercícios",
+    resultadosN: (n) => n + " exercícios",
+    elPlanPedia: (s) => "O plano pedia " + s,
+    sustitutosN: (n) => n + " substitutos para o seu equipamento",
+    masNSeg: (n) => "+" + n + " s",
+    agregarA: (s) => "Adicionar a " + s,
+    quedanNSeries: (n) => "Faltam " + n + " séries neste exercício"
+  },
+  "ja-JP": {
+    nEjerciciosNMin: (n, m) => n + "種目 · " + m + "分",
+    nSeriesNReps: (n, r) => n + "セット × " + r + "回",
+    nSeriesNSeg: (n, sg) => n + "セット × " + sg + "秒",
+    nSeriesRango: (n, a, b) => n + "セット × " + a + "–" + b + "回",
+    ejercicioNdeM: (n, m) => m + "種目中 " + n + "種目め",
+    seriesNdeM: (n, m) => m + "セット中 " + n + "セット完了",
+    serieNHecha: (n) => n + "セットめ完了",
+    guardarSerieN: (n) => n + "セットめを保存",
+    serieNAnterior: (n) => "直前の " + n + "セットめ",
+    verNEjercicios: (n) => n + "件を表示",
+    resultadosN: (n) => n + "件",
+    elPlanPedia: (s) => "プランの指定は " + s,
+    sustitutosN: (n) => "手持ちの器具で使える代替 " + n + "件",
+    masNSeg: (n) => "+" + n + "秒",
+    agregarA: (s) => s + "に追加",
+    quedanNSeries: (n) => "この種目はあと " + n + "セット"
+  }
+};
+
+/* El catalogo es DATO (AGENTS.md 9.1): nombre por locale, musculos,
+   equipamiento, patron y sustitutos. Nada de esto esta enumerado en la UI, asi
+   que 50 o 500 entradas se ven igual. Aca hay 8 para poder probar la busqueda,
+   los filtros, la ficha, los sustitutos y el caso vacio. */
+const CATALOGO = [
+  { id: "press-banca", nombre: { "es-AR": "Press plano con barra", "en-US": "Barbell bench press", "pt-BR": "Supino reto com barra", "ja-JP": "バーベル・ベンチプレス" },
+    patron: "empuje-horizontal", equipo: "barra", musculos: [["pectoral", "primario"], ["triceps", "secundario"], ["deltoides-anterior", "secundario"]],
+    sustitutos: ["press-mancuernas", "flexiones", "press-maquina"] },
+  { id: "dominadas", nombre: { "es-AR": "Dominadas", "en-US": "Pull-ups", "pt-BR": "Barra fixa", "ja-JP": "懸垂" },
+    patron: "traccion-vertical", equipo: "barra-fija", musculos: [["dorsal", "primario"], ["biceps", "secundario"]],
+    sustitutos: ["jalon-polea", "remo-invertido"] },
+  { id: "remo-barra", nombre: { "es-AR": "Remo con barra", "en-US": "Barbell row", "pt-BR": "Remada curvada", "ja-JP": "ベントオーバーロー" },
+    patron: "traccion-horizontal", equipo: "barra", musculos: [["dorsal", "primario"], ["trapecio", "secundario"]],
+    sustitutos: ["remo-mancuerna", "remo-invertido"] },
+  { id: "bulgara", nombre: { "es-AR": "Sentadilla búlgara", "en-US": "Bulgarian split squat", "pt-BR": "Agachamento búlgaro", "ja-JP": "ブルガリアン・スクワット" },
+    patron: "rodilla-unilateral", equipo: "mancuernas", musculos: [["cuadriceps", "primario"], ["gluteo", "primario"]],
+    sustitutos: ["zancadas", "sentadilla-a-una-pierna"] },
+  { id: "talones", nombre: { "es-AR": "Elevación de talones", "en-US": "Calf raise", "pt-BR": "Elevação de panturrilha", "ja-JP": "カーフレイズ" },
+    patron: "tobillo", equipo: "mancuernas", musculos: [["soleo", "primario"], ["gemelo", "primario"]],
+    sustitutos: ["talones-sentado", "talones-peso-corporal"] },
+  { id: "plancha", nombre: { "es-AR": "Plancha frontal", "en-US": "Front plank", "pt-BR": "Prancha frontal", "ja-JP": "フロントプランク" },
+    patron: "antiextension", equipo: "ninguno", musculos: [["core", "primario"]],
+    sustitutos: ["plancha-lateral", "rueda-abdominal"] },
+  { id: "press-mancuernas", nombre: { "es-AR": "Press con mancuernas", "en-US": "Dumbbell press", "pt-BR": "Supino com halteres", "ja-JP": "ダンベルプレス" },
+    patron: "empuje-horizontal", equipo: "mancuernas", musculos: [["pectoral", "primario"], ["triceps", "secundario"]],
+    sustitutos: ["flexiones"] },
+  { id: "flexiones", nombre: { "es-AR": "Flexiones de brazos", "en-US": "Push-ups", "pt-BR": "Flexão de braço", "ja-JP": "腕立て伏せ" },
+    patron: "empuje-horizontal", equipo: "ninguno", musculos: [["pectoral", "primario"], ["core", "secundario"]],
+    sustitutos: ["flexiones-inclinadas"] }
+];
+
+const MUSCULO = {
+  pectoral: { "es-AR": "Pectoral", "en-US": "Chest", "pt-BR": "Peitoral", "ja-JP": "大胸筋" },
+  triceps: { "es-AR": "Tríceps", "en-US": "Triceps", "pt-BR": "Tríceps", "ja-JP": "上腕三頭筋" },
+  "deltoides-anterior": { "es-AR": "Deltoides anterior", "en-US": "Front delt", "pt-BR": "Deltoide anterior", "ja-JP": "三角筋前部" },
+  dorsal: { "es-AR": "Dorsal ancho", "en-US": "Lats", "pt-BR": "Dorsal", "ja-JP": "広背筋" },
+  biceps: { "es-AR": "Bíceps", "en-US": "Biceps", "pt-BR": "Bíceps", "ja-JP": "上腕二頭筋" },
+  trapecio: { "es-AR": "Trapecio", "en-US": "Traps", "pt-BR": "Trapézio", "ja-JP": "僧帽筋" },
+  cuadriceps: { "es-AR": "Cuádriceps", "en-US": "Quads", "pt-BR": "Quadríceps", "ja-JP": "大腿四頭筋" },
+  gluteo: { "es-AR": "Glúteo", "en-US": "Glutes", "pt-BR": "Glúteo", "ja-JP": "臀筋" },
+  soleo: { "es-AR": "Sóleo", "en-US": "Soleus", "pt-BR": "Sóleo", "ja-JP": "ヒラメ筋" },
+  gemelo: { "es-AR": "Gemelos", "en-US": "Calves", "pt-BR": "Panturrilha", "ja-JP": "腓腹筋" },
+  core: { "es-AR": "Core", "en-US": "Core", "pt-BR": "Core", "ja-JP": "体幹" }
+};
+
+const PATRON = {
+  "empuje-horizontal": { "es-AR": "Empuje horizontal", "en-US": "Horizontal push", "pt-BR": "Empurrar horizontal", "ja-JP": "水平方向の押す動作" },
+  "traccion-vertical": { "es-AR": "Tracción vertical", "en-US": "Vertical pull", "pt-BR": "Tração vertical", "ja-JP": "垂直方向の引く動作" },
+  "traccion-horizontal": { "es-AR": "Tracción horizontal", "en-US": "Horizontal pull", "pt-BR": "Tração horizontal", "ja-JP": "水平方向の引く動作" },
+  "rodilla-unilateral": { "es-AR": "Rodilla, una pierna", "en-US": "Single-leg knee", "pt-BR": "Joelho, uma perna", "ja-JP": "片脚の膝主導" },
+  tobillo: { "es-AR": "Tobillo", "en-US": "Ankle", "pt-BR": "Tornozelo", "ja-JP": "足関節" },
+  antiextension: { "es-AR": "Antiextensión", "en-US": "Anti-extension", "pt-BR": "Antiextensão", "ja-JP": "抗伸展" }
+};
+
+const EQUIPO = {
+  barra: { "es-AR": "Barra", "en-US": "Barbell", "pt-BR": "Barra", "ja-JP": "バーベル" },
+  "barra-fija": { "es-AR": "Barra fija", "en-US": "Pull-up bar", "pt-BR": "Barra fixa", "ja-JP": "懸垂バー" },
+  mancuernas: { "es-AR": "Mancuernas", "en-US": "Dumbbells", "pt-BR": "Halteres", "ja-JP": "ダンベル" },
+  maquina: { "es-AR": "Máquina", "en-US": "Machine", "pt-BR": "Máquina", "ja-JP": "マシン" },
+  ninguno: { "es-AR": "Sin equipo", "en-US": "No equipment", "pt-BR": "Sem equipamento", "ja-JP": "器具なし" }
+};
+
+/* La rutina del dia. La prescripcion es una LISTA DE SERIES, no una cadena:
+   ese es el punto 5 de las decisiones. HomeB hoy guarda
+   "4 series x 8 - 45 kg - 90 s" como texto; el reloj ya la tiene estructurada.
+   Gana lo estructurado, y el string se compone para mostrar. */
+const RUTINA = [
+  { id: "press-banca", unidad: "kg", descanso: 90, etiqueta: "general",
+    series: [{ reps: 8, peso: 45 }, { reps: 8, peso: 45 }, { reps: 8, peso: 45 }, { reps: 8, peso: 45 }],
+    rampa: [{ reps: 10, peso: 40 }, { reps: 8, peso: 45 }, { reps: 8, peso: 45 }, { reps: 6, peso: 47.5 }],
+    porQue: { "es-AR": "Fuerza de empuje: no aporta a la carrera, pero es tu objetivo estético.", "en-US": "Pushing strength: it does not help your running, but it is your aesthetic goal.", "pt-BR": "Força de empurrar: não ajuda na corrida, mas é o seu objetivo estético.", "ja-JP": "プッシュ系の筋力。走りには効きませんが、見た目の目標に効きます。" } },
+  { id: "dominadas", unidad: "lastre", descanso: 90, etiqueta: "general",
+    series: [{ reps: 6, peso: 0 }, { reps: 6, peso: 0 }, { reps: 6, peso: 0 }, { reps: 6, peso: 0 }],
+    porQue: { "es-AR": "Tracción y espalda alta; ayuda a mantener el torso firme al correr cansado.", "en-US": "Pulling and upper back; keeps your torso steady when you run tired.", "pt-BR": "Tração e costas altas; ajuda a manter o tronco firme correndo cansado.", "ja-JP": "引く力と上背部。疲れて走るときに上体を安定させます。" } },
+  { id: "remo-barra", unidad: "kg", descanso: 75, etiqueta: "general",
+    series: [{ reps: 10, peso: 35 }, { reps: 10, peso: 35 }, { reps: 10, peso: 35 }],
+    porQue: { "es-AR": "Equilibra el trabajo de empuje del press.", "en-US": "Balances the pushing work of the bench press.", "pt-BR": "Equilibra o trabalho de empurrar do supino.", "ja-JP": "ベンチプレスの押す動作とのバランスを取ります。" } },
+  { id: "bulgara", unidad: "kg", descanso: 75, etiqueta: "correr",
+    series: [{ reps: 10, peso: 12 }, { reps: 10, peso: 12 }, { reps: 10, peso: 12 }],
+    porQue: { "es-AR": "Fuerza unilateral: menos desequilibrios y menos riesgo de lesión.", "en-US": "Single-leg strength: fewer imbalances and less injury risk.", "pt-BR": "Força unilateral: menos desequilíbrios e menos risco de lesão.", "ja-JP": "片脚の筋力。左右差とケガのリスクを減らします。" } },
+  { id: "talones", unidad: "kg", descanso: 60, etiqueta: "correr",
+    series: [{ reps: 15, peso: 20 }, { reps: 15, peso: 20 }, { reps: 15, peso: 20 }],
+    porQue: { "es-AR": "Protege tendón de Aquiles y sóleo, los que más sufren en fondos largos.", "en-US": "Protects the Achilles and soleus, the ones that suffer most on long runs.", "pt-BR": "Protege o tendão de Aquiles e o sóleo, os que mais sofrem nos longões.", "ja-JP": "アキレス腱とヒラメ筋を守ります。ロング走で最も負担がかかる部位です。" } },
+  /* HomeB dice literal "3 series x 45 s - 45 s de pausa": por eso peso=45, que
+     para un ejercicio por tiempo es la pausa en segundos, no un peso. El reloj
+     lo modela con peso=0 y la etiqueta "Pausa (seg)", que muestra un 0 que no
+     quiere decir nada. Manda HomeB, que es canonico para el telefono. */
+  { id: "plancha", unidad: "tiempo", descanso: 45, etiqueta: "correr",
+    series: [{ reps: 45, peso: 45 }, { reps: 45, peso: 45 }, { reps: 45, peso: 45 }],
+    porQue: { "es-AR": "Core estable = mejor economía de carrera en los últimos kilómetros.", "en-US": "A stable core means better running economy in the last kilometres.", "pt-BR": "Core estável significa melhor economia de corrida nos últimos quilômetros.", "ja-JP": "体幹が安定すると、終盤の走りの効率が上がります。" } }
+];
+
+/* Lo que se hizo la SESION ANTERIOR, serie por serie. Es la columna PREVIA de la
+   tabla y el tercer paso de la regla de precarga: en la primera serie del dia no
+   hay nada de esta sesion con que precargar. Viene del historial; el cliente no
+   la calcula. */
+const PREVIAS = {
+  "press-banca": [{ reps: 10, peso: 40 }, { reps: 8, peso: 45 }, { reps: 8, peso: 42.5 }, { reps: 6, peso: 45 }],
+  "dominadas": [{ reps: 6, peso: 0 }, { reps: 6, peso: 0 }, { reps: 5, peso: 0 }],
+  "remo-barra": [{ reps: 10, peso: 32.5 }, { reps: 10, peso: 32.5 }],
+  "bulgara": [{ reps: 10, peso: 10 }, { reps: 10, peso: 12 }],
+  "talones": [{ reps: 15, peso: 20 }, { reps: 15, peso: 20 }, { reps: 12, peso: 20 }],
+  "plancha": [{ reps: 45, peso: 45 }, { reps: 40, peso: 45 }]
+};
+
+/* La distribucion muscular de la rutina del dia. Sale del catalogo, que es dato
+   del servidor (AGENTS.md 9.1): aca va cableada para poder dibujar la pantalla. */
+const DISTRIBUCION = {
+  "es-AR": [["Pectoral", 26], ["Espalda", 24], ["Cuádriceps", 18], ["Glúteos", 14], ["Gemelos", 10], ["Core", 8]],
+  "en-US": [["Chest", 26], ["Back", 24], ["Quads", 18], ["Glutes", 14], ["Calves", 10], ["Core", 8]],
+  "pt-BR": [["Peitoral", 26], ["Costas", 24], ["Quadríceps", 18], ["Glúteos", 14], ["Panturrilhas", 10], ["Core", 8]],
+  "ja-JP": [["胸", 26], ["背中", 24], ["大腿四頭筋", 18], ["臀筋", 14], ["ふくらはぎ", 10], ["体幹", 8]]
+};
+
+const PASOS = {
+  "press-banca": { "es-AR": ["Omóplatos juntos y apoyados; pies firmes en el piso.", "Bajá la barra hasta la parte baja del pecho, con los codos a unos 45°.", "Empujá sin despegar la cadera del banco."], "en-US": ["Shoulder blades pinched and planted; feet firm on the floor.", "Lower the bar to the lower chest, elbows at about 45°.", "Press up without lifting your hips off the bench."], "pt-BR": ["Escápulas juntas e apoiadas; pés firmes no chão.", "Desça a barra até a parte baixa do peito, cotovelos a uns 45°.", "Empurre sem tirar o quadril do banco."], "ja-JP": ["肩甲骨を寄せてベンチに固定し、足裏を床にしっかりつける。", "バーを胸の下部まで下ろす。肘は約45度。", "腰をベンチから浮かせずに押し上げる。"] }
+};
+
+/* Los sustitutos tambien son entradas del catalogo. Aca van solo con su nombre
+   y su motivo: el prototipo no necesita su ficha entera, pero el nombre tiene
+   que resolver en los cuatro locales o la pantalla miente. */
+const NOMBRE_EXTRA = {
+  "press-maquina": { "es-AR": "Press en máquina", "en-US": "Machine chest press", "pt-BR": "Supino na máquina", "ja-JP": "マシン・チェストプレス" },
+  "jalon-polea": { "es-AR": "Jalón en polea", "en-US": "Lat pulldown", "pt-BR": "Puxada na polia", "ja-JP": "ラットプルダウン" },
+  "remo-invertido": { "es-AR": "Remo invertido", "en-US": "Inverted row", "pt-BR": "Remada invertida", "ja-JP": "インバーテッドロー" },
+  "remo-mancuerna": { "es-AR": "Remo con mancuerna", "en-US": "One-arm dumbbell row", "pt-BR": "Remada unilateral", "ja-JP": "ワンハンド・ダンベルロー" },
+  "zancadas": { "es-AR": "Zancadas", "en-US": "Lunges", "pt-BR": "Afundo", "ja-JP": "ランジ" },
+  "sentadilla-a-una-pierna": { "es-AR": "Sentadilla a una pierna", "en-US": "Single-leg squat", "pt-BR": "Agachamento unilateral", "ja-JP": "シングルレッグ・スクワット" },
+  "talones-sentado": { "es-AR": "Talones sentado", "en-US": "Seated calf raise", "pt-BR": "Panturrilha sentado", "ja-JP": "シーテッド・カーフレイズ" },
+  "talones-peso-corporal": { "es-AR": "Talones con peso corporal", "en-US": "Bodyweight calf raise", "pt-BR": "Panturrilha com peso corporal", "ja-JP": "自重カーフレイズ" },
+  "plancha-lateral": { "es-AR": "Plancha lateral", "en-US": "Side plank", "pt-BR": "Prancha lateral", "ja-JP": "サイドプランク" },
+  "rueda-abdominal": { "es-AR": "Rueda abdominal", "en-US": "Ab wheel", "pt-BR": "Roda abdominal", "ja-JP": "アブローラー" },
+  "flexiones-inclinadas": { "es-AR": "Flexiones inclinadas", "en-US": "Incline push-ups", "pt-BR": "Flexão inclinada", "ja-JP": "インクライン腕立て" }
+};
+
+const SUSTITUTO_MOTIVO = {
+  "press-mancuernas": { grado: "alto", "es-AR": "Mismo patrón de empuje, más rango y sin necesidad de rack.", "en-US": "Same pushing pattern, more range, no rack needed.", "pt-BR": "Mesmo padrão de empurrar, mais amplitude e sem rack.", "ja-JP": "同じ押す動作。可動域が広く、ラックも不要です。" },
+  flexiones: { grado: "medio", "es-AR": "Mismo patrón, sin carga externa: sirve si no hay peso disponible.", "en-US": "Same pattern, no external load: works when there are no weights.", "pt-BR": "Mesmo padrão, sem carga externa: serve se não houver peso.", "ja-JP": "同じ動作で外的負荷なし。重りがない場合に使えます。" },
+  "press-maquina": { grado: "medio", "es-AR": "Mismo músculo con trayectoria guiada: menos técnica, menos transferencia.", "en-US": "Same muscle on a guided path: less technique, less transfer.", "pt-BR": "Mesmo músculo com trajetória guiada: menos técnica, menos transferência.", "ja-JP": "軌道が固定され同じ筋肉に効きます。技術要素は減りますが転移も減ります。" },
+  "jalon-polea": { grado: "alto", "es-AR": "Misma tracción vertical con carga graduable: sirve si todavía no salen dominadas.", "en-US": "Same vertical pull with adjustable load: use it while pull-ups are still out of reach.", "pt-BR": "Mesma tração vertical com carga ajustável: serve enquanto a barra ainda não sai.", "ja-JP": "同じ垂直方向の引く動作で負荷を調整できます。懸垂がまだ難しい場合に。" },
+  "remo-invertido": { grado: "medio", "es-AR": "Tracción con peso corporal y ángulo regulable: no necesita máquina.", "en-US": "Bodyweight pull at an adjustable angle: no machine needed.", "pt-BR": "Tração com peso corporal e ângulo regulável: não precisa de máquina.", "ja-JP": "自重で角度を変えられる引く動作。マシン不要です。" },
+  "remo-mancuerna": { grado: "alto", "es-AR": "Mismo patrón, un lado por vez: corrige desequilibrios y cuida la zona lumbar.", "en-US": "Same pattern, one side at a time: fixes imbalances and spares the lower back.", "pt-BR": "Mesmo padrão, um lado por vez: corrige desequilíbrios e poupa a lombar.", "ja-JP": "同じ動作を片側ずつ。左右差を整え、腰への負担も減ります。" },
+  "zancadas": { grado: "alto", "es-AR": "Mismo trabajo unilateral de rodilla, con menos exigencia de equilibrio.", "en-US": "Same single-leg knee work, with less balance demand.", "pt-BR": "Mesmo trabalho unilateral de joelho, com menos exigência de equilíbrio.", "ja-JP": "同じ片脚の膝主導の動作。バランス要求は低めです。" },
+  "sentadilla-a-una-pierna": { grado: "medio", "es-AR": "Sin equipamiento, pero pide bastante movilidad de tobillo.", "en-US": "No equipment, but it asks for a good deal of ankle mobility.", "pt-BR": "Sem equipamento, mas exige boa mobilidade de tornozelo.", "ja-JP": "器具は不要ですが、足首の可動域がかなり必要です。" },
+  "talones-sentado": { grado: "alto", "es-AR": "Apunta más al sóleo, que es el que sufre en fondos largos.", "en-US": "Targets the soleus more, which is what suffers on long runs.", "pt-BR": "Foca mais no sóleo, que é o que sofre nos longões.", "ja-JP": "ヒラメ筋により効きます。ロング走で負担がかかる部位です。" },
+  "talones-peso-corporal": { grado: "medio", "es-AR": "Sin carga: más repeticiones para el mismo estímulo.", "en-US": "No load: more reps for the same stimulus.", "pt-BR": "Sem carga: mais repetições para o mesmo estímulo.", "ja-JP": "無負荷。同じ刺激を得るには回数が増えます。" },
+  "plancha-lateral": { grado: "alto", "es-AR": "Mismo trabajo de core, en el plano que la carrera exige de costado.", "en-US": "Same core work, in the plane running loads from the side.", "pt-BR": "Mesmo trabalho de core, no plano que a corrida exige de lado.", "ja-JP": "同じ体幹の働きを、走りで横方向にかかる面で鍛えます。" },
+  "rueda-abdominal": { grado: "medio", "es-AR": "Mucho más exigente: si la zona lumbar se arquea, no es sustituto.", "en-US": "Much harder: if your lower back arches, it is not a substitute.", "pt-BR": "Bem mais exigente: se a lombar arqueia, não é substituto.", "ja-JP": "難度が上がります。腰が反るようなら代替になりません。" },
+  "flexiones-inclinadas": { grado: "alto", "es-AR": "Mismo patrón con menos carga: el ángulo del apoyo gradúa la dificultad.", "en-US": "Same pattern with less load: the angle of the support sets the difficulty.", "pt-BR": "Mesmo padrão com menos carga: o ângulo do apoio gradua a dificuldade.", "ja-JP": "同じ動作で負荷を軽く。支点の角度で難度を調整します。" }
+};
+
+/* Las notas del lienzo sobre la notificacion: se ven DENTRO del marco, asi que
+   tambien salen de tabla. */
+const FONDO_NOTAS = {
+  "es-AR": [
+    "La cuenta sigue con la pantalla apagada y con la app en segundo plano: no se pausa ni se reinicia al volver.",
+    "El número de la notificación se actualiza solo. Si una plataforma no lo permite, se degrada a una notificación fija con la hora de fin, y eso hay que VERIFICARLO en la fase 6, no darlo por hecho.",
+    "Las dos acciones de la notificación no abren la app: actúan sobre el cronómetro y la notificación se queda.",
+    "Sin datos de salud en el texto: ni peso, ni pulso, ni nada de §8. Sólo el ejercicio y cuántas series faltan."
+  ],
+  "en-US": [
+    "The countdown keeps running with the screen off and the app in the background: it neither pauses nor restarts when you come back.",
+    "The number in the notification updates on its own. If a platform does not allow that, it degrades to a fixed notification carrying the end time — and that has to be VERIFIED in phase 6, not assumed.",
+    "The two notification actions do not open the app: they act on the timer and the notification stays put.",
+    "No health data in the text: no weight, no heart rate, nothing from §8. Only the exercise and how many sets are left."
+  ],
+  "pt-BR": [
+    "A contagem continua com a tela apagada e o app em segundo plano: não pausa nem reinicia ao voltar.",
+    "O número da notificação se atualiza sozinho. Se uma plataforma não permitir, cai para uma notificação fixa com o horário de fim — e isso precisa ser VERIFICADO na fase 6, não presumido.",
+    "As duas ações da notificação não abrem o app: agem sobre o cronômetro e a notificação continua ali.",
+    "Sem dados de saúde no texto: nem peso, nem batimentos, nada do §8. Só o exercício e quantas séries faltam."
+  ],
+  "ja-JP": [
+    "画面を消しても、アプリがバックグラウンドでも、カウントは続きます。戻ったときに一時停止も再スタートもしません。",
+    "通知の数字は自動で更新されます。プラットフォームが対応していない場合は、終了時刻を表示する固定通知に切り替えます。これはフェーズ6で必ず検証すべきで、前提にはしません。",
+    "通知の2つの操作はアプリを開きません。タイマーだけを操作し、通知はそのまま残ります。",
+    "本文に健康データは出しません。体重も心拍も、§8に当たるものは一切なし。種目と残りセット数だけです。"
+  ]
+};
+
+const ORDEN = ["rutina", "serie", "serie-teclado", "serie-borrar", "serie-casos",
+               "descanso", "descanso-fondo", "descanso-fin",
+               "catalogo", "catalogo-filtros", "catalogo-vacio", "ficha", "sustitutos"];
+
+const ETIQUETA_PANT = {
+  "es-AR": { rutina: "Antes de entrenar", catalogo: "Catálogo", "catalogo-filtros": "Filtros", "catalogo-vacio": "No encontré", ficha: "Ficha", sustitutos: "Sustitutos", serie: "Entrenando · tabla de series", "serie-teclado": "Teclado", "serie-borrar": "Borrar una serie", "serie-casos": "Fallida · salteada · extra", descanso: "Descanso en pantalla", "descanso-fondo": "Descanso en segundo plano", "descanso-fin": "Aviso al terminar" }
+};
+
+const CONTRASTE = [
+  { rol: "Texto primario F2F4F0 sobre fondo 0B0C0A", ratio: "17.71", aa: "AA" },
+  { rol: "Texto primario sobre superficie 131511", ratio: "16.60", aa: "AA" },
+  { rol: "Acento 7CF03D sobre superficie 131511", ratio: "12.59", aa: "AA" },
+  { rol: "Texto 0B0C0A sobre botón de acento", ratio: "13.43", aa: "AA" },
+  { rol: "Secundario 60 % sobre superficie", ratio: "6.54", aa: "AA" },
+  { rol: "Secundario 60 % sobre superficie alterna 1C1F1A", ratio: "6.22", aa: "AA" },
+  { rol: "Terciario 50 % sobre superficie (el mínimo que uso)", ratio: "4.90", aa: "AA" },
+  { rol: "Placeholder 50 % sobre input 141613", ratio: "4.89", aa: "AA" },
+  { rol: "Texto 45 % del diseño viejo — NO se usa acá", ratio: "4.20", aa: "no" }
+];
+
+const ENGANCHE = [
+  { desde: "Home › Inicio › agenda del día › fila «Gimnasio · tren superior y core»", hacia: "Abre la pantalla gimnasio de HomeB, como hoy. Esta pieza no cambia esa fila: es la entrada que ya existe.", ref: "HomeB.dc.html · agenda[] key:\"gym\" · act:\"gym\"" },
+  { desde: "Home › Gimnasio › tocar la card de un ejercicio", hacia: "Abre CAPTURA DE SERIE en ese ejercicio. Hoy la card no es tocable: sólo lo son sus chips de serie, y sólo para tildar.", ref: "HomeB.dc.html · gym.exercises[i] · nuevo onClick" },
+  { desde: "Home › Gimnasio › chip de serie", hacia: "Deja de tildar. Abre CAPTURA DE SERIE con esa serie apuntada. El tilde ciego es justo lo que esta pieza viene a reemplazar.", ref: "HomeB.dc.html · e.sets[j].tap · se reemplaza" },
+  { desde: "Home › Gimnasio › botón «Agregar ejercicio»", hacia: "Abre el CATÁLOGO. Hoy ese botón no lleva a ninguna pantalla diseñada: es el hueco que esta pieza cierra.", ref: "HomeB.dc.html · «Agregar ejercicio» · sin onClick" },
+  { desde: "Captura de serie › confirmar una serie", hacia: "Arranca el DESCANSO en la misma pantalla. Con la pantalla apagada o la app en segundo plano, sigue en la notificación.", ref: "nuevo · no existe en HomeB" }
+];
+
+const SALIDAS = [
+  { desde: "Catálogo › elegir un ejercicio", hacia: "Vuelve a Gimnasio con el ejercicio agregado al final de la rutina del día, y la lista scrolleada hasta él." },
+  { desde: "Ficha › «Usar este ejercicio»", hacia: "Igual que arriba. Si se entró desde Sustitutos, reemplaza al ejercicio original en vez de agregar uno nuevo." },
+  { desde: "Captura › última serie del último ejercicio", hacia: "Vuelve a Gimnasio, con la sesión al 100 %. El botón «Terminar sesión de gimnasio» de HomeB no cambia." },
+  { desde: "Captura › flecha ‹ del encabezado", hacia: "Vuelve a Gimnasio. Lo registrado queda guardado: no hay «descartar»." },
+  { desde: "Aviso de fin de descanso", hacia: "Vuelve a Captura, en el ejercicio y la serie que corresponden. Nunca abre el Home." }
+];
+
+const ABIERTO = [
+  "El ejercicio libre del caso vacío: si el motor del plan (fase 7) acepta o no un ejercicio que no está en el catálogo. Acá está diseñada la salida; la regla de negocio no está decidida.",
+  "Qué pasa si dos series de la misma sesión se editan desde el teléfono y desde el reloj. Es el conflicto teléfono↔reloj de AGENTS.md §6, que sigue ▢.",
+  "Superseries y ejercicios encadenados: se puede saltar el descanso, pero el diseño no modela el par de ejercicios como una unidad.",
+  "Unidades imperiales. Todo el diseño está en kg; AGENTS.md §10 dice que métrico e imperial son preferencia del usuario, así que falta el paso de libras.",
+  "Historial entre sesiones: la precarga usa la última serie de ESTA sesión. Qué se precarga en la primera serie del día —el plan, o lo que levantaste la semana pasada— es decisión de la fase 7.",
+  "El set de íconos: los de acá son de trazo, provisorios.",
+  "Revisión nativa del portugués y del japonés."
+];
+
+class Component extends DCLogic {
+  constructor(props) {
+    super(props);
+    this.state = {
+      pant: "rutina", ejIdx: 0, hechas: {}, extras: {}, editando: null,
+      reps: null, peso: null, teclado: null, tecladoBuf: "",
+      restT: null, sesionT: 0, entrenando: false,
+      /* borradores: lo escrito en una fila que TODAVIA no se marco. Sin esto, la
+         tabla obligaria a marcar para poder escribir. */
+      borradores: {},
+      /* quitadas: indices de series borradas con el gesto. No se borra el dato de
+         `hechas`: si se deshace, vuelve con lo que tenia. */
+      quitadas: {}, deshacer: null,
+      q: "", fMusculo: [], fEquipo: [], sinEquipo: false,
+      fichaId: "press-banca", desdeSustituto: false
+    };
+  }
+
+  componentDidMount() {
+    this.tick = setInterval(() => {
+      this.setState(s => {
+        const cambio = {};
+        if (s.restT !== null && s.restT > 0) cambio.restT = s.restT - 1;
+        if (s.entrenando) cambio.sesionT = s.sesionT + 1;
+        return Object.keys(cambio).length ? cambio : null;
+      });
+    }, 1000);
+  }
+  componentWillUnmount() { if (this.tick) clearInterval(this.tick); }
+
+  /* ---- locale y formato ------------------------------------------------ */
+  loc() {
+    const p = this.props.locale || "auto";
+    if (p !== "auto" && LOCALES.indexOf(p) >= 0) return p;
+    const nav = (typeof navigator !== "undefined" && navigator.language) || "es-AR";
+    const exacto = LOCALES.filter(l => l.toLowerCase() === nav.toLowerCase())[0];
+    if (exacto) return exacto;
+    const base = LOCALES.filter(l => l.split("-")[0] === nav.split("-")[0])[0];
+    return base || "es-AR";
+  }
+  num(v) { return new Intl.NumberFormat(this.loc(), { maximumFractionDigits: 1 }).format(v); }
+  reloj(seg) {
+    const s = Math.max(0, seg | 0);
+    return Math.floor(s / 60) + ":" + String(s % 60).padStart(2, "0");
+  }
+
+  /* ---- rutina y precarga ----------------------------------------------- */
+  ejercicio(i) {
+    const base = RUTINA[i];
+    const usarRampa = this.props.variaPeso !== false && base.rampa;
+    return { ...base, series: usarRampa ? base.rampa : base.series };
+  }
+  objetivos(i) {
+    const ej = this.ejercicio(i);
+    const extra = this.state.extras[i] || 0;
+    const lista = ej.series.slice();
+    for (let k = 0; k < extra; k++) lista.push({ ...ej.series[ej.series.length - 1], esExtra: true });
+    return lista;
+  }
+  /* LA REGLA, en un solo lugar y sin ramas escondidas. Cuatro pasos, en orden:
+     1. si el peso prescrito VARIA entre series -> gana el objetivo de ESA serie;
+     2. si es igual en todas -> gana la ultima serie efectivamente hecha HOY;
+     3. si todavia no hizo ninguna hoy -> lo que hizo en esa misma serie la SESION
+        ANTERIOR (la columna PREVIA). Agregado el 2026-09-08: en la primera serie
+        del dia no hay nada de esta sesion, y el objetivo puede estar lejos de lo
+        que la persona viene levantando;
+     4. y si tampoco hay historial -> el objetivo.
+     No adivina progresiones: subir la carga es del motor de la fase 7. */
+  precarga(i, k) {
+    const objs = this.objetivos(i);
+    const obj = objs[Math.min(k, objs.length - 1)] || { reps: 0, peso: 0 };
+    const varia = objs.some(o => o.peso !== objs[0].peso);
+    if (varia) return { reps: obj.reps, peso: obj.peso, motivo: "objetivo" };
+    const hechas = (this.state.hechas[i] || []).filter(h => h && !h.saltada);
+    const ult = hechas[hechas.length - 1];
+    if (ult) return { reps: ult.reps, peso: ult.peso, motivo: "ultima" };
+    const prev = this.previa(i, k);
+    if (prev) return { reps: prev.reps, peso: prev.peso, motivo: "anterior" };
+    return { reps: obj.reps, peso: obj.peso, motivo: "objetivo" };
+  }
+
+  /* Lo que se hizo en ESA serie la sesion anterior, o null. */
+  previa(i, k) {
+    const lista = PREVIAS[this.ejercicio(i).id] || [];
+    return lista[k] || null;
+  }
+
+  /* Lo que muestra la fila: lo marcado, si no el borrador, si no la sugerencia. */
+  valoresDeLaFila(i, k) {
+    const h = (this.state.hechas[i] || [])[k];
+    if (h && !h.saltada) return { reps: h.reps, peso: h.peso, motivo: "hecha" };
+    const b = (this.state.borradores[i] || [])[k];
+    if (b) return { reps: b.reps, peso: b.peso, motivo: "borrador" };
+    return this.precarga(i, k);
+  }
+
+  marcada(i, k) {
+    const h = (this.state.hechas[i] || [])[k];
+    return !!(h && !h.saltada);
+  }
+
+  quitada(i, k) { return (this.state.quitadas[i] || []).indexOf(k) >= 0; }
+
+  /* El tilde. Marcar guarda lo que muestra la fila; desmarcar deja ESE valor como
+     borrador, asi que destildar sin querer no borra el numero. */
+  alternar(i, k) {
+    const v = this.valoresDeLaFila(i, k);
+    this.setState(s => {
+      const hechas = (s.hechas[i] || []).slice();
+      const borr = (s.borradores[i] || []).slice();
+      if (this.marcada(i, k)) {
+        hechas[k] = null;
+        borr[k] = { reps: v.reps, peso: v.peso };
+        return { hechas: { ...s.hechas, [i]: hechas }, borradores: { ...s.borradores, [i]: borr }, restT: null };
+      }
+      hechas[k] = { reps: v.reps, peso: v.peso };
+      borr[k] = null;
+      return {
+        hechas: { ...s.hechas, [i]: hechas },
+        borradores: { ...s.borradores, [i]: borr },
+        restT: this.ejercicio(i).descanso
+      };
+    });
+  }
+
+  /* Escribir en una fila NO la desmarca: desmarcar por escribir borraria el
+     progreso sin que nadie lo pida. */
+  escribirFila(i, k, reps, peso) {
+    this.setState(s => {
+      if (this.marcada(i, k)) {
+        const hechas = (s.hechas[i] || []).slice();
+        hechas[k] = { reps: reps, peso: peso };
+        return { hechas: { ...s.hechas, [i]: hechas } };
+      }
+      const borr = (s.borradores[i] || []).slice();
+      borr[k] = { reps: reps, peso: peso };
+      return { borradores: { ...s.borradores, [i]: borr } };
+    });
+  }
+
+  /* Borrar una serie. NO se pierde el dato: queda en `hechas` y `deshacer` guarda
+     que fila era, asi que "Deshacer" la devuelve tal cual estaba. */
+  borrarSerie(i, k) {
+    this.setState(s => ({
+      quitadas: { ...s.quitadas, [i]: (s.quitadas[i] || []).concat([k]) },
+      deshacer: { ej: i, fila: k },
+      teclado: null
+    }));
+  }
+
+  deshacerBorrado() {
+    const d = this.state.deshacer;
+    if (!d) return;
+    this.setState(s => ({
+      quitadas: { ...s.quitadas, [d.ej]: (s.quitadas[d.ej] || []).filter(x => x !== d.fila) },
+      deshacer: null
+    }));
+  }
+  /* -1 = no queda ninguna serie pendiente en este ejercicio. */
+  serieActual(i) {
+    const hechas = this.state.hechas[i] || [];
+    const objs = this.objetivos(i);
+    for (let k = 0; k < objs.length; k++) if (!hechas[k]) return k;
+    return -1;
+  }
+  /* La serie apuntada: la que se toco, o la primera pendiente, o la ultima. */
+  foco() {
+    const i = this.state.ejIdx;
+    if (this.state.editando !== null) return this.state.editando;
+    const a = this.serieActual(i);
+    return a >= 0 ? a : this.objetivos(i).length - 1;
+  }
+  valores() {
+    const i = this.state.ejIdx, k = this.foco();
+    const hecha = (this.state.hechas[i] || [])[k];
+    const base = hecha && !hecha.saltada ? { reps: hecha.reps, peso: hecha.peso } : this.precarga(i, k);
+    return { reps: this.state.reps === null ? base.reps : this.state.reps,
+             peso: this.state.peso === null ? base.peso : this.state.peso };
+  }
+
+  /* ---- acciones -------------------------------------------------------- */
+  ir(p) { this.setState({ pant: p, teclado: null }); }
+  irSerie(sub) {
+    /* Las tres entradas del riel que son ESTADOS de la captura, no pantallas. */
+    if (sub === "serie-teclado") { this.setState({ pant: "serie", teclado: "reps", tecladoBuf: "" }); return; }
+    if (sub === "serie-corregir") {
+      const i = this.state.ejIdx;
+      if (!(this.state.hechas[i] || []).length) this.confirmar(true);
+      this.setState(s => ({ pant: "serie", teclado: null, editando: Math.max(0, (s.hechas[s.ejIdx] || []).length - 1), reps: null, peso: null }));
+      return;
+    }
+    if (sub === "descanso") { this.setState({ pant: "serie", teclado: null, restT: 90 }); return; }
+    this.setState({ pant: "serie", teclado: null, editando: null });
+  }
+  confirmar(silencioso) {
+    const i = this.state.ejIdx, k = this.foco(), v = this.valores();
+    const ej = this.ejercicio(i);
+    this.setState(s => {
+      const lista = (s.hechas[i] || []).slice();
+      lista[k] = { reps: v.reps, peso: v.peso };
+      const editaba = s.editando !== null;
+      return { hechas: { ...s.hechas, [i]: lista }, editando: null, reps: null, peso: null,
+               restT: editaba ? s.restT : ej.descanso };
+    });
+    if (silencioso) return;
+  }
+  saltear() {
+    const i = this.state.ejIdx;
+    if (this.serieActual(i) < 0 && this.state.editando === null) return;
+    const k = this.foco();
+    this.setState(s => {
+      const lista = (s.hechas[i] || []).slice();
+      lista[k] = { saltada: true };
+      return { hechas: { ...s.hechas, [i]: lista }, editando: null, reps: null, peso: null };
+    });
+  }
+  serieExtra() {
+    const i = this.state.ejIdx;
+    this.setState(s => ({ extras: { ...s.extras, [i]: (s.extras[i] || 0) + 1 }, editando: null, reps: null, peso: null }));
+  }
+
+  renderVals() {
+    const st = this.state, loc = this.loc(), t = STR[loc], f = FRASE[loc];
+    const accent = this.props.accent || "#7CF03D";
+    const idle = "rgba(242,244,240,.6)";
+    const i = st.ejIdx, ej = this.ejercicio(i), k = this.foco();
+    const objs = this.objetivos(i), hechas = st.hechas[i] || [];
+    const v = this.valores();
+    const esTiempo = ej.unidad === "tiempo", esLastre = ej.unidad === "lastre";
+    const varia = objs.some(o => o.peso !== objs[0].peso);
+    const nom = (id) => {
+      const c = CATALOGO.filter(x => x.id === id)[0];
+      if (c) return c.nombre[loc];
+      if (NOMBRE_EXTRA[id]) return NOMBRE_EXTRA[id][loc];
+      return id; /* nunca deberia pasar: si pasa, se ve el id y no un hueco mudo */
+    };
+    const unidadPeso = esTiempo ? t.pausa : (esLastre ? t.lastre : t.peso);
+
+    /* ------- riel del lienzo ------- */
+    const rail = ORDEN.map(p => {
+      const activo = st.pant === p || (p === "serie" && st.pant === "serie" && st.editando === null && !st.teclado && st.restT === null);
+      return {
+        label: (ETIQUETA_PANT["es-AR"][p] || p),
+        go: () => (p.indexOf("serie") === 0 || p === "descanso") ? this.irSerie(p) : this.ir(p),
+        bg: activo ? accent : "rgba(255,255,255,.04)",
+        color: activo ? "#0A0B09" : "rgba(242,244,240,.7)",
+        border: activo ? accent : "rgba(255,255,255,.14)"
+      };
+    });
+
+    /* ------- catalogo ------- */
+    const q = st.q.trim().toLowerCase();
+    const activos = { musculo: st.fMusculo, equipo: st.fEquipo };
+    const lista = CATALOGO.filter(c => {
+      if (st.sinEquipo && c.equipo !== "ninguno") return false;
+      if (activos.equipo.length && activos.equipo.indexOf(c.equipo) < 0) return false;
+      if (activos.musculo.length && !c.musculos.some(m => activos.musculo.indexOf(m[0]) >= 0)) return false;
+      if (!q) return true;
+      const enNombre = LOCALES.some(l => c.nombre[l].toLowerCase().indexOf(q) >= 0);
+      const enMusculo = c.musculos.some(m => (MUSCULO[m[0]][loc] || "").toLowerCase().indexOf(q) >= 0);
+      return enNombre || enMusculo;
+    });
+    const idsRutina = RUTINA.map(r => r.id);
+    const nFiltros = st.fMusculo.length + st.fEquipo.length;
+
+    const grupos = [
+      { titulo: t.musculo, claves: Object.keys(MUSCULO), campo: "fMusculo", dic: MUSCULO },
+      { titulo: t.equipamiento, claves: Object.keys(EQUIPO), campo: "fEquipo", dic: EQUIPO }
+    ].map(g => ({
+      titulo: g.titulo,
+      opciones: g.claves.map(c => {
+        const on = st[g.campo].indexOf(c) >= 0;
+        return {
+          label: g.dic[c][loc], activo: on,
+          bg: on ? "rgb(var(--ac-rgb) / .14)" : "rgba(255,255,255,.04)",
+          borde: on ? accent : "rgba(255,255,255,.38)",
+          color: on ? accent : "rgba(242,244,240,.85)",
+          toggle: () => this.setState(s => ({ [g.campo]: on ? s[g.campo].filter(x => x !== c) : s[g.campo].concat([c]) }))
+        };
+      })
+    }));
+
+    /* ------- ficha ------- */
+    const fichaBase = CATALOGO.filter(c => c.id === st.fichaId)[0] || CATALOGO[0];
+    const rutinaDe = RUTINA.filter(r => r.id === fichaBase.id)[0];
+    const pasos = (PASOS[fichaBase.id] || PASOS["press-banca"])[loc];
+    const subs = fichaBase.sustitutos.map(id => {
+      const meta = SUSTITUTO_MOTIVO[id] || SUSTITUTO_MOTIVO["flexiones"];
+      const alto = meta.grado === "alto";
+      return {
+        nombre: nom(id) || id, motivo: meta[loc],
+        grado: (alto ? t.gradoAlto : t.gradoMedio),
+        gradoBg: alto ? "rgb(var(--ac-rgb) / .14)" : "rgba(255,255,255,.04)",
+        gradoBorde: alto ? accent : "rgba(255,255,255,.38)",
+        gradoColor: alto ? accent : "rgba(242,244,240,.85)",
+        usar: () => this.setState({ pant: "serie", desdeSustituto: true })
+      };
+    });
+
+    /* ------- strip de series ------- */
+    const strip = objs.map((o, j) => {
+      const h = hechas[j];
+      const esFoco = j === k && !h;
+      let valor, sub, bg, borde, color, subColor;
+      if (h && h.saltada) {
+        valor = "—"; sub = t.salteada;
+        bg = "rgba(255,255,255,.04)"; borde = "1px dashed rgba(255,255,255,.38)";
+        color = "rgba(242,244,240,.6)"; subColor = "rgba(242,244,240,.6)";
+      } else if (h && j === st.editando) {
+        valor = (o.esExtra ? "+" : "") + h.reps; sub = t.corrigiendo;
+        bg = "#1C1F1A"; borde = "2px dashed " + accent;
+        color = "#F2F4F0"; subColor = accent;
+      } else if (h) {
+        valor = (o.esExtra ? "+" : "") + h.reps; sub = t.hecha;
+        bg = "rgb(var(--ac-rgb) / .14)"; borde = "1px solid " + accent;
+        color = accent; subColor = accent;
+      } else if (esFoco) {
+        valor = (o.esExtra ? "+" : "") + o.reps; sub = t.ahora;
+        bg = "rgba(255,255,255,.04)"; borde = "2px solid " + accent;
+        color = "#F2F4F0"; subColor = accent;
+      } else {
+        valor = (o.esExtra ? "+" : "") + o.reps; sub = t.pendiente;
+        bg = "rgba(255,255,255,.04)"; borde = "1px solid rgba(255,255,255,.38)";
+        color = "rgba(242,244,240,.85)"; subColor = "rgba(242,244,240,.6)";
+      }
+      return { valor: String(valor), sub, bg, borde, color, subColor,
+               tap: () => this.setState({ editando: j, reps: null, peso: null }) };
+    });
+
+    const nHechas = hechas.filter(h => h && !h.saltada).length;
+    const anteriorIdx = (() => { for (let j = hechas.length - 1; j >= 0; j--) if (hechas[j] && !hechas[j].saltada) return j; return -1; })();
+    const anterior = anteriorIdx >= 0 ? hechas[anteriorIdx] : null;
+
+    /* ------- teclado numerico ------- */
+    const tecladoCampo = st.teclado;
+    const teclas = ["1","2","3","4","5","6","7","8","9",".","0","←"].map(lbl => ({
+      label: lbl, bg: lbl === "←" ? "rgba(255,255,255,.04)" : "rgba(255,255,255,.07)",
+      tap: () => this.setState(s => {
+        let buf = s.tecladoBuf;
+        if (lbl === "←") buf = buf.slice(0, -1);
+        else if (lbl === "." && (buf.indexOf(".") >= 0 || s.teclado === "reps")) return null;
+        else buf = (buf + lbl).slice(0, 6);
+        const n = buf === "" ? 0 : parseFloat(buf) || 0;
+        return s.teclado === "reps" ? { tecladoBuf: buf, reps: Math.min(999, Math.round(n)) }
+                                    : { tecladoBuf: buf, peso: Math.min(500, n) };
+      })
+    }));
+
+    /* ------- los tres casos, en estatico ------- */
+    const chip = (valor, sub, tipo) => ({
+      valor, sub,
+      bg: tipo === "hecha" ? "rgb(var(--ac-rgb) / .14)" : (tipo === "salteada" ? "rgba(255,255,255,.04)" : "rgba(255,255,255,.04)"),
+      borde: tipo === "hecha" ? "1px solid " + accent : (tipo === "salteada" ? "1px dashed rgba(255,255,255,.38)" : (tipo === "ahora" ? "2px solid " + accent : "1px solid rgba(255,255,255,.38)")),
+      color: tipo === "hecha" ? accent : (tipo === "ahora" ? "#F2F4F0" : "rgba(242,244,240,.85)"),
+      subColor: tipo === "hecha" || tipo === "ahora" ? accent : "rgba(242,244,240,.6)"
+    });
+    const CASOS_TXT = {
+      "es-AR": [
+        ["Serie fallida: hiciste 6 de las 8",
+         "Bajás las repeticiones con el − y confirmás. Un tap más que una serie normal.",
+         "Se guarda como hecha, nunca como error. El chip muestra 6, que es el dato; no hay rojo, ni tilde tachado, ni «no cumpliste». El tono no es punitivo (AGENTS.md §9.2) y eso es regla de código, no de copy."],
+        ["Serie salteada: te la salteás entera",
+         "Un tap en «Saltear». El foco pasa solo a la siguiente.",
+         "El chip queda con borde punteado y la palabra: la forma cambia, no sólo el color. Una serie salteada no cuenta para la precarga de la siguiente."],
+        ["Serie extra: hacés una más de la que decía el plan",
+         "Un tap en «Serie extra». Aparece un chip más al final del strip.",
+         "El «+» dice que está fuera del plan. El progreso pasa a 4/3 y no se rompe: la sesión reporta lo que hiciste, no lo que estaba prescrito."]
+      ],
+      "en-US": [
+        ["Missed reps: you did 6 of the 8",
+         "Bring the reps down with − and confirm. One tap more than a normal set.",
+         "It is saved as done, never as an error. The chip shows 6, which is the data; no red, no crossed-out check, no \"you failed\". The tone is never punitive (AGENTS.md §9.2) and that is a code rule, not a copy rule."],
+        ["Skipped set: you skip it entirely",
+         "One tap on \"Skip\". The focus moves to the next set on its own.",
+         "The chip keeps a dashed border and the word: the shape changes, not just the colour. A skipped set does not count toward the next set's preload."],
+        ["Extra set: you do one more than the plan asked for",
+         "One tap on \"Extra set\". One more chip appears at the end of the strip.",
+         "The \"+\" says it is outside the plan. Progress becomes 4/3 and nothing breaks: the session reports what you did, not what was prescribed."]
+      ],
+      "pt-BR": [
+        ["Série falhada: você fez 6 das 8",
+         "Baixe as repetições com o − e confirme. Um toque a mais que uma série normal.",
+         "Fica salva como feita, nunca como erro. O chip mostra 6, que é o dado; sem vermelho, sem visto riscado, sem «você não cumpriu». O tom nunca é punitivo (AGENTS.md §9.2), e isso é regra de código, não de texto."],
+        ["Série pulada: você pula ela inteira",
+         "Um toque em «Pular». O foco passa sozinho para a próxima.",
+         "O chip fica com borda pontilhada e a palavra: muda a forma, não só a cor. Uma série pulada não conta para a pré-carga da seguinte."],
+        ["Série extra: você faz uma a mais do que o plano pedia",
+         "Um toque em «Série extra». Aparece mais um chip no fim da tira.",
+         "O «+» diz que está fora do plano. O progresso vira 4/3 e nada quebra: a sessão reporta o que você fez, não o que estava prescrito."]
+      ],
+      "ja-JP": [
+        ["回数が届かない: 8回のうち6回",
+         "− で回数を下げて確定します。通常のセットより1タップ多いだけです。",
+         "エラーではなく「完了」として保存します。チップには実際の6が出ます。赤色も、取り消し線のチェックも、「未達成」の表示もありません。罰する調子にはしない（AGENTS.md §9.2）——これはコピーではなくコードの規則です。"],
+        ["スキップ: セットをまるごと飛ばす",
+         "「スキップ」を1タップ。フォーカスは自動で次へ移ります。",
+         "チップは破線の枠と文字が残ります。色だけでなく形が変わります。スキップしたセットは次のセットのプリロードには使いません。"],
+        ["追加セット: プランより1セット多くやる",
+         "「追加セット」を1タップ。チップが1つ末尾に増えます。",
+         "「+」がプラン外であることを示します。進捗は 4/3 になりますが壊れません。セッションが報告するのは、指定ではなく実際にやった内容です。"]
+      ]
+    };
+    const CASOS_STRIP = [
+      [["8", t.hecha, "hecha"], ["6", t.hecha, "hecha"], ["8", t.ahora, "ahora"], ["8", t.pendiente, "p"]],
+      [["8", t.hecha, "hecha"], ["—", t.salteada, "salteada"], ["8", t.ahora, "ahora"], ["8", t.pendiente, "p"]],
+      [["8", t.hecha, "hecha"], ["8", t.hecha, "hecha"], ["8", t.hecha, "hecha"], ["+8", t.ahora, "ahora"]]
+    ];
+    const casos = (CASOS_TXT[loc] || CASOS_TXT["es-AR"]).map((c, ci) => ({
+      titulo: c[0], como: c[1], regla: c[2],
+      strip: CASOS_STRIP[ci].map(a => chip(a[0], a[1], a[2]))
+    }));
+
+    /* ------- lo que se muestra ------- */
+    const pantSerie = st.pant === "serie";
+    const enEdicion = st.editando !== null && !!hechas[k];
+    const completo = this.serieActual(i) < 0 && st.editando === null;
+    const ultimoEj = i === RUTINA.length - 1;
+    const prescripcion = [
+      { valor: String(objs.length), unidad: t.series.toLowerCase() },
+      { valor: esTiempo ? this.num(objs[k].reps) : String(objs[k].reps), unidad: esTiempo ? t.unidadSeg : t.unidadReps }
+    ];
+    if (!esTiempo && objs[k].peso) prescripcion.push({ valor: this.num(objs[k].peso), unidad: t.kg });
+    prescripcion.push({ valor: this.num(ej.descanso), unidad: t.unidadSeg });
+
+    const valoresBoton = esTiempo
+      ? this.num(v.reps) + " " + t.unidadSeg
+      : (esLastre && !v.peso
+          ? this.num(v.reps) + " · " + t.pesoCorporal
+          : this.num(v.reps) + " × " + this.num(v.peso) + " " + t.kg);
+
+    return {
+      rootRef: this.rootRef, t: t,
+      is: {
+        catalogo: st.pant === "catalogo", catalogoFiltros: st.pant === "catalogo-filtros",
+        catalogoVacio: st.pant === "catalogo-vacio", ficha: st.pant === "ficha",
+        sustitutos: st.pant === "sustitutos", captura: pantSerie,
+        rutina: st.pant === "rutina",
+        casos: st.pant === "serie-casos", descansoFondo: st.pant === "descanso-fondo",
+        descansoFin: st.pant === "descanso-fin"
+      },
+      go: {
+        serie: () => this.irSerie("serie"), catalogo: () => this.ir("catalogo"),
+        catalogoFiltros: () => this.ir("catalogo-filtros"), catalogoVacio: () => this.ir("catalogo-vacio"),
+        ficha: () => this.ir("ficha"), sustitutos: () => this.ir("sustitutos")
+      },
+      rail: rail,
+
+      q: st.q, hayQ: st.q.length > 0,
+      setQ: (e) => this.setState({ q: e.target.value }),
+      limpiarQ: () => this.setState({ q: "" }),
+      filtros: {
+        label: nFiltros ? t.filtrar + " · " + nFiltros : t.filtrar,
+        bg: nFiltros ? "rgb(var(--ac-rgb) / .14)" : "rgba(255,255,255,.04)",
+        borde: nFiltros ? accent : "rgba(255,255,255,.38)",
+        color: nFiltros ? accent : "rgba(242,244,240,.85)"
+      },
+      sinEquipo: {
+        activo: st.sinEquipo,
+        bg: st.sinEquipo ? "rgb(var(--ac-rgb) / .14)" : "rgba(255,255,255,.04)",
+        borde: st.sinEquipo ? accent : "rgba(255,255,255,.38)",
+        color: st.sinEquipo ? accent : "rgba(242,244,240,.85)"
+      },
+      toggleSinEquipo: () => this.setState(s => ({ sinEquipo: !s.sinEquipo })),
+      limpiarFiltros: () => this.setState({ fMusculo: [], fEquipo: [], sinEquipo: false }),
+      gruposFiltro: grupos,
+      resultados: {
+        linea: f.resultadosN(lista.length),
+        verBoton: f.verNEjercicios(lista.length),
+        lista: lista.map(c => ({
+          nombre: c.nombre[loc],
+          meta: c.musculos.map(m => MUSCULO[m[0]][loc]).join(" · ") + " · " + EQUIPO[c.equipo][loc],
+          enRutina: idsRutina.indexOf(c.id) >= 0,
+          abrir: () => this.setState({ pant: "ficha", fichaId: c.id })
+        }))
+      },
+      salidasVacio: [
+        { titulo: t.salidaAmpliarT, detalle: t.salidaAmpliarD, borde: "rgba(255,255,255,.38)",
+          act: () => this.setState({ pant: "catalogo", fMusculo: [], fEquipo: [], sinEquipo: false }) },
+        { titulo: t.salidaLibreT, detalle: t.salidaLibreD, borde: accent,
+          act: () => this.irSerie("serie") },
+        { titulo: t.salidaSugerirT, detalle: t.salidaSugerirD, borde: "rgba(255,255,255,.38)",
+          act: () => this.ir("catalogo") }
+      ],
+
+      ficha: {
+        nombre: fichaBase.nombre[loc],
+        chips: [EQUIPO[fichaBase.equipo][loc], (PATRON[fichaBase.patron] || {})[loc] || fichaBase.patron],
+        musculos: fichaBase.musculos.map(m => ({
+          nombre: MUSCULO[m[0]][loc], rol: m[1] === "primario" ? t.primario : t.secundario,
+          punto: m[1] === "primario" ? accent : "transparent",
+          borde: m[1] === "primario" ? accent : "rgba(242,244,240,.6)"
+        })),
+        pasos: pasos.map((p, n) => ({ n: String(n + 1), texto: p })),
+        porQue: (rutinaDe || RUTINA[0]).porQue[loc],
+        sustitutosLinea: f.sustitutosN(fichaBase.sustitutos.length),
+        botonAgregar: f.agregarA(t.rutinaDeHoy)
+      },
+      agregarDesdeFicha: () => this.irSerie("serie"),
+      sustitutos: subs,
+
+      ej: {
+        nombre: nom(ej.id), contador: f.ejercicioNdeM(i + 1, RUTINA.length),
+        prev: () => this.setState({ ejIdx: Math.max(0, i - 1), editando: null, reps: null, peso: null }),
+        next: () => this.setState({ ejIdx: Math.min(RUTINA.length - 1, i + 1), editando: null, reps: null, peso: null }),
+        hayPrev: i > 0, noHayPrev: i === 0,
+        hayNext: i < RUTINA.length - 1, noHayNext: i === RUTINA.length - 1,
+        prescripcion: prescripcion, varia: varia,
+        progreso: f.seriesNdeM(nHechas, objs.length), strip: strip
+      },
+      saltear: () => this.saltear(),
+      serieExtra: () => this.serieExtra(),
+
+      campos: [
+        { label: esTiempo ? t.segundos : t.reps, valor: esTiempo ? this.num(v.reps) : String(v.reps),
+          borde: st.teclado === "reps" ? accent : "rgba(255,255,255,.09)",
+          paso: esTiempo ? f.masNSeg(5) : "± 1",
+          abrirTeclado: () => this.setState({ teclado: "reps", tecladoBuf: "" }),
+          menos: () => this.setState({ reps: Math.max(1, v.reps - (esTiempo ? 5 : 1)) }),
+          mas: () => this.setState({ reps: Math.min(esTiempo ? 600 : 100, v.reps + (esTiempo ? 5 : 1)) }) },
+        { label: unidadPeso, valor: this.num(v.peso),
+          borde: st.teclado === "peso" ? accent : "rgba(255,255,255,.09)",
+          paso: esTiempo ? ("± " + this.num(5) + " " + t.unidadSeg) : ("± " + this.num(2.5) + " " + t.kg),
+          abrirTeclado: () => this.setState({ teclado: "peso", tecladoBuf: "" }),
+          menos: () => this.setState({ peso: Math.max(0, Math.round((v.peso - (esTiempo ? 5 : 2.5)) * 10) / 10) }),
+          mas: () => this.setState({ peso: Math.min(500, Math.round((v.peso + (esTiempo ? 5 : 2.5)) * 10) / 10) }) }
+      ],
+
+      hayAnterior: anteriorIdx >= 0,
+      anterior: {
+        titulo: anterior ? f.serieNAnterior(anteriorIdx + 1) : "",
+        valores: anterior ? (esTiempo ? this.num(anterior.reps) + " " + t.unidadSeg
+                 : (esLastre && !anterior.peso ? this.num(anterior.reps) + " · " + t.pesoCorporal
+                    : this.num(anterior.reps) + " × " + this.num(anterior.peso) + " " + t.kg)) : "",
+        accion: enEdicion && st.editando === anteriorIdx ? t.ahora : t.corregir,
+        borde: enEdicion && st.editando === anteriorIdx ? accent : "rgba(255,255,255,.14)",
+        corregir: () => this.setState(s => ({ editando: s.editando === anteriorIdx ? null : anteriorIdx, reps: null, peso: null }))
+      },
+
+      descanso: {
+        visible: st.restT !== null,
+        rotulo: st.restT === 0 ? t.descansoTerminado : t.descansoRotulo,
+        reloj: this.reloj(st.restT || 0),
+        color: st.restT === 0 ? accent : "#F2F4F0",
+        borde: st.restT === 0 ? accent : "rgba(255,255,255,.09)",
+        mas30Label: f.masNSeg(30),
+        mas30: () => this.setState(s => ({ restT: (s.restT || 0) + 30 })),
+        saltar: () => this.setState({ restT: null })
+      },
+
+      boton: {
+        titulo: completo ? (ultimoEj ? t.terminarGimnasio : t.siguienteEjercicio)
+                         : (enEdicion ? f.guardarSerieN(k + 1) : f.serieNHecha(k + 1)),
+        valores: completo ? t.ejercicioCompleto : valoresBoton,
+        bg: enEdicion ? "#1C1F1A" : accent,
+        color: enEdicion ? "#F2F4F0" : "#0B0C0A"
+      },
+      /* Con todas las series hechas el primario deja de guardar: pasa al ejercicio
+         siguiente. Antes sobrescribia la ultima en silencio, que es justo el tipo
+         de dato perdido que nadie nota hasta que mira el historial. */
+      confirmar: () => completo
+        ? (ultimoEj ? this.ir("serie") : this.setState({ ejIdx: i + 1, editando: null, reps: null, peso: null }))
+        : this.confirmar(false),
+
+      teclado: {
+        abierto: !!tecladoCampo,
+        label: tecladoCampo === "peso" ? unidadPeso : (esTiempo ? t.segundos : t.reps),
+        valor: tecladoCampo === "peso" ? this.num(v.peso) : String(v.reps),
+        cerrar: () => this.setState({ teclado: null, tecladoBuf: "" }),
+        teclas: teclas
+      },
+
+      casos: casos,
+
+      fondo: {
+        hora: new Intl.DateTimeFormat(loc, { hour: "2-digit", minute: "2-digit", hour12: false }).format(new Date(2026, 7, 28, 19, 12)),
+        fecha: new Intl.DateTimeFormat(loc, { weekday: "long", day: "numeric", month: "long" }).format(new Date(2026, 7, 28)),
+        hace: t.ahoraCorto,
+        titulo: nom(ej.id), cuerpo: f.quedanNSeries(Math.max(0, objs.length - nHechas)),
+        reloj: "0:47", mas30: f.masNSeg(30)
+      },
+      fondoNotas: (FONDO_NOTAS[loc] || FONDO_NOTAS["es-AR"]),
+      fin: {
+        cuerpo: nom(ej.id) + " · " + f.serieNHecha(Math.max(1, nHechas)),
+        boton: t.irSerieSiguiente,
+        mas30: () => this.setState({ restT: 30, pant: "serie" })
+      },
+
+      /* ===================== EL REDISENO DEL 2026-09-08 =====================
+         Captura en TABLA: todas las series a la vez, con lo que se hizo la sesion
+         anterior al lado. La decision y sus condiciones estan en
+         docs/decisiones/0007-captura-de-serie-en-tabla.md. */
+
+      /* --- pantalla de antes de entrenar --- */
+      rutina: {
+        titulo: t.rutinaTitulo,
+        resumen: f.nEjerciciosNMin(RUTINA.length, 55),
+        distribucionLabel: t.distribucion,
+        listaLabel: t.listaEjercicios,
+        empezar: t.empezar,
+        empezarTap: () => this.setState({ pant: "serie", entrenando: true, sesionT: 0 })
+      },
+      distribucion: (DISTRIBUCION[loc] || DISTRIBUCION["es-AR"]).map(d => ({
+        musculo: d[0], pct: this.num(d[1]) + " %"
+      })),
+      listaEjercicios: RUTINA.map((r, n) => {
+        const objs = this.objetivos(n);
+        const reps = objs.map(o => o.reps);
+        const min = Math.min.apply(null, reps), max = Math.max.apply(null, reps);
+        const esT = r.unidad === "tiempo";
+        return {
+          n: String(n + 1),
+          nombre: nom(r.id),
+          prescripcion: esT ? f.nSeriesNSeg(objs.length, max)
+                        : (min === max ? f.nSeriesNReps(objs.length, max) : f.nSeriesRango(objs.length, min, max)),
+          ir: () => this.setState({ pant: "serie", entrenando: true, ejIdx: n })
+        };
+      }),
+
+      /* --- barra de sesion: cronometro, o el descanso cuando esta corriendo --- */
+      sesion: {
+        rotulo: st.restT !== null ? (st.restT === 0 ? t.descansoTerminado : t.descansoRotulo) : t.tiempoDeSesion,
+        rotuloColor: st.restT !== null ? accent : idle,
+        reloj: this.reloj(st.restT !== null ? st.restT : st.sesionT),
+        color: st.restT !== null ? accent : "#F2F4F0",
+        enDescanso: st.restT !== null,
+        mas30Label: f.masNSeg(30),
+        mas30: () => this.setState(s => ({ restT: (s.restT || 0) + 30 })),
+        saltarLabel: t.saltarDescanso,
+        saltar: () => this.setState({ restT: null }),
+        terminarLabel: t.terminarCorto,
+        terminar: () => this.setState({ pant: "rutina", entrenando: false })
+      },
+
+      /* --- carrusel de ejercicios: se salta sin volver atras --- */
+      carrusel: RUTINA.map((r, n) => ({
+        n: String(n + 1),
+        bg: n === i ? "rgb(var(--ac-rgb) / .14)" : "rgba(255,255,255,.04)",
+        borde: n === i ? "2px solid " + accent : "1px solid rgba(255,255,255,.38)",
+        color: n === i ? accent : "rgba(242,244,240,.6)",
+        titulo: nom(r.id),
+        ir: () => this.setState({ ejIdx: n })
+      })),
+
+      /* --- el hueco de la animacion. Ver la decision 0007: el lugar esta
+             reservado y medido; los archivos no existen y de donde salen es una
+             decision de Ivan, no tecnica. --- */
+      animacion: { titulo: t.animacionFalta, cuerpo: t.animacionDetalle },
+
+      acciones: [
+        { label: t.accionTutorial }, { label: t.accionReemplazar }, { label: t.accionNotas }
+      ],
+      accionesNota: t.accionSinHacer,
+
+      /* --- LA TABLA --- */
+      cols: {
+        serie: t.colSerie, previa: t.colPrevia,
+        carga: esTiempo ? t.colSeg : t.colKg, reps: t.colReps
+      },
+      tabla: (() => {
+        const filas = [];
+        for (let j = 0; j < objs.length; j++) {
+          if (this.quitada(i, j)) continue;
+          const val = this.valoresDeLaFila(i, j);
+          const prev = this.previa(i, j);
+          const marcada = this.marcada(i, j);
+          const abierta = st.pant === "serie-borrar" && filas.length === 1;
+          filas.push({
+            n: (objs[j].esExtra ? "+" : "") + String(filas.length + 1),
+            previa: prev ? (this.num(prev.peso) + " × " + this.num(prev.reps)) : "—",
+            carga: this.num(val.peso),
+            reps: this.num(val.reps),
+            bg: marcada ? "rgb(var(--ac-rgb) / .14)" : "#131511",
+            nColor: marcada ? accent : idle,
+            tildeBg: marcada ? accent : "rgba(255,255,255,.07)",
+            tildeBorde: marcada ? accent : "rgba(255,255,255,.38)",
+            tildeColor: marcada ? "#0B0C0A" : "rgba(242,244,240,.6)",
+            /* El gesto NO puede ser la unica forma: WCAG 2.5.1 pide una
+               alternativa de un solo punto, y alguien con temblor no desliza.
+               El boton Borrar que queda a la vista es esa alternativa. */
+            desplazada: abierta ? "-96px" : "0px",
+            borrarLabel: t.borrar,
+            alternar: () => this.alternar(i, j),
+            editarCarga: () => this.setState({ teclado: "peso", tecladoBuf: "", editando: j }),
+            editarReps: () => this.setState({ teclado: "reps", tecladoBuf: "", editando: j }),
+            abrirBorrar: () => this.setState({ pant: "serie-borrar" }),
+            borrar: () => this.borrarSerie(i, j)
+          });
+        }
+        return filas;
+      })(),
+      agregar: { label: t.anadirSerie, tap: () => this.serieExtra() },
+
+      /* --- deshacer. Borrar sin deshacer es destructivo, y una serie borrada sin
+             querer es una serie que la persona hizo y no queda en ningun lado. --- */
+      deshacer: {
+        visible: !!st.deshacer,
+        texto: t.serieBorrada,
+        label: t.deshacer,
+        tap: () => this.deshacerBorrado()
+      },
+
+      enganche: ENGANCHE.map((e, n) => ({ ...e, barra: n === 0 ? "rgba(255,255,255,.2)" : accent })),
+      salidas: SALIDAS,
+      contraste: CONTRASTE.map(c => ({ rol: c.rol, ratio: c.ratio + ":1", aa: c.aa,
+        color: c.aa === "AA" ? accent : "rgba(255,170,155,.95)" })),
+      abierto: ABIERTO
+    };
+  }
+}
+</script>
+</body>
+</html>

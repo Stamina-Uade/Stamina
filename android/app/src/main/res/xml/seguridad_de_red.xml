@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  Configuración de red de la app publicada.
+
+  🛑 Nada en claro, con nadie. Todo sale por HTTPS y el certificado se valida contra
+  las autoridades del sistema. AGENTS.md §12.1: esa validación no se apaga nunca, ni
+  "para probar".
+
+  El build de debug pisa este archivo con src/debug/res/xml/seguridad_de_red.xml,
+  que abre UNA excepción para el backend local. Esa excepción no puede colarse en un
+  release porque vive en otra carpeta: el límite es el source set, no la memoria de
+  nadie. ConfiguracionDeRedTest lo vigila.
+
+  Pinning no hay, a propósito: AGENTS.md §12.1 lo deja abierto hasta que exista un
+  plan de rotación, porque pinnear sin plan rompe la app el día que se renueva el
+  certificado.
+-->
+<network-security-config>
+    <base-config cleartextTrafficPermitted="false" />
+</network-security-config>

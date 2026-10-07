@@ -1,0 +1,6 @@
+{
+  "error": {
+    "code": "profile_incomplete",
+    "message": "The plan needs goal, level, sport, timezone and at least one training day"
+  }
+}

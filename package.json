@@ -1,0 +1,29 @@
+{
+  "name": "trainer-tooling",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "description": "Herramientas del monorepo, no un paquete publicable. Acá viven los generadores que leen shared/ y escriben en los clientes (AGENTS.md §4.2): hoy el de esquemas, mañana los de modelos de Kotlin y Swift y el de tokens de diseño. Viven en la raíz y no dentro de backend/ porque los consumen los cuatro clientes, no sólo el servidor.",
+  "engines": {
+    "node": ">=22.0.0"
+  },
+  "scripts": {
+    "generar:esquemas": "node scripts/generar-esquemas.mjs",
+    "lint:contrato": "npx --yes @redocly/cli@1 lint --config shared/api/.redocly.yaml shared/api/openapi.yaml",
+    "generar:tema": "node scripts/generar-tema.mjs",
+    "acento:desde-xcode": "node scripts/acento-desde-xcode.mjs",
+    "generar:modelos-kotlin": "node scripts/generar-modelos.mjs",
+    "verificar:modelos-kotlin": "node scripts/generar-modelos.mjs && git diff --exit-code --stat -- android/core/src/main/kotlin/com/tecladus/trainer/core/red",
+    "verificar:tokens": "node scripts/verificar-tokens.mjs",
+    "verificar:tema": "node scripts/generar-tema.mjs && git diff --exit-code --stat -- android/core/src ios/TrainerCore/Sources/TrainerCore/TokensGenerados.swift",
+    "generar:modelos-swift": "node scripts/generar-modelos-swift.mjs",
+    "verificar:modelos-swift": "node scripts/generar-modelos-swift.mjs && git diff --exit-code --stat -- ios/TrainerCore/Sources/TrainerCore/Red",
+    "generar:textos": "node scripts/generar-textos-swift.mjs",
+    "verificar:textos": "node scripts/generar-textos-swift.mjs && git diff --exit-code --stat -- ios/Trainer/Trainer/Recursos",
+    "test:scripts": "node --test scripts/test/*.test.mjs",
+    "verificar:catalogo": "node scripts/verificar-catalogo.mjs"
+  },
+  "devDependencies": {
+    "yaml": "^2.6.1"
+  }
+}

@@ -1,0 +1,305 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Stamina — Avisos Legales y de Salud</title>
+    <link rel="icon" type="image/png" href="/assets/logo.png">
+    <style>
+        :root {
+            --bg-color: #120224;
+            --surface-color: #240647;
+            --surface-hover: #300A5C;
+            --surface-border: rgba(168, 85, 247, 0.28);
+            --accent-green: #59F21B;
+            --accent-green-glow: rgba(89, 242, 27, 0.3);
+            --accent-warning: #FFB703;
+            --text-primary: #FFFFFF;
+            --text-secondary: #C4B5FD;
+            --text-muted: #8B7AA8;
+            --font-stack: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+            background-color: var(--bg-color);
+            background-image: 
+                radial-gradient(circle at 10% 10%, rgba(147, 51, 234, 0.25) 0%, transparent 40%),
+                radial-gradient(circle at 90% 80%, rgba(89, 242, 27, 0.12) 0%, transparent 35%);
+            color: var(--text-primary);
+            font-family: var(--font-stack);
+            line-height: 1.6;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 0 24px;
+            width: 100%;
+        }
+
+        header { padding: 32px 0 20px; }
+
+        .navbar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .brand {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            text-decoration: none;
+            color: var(--text-primary);
+        }
+
+        .brand img {
+            width: 40px;
+            height: 40px;
+            border-radius: 10px;
+            border: 2px solid rgba(89, 242, 27, 0.4);
+        }
+
+        .brand-text {
+            font-size: 1.35rem;
+            font-weight: 900;
+            letter-spacing: 1.5px;
+        }
+
+        .brand-text span { color: var(--accent-green); }
+
+        .back-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            color: var(--text-secondary);
+            text-decoration: none;
+            font-size: 0.95rem;
+            font-weight: 600;
+            transition: color 0.2s;
+        }
+
+        .back-link:hover { color: var(--accent-green); }
+        .back-link svg { width: 18px; height: 18px; }
+
+        main { padding: 40px 0 80px; }
+
+        .page-header {
+            margin-bottom: 40px;
+        }
+
+        .page-header h1 {
+            font-size: clamp(2rem, 4vw, 2.8rem);
+            font-weight: 900;
+            margin-bottom: 12px;
+            letter-spacing: -0.5px;
+        }
+
+        .page-header p {
+            color: var(--text-secondary);
+            font-size: 1.05rem;
+        }
+
+        /* Banner de aviso médico destacado */
+        .alert-box {
+            background: rgba(255, 183, 3, 0.1);
+            border: 1px solid rgba(255, 183, 3, 0.4);
+            border-radius: 16px;
+            padding: 24px;
+            margin-bottom: 36px;
+            display: flex;
+            gap: 20px;
+            align-items: flex-start;
+        }
+
+        .alert-box svg {
+            width: 32px;
+            height: 32px;
+            color: var(--accent-warning);
+            flex-shrink: 0;
+            margin-top: 2px;
+        }
+
+        .alert-box h3 {
+            color: var(--accent-warning);
+            font-size: 1.15rem;
+            font-weight: 800;
+            margin-bottom: 6px;
+        }
+
+        .alert-box p {
+            color: #FED7AA;
+            font-size: 0.95rem;
+            line-height: 1.5;
+        }
+
+        /* Secciones */
+        .section-card {
+            background: var(--surface-color);
+            border: 1px solid var(--surface-border);
+            border-radius: 18px;
+            padding: 32px;
+            margin-bottom: 24px;
+        }
+
+        .section-card h2 {
+            font-size: 1.45rem;
+            font-weight: 800;
+            color: var(--accent-green);
+            margin-bottom: 16px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .section-card h2 svg { width: 22px; height: 22px; }
+
+        .article-block {
+            margin-bottom: 24px;
+            padding-bottom: 20px;
+            border-bottom: 1px solid rgba(168, 85, 247, 0.15);
+        }
+
+        .article-block:last-child {
+            margin-bottom: 0;
+            padding-bottom: 0;
+            border-bottom: none;
+        }
+
+        .article-block h3 {
+            font-size: 1.12rem;
+            font-weight: 700;
+            margin-bottom: 8px;
+            color: #FFFFFF;
+        }
+
+        .article-block p {
+            color: var(--text-secondary);
+            font-size: 0.95rem;
+            line-height: 1.6;
+        }
+
+        footer {
+            margin-top: auto;
+            border-top: 1px solid var(--surface-border);
+            padding: 28px 0;
+            text-align: center;
+            color: var(--text-muted);
+            font-size: 0.85rem;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <div class="navbar">
+                <a href="/" class="brand">
+                    <img src="/assets/logo.png" alt="Stamina Logo">
+                    <span class="brand-text">STAMINA<span>.</span></span>
+                </a>
+                <a href="/" class="back-link">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><line x1="19" y1="12" x2="5" y2="12"></line><polyline points="12 19 5 12 12 5"></polyline></svg>
+                    Volver a Inicio
+                </a>
+            </div>
+        </header>
+
+        <main>
+            <div class="page-header">
+                <h1>Avisos Legales y de Salud</h1>
+                <p>Información fundamental sobre la responsabilidad, el uso de la plataforma y el cuidado de tu cuerpo.</p>
+            </div>
+
+            <div class="alert-box">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path><line x1="12" y1="9" x2="12" y2="13"></line><line x1="12" y1="17" x2="12.01" y2="17"></line></svg>
+                <div>
+                    <h3>Antes de empezar, leé esto atentamente</h3>
+                    <p>
+                        Stamina te arma un plan de entrenamiento y de alimentación a partir de los datos que cargás. 
+                        <strong>No es un profesional de la salud ni un médico</strong>. Todo plan es orientativo y requiere supervisión médica.
+                    </p>
+                </div>
+            </div>
+
+            <div class="section-card">
+                <h2>
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 12h-4l-3 9L9 3l-3 9H2"></path></svg>
+                    Aviso de Salud
+                </h2>
+
+                <div class="article-block">
+                    <h3>Consultá a un profesional</h3>
+                    <p>
+                        Antes de empezar un plan nuevo, hablá con tu médico o médica —y con un nutricionista si vas a cambiar cómo comés—. 
+                        Es especialmente importante si tenés una condición cardíaca, respiratoria, metabólica o articular, si estás con alguna medicación, 
+                        si volvés después de una lesión, o si hace mucho tiempo que no entrenás.
+                    </p>
+                </div>
+
+                <div class="article-block">
+                    <h3>Esto no es un diagnóstico ni un tratamiento</h3>
+                    <p>
+                        Stamina no diagnostica, no trata y no reemplaza a nadie con formación clínica. Los números de calorías, hidratación y sales son 
+                        <strong>estimaciones</strong> calculadas con fórmulas metabólicas generales a partir de tu peso, tu altura y el clima. Tu organismo puede requerir parámetros distintos.
+                    </p>
+                </div>
+
+                <div class="article-block">
+                    <h3>Si algo te pasa, pará inmediatamente</h3>
+                    <p>
+                        Dolor en el pecho, mareo, falta de aire que no cede, visión borrosa o confusión: parás y buscás ayuda de inmediato. No hay ningún entrenamiento que valga poner en riesgo tu vida. 
+                        Ante una emergencia médica, comunicate con el número de emergencias de tu localidad: la app no emite alertas de auxilio automáticas por vos.
+                    </p>
+                </div>
+
+                <div class="article-block">
+                    <h3>Poblaciones con requerimientos específicos</h3>
+                    <p>
+                        Stamina no calcula metas de déficit calórico a menores de edad, ni durante el período de embarazo o lactancia. Son situaciones que requieren seguimiento presencial por profesionales idóneos. 
+                        En esos casos, utilizá la plataforma únicamente para registrar tus sesiones deportivas siguiendo el consejo de tu médico.
+                    </p>
+                </div>
+
+                <div class="article-block">
+                    <h3>Vos decidís</h3>
+                    <p>
+                        El plan es una sugerencia generada por algoritmos de periodización. Cómo, cuándo y cuánto entrenás lo decidís vos bajo tu exclusiva responsabilidad. 
+                        Si una rutina o intensidad no te resulta adecuada, no la ejecutes.
+                    </p>
+                </div>
+            </div>
+
+            <div class="section-card">
+                <h2>
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line></svg>
+                    Términos y Condiciones Generales
+                </h2>
+
+                <div class="article-block">
+                    <h3>Naturaleza del servicio</h3>
+                    <p>
+                        Stamina es una herramienta de software orientada a la organización de entrenamientos y el registro biométrico. 
+                        No comercializamos datos médicos ni información personal a terceros. Tus datos de salud están protegidos con cifrado y podés solicitar su eliminación total en cualquier momento.
+                    </p>
+                </div>
+
+                <div class="article-block">
+                    <h3>Responsabilidad deportiva</h3>
+                    <p>
+                        La práctica deportiva de resistencia y fuerza conlleva riesgos inherentes. Al utilizar Stamina asumís la realización de tus entrenamientos por tu propia cuenta y riesgo, habiendo realizado los controles médicos preventivos pertinentes.
+                    </p>
+                </div>
+            </div>
+        </main>
+
+        <footer>
+            &copy; 2026 Stamina. Todos los derechos reservados.
+        </footer>
+    </div>
+</body>
+</html>

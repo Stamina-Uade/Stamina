@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  Lo que NO viaja en el backup del sistema hasta Android 11. Desde Android 12 manda
+  data_extraction_rules.xml, que dice lo mismo: si cambia uno, cambia el otro.
+
+  🛑 La sesión cifrada no se respalda. Está cifrada con una llave del Keystore y la
+  llave no viaja con el backup: restaurada en otro teléfono, o en éste después de
+  reinstalar, no descifra y el primer arranque la tira. El nombre del archivo sale de
+  AlmacenDeSesionCifrado.ARCHIVO, en :core.
+
+  🛑 El gimnasio tampoco: la rutina y las series guardadas son datos de salud, cifrados
+  con otra llave del Keystore que tampoco viaja, y son de la cuenta que estaba adentro.
+  Restaurados en otro teléfono no descifran, y si descifraran serían de alguien que ahí
+  todavía no entró. La carpeta sale de AlmacenDeGimnasioCifrado.CARPETA, en :core.
+-->
+<full-backup-content>
+    <exclude domain="sharedpref" path="sesion_cifrada.xml" />
+    <exclude domain="file" path="gimnasio/" />
+</full-backup-content>

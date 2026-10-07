@@ -1,0 +1,130 @@
+# .gitignore — AGENTS.md §10.3
+# "Nunca commitees rutas absolutas ni configuracion local."
+
+# =============================================================================
+# Secretos y credenciales
+# =============================================================================
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+!**/res/**/*.key
+*.jks
+*.keystore
+*.p12
+*.mobileprovision
+secrets.properties
+keystore.properties
+google-services.json
+GoogleService-Info.plist
+
+# Servidor, despliegue privado y auditoria interna
+backend/deploy/
+scripts/desplegar-backend.sh
+scripts/chequear-capacidad.sh
+security-audit/
+
+# =============================================================================
+# Android / Kotlin / Gradle
+# =============================================================================
+local.properties
+.gradle/
+build/
+captures/
+.externalNativeBuild/
+.cxx/
+*.iml
+.kotlin/
+release/
+*.apk
+*.aab
+*.ap_
+*.dex
+lint-results*.html
+lint-results*.xml
+
+# =============================================================================
+# Swift / Xcode / macOS — AGENTS.md §10.3
+# =============================================================================
+DerivedData/
+xcuserdata/
+*.xcuserstate
+*.xcscmblueprint
+*.xccheckout
+build/
+*.moved-aside
+*.hmap
+*.ipa
+*.dSYM.zip
+*.dSYM
+.swiftpm/
+.build/
+Packages/
+Package.resolved.bak
+
+# =============================================================================
+# Backend
+# El stack NO esta decidido (AGENTS.md §3, se decide en la fase 3 con la
+# medicion de §2.2). Hasta entonces esta lista cubre los cuatro candidatos de
+# la tabla de §3; cuando se elija uno, se recorta a lo que aplique.
+# =============================================================================
+# JVM
+target/
+*.jar
+!gradle/wrapper/gradle-wrapper.jar
+!**/gradle-wrapper.jar
+# Node
+node_modules/
+npm-debug.log*
+yarn-error.log*
+.pnpm-debug.log*
+dist/
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+.pytest_cache/
+.mypy_cache/
+# Go
+/bin/
+vendor/
+
+# =============================================================================
+# IDEs
+# =============================================================================
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+.fleet/
+
+# =============================================================================
+# Sistemas operativos
+# =============================================================================
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+$RECYCLE.BIN/
+
+# =============================================================================
+# Especifico de este repositorio
+# =============================================================================
+# El diseno original NO se versiona como .zip: la fase 2 lo descomprime en
+# design/origen/ y se versiona el contenido, que si es legible en un diff
+# (AGENTS.md §10.1). El .zip vive en tu disco, no en el historial.
+diseno-original.zip
+
+# Restos de sesiones de trabajo previas.
+_to_delete/
+
+# Carpeta temporal del asistente de Android Studio (paso 2 del arranque de Android)
+_wizard/
+android/**/build-log.txt

@@ -1,0 +1,14 @@
+{
+  "data": [
+    {
+      "session_id": "gym-2026-09-10",
+      "updated_at_ms": 1789033543346,
+      "sets_done": 1,
+      "exercises": 1,
+      "date_ms": 1789009200000
+    }
+  ],
+  "pagination": {
+    "has_more": false
+  }
+}

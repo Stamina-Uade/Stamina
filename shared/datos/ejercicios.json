@@ -1,0 +1,6235 @@
+{
+  "_meta": {
+    "version": "1.1.0",
+    "fecha": "2026-09-08",
+    "total": 147,
+    "_que_es": "Catalogo semilla de ejercicios. AGENTS.md 9.1: EL CATALOGO ES DATO, NO CODIGO. Un ejercicio nuevo se agrega sin desplegar.",
+    "_como_se_usa": "Se carga en la tabla de ejercicios con una migracion de datos, y desde ahi lo sirve la API. Este archivo es la semilla, no la fuente en runtime.",
+    "_idiomas": "es-AR y en-US estan escritos y revisados. pt-BR y ja-JP estan en null A PROPOSITO: hacen falta y no se inventan. El validador cuenta cuantos faltan y no falla por eso.",
+    "_lo_que_NO_tiene": "Ninguna prescripcion (series, repeticiones, peso, descanso). Eso lo calcula el motor de la fase 7 segun objetivo, nivel e historial: no es un atributo del ejercicio.",
+    "_articulaciones": "El campo 'articulaciones' dice QUE ARTICULACIONES CARGA el ejercicio. Es un dato estructural, no una recomendacion clinica. 9.1 pide filtrar el catalogo por lesiones declaradas; el MAPEO de lesion -> articulacion -> exclusion es un criterio que tiene que definir alguien con formacion, y NO esta en este archivo.",
+    "_validar": "node scripts/verificar-catalogo.mjs",
+    "_sustitutos": "Hay DOS clases, y la distincion salio de un test que fallo. 'mismo-patron': mismo patron de movimiento, que es lo que la pantalla de sustitutos promete ('el plan no cambia de forma') y lo que el motor puede intercambiar solo. 'mismo-musculo': carga los mismos musculos por otro camino; sirve como accesorio, pero NO es un reemplazo transparente y el motor no deberia elegirlo sin decirlo.",
+    "_ampliacion_1_1_0": "2026-09-08: de 52 a 147 ejercicios. Se agregaron 7 musculos, 7 equipamientos y 3 patrones (rotacion, acarreo, agarre). NO es 'todos los ejercicios posibles' y no puede serlo: un catalogo de gimnasio serio son miles de variantes y este archivo es la SEMILLA. AGENTS.md 9.1 es explicito: el catalogo es dato del servidor y va de 50 a 500 sin desplegar la app. Agregar el ejercicio 200 tiene que ser una fila en una tabla, no un commit.",
+    "_sustitutos_derivados": "Los sustitutos de los 52 originales estan escritos a mano. Los de los agregados en 1.1.0 se DERIVAN: mismo patron de movimiento, priorizando otro equipamiento y, entre esos, el que no necesita nada. Es exactamente lo que promete la pantalla de sustitutos ('mismo patron, con lo que tengas a mano'). Ningun sustituto derivado es 'mismo-musculo': esa clase se escribe a mano porque NO es un reemplazo transparente y el motor no la puede intercambiar sola."
+  },
+  "diccionarios": {
+    "musculos": {
+      "pectoral": {
+        "es-AR": "Pectoral",
+        "en-US": "Chest",
+        "pt-BR": null,
+        "ja-JP": null
+      },
+      "triceps": {
+        "es-AR": "Tríceps",
+        "en-US": "Triceps",
+        "pt-BR": null,
+        "ja-JP": null
+      },
+      "deltoides-anterior": {
+        "es-AR": "Deltoides anterior",
+        "en-US": "Front delt",
+        "pt-BR": null,
+        "ja-JP": null
+      },
+      "deltoides-posterior": {
+        "es-AR": "Deltoides posterior",
+        "en-US": "Rear delt",
+        "pt-BR": null,
+        "ja-JP": null
+      },
+      "dorsal": {
+        "es-AR": "Dorsal ancho",
+        "en-US": "Lats",
+        "pt-BR": null,
+        "ja-JP": null
+      },
+      "biceps": {
+        "es-AR": "Bíceps",
+        "en-US": "Biceps",
+        "pt-BR": null,
+        "ja-JP": null
+      },
+      "trapecio": {
+        "es-AR": "Trapecio",
+        "en-US": "Traps",
+        "pt-BR": null,
+        "ja-JP": null
+      },
+      "cuadriceps": {
+        "es-AR": "Cuádriceps",
+        "en-US": "Quads",
+        "pt-BR": null,
+        "ja-JP": null
+      },
+      "gluteo": {
+        "es-AR": "Glúteo",
+        "en-US": "Glutes",
+        "pt-BR": null,
+        "ja-JP": null
+      },
+      "isquiotibiales": {
+        "es-AR": "Isquiotibiales",
+        "en-US": "Hamstrings",
+        "pt-BR": null,
+        "ja-JP": null
+      },
+      "soleo": {
+        "es-AR": "Sóleo",
+        "en-US": "Soleus",
+        "pt-BR": null,
+        "ja-JP": null
+      },
+      "gemelo": {
+        "es-AR": "Gemelos",
+        "en-US": "Calves",
+        "pt-BR": null,
+        "ja-JP": null
+      },
+      "core": {
+        "es-AR": "Core",
+        "en-US": "Core",
+        "pt-BR": null,
+        "ja-JP": null
+      },
+      "zona-lumbar": {
+        "es-AR": "Zona lumbar",
+        "en-US": "Lower back",
+        "pt-BR": null,
+        "ja-JP": null
+      },
+      "deltoides-lateral": {
+        "es-AR": "Deltoides lateral",
+        "en-US": "Side delt",
+        "pt-BR": null,
+        "ja-JP": null
+      },
+      "antebrazo": {
+        "es-AR": "Antebrazo",
+        "en-US": "Forearm",
+        "pt-BR": null,
+        "ja-JP": null
+      },
+      "oblicuo": {
+        "es-AR": "Oblicuos",
+        "en-US": "Obliques",
+        "pt-BR": null,
+        "ja-JP": null
+      },
+      "aductor": {
+        "es-AR": "Aductores",
+        "en-US": "Adductors",
+        "pt-BR": null,
+        "ja-JP": null
+      },
+      "abductor": {
+        "es-AR": "Abductores",
+        "en-US": "Abductors",
+        "pt-BR": null,
+        "ja-JP": null
+      },
+      "serrato": {
+        "es-AR": "Serrato anterior",
+        "en-US": "Serratus anterior",
+        "pt-BR": null,
+        "ja-JP": null
+      },
+      "romboides": {
+        "es-AR": "Romboides",
+        "en-US": "Rhomboids",
+        "pt-BR": null,
+        "ja-JP": null
+      }
+    },
+    "equipamiento": {
+      "barra": {
+        "es-AR": "Barra",
+        "en-US": "Barbell",
+        "pt-BR": null,
+        "ja-JP": null
+      },
+      "barra-fija": {
+        "es-AR": "Barra fija",
+        "en-US": "Pull-up bar",
+        "pt-BR": null,
+        "ja-JP": null
+      },
+      "mancuernas": {
+        "es-AR": "Mancuernas",
+        "en-US": "Dumbbells",
+        "pt-BR": null,
+        "ja-JP": null
+      },
+      "maquina": {
+        "es-AR": "Máquina",
+        "en-US": "Machine",
+        "pt-BR": null,
+        "ja-JP": null
+      },
+      "ninguno": {
+        "es-AR": "Sin equipo",
+        "en-US": "No equipment",
+        "pt-BR": null,
+        "ja-JP": null
+      },
+      "polea": {
+        "es-AR": "Polea",
+        "en-US": "Cable machine",
+        "pt-BR": null,
+        "ja-JP": null
+      },
+      "kettlebell": {
+        "es-AR": "Pesa rusa",
+        "en-US": "Kettlebell",
+        "pt-BR": null,
+        "ja-JP": null
+      },
+      "banda": {
+        "es-AR": "Banda elástica",
+        "en-US": "Resistance band",
+        "pt-BR": null,
+        "ja-JP": null
+      },
+      "smith": {
+        "es-AR": "Multipower",
+        "en-US": "Smith machine",
+        "pt-BR": null,
+        "ja-JP": null
+      },
+      "disco": {
+        "es-AR": "Disco",
+        "en-US": "Weight plate",
+        "pt-BR": null,
+        "ja-JP": null
+      },
+      "banco": {
+        "es-AR": "Banco o cajón",
+        "en-US": "Bench or box",
+        "pt-BR": null,
+        "ja-JP": null
+      },
+      "suspension": {
+        "es-AR": "Anillas o TRX",
+        "en-US": "Rings or suspension trainer",
+        "pt-BR": null,
+        "ja-JP": null
+      }
+    },
+    "patrones": {
+      "empuje-horizontal": {
+        "es-AR": "Empuje horizontal",
+        "en-US": "Horizontal push",
+        "pt-BR": null,
+        "ja-JP": null
+      },
+      "empuje-vertical": {
+        "es-AR": "Empuje vertical",
+        "en-US": "Vertical push",
+        "pt-BR": null,
+        "ja-JP": null
+      },
+      "traccion-vertical": {
+        "es-AR": "Tracción vertical",
+        "en-US": "Vertical pull",
+        "pt-BR": null,
+        "ja-JP": null
+      },
+      "traccion-horizontal": {
+        "es-AR": "Tracción horizontal",
+        "en-US": "Horizontal pull",
+        "pt-BR": null,
+        "ja-JP": null
+      },
+      "rodilla-bilateral": {
+        "es-AR": "Rodilla, dos piernas",
+        "en-US": "Bilateral knee",
+        "pt-BR": null,
+        "ja-JP": null
+      },
+      "rodilla-unilateral": {
+        "es-AR": "Rodilla, una pierna",
+        "en-US": "Single-leg knee",
+        "pt-BR": null,
+        "ja-JP": null
+      },
+      "cadera": {
+        "es-AR": "Cadera",
+        "en-US": "Hip hinge",
+        "pt-BR": null,
+        "ja-JP": null
+      },
+      "tobillo": {
+        "es-AR": "Tobillo",
+        "en-US": "Ankle",
+        "pt-BR": null,
+        "ja-JP": null
+      },
+      "antiextension": {
+        "es-AR": "Antiextensión",
+        "en-US": "Anti-extension",
+        "pt-BR": null,
+        "ja-JP": null
+      },
+      "antilateral": {
+        "es-AR": "Antiflexión lateral",
+        "en-US": "Anti-lateral flexion",
+        "pt-BR": null,
+        "ja-JP": null
+      },
+      "antirotacion": {
+        "es-AR": "Antirrotación",
+        "en-US": "Anti-rotation",
+        "pt-BR": null,
+        "ja-JP": null
+      },
+      "codo-flexion": {
+        "es-AR": "Flexión de codo",
+        "en-US": "Elbow flexion",
+        "pt-BR": null,
+        "ja-JP": null
+      },
+      "codo-extension": {
+        "es-AR": "Extensión de codo",
+        "en-US": "Elbow extension",
+        "pt-BR": null,
+        "ja-JP": null
+      },
+      "rotacion": {
+        "es-AR": "Rotación de tronco",
+        "en-US": "Trunk rotation",
+        "pt-BR": null,
+        "ja-JP": null
+      },
+      "acarreo": {
+        "es-AR": "Acarreo",
+        "en-US": "Loaded carry",
+        "pt-BR": null,
+        "ja-JP": null
+      },
+      "agarre": {
+        "es-AR": "Agarre",
+        "en-US": "Grip",
+        "pt-BR": null,
+        "ja-JP": null
+      }
+    },
+    "articulaciones": {
+      "hombro": {
+        "es-AR": "Hombro",
+        "en-US": "Shoulder",
+        "pt-BR": null,
+        "ja-JP": null
+      },
+      "codo": {
+        "es-AR": "Codo",
+        "en-US": "Elbow",
+        "pt-BR": null,
+        "ja-JP": null
+      },
+      "muneca": {
+        "es-AR": "Muñeca",
+        "en-US": "Wrist",
+        "pt-BR": null,
+        "ja-JP": null
+      },
+      "cadera": {
+        "es-AR": "Cadera",
+        "en-US": "Hip",
+        "pt-BR": null,
+        "ja-JP": null
+      },
+      "rodilla": {
+        "es-AR": "Rodilla",
+        "en-US": "Knee",
+        "pt-BR": null,
+        "ja-JP": null
+      },
+      "tobillo": {
+        "es-AR": "Tobillo",
+        "en-US": "Ankle",
+        "pt-BR": null,
+        "ja-JP": null
+      },
+      "zona-lumbar": {
+        "es-AR": "Zona lumbar",
+        "en-US": "Lower back",
+        "pt-BR": null,
+        "ja-JP": null
+      }
+    }
+  },
+  "ejercicios": [
+    {
+      "id": "press-banca-barra",
+      "nombre": {
+        "es-AR": "Press plano con barra",
+        "en-US": "Barbell bench press",
+        "pt-BR": null,
+        "ja-JP": null
+      },
+      "patron": "empuje-horizontal",
+      "equipamiento": "barra",
+      "lado": "bilateral",
+      "unidad": "reps",
+      "musculos": [
+        {
+          "id": "pectoral",
+          "rol": "principal"
+        },
+        {
+          "id": "triceps",
+          "rol": "secundario"
+        },
+        {
+          "id": "deltoides-anterior",
+          "rol": "secundario"
+        }
+      ],
+      "sustitutos": [
+        {
+          "id": "press-banca-mancuernas",
+          "tipo": "mismo-patron"
+        },
+        {
+          "id": "press-pecho-maquina",
+          "tipo": "mismo-patron"
+        },
+        {
+          "id": "flexiones",
+          "tipo": "mismo-patron"
+        }
+      ],
+      "articulaciones": [
+        "hombro",
+        "codo"
+      ]
+    },
+    {
+      "id": "press-banca-mancuernas",
+      "nombre": {
+        "es-AR": "Press plano con mancuernas",
+        "en-US": "Dumbbell bench press",
+        "pt-BR": null,
+        "ja-JP": null
+      },
+      "patron": "empuje-horizontal",
+      "equipamiento": "mancuernas",
+      "lado": "bilateral",
+      "unidad": "reps",
+      "musculos": [
+        {
+          "id": "pectoral",
+          "rol": "principal"
+        },
+        {
+          "id": "triceps",
+          "rol": "secundario"
+        },
+        {
+          "id": "deltoides-anterior",
+          "rol": "secundario"
+        }
+      ],
+      "sustitutos": [
+        {
+          "id": "press-banca-barra",
+          "tipo": "mismo-patron"
+        },
+        {
+          "id": "flexiones",
+          "tipo": "mismo-patron"
+        }
+      ],
+      "articulaciones": [
+        "hombro",
+        "codo"
+      ]
+    },
+    {
+      "id": "press-inclinado-barra",
+      "nombre": {
+        "es-AR": "Press inclinado con barra",
+        "en-US": "Incline barbell press",
+        "pt-BR": null,
+        "ja-JP": null
+      },
+      "patron": "empuje-horizontal",
+      "equipamiento": "barra",
+      "lado": "bilateral",
+      "unidad": "reps",
+      "musculos": [
+        {
+          "id": "pectoral",
+          "rol": "principal"
+        },
+        {
+          "id": "deltoides-anterior",
+          "rol": "principal"
+        },
+        {
+          "id": "triceps",
+          "rol": "secundario"
+        }
+      ],
+      "sustitutos": [
+        {
+          "id": "press-banca-barra",
+          "tipo": "mismo-patron"
+        },
+        {
+          "id": "press-inclinado-mancuernas",
+          "tipo": "mismo-patron"
+        }
+      ],
+      "articulaciones": [
+        "hombro",
+        "codo"
+      ]
+    },
+    {
+      "id": "press-inclinado-mancuernas",
+      "nombre": {
+        "es-AR": "Press inclinado con mancuernas",
+        "en-US": "Incline dumbbell press",
+        "pt-BR": null,
+        "ja-JP": null
+      },
+      "patron": "empuje-horizontal",
+      "equipamiento": "mancuernas",
+      "lado": "bilateral",
+      "unidad": "reps",
+      "musculos": [
+        {
+          "id": "pectoral",
+          "rol": "principal"
+        },
+        {
+          "id": "deltoides-anterior",
+          "rol": "principal"
+        }
+      ],
+      "sustitutos": [
+        {
+          "id": "press-inclinado-barra",
+          "tipo": "mismo-patron"
+        }
+      ],
+      "articulaciones": [
+        "hombro",
+        "codo"
+      ]
+    },
+    {
+      "id": "press-pecho-maquina",
+      "nombre": {
+        "es-AR": "Press de pecho en máquina",
+        "en-US": "Machine chest press",
+        "pt-BR": null,
+        "ja-JP": null
+      },
+      "patron": "empuje-horizontal",
+      "equipamiento": "maquina",
+      "lado": "bilateral",
+      "unidad": "reps",
+      "musculos": [
+        {
+          "id": "pectoral",
+          "rol": "principal"
+        },
+        {
+          "id": "triceps",
+          "rol": "secundario"
+        }
+      ],
+      "sustitutos": [
+        {
+          "id": "press-banca-mancuernas",
+          "tipo": "mismo-patron"
+        }
+      ],
+      "articulaciones": [
+        "hombro",
+        "codo"
+      ]
+    },
+    {
+      "id": "flexiones",
+      "nombre": {
+        "es-AR": "Flexiones de brazos",
+        "en-US": "Push-ups",
+        "pt-BR": null,
+        "ja-JP": null
+      },
+      "patron": "empuje-horizontal",
+      "equipamiento": "ninguno",
+      "lado": "bilateral",
+      "unidad": "reps",
+      "musculos": [
+        {
+          "id": "pectoral",
+          "rol": "principal"
+        },
+        {
+          "id": "triceps",
+          "rol": "secundario"
+        },
+        {
+          "id": "core",
+          "rol": "secundario"
+        }
+      ],
+      "sustitutos": [
+        {
+          "id": "flexiones-inclinadas",
+          "tipo": "mismo-patron"
+        },
+        {
+          "id": "press-banca-mancuernas",
+          "tipo": "mismo-patron"
+        }
+      ],
+      "articulaciones": [
+        "hombro",
+        "codo",
+        "muneca"
+      ]
+    },
+    {
+      "id": "flexiones-inclinadas",
+      "nombre": {
+        "es-AR": "Flexiones inclinadas",
+        "en-US": "Incline push-ups",
+        "pt-BR": null,
+        "ja-JP": null
+      },
+      "patron": "empuje-horizontal",
+      "equipamiento": "ninguno",
+      "lado": "bilateral",
+      "unidad": "reps",
+      "musculos": [
+        {
+          "id": "pectoral",
+          "rol": "principal"
+        },
+        {
+          "id": "triceps",
+          "rol": "secundario"
+        }
+      ],
+      "sustitutos": [
+        {
+          "id": "flexiones",
+          "tipo": "mismo-patron"
+        }
+      ],
+      "articulaciones": [
+        "hombro",
+        "codo",
+        "muneca"
+      ]
+    },
+    {
+      "id": "fondos-paralelas",
+      "nombre": {
+        "es-AR": "Fondos en paralelas",
+        "en-US": "Parallel bar dips",
+        "pt-BR": null,
+        "ja-JP": null
+      },
+      "patron": "empuje-horizontal",
+      "equipamiento": "barra-fija",
+      "lado": "bilateral",
+      "unidad": "reps",
+      "musculos": [
+        {
+          "id": "pectoral",
+          "rol": "principal"
+        },
+        {
+          "id": "triceps",
+          "rol": "principal"
+        }
+      ],
+      "sustitutos": [
+        {
+          "id": "flexiones",
+          "tipo": "mismo-patron"
+        },
+        {
+          "id": "press-banca-mancuernas",
+          "tipo": "mismo-patron"
+        }
+      ],
+      "articulaciones": [
+        "hombro",
+        "codo"
+      ]
+    },
+    {
+      "id": "press-militar-barra",
+      "nombre": {
+        "es-AR": "Press militar con barra",
+        "en-US": "Barbell overhead press",
+        "pt-BR": null,
+        "ja-JP": null
+      },
+      "patron": "empuje-vertical",
+      "equipamiento": "barra",
+      "lado": "bilateral",
+      "unidad": "reps",
+      "musculos": [
+        {
+          "id": "deltoides-anterior",
+          "rol": "principal"
+        },
+        {
+          "id": "triceps",
+          "rol": "secundario"
+        },
+        {
+          "id": "core",
+          "rol": "secundario"
+        }
+      ],
+      "sustitutos": [
+        {
+          "id": "press-hombro-mancuernas",
+          "tipo": "mismo-patron"
+        },
+        {
+          "id": "press-hombro-maquina",
+          "tipo": "mismo-patron"
+        }
+      ],
+      "articulaciones": [
+        "hombro",
+        "codo"
+      ]
+    },
+    {
+      "id": "press-hombro-mancuernas",
+      "nombre": {
+        "es-AR": "Press de hombro con mancuernas",
+        "en-US": "Dumbbell shoulder press",
+        "pt-BR": null,
+        "ja-JP": null
+      },
+      "patron": "empuje-vertical",
+      "equipamiento": "mancuernas",
+      "lado": "bilateral",
+      "unidad": "reps",
+      "musculos": [
+        {
+          "id": "deltoides-anterior",
+          "rol": "principal"
+        },
+        {
+          "id": "triceps",
+          "rol": "secundario"
+        }
+      ],
+      "sustitutos": [
+        {
+          "id": "press-militar-barra",
+          "tipo": "mismo-patron"
+        }
+      ],
+      "articulaciones": [
+        "hombro",
+        "codo"
+      ]
+    },
+    {
+      "id": "press-hombro-maquina",
+      "nombre": {
+        "es-AR": "Press de hombro en máquina",
+        "en-US": "Machine shoulder press",
+        "pt-BR": null,
+        "ja-JP": null
+      },
+      "patron": "empuje-vertical",
+      "equipamiento": "maquina",
+      "lado": "bilateral",
+      "unidad": "reps",
+      "musculos": [
+        {
+          "id": "deltoides-anterior",
+          "rol": "principal"
+        },
+        {
+          "id": "triceps",
+          "rol": "secundario"
+        }
+      ],
+      "sustitutos": [
+        {
+          "id": "press-hombro-mancuernas",
+          "tipo": "mismo-patron"
+        }
+      ],
+      "articulaciones": [
+        "hombro",
+        "codo"
+      ]
+    },
+    {
+      "id": "flexion-pica",
+      "nombre": {
+        "es-AR": "Flexión en pica",
+        "en-US": "Pike push-up",
+        "pt-BR": null,
+        "ja-JP": null
+      },
+      "patron": "empuje-vertical",
+      "equipamiento": "ninguno",
+      "lado": "bilateral",
+      "unidad": "reps",
+      "musculos": [
+        {
+          "id": "deltoides-anterior",
+          "rol": "principal"
+        },
+        {
+          "id": "triceps",
+          "rol": "secundario"
+        }
+      ],
+      "sustitutos": [
+        {
+          "id": "press-hombro-mancuernas",
+          "tipo": "mismo-patron"
+        }
+      ],
+      "articulaciones": [
+        "hombro",
+        "codo",
+        "muneca"
+      ]
+    },
+    {
+      "id": "dominadas",
+      "nombre": {
+        "es-AR": "Dominadas",
+        "en-US": "Pull-ups",
+        "pt-BR": null,
+        "ja-JP": null
+      },
+      "patron": "traccion-vertical",
+      "equipamiento": "barra-fija",
+      "lado": "bilateral",
+      "unidad": "reps",
+      "musculos": [
+        {
+          "id": "dorsal",
+          "rol": "principal"
+        },
+        {
+          "id": "biceps",
+          "rol": "secundario"
+        }
+      ],
+      "sustitutos": [
+        {
+          "id": "jalon-polea",
+          "tipo": "mismo-patron"
+        },
+        {
+          "id": "dominadas-asistidas",
+          "tipo": "mismo-patron"
+        },
+        {
+          "id": "remo-invertido",
+          "tipo": "mismo-musculo"
+        }
+      ],
+      "articulaciones": [
+        "hombro",
+        "codo"
+      ]
+    },
+    {
+      "id": "dominadas-asistidas",
+      "nombre": {
+        "es-AR": "Dominadas asistidas",
+        "en-US": "Assisted pull-ups",
+        "pt-BR": null,
+        "ja-JP": null
+      },
+      "patron": "traccion-vertical",
+      "equipamiento": "maquina",
+      "lado": "bilateral",
+      "unidad": "reps",
+      "musculos": [
+        {
+          "id": "dorsal",
+          "rol": "principal"
+        },
+        {
+          "id": "biceps",
+          "rol": "secundario"
+        }
+      ],
+      "sustitutos": [
+        {
+          "id": "jalon-polea",
+          "tipo": "mismo-patron"
+        },
+        {
+          "id": "dominadas",
+          "tipo": "mismo-patron"
+        }
+      ],
+      "articulaciones": [
+        "hombro",
+        "codo"
+      ]
+    },
+    {
+      "id": "jalon-polea",
+      "nombre": {
+        "es-AR": "Jalón en polea",
+        "en-US": "Lat pulldown",
+        "pt-BR": null,
+        "ja-JP": null
+      },
+      "patron": "traccion-vertical",
+      "equipamiento": "maquina",
+      "lado": "bilateral",
+      "unidad": "reps",
+      "musculos": [
+        {
+          "id": "dorsal",
+          "rol": "principal"
+        },
+        {
+          "id": "biceps",
+          "rol": "secundario"
+        }
+      ],
+      "sustitutos": [
+        {
+          "id": "dominadas",
+          "tipo": "mismo-patron"
+        },
+        {
+          "id": "dominadas-asistidas",
+          "tipo": "mismo-patron"
+        }
+      ],
+      "articulaciones": [
+        "hombro",
+        "codo"
+      ]
+    },
+    {
+      "id": "remo-barra",
+      "nombre": {
+        "es-AR": "Remo con barra",
+        "en-US": "Barbell row",
+        "pt-BR": null,
+        "ja-JP": null
+      },
+      "patron": "traccion-horizontal",
+      "equipamiento": "barra",
+      "lado": "bilateral",
+      "unidad": "reps",
+      "musculos": [
+        {
+          "id": "dorsal",
+          "rol": "principal"
+        },
+        {
+          "id": "trapecio",
+          "rol": "secundario"
+        },
+        {
+          "id": "biceps",
+          "rol": "secundario"
+        }
+      ],
+      "sustitutos": [
+        {
+          "id": "remo-mancuerna",
+          "tipo": "mismo-patron"
+        },
+        {
+          "id": "remo-polea-baja",
+          "tipo": "mismo-patron"
+        }
+      ],
+      "articulaciones": [
+        "hombro",
+        "codo",
+        "zona-lumbar"
+      ]
+    },
+    {
+      "id": "remo-mancuerna",
+      "nombre": {
+        "es-AR": "Remo con mancuerna",
+        "en-US": "One-arm dumbbell row",
+        "pt-BR": null,
+        "ja-JP": null
+      },
+      "patron": "traccion-horizontal",
+      "equipamiento": "mancuernas",
+      "lado": "unilateral",
+      "unidad": "reps",
+      "musculos": [
+        {
+          "id": "dorsal",
+          "rol": "principal"
+        },
+        {
+          "id": "trapecio",
+          "rol": "secundario"
+        }
+      ],
+      "sustitutos": [
+        {
+          "id": "remo-barra",
+          "tipo": "mismo-patron"
+        },
+        {
+          "id": "remo-polea-baja",
+          "tipo": "mismo-patron"
+        }
+      ],
+      "articulaciones": [
+        "hombro",
+        "codo"
+      ]
+    },
+    {
+      "id": "remo-polea-baja",
+      "nombre": {
+        "es-AR": "Remo en polea baja",
+        "en-US": "Seated cable row",
+        "pt-BR": null,
+        "ja-JP": null
+      },
+      "patron": "traccion-horizontal",
+      "equipamiento": "maquina",
+      "lado": "bilateral",
+      "unidad": "reps",
+      "musculos": [
+        {
+          "id": "dorsal",
+          "rol": "principal"
+        },
+        {
+          "id": "trapecio",
+          "rol": "secundario"
+        }
+      ],
+      "sustitutos": [
+        {
+          "id": "remo-mancuerna",
+          "tipo": "mismo-patron"
+        }
+      ],
+      "articulaciones": [
+        "hombro",
+        "codo"
+      ]
+    },
+    {
+      "id": "remo-invertido",
+      "nombre": {
+        "es-AR": "Remo invertido",
+        "en-US": "Inverted row",
+        "pt-BR": null,
+        "ja-JP": null
+      },
+      "patron": "traccion-horizontal",
+      "equipamiento": "barra-fija",
+      "lado": "bilateral",
+      "unidad": "reps",
+      "musculos": [
+        {
+          "id": "dorsal",
+          "rol": "principal"
+        },
+        {
+          "id": "biceps",
+          "rol": "secundario"
+        },
+        {
+          "id": "core",
+          "rol": "secundario"
+        }
+      ],
+      "sustitutos": [
+        {
+          "id": "remo-mancuerna",
+          "tipo": "mismo-patron"
+        },
+        {
+          "id": "dominadas",
+          "tipo": "mismo-musculo"
+        }
+      ],
+      "articulaciones": [
+        "hombro",
+        "codo"
+      ]
+    },
+    {
+      "id": "face-pull",
+      "nombre": {
+        "es-AR": "Face pull",
+        "en-US": "Face pull",
+        "pt-BR": null,
+        "ja-JP": null
+      },
+      "patron": "traccion-horizontal",
+      "equipamiento": "maquina",
+      "lado": "bilateral",
+      "unidad": "reps",
+      "musculos": [
+        {
+          "id": "trapecio",
+          "rol": "principal"
+        },
+        {
+          "id": "deltoides-posterior",
+          "rol": "principal"
+        }
+      ],
+      "sustitutos": [
+        {
+          "id": "remo-polea-baja",
+          "tipo": "mismo-patron"
+        }
+      ],
+      "articulaciones": [
+        "hombro"
+      ]
+    },
+    {
+      "id": "sentadilla-trasera",
+      "nombre": {
+        "es-AR": "Sentadilla trasera",
+        "en-US": "Back squat",
+        "pt-BR": null,
+        "ja-JP": null
+      },
+      "patron": "rodilla-bilateral",
+      "equipamiento": "barra",
+      "lado": "bilateral",
+      "unidad": "reps",
+      "musculos": [
+        {
+          "id": "cuadriceps",
+          "rol": "principal"
+        },
+        {
+          "id": "gluteo",
+          "rol": "principal"
+        },
+        {
+          "id": "core",
+          "rol": "secundario"
+        }
+      ],
+      "sustitutos": [
+        {
+          "id": "sentadilla-goblet",
+          "tipo": "mismo-patron"
+        },
+        {
+          "id": "prensa",
+          "tipo": "mismo-patron"
+        },
+        {
+          "id": "sentadilla-frontal",
+          "tipo": "mismo-patron"
+        }
+      ],
+      "articulaciones": [
+        "rodilla",
+        "cadera",
+        "zona-lumbar"
+      ]
+    },
+    {
+      "id": "sentadilla-frontal",
+      "nombre": {
+        "es-AR": "Sentadilla frontal",
+        "en-US": "Front squat",
+        "pt-BR": null,
+        "ja-JP": null
+      },
+      "patron": "rodilla-bilateral",
+      "equipamiento": "barra",
+      "lado": "bilateral",
+      "unidad": "reps",
+      "musculos": [
+        {
+          "id": "cuadriceps",
+          "rol": "principal"
+        },
+        {
+          "id": "core",
+          "rol": "secundario"
+        }
+      ],
+      "sustitutos": [
+        {
+          "id": "sentadilla-trasera",
+          "tipo": "mismo-patron"
+        },
+        {
+          "id": "sentadilla-goblet",
+          "tipo": "mismo-patron"
+        }
+      ],
+      "articulaciones": [
+        "rodilla",
+        "cadera",
+        "muneca"
+      ]
+    },
+    {
+      "id": "sentadilla-goblet",
+      "nombre": {
+        "es-AR": "Sentadilla goblet",
+        "en-US": "Goblet squat",
+        "pt-BR": null,
+        "ja-JP": null
+      },
+      "patron": "rodilla-bilateral",
+      "equipamiento": "mancuernas",
+      "lado": "bilateral",
+      "unidad": "reps",
+      "musculos": [
+        {
+          "id": "cuadriceps",
+          "rol": "principal"
+        },
+        {
+          "id": "gluteo",
+          "rol": "principal"
+        }
+      ],
+      "sustitutos": [
+        {
+          "id": "sentadilla-trasera",
+          "tipo": "mismo-patron"
+        },
+        {
+          "id": "prensa",
+          "tipo": "mismo-patron"
+        }
+      ],
+      "articulaciones": [
+        "rodilla",
+        "cadera"
+      ]
+    },
+    {
+      "id": "prensa",
+      "nombre": {
+        "es-AR": "Prensa de piernas",
+        "en-US": "Leg press",
+        "pt-BR": null,
+        "ja-JP": null
+      },
+      "patron": "rodilla-bilateral",
+      "equipamiento": "maquina",
+      "lado": "bilateral",
+      "unidad": "reps",
+      "musculos": [
+        {
+          "id": "cuadriceps",
+          "rol": "principal"
+        },
+        {
+          "id": "gluteo",
+          "rol": "secundario"
+        }
+      ],
+      "sustitutos": [
+        {
+          "id": "sentadilla-goblet",
+          "tipo": "mismo-patron"
+        }
+      ],
+      "articulaciones": [
+        "rodilla",
+        "cadera"
+      ]
+    },
+    {
+      "id": "extension-rodilla",
+      "nombre": {
+        "es-AR": "Extensión de rodilla",
+        "en-US": "Leg extension",
+        "pt-BR": null,
+        "ja-JP": null
+      },
+      "patron": "rodilla-bilateral",
+      "equipamiento": "maquina",
+      "lado": "bilateral",
+      "unidad": "reps",
+      "musculos": [
+        {
+          "id": "cuadriceps",
+          "rol": "principal"
+        }
+      ],
+      "sustitutos": [
+        {
+          "id": "sentadilla-goblet",
+          "tipo": "mismo-patron"
+        }
+      ],
+      "articulaciones": [
+        "rodilla"
+      ]
+    },
+    {
+      "id": "sentadilla-bulgara",
+      "nombre": {
+        "es-AR": "Sentadilla búlgara",
+        "en-US": "Bulgarian split squat",
+        "pt-BR": null,
+        "ja-JP": null
+      },
+      "patron": "rodilla-unilateral",
+      "equipamiento": "mancuernas",
+      "lado": "unilateral",
+      "unidad": "reps",
+      "musculos": [
+        {
+          "id": "cuadriceps",
+          "rol": "principal"
+        },
+        {
+          "id": "gluteo",
+          "rol": "principal"
+        }
+      ],
+      "sustitutos": [
+        {
+          "id": "zancadas",
+          "tipo": "mismo-patron"
+        },
+        {
+          "id": "subida-cajon",
+          "tipo": "mismo-patron"
+        }
+      ],
+      "articulaciones": [
+        "rodilla",
+        "cadera",
+        "tobillo"
+      ]
+    },
+    {
+      "id": "zancadas",
+      "nombre": {
+        "es-AR": "Zancadas",
+        "en-US": "Lunges",
+        "pt-BR": null,
+        "ja-JP": null
+      },
+      "patron": "rodilla-unilateral",
+      "equipamiento": "mancuernas",
+      "lado": "unilateral",
+      "unidad": "reps",
+      "musculos": [
+        {
+          "id": "cuadriceps",
+          "rol": "principal"
+        },
+        {
+          "id": "gluteo",
+          "rol": "principal"
+        }
+      ],
+      "sustitutos": [
+        {
+          "id": "sentadilla-bulgara",
+          "tipo": "mismo-patron"
+        },
+        {
+          "id": "subida-cajon",
+          "tipo": "mismo-patron"
+        }
+      ],
+      "articulaciones": [
+        "rodilla",
+        "cadera"
+      ]
+    },
+    {
+      "id": "subida-cajon",
+      "nombre": {
+        "es-AR": "Subida al cajón",
+        "en-US": "Step-up",
+        "pt-BR": null,
+        "ja-JP": null
+      },
+      "patron": "rodilla-unilateral",
+      "equipamiento": "mancuernas",
+      "lado": "unilateral",
+      "unidad": "reps",
+      "musculos": [
+        {
+          "id": "cuadriceps",
+          "rol": "principal"
+        },
+        {
+          "id": "gluteo",
+          "rol": "principal"
+        }
+      ],
+      "sustitutos": [
+        {
+          "id": "zancadas",
+          "tipo": "mismo-patron"
+        },
+        {
+          "id": "sentadilla-bulgara",
+          "tipo": "mismo-patron"
+        }
+      ],
+      "articulaciones": [
+        "rodilla",
+        "cadera"
+      ]
+    },
+    {
+      "id": "sentadilla-una-pierna",
+      "nombre": {
+        "es-AR": "Sentadilla a una pierna",
+        "en-US": "Single-leg squat",
+        "pt-BR": null,
+        "ja-JP": null
+      },
+      "patron": "rodilla-unilateral",
+      "equipamiento": "ninguno",
+      "lado": "unilateral",
+      "unidad": "reps",
+      "musculos": [
+        {
+          "id": "cuadriceps",
+          "rol": "principal"
+        },
+        {
+          "id": "gluteo",
+          "rol": "principal"
+        },
+        {
+          "id": "core",
+          "rol": "secundario"
+        }
+      ],
+      "sustitutos": [
+        {
+          "id": "sentadilla-bulgara",
+          "tipo": "mismo-patron"
+        }
+      ],
+      "articulaciones": [
+        "rodilla",
+        "cadera",
+        "tobillo"
+      ]
+    },
+    {
+      "id": "peso-muerto",
+      "nombre": {
+        "es-AR": "Peso muerto",
+        "en-US": "Conventional deadlift",
+        "pt-BR": null,
+        "ja-JP": null
+      },
+      "patron": "cadera",
+      "equipamiento": "barra",
+      "lado": "bilateral",
+      "unidad": "reps",
+      "musculos": [
+        {
+          "id": "isquiotibiales",
+          "rol": "principal"
+        },
+        {
+          "id": "gluteo",
+          "rol": "principal"
+        },
+        {
+          "id": "zona-lumbar",
+          "rol": "secundario"
+        }
+      ],
+      "sustitutos": [
+        {
+          "id": "peso-muerto-rumano",
+          "tipo": "mismo-patron"
+        },
+        {
+          "id": "hip-thrust",
+          "tipo": "mismo-patron"
+        }
+      ],
+      "articulaciones": [
+        "cadera",
+        "zona-lumbar",
+        "rodilla"
+      ]
+    },
+    {
+      "id": "peso-muerto-rumano",
+      "nombre": {
+        "es-AR": "Peso muerto rumano",
+        "en-US": "Romanian deadlift",
+        "pt-BR": null,
+        "ja-JP": null
+      },
+      "patron": "cadera",
+      "equipamiento": "barra",
+      "lado": "bilateral",
+      "unidad": "reps",
+      "musculos": [
+        {
+          "id": "isquiotibiales",
+          "rol": "principal"
+        },
+        {
+          "id": "gluteo",
+          "rol": "principal"
+        }
+      ],
+      "sustitutos": [
+        {
+          "id": "peso-muerto",
+          "tipo": "mismo-patron"
+        },
+        {
+          "id": "buenos-dias",
+          "tipo": "mismo-patron"
+        },
+        {
+          "id": "curl-femoral",
+          "tipo": "mismo-patron"
+        }
+      ],
+      "articulaciones": [
+        "cadera",
+        "zona-lumbar"
+      ]
+    },
+    {
+      "id": "hip-thrust",
+      "nombre": {
+        "es-AR": "Hip thrust",
+        "en-US": "Hip thrust",
+        "pt-BR": null,
+        "ja-JP": null
+      },
+      "patron": "cadera",
+      "equipamiento": "barra",
+      "lado": "bilateral",
+      "unidad": "reps",
+      "musculos": [
+        {
+          "id": "gluteo",
+          "rol": "principal"
+        },
+        {
+          "id": "isquiotibiales",
+          "rol": "secundario"
+        }
+      ],
+      "sustitutos": [
+        {
+          "id": "puente-gluteo",
+          "tipo": "mismo-patron"
+        },
+        {
+          "id": "peso-muerto-rumano",
+          "tipo": "mismo-patron"
+        }
+      ],
+      "articulaciones": [
+        "cadera"
+      ]
+    },
+    {
+      "id": "puente-gluteo",
+      "nombre": {
+        "es-AR": "Puente de glúteos",
+        "en-US": "Glute bridge",
+        "pt-BR": null,
+        "ja-JP": null
+      },
+      "patron": "cadera",
+      "equipamiento": "ninguno",
+      "lado": "bilateral",
+      "unidad": "reps",
+      "musculos": [
+        {
+          "id": "gluteo",
+          "rol": "principal"
+        }
+      ],
+      "sustitutos": [
+        {
+          "id": "hip-thrust",
+          "tipo": "mismo-patron"
+        }
+      ],
+      "articulaciones": [
+        "cadera"
+      ]
+    },
+    {
+      "id": "buenos-dias",
+      "nombre": {
+        "es-AR": "Buenos días",
+        "en-US": "Good morning",
+        "pt-BR": null,
+        "ja-JP": null
+      },
+      "patron": "cadera",
+      "equipamiento": "barra",
+      "lado": "bilateral",
+      "unidad": "reps",
+      "musculos": [
+        {
+          "id": "isquiotibiales",
+          "rol": "principal"
+        },
+        {
+          "id": "zona-lumbar",
+          "rol": "principal"
+        }
+      ],
+      "sustitutos": [
+        {
+          "id": "peso-muerto-rumano",
+          "tipo": "mismo-patron"
+        }
+      ],
+      "articulaciones": [
+        "cadera",
+        "zona-lumbar"
+      ]
+    },
+    {
+      "id": "curl-femoral",
+      "nombre": {
+        "es-AR": "Curl femoral",
+        "en-US": "Leg curl",
+        "pt-BR": null,
+        "ja-JP": null
+      },
+      "patron": "cadera",
+      "equipamiento": "maquina",
+      "lado": "bilateral",
+      "unidad": "reps",
+      "musculos": [
+        {
+          "id": "isquiotibiales",
+          "rol": "principal"
+        }
+      ],
+      "sustitutos": [
+        {
+          "id": "peso-muerto-rumano",
+          "tipo": "mismo-patron"
+        }
+      ],
+      "articulaciones": [
+        "rodilla"
+      ]
+    },
+    {
+      "id": "elevacion-talones-pie",
+      "nombre": {
+        "es-AR": "Elevación de talones de pie",
+        "en-US": "Standing calf raise",
+        "pt-BR": null,
+        "ja-JP": null
+      },
+      "patron": "tobillo",
+      "equipamiento": "mancuernas",
+      "lado": "bilateral",
+      "unidad": "reps",
+      "musculos": [
+        {
+          "id": "gemelo",
+          "rol": "principal"
+        },
+        {
+          "id": "soleo",
+          "rol": "secundario"
+        }
+      ],
+      "sustitutos": [
+        {
+          "id": "elevacion-talones-sentado",
+          "tipo": "mismo-patron"
+        },
+        {
+          "id": "elevacion-talones-peso-corporal",
+          "tipo": "mismo-patron"
+        }
+      ],
+      "articulaciones": [
+        "tobillo"
+      ]
+    },
+    {
+      "id": "elevacion-talones-sentado",
+      "nombre": {
+        "es-AR": "Elevación de talones sentado",
+        "en-US": "Seated calf raise",
+        "pt-BR": null,
+        "ja-JP": null
+      },
+      "patron": "tobillo",
+      "equipamiento": "maquina",
+      "lado": "bilateral",
+      "unidad": "reps",
+      "musculos": [
+        {
+          "id": "soleo",
+          "rol": "principal"
+        }
+      ],
+      "sustitutos": [
+        {
+          "id": "elevacion-talones-pie",
+          "tipo": "mismo-patron"
+        }
+      ],
+      "articulaciones": [
+        "tobillo",
+        "rodilla"
+      ]
+    },
+    {
+      "id": "elevacion-talones-peso-corporal",
+      "nombre": {
+        "es-AR": "Elevación de talones con peso corporal",
+        "en-US": "Bodyweight calf raise",
+        "pt-BR": null,
+        "ja-JP": null
+      },
+      "patron": "tobillo",
+      "equipamiento": "ninguno",
+      "lado": "bilateral",
+      "unidad": "reps",
+      "musculos": [
+        {
+          "id": "gemelo",
+          "rol": "principal"
+        },
+        {
+          "id": "soleo",
+          "rol": "secundario"
+        }
+      ],
+      "sustitutos": [
+        {
+          "id": "elevacion-talones-pie",
+          "tipo": "mismo-patron"
+        }
+      ],
+      "articulaciones": [
+        "tobillo"
+      ]
+    },
+    {
+      "id": "plancha-frontal",
+      "nombre": {
+        "es-AR": "Plancha frontal",
+        "en-US": "Front plank",
+        "pt-BR": null,
+        "ja-JP": null
+      },
+      "patron": "antiextension",
+      "equipamiento": "ninguno",
+      "lado": "bilateral",
+      "unidad": "tiempo",
+      "musculos": [
+        {
+          "id": "core",
+          "rol": "principal"
+        }
+      ],
+      "sustitutos": [
+        {
+          "id": "plancha-lateral",
+          "tipo": "mismo-musculo"
+        },
+        {
+          "id": "rueda-abdominal",
+          "tipo": "mismo-patron"
+        },
+        {
+          "id": "bicho-muerto",
+          "tipo": "mismo-patron"
+        }
+      ],
+      "articulaciones": [
+        "hombro",
+        "zona-lumbar"
+      ]
+    },
+    {
+      "id": "rueda-abdominal",
+      "nombre": {
+        "es-AR": "Rueda abdominal",
+        "en-US": "Ab wheel rollout",
+        "pt-BR": null,
+        "ja-JP": null
+      },
+      "patron": "antiextension",
+      "equipamiento": "mancuernas",
+      "lado": "bilateral",
+      "unidad": "reps",
+      "musculos": [
+        {
+          "id": "core",
+          "rol": "principal"
+        }
+      ],
+      "sustitutos": [
+        {
+          "id": "plancha-frontal",
+          "tipo": "mismo-patron"
+        }
+      ],
+      "articulaciones": [
+        "hombro",
+        "zona-lumbar"
+      ]
+    },
+    {
+      "id": "bicho-muerto",
+      "nombre": {
+        "es-AR": "Bicho muerto",
+        "en-US": "Dead bug",
+        "pt-BR": null,
+        "ja-JP": null
+      },
+      "patron": "antiextension",
+      "equipamiento": "ninguno",
+      "lado": "bilateral",
+      "unidad": "reps",
+      "musculos": [
+        {
+          "id": "core",
+          "rol": "principal"
+        }
+      ],
+      "sustitutos": [
+        {
+          "id": "plancha-frontal",
+          "tipo": "mismo-patron"
+        }
+      ],
+      "articulaciones": [
+        "zona-lumbar"
+      ]
+    },
+    {
+      "id": "plancha-lateral",
+      "nombre": {
+        "es-AR": "Plancha lateral",
+        "en-US": "Side plank",
+        "pt-BR": null,
+        "ja-JP": null
+      },
+      "patron": "antilateral",
+      "equipamiento": "ninguno",
+      "lado": "unilateral",
+      "unidad": "tiempo",
+      "musculos": [
+        {
+          "id": "core",
+          "rol": "principal"
+        }
+      ],
+      "sustitutos": [
+        {
+          "id": "plancha-lateral-rodillas",
+          "tipo": "mismo-patron"
+        },
+        {
+          "id": "paseo-maleta",
+          "tipo": "mismo-patron"
+        },
+        {
+          "id": "plancha-frontal",
+          "tipo": "mismo-musculo"
+        }
+      ],
+      "articulaciones": [
+        "hombro"
+      ]
+    },
+    {
+      "id": "pallof-press",
+      "nombre": {
+        "es-AR": "Pallof press",
+        "en-US": "Pallof press",
+        "pt-BR": null,
+        "ja-JP": null
+      },
+      "patron": "antirotacion",
+      "equipamiento": "maquina",
+      "lado": "unilateral",
+      "unidad": "reps",
+      "musculos": [
+        {
+          "id": "core",
+          "rol": "principal"
+        }
+      ],
+      "sustitutos": [
+        {
+          "id": "toque-hombro-plancha",
+          "tipo": "mismo-patron"
+        },
+        {
+          "id": "perro-pajaro",
+          "tipo": "mismo-patron"
+        },
+        {
+          "id": "plancha-lateral",
+          "tipo": "mismo-musculo"
+        }
+      ],
+      "articulaciones": [
+        "hombro"
+      ]
+    },
+    {
+      "id": "curl-biceps",
+      "nombre": {
+        "es-AR": "Curl de bíceps",
+        "en-US": "Dumbbell curl",
+        "pt-BR": null,
+        "ja-JP": null
+      },
+      "patron": "codo-flexion",
+      "equipamiento": "mancuernas",
+      "lado": "bilateral",
+      "unidad": "reps",
+      "musculos": [
+        {
+          "id": "biceps",
+          "rol": "principal"
+        }
+      ],
+      "sustitutos": [
+        {
+          "id": "curl-barra",
+          "tipo": "mismo-patron"
+        }
+      ],
+      "articulaciones": [
+        "codo"
+      ]
+    },
+    {
+      "id": "curl-barra",
+      "nombre": {
+        "es-AR": "Curl con barra",
+        "en-US": "Barbell curl",
+        "pt-BR": null,
+        "ja-JP": null
+      },
+      "patron": "codo-flexion",
+      "equipamiento": "barra",
+      "lado": "bilateral",
+      "unidad": "reps",
+      "musculos": [
+        {
+          "id": "biceps",
+          "rol": "principal"
+        }
+      ],
+      "sustitutos": [
+        {
+          "id": "curl-biceps",
+          "tipo": "mismo-patron"
+        }
+      ],
+      "articulaciones": [
+        "codo",
+        "muneca"
+      ]
+    },
+    {
+      "id": "extension-triceps-polea",
+      "nombre": {
+        "es-AR": "Extensión de tríceps en polea",
+        "en-US": "Triceps pushdown",
+        "pt-BR": null,
+        "ja-JP": null
+      },
+      "patron": "codo-extension",
+      "equipamiento": "maquina",
+      "lado": "bilateral",
+      "unidad": "reps",
+      "musculos": [
+        {
+          "id": "triceps",
+          "rol": "principal"
+        }
+      ],
+      "sustitutos": [
+        {
+          "id": "extension-triceps-mancuerna",
+          "tipo": "mismo-patron"
+        },
+        {
+          "id": "fondos-banco",
+          "tipo": "mismo-patron"
+        },
+        {
+          "id": "fondos-paralelas",
+          "tipo": "mismo-musculo"
+        },
+        {
+          "id": "flexiones",
+          "tipo": "mismo-musculo"
+        }
+      ],
+      "articulaciones": [
+        "codo"
+      ]
+    },
+    {
+      "id": "paseo-maleta",
+      "nombre": {
+        "es-AR": "Paseo del granjero a una mano",
+        "en-US": "Suitcase carry",
+        "pt-BR": null,
+        "ja-JP": null
+      },
+      "patron": "antilateral",
+      "equipamiento": "mancuernas",
+      "lado": "unilateral",
+      "unidad": "tiempo",
+      "musculos": [
+        {
+          "id": "core",
+          "rol": "principal"
+        },
+        {
+          "id": "trapecio",
+          "rol": "secundario"
+        }
+      ],
+      "sustitutos": [
+        {
+          "id": "plancha-lateral",
+          "tipo": "mismo-patron"
+        }
+      ],
+      "articulaciones": [
+        "hombro",
+        "zona-lumbar"
+      ]
+    },
+    {
+      "id": "plancha-lateral-rodillas",
+      "nombre": {
+        "es-AR": "Plancha lateral con rodillas apoyadas",
+        "en-US": "Kneeling side plank",
+        "pt-BR": null,
+        "ja-JP": null
+      },
+      "patron": "antilateral",
+      "equipamiento": "ninguno",
+      "lado": "unilateral",
+      "unidad": "tiempo",
+      "musculos": [
+        {
+          "id": "core",
+          "rol": "principal"
+        }
+      ],
+      "sustitutos": [
+        {
+          "id": "plancha-lateral",
+          "tipo": "mismo-patron"
+        }
+      ],
+      "articulaciones": [
+        "hombro"
+      ]
+    },
+    {
+      "id": "toque-hombro-plancha",
+      "nombre": {
+        "es-AR": "Toque de hombro en plancha",
+        "en-US": "Plank shoulder tap",
+        "pt-BR": null,
+        "ja-JP": null
+      },
+      "patron": "antirotacion",
+      "equipamiento": "ninguno",
+      "lado": "bilateral",
+      "unidad": "reps",
+      "musculos": [
+        {
+          "id": "core",
+          "rol": "principal"
+        }
+      ],
+      "sustitutos": [
+        {
+          "id": "pallof-press",
+          "tipo": "mismo-patron"
+        },
+        {
+          "id": "perro-pajaro",
+          "tipo": "mismo-patron"
+        }
+      ],
+      "articulaciones": [
+        "hombro",
+        "muneca"
+      ]
+    },
+    {
+      "id": "perro-pajaro",
+      "nombre": {
+        "es-AR": "Perro-pájaro",
+        "en-US": "Bird dog",
+        "pt-BR": null,
+        "ja-JP": null
+      },
+      "patron": "antirotacion",
+      "equipamiento": "ninguno",
+      "lado": "unilateral",
+      "unidad": "reps",
+      "musculos": [
+        {
+          "id": "core",
+          "rol": "principal"
+        },
+        {
+          "id": "gluteo",
+          "rol": "secundario"
+        }
+      ],
+      "sustitutos": [
+        {
+          "id": "toque-hombro-plancha",
+          "tipo": "mismo-patron"
+        }
+      ],
+      "articulaciones": [
+        "zona-lumbar",
+        "hombro"
+      ]
+    },
+    {
+      "id": "extension-triceps-mancuerna",
+      "nombre": {
+        "es-AR": "Extensión de tríceps sobre la cabeza",
+        "en-US": "Overhead dumbbell triceps extension",
+        "pt-BR": null,
+        "ja-JP": null
+      },
+      "patron": "codo-extension",
+      "equipamiento": "mancuernas",
+      "lado": "bilateral",
+      "unidad": "reps",
+      "musculos": [
+        {
+          "id": "triceps",
+          "rol": "principal"
+        }
+      ],
+      "sustitutos": [
+        {
+          "id": "extension-triceps-polea",
+          "tipo": "mismo-patron"
+        },
+        {
+          "id": "fondos-banco",
+          "tipo": "mismo-patron"
+        }
+      ],
+      "articulaciones": [
+        "codo",
+        "hombro"
+      ]
+    },
+    {
+      "id": "fondos-banco",
+      "nombre": {
+        "es-AR": "Fondos en banco",
+        "en-US": "Bench dips",
+        "pt-BR": null,
+        "ja-JP": null
+      },
+      "patron": "codo-extension",
+      "equipamiento": "ninguno",
+      "lado": "bilateral",
+      "unidad": "reps",
+      "musculos": [
+        {
+          "id": "triceps",
+          "rol": "principal"
+        }
+      ],
+      "sustitutos": [
+        {
+          "id": "extension-triceps-mancuerna",
+          "tipo": "mismo-patron"
+        }
+      ],
+      "articulaciones": [
+        "codo",
+        "hombro"
+      ]
+    },
+    {
+      "id": "press-declinado-barra",
+      "nombre": {
+        "es-AR": "Press declinado con barra",
+        "en-US": "Decline barbell bench press",
+        "pt-BR": null,
+        "ja-JP": null
+      },
+      "patron": "empuje-horizontal",
+      "equipamiento": "barra",
+      "lado": "bilateral",
+      "unidad": "reps",
+      "musculos": [
+        {
+          "id": "pectoral",
+          "rol": "principal"
+        },
+        {
+          "id": "triceps",
+          "rol": "secundario"
+        },
+        {
+          "id": "deltoides-anterior",
+          "rol": "secundario"
+        }
+      ],
+      "sustitutos": [
+        {
+          "id": "flexiones",
+          "tipo": "mismo-patron"
+        },
+        {
+          "id": "flexiones-inclinadas",
+          "tipo": "mismo-patron"
+        },
+        {
+          "id": "flexiones-diamante",
+          "tipo": "mismo-patron"
+        }
+      ],
+      "articulaciones": [
+        "hombro",
+        "codo"
+      ]
+    },
+    {
+      "id": "press-banca-smith",
+      "nombre": {
+        "es-AR": "Press plano en multipower",
+        "en-US": "Smith machine bench press",
+        "pt-BR": null,
+        "ja-JP": null
+      },
+      "patron": "empuje-horizontal",
+      "equipamiento": "smith",
+      "lado": "bilateral",
+      "unidad": "reps",
+      "musculos": [
+        {
+          "id": "pectoral",
+          "rol": "principal"
+        },
+        {
+          "id": "triceps",
+          "rol": "secundario"
+        },
+        {
+          "id": "deltoides-anterior",
+          "rol": "secundario"
+        }
+      ],
+      "sustitutos": [
+        {
+          "id": "flexiones",
+          "tipo": "mismo-patron"
+        },
+        {
+          "id": "flexiones-inclinadas",
+          "tipo": "mismo-patron"
+        },
+        {
+          "id": "flexiones-diamante",
+          "tipo": "mismo-patron"
+        }
+      ],
+      "articulaciones": [
+        "hombro",
+        "codo"
+      ]
+    },
+    {
+      "id": "aperturas-mancuernas",
+      "nombre": {
+        "es-AR": "Aperturas con mancuernas",
+        "en-US": "Dumbbell chest fly",
+        "pt-BR": null,
+        "ja-JP": null
+      },
+      "patron": "empuje-horizontal",
+      "equipamiento": "mancuernas",
+      "lado": "bilateral",
+      "unidad": "reps",
+      "musculos": [
+        {
+          "id": "pectoral",
+          "rol": "principal"
+        },
+        {
+          "id": "deltoides-anterior",
+          "rol": "secundario"
+        }
+      ],
+      "sustitutos": [
+        {
+          "id": "flexiones",
+          "tipo": "mismo-patron"
+        },
+        {
+          "id": "flexiones-inclinadas",
+          "tipo": "mismo-patron"
+        },
+        {
+          "id": "flexiones-diamante",
+          "tipo": "mismo-patron"
+        }
+      ],
+      "articulaciones": [
+        "hombro"
+      ]
+    },
+    {
+      "id": "contractor-pectoral",
+      "nombre": {
+        "es-AR": "Contractor de pecho",
+        "en-US": "Pec deck",
+        "pt-BR": null,
+        "ja-JP": null
+      },
+      "patron": "empuje-horizontal",
+      "equipamiento": "maquina",
+      "lado": "bilateral",
+      "unidad": "reps",
+      "musculos": [
+        {
+          "id": "pectoral",
+          "rol": "principal"
+        },
+        {
+          "id": "deltoides-anterior",
+          "rol": "secundario"
+        }
+      ],
+      "sustitutos": [
+        {
+          "id": "flexiones",
+          "tipo": "mismo-patron"
+        },
+        {
+          "id": "flexiones-inclinadas",
+          "tipo": "mismo-patron"
+        },
+        {
+          "id": "flexiones-diamante",
+          "tipo": "mismo-patron"
+        }
+      ],
+      "articulaciones": [
+        "hombro"
+      ]
+    },
+    {
+      "id": "cruce-poleas",
+      "nombre": {
+        "es-AR": "Cruce de poleas",
+        "en-US": "Cable crossover",
+        "pt-BR": null,
+        "ja-JP": null
+      },
+      "patron": "empuje-horizontal",
+      "equipamiento": "polea",
+      "lado": "bilateral",
+      "unidad": "reps",
+      "musculos": [
+        {
+          "id": "pectoral",
+          "rol": "principal"
+        },
+        {
+          "id": "deltoides-anterior",
+          "rol": "secundario"
+        }
+      ],
+      "sustitutos": [
+        {
+          "id": "flexiones",
+          "tipo": "mismo-patron"
+        },
+        {
+          "id": "flexiones-inclinadas",
+          "tipo": "mismo-patron"
+        },
+        {
+          "id": "flexiones-diamante",
+          "tipo": "mismo-patron"
+        }
+      ],
+      "articulaciones": [
+        "hombro"
+      ]
+    },
+    {
+      "id": "press-piso-mancuernas",
+      "nombre": {
+        "es-AR": "Press en el piso con mancuernas",
+        "en-US": "Dumbbell floor press",
+        "pt-BR": null,
+        "ja-JP": null
+      },
+      "patron": "empuje-horizontal",
+      "equipamiento": "mancuernas",
+      "lado": "bilateral",
+      "unidad": "reps",
+      "musculos": [
+        {
+          "id": "pectoral",
+          "rol": "principal"
+        },
+        {
+          "id": "triceps",
+          "rol": "secundario"
+        }
+      ],
+      "sustitutos": [
+        {
+          "id": "flexiones",
+          "tipo": "mismo-patron"
+        },
+        {
+          "id": "flexiones-inclinadas",
+          "tipo": "mismo-patron"
+        },
+        {
+          "id": "flexiones-diamante",
+          "tipo": "mismo-patron"
+        }
+      ],
+      "articulaciones": [
+        "hombro",
+        "codo"
+      ]
+    },
+    {
+      "id": "flexiones-diamante",
+      "nombre": {
+        "es-AR": "Flexiones diamante",
+        "en-US": "Diamond push-up",
+        "pt-BR": null,
+        "ja-JP": null
+      },
+      "patron": "empuje-horizontal",
+      "equipamiento": "ninguno",
+      "lado": "bilateral",
+      "unidad": "reps",
+      "musculos": [
+        {
+          "id": "triceps",
+          "rol": "principal"
+        },
+        {
+          "id": "pectoral",
+          "rol": "secundario"
+        },
+        {
+          "id": "deltoides-anterior",
+          "rol": "secundario"
+        }
+      ],
+      "sustitutos": [
+        {
+          "id": "aperturas-mancuernas",
+          "tipo": "mismo-patron"
+        },
+        {
+          "id": "contractor-pectoral",
+          "tipo": "mismo-patron"
+        },
+        {
+          "id": "cruce-poleas",
+          "tipo": "mismo-patron"
+        }
+      ],
+      "articulaciones": [
+        "hombro",
+        "codo"
+      ]
+    },
+    {
+      "id": "flexiones-declinadas",
+      "nombre": {
+        "es-AR": "Flexiones con pies elevados",
+        "en-US": "Decline push-up",
+        "pt-BR": null,
+        "ja-JP": null
+      },
+      "patron": "empuje-horizontal",
+      "equipamiento": "banco",
+      "lado": "bilateral",
+      "unidad": "reps",
+      "musculos": [
+        {
+          "id": "pectoral",
+          "rol": "principal"
+        },
+        {
+          "id": "triceps",
+          "rol": "secundario"
+        },
+        {
+          "id": "deltoides-anterior",
+          "rol": "secundario"
+        }
+      ],
+      "sustitutos": [
+        {
+          "id": "flexiones",
+          "tipo": "mismo-patron"
+        },
+        {
+          "id": "flexiones-inclinadas",
+          "tipo": "mismo-patron"
+        },
+        {
+          "id": "flexiones-diamante",
+          "tipo": "mismo-patron"
+        }
+      ],
+      "articulaciones": [
+        "hombro",
+        "codo"
+      ]
+    },
+    {
+      "id": "press-pecho-banda",
+      "nombre": {
+        "es-AR": "Press de pecho con banda",
+        "en-US": "Band chest press",
+        "pt-BR": null,
+        "ja-JP": null
+      },
+      "patron": "empuje-horizontal",
+      "equipamiento": "banda",
+      "lado": "bilateral",
+      "unidad": "reps",
+      "musculos": [
+        {
+          "id": "pectoral",
+          "rol": "principal"
+        },
+        {
+          "id": "triceps",
+          "rol": "secundario"
+        },
+        {
+          "id": "deltoides-anterior",
+          "rol": "secundario"
+        }
+      ],
+      "sustitutos": [
+        {
+          "id": "flexiones",
+          "tipo": "mismo-patron"
+        },
+        {
+          "id": "flexiones-inclinadas",
+          "tipo": "mismo-patron"
+        },
+        {
+          "id": "flexiones-diamante",
+          "tipo": "mismo-patron"
+        }
+      ],
+      "articulaciones": [
+        "hombro",
+        "codo"
+      ]
+    },
+    {
+      "id": "fondos-anillas",
+      "nombre": {
+        "es-AR": "Fondos en anillas",
+        "en-US": "Ring dips",
+        "pt-BR": null,
+        "ja-JP": null
+      },
+      "patron": "empuje-horizontal",
+      "equipamiento": "suspension",
+      "lado": "bilateral",
+      "unidad": "reps",
+      "musculos": [
+        {
+          "id": "pectoral",
+          "rol": "principal"
+        },
+        {
+          "id": "triceps",
+          "rol": "secundario"
+        },
+        {
+          "id": "deltoides-anterior",
+          "rol": "secundario"
+        }
+      ],
+      "sustitutos": [
+        {
+          "id": "flexiones",
+          "tipo": "mismo-patron"
+        },
+        {
+          "id": "flexiones-inclinadas",
+          "tipo": "mismo-patron"
+        },
+        {
+          "id": "flexiones-diamante",
+          "tipo": "mismo-patron"
+        }
+      ],
+      "articulaciones": [
+        "hombro",
+        "codo"
+      ]
+    },
+    {
+      "id": "press-arnold",
+      "nombre": {
+        "es-AR": "Press Arnold",
+        "en-US": "Arnold press",
+        "pt-BR": null,
+        "ja-JP": null
+      },
+      "patron": "empuje-vertical",
+      "equipamiento": "mancuernas",
+      "lado": "bilateral",
+      "unidad": "reps",
+      "musculos": [
+        {
+          "id": "deltoides-anterior",
+          "rol": "principal"
+        },
+        {
+          "id": "deltoides-lateral",
+          "rol": "secundario"
+        },
+        {
+          "id": "triceps",
+          "rol": "secundario"
+        }
+      ],
+      "sustitutos": [
+        {
+          "id": "flexion-pica",
+          "tipo": "mismo-patron"
+        },
+        {
+          "id": "press-hombro-kettlebell",
+          "tipo": "mismo-patron"
+        },
+        {
+          "id": "press-hombro-maquina",
+          "tipo": "mismo-patron"
+        }
+      ],
+      "articulaciones": [
+        "hombro",
+        "codo"
+      ]
+    },
+    {
+      "id": "push-press",
+      "nombre": {
+        "es-AR": "Push press",
+        "en-US": "Push press",
+        "pt-BR": null,
+        "ja-JP": null
+      },
+      "patron": "empuje-vertical",
+      "equipamiento": "barra",
+      "lado": "bilateral",
+      "unidad": "reps",
+      "musculos": [
+        {
+          "id": "deltoides-anterior",
+          "rol": "principal"
+        },
+        {
+          "id": "triceps",
+          "rol": "secundario"
+        },
+        {
+          "id": "cuadriceps",
+          "rol": "secundario"
+        }
+      ],
+      "sustitutos": [
+        {
+          "id": "flexion-pica",
+          "tipo": "mismo-patron"
+        },
+        {
+          "id": "elevacion-frontal-mancuernas",
+          "tipo": "mismo-patron"
+        },
+        {
+          "id": "press-arnold",
+          "tipo": "mismo-patron"
+        }
+      ],
+      "articulaciones": [
+        "hombro",
+        "codo",
+        "rodilla"
+      ]
+    },
+    {
+      "id": "elevacion-lateral-mancuernas",
+      "nombre": {
+        "es-AR": "Elevaciones laterales",
+        "en-US": "Dumbbell lateral raise",
+        "pt-BR": null,
+        "ja-JP": null
+      },
+      "patron": "empuje-vertical",
+      "equipamiento": "mancuernas",
+      "lado": "bilateral",
+      "unidad": "reps",
+      "musculos": [
+        {
+          "id": "deltoides-lateral",
+          "rol": "principal"
+        },
+        {
+          "id": "trapecio",
+          "rol": "secundario"
+        }
+      ],
+      "sustitutos": [
+        {
+          "id": "flexion-pica",
+          "tipo": "mismo-patron"
+        },
+        {
+          "id": "elevacion-lateral-polea",
+          "tipo": "mismo-patron"
+        },
+        {
+          "id": "press-hombro-kettlebell",
+          "tipo": "mismo-patron"
+        }
+      ],
+      "articulaciones": [
+        "hombro"
+      ]
+    },
+    {
+      "id": "elevacion-lateral-polea",
+      "nombre": {
+        "es-AR": "Elevaciones laterales en polea",
+        "en-US": "Cable lateral raise",
+        "pt-BR": null,
+        "ja-JP": null
+      },
+      "patron": "empuje-vertical",
+      "equipamiento": "polea",
+      "lado": "unilateral",
+      "unidad": "reps",
+      "musculos": [
+        {
+          "id": "deltoides-lateral",
+          "rol": "principal"
+        },
+        {
+          "id": "trapecio",
+          "rol": "secundario"
+        }
+      ],
+      "sustitutos": [
+        {
+          "id": "flexion-pica",
+          "tipo": "mismo-patron"
+        },
+        {
+          "id": "elevacion-lateral-mancuernas",
+          "tipo": "mismo-patron"
+        },
+        {
+          "id": "elevacion-frontal-mancuernas",
+          "tipo": "mismo-patron"
+        }
+      ],
+      "articulaciones": [
+        "hombro"
+      ]
+    },
+    {
+      "id": "elevacion-frontal-mancuernas",
+      "nombre": {
+        "es-AR": "Elevaciones frontales",
+        "en-US": "Dumbbell front raise",
+        "pt-BR": null,
+        "ja-JP": null
+      },
+      "patron": "empuje-vertical",
+      "equipamiento": "mancuernas",
+      "lado": "bilateral",
+      "unidad": "reps",
+      "musculos": [
+        {
+          "id": "deltoides-anterior",
+          "rol": "principal"
+        },
+        {
+          "id": "pectoral",
+          "rol": "secundario"
+        }
+      ],
+      "sustitutos": [
+        {
+          "id": "flexion-pica",
+          "tipo": "mismo-patron"
+        },
+        {
+          "id": "press-hombro-kettlebell",
+          "tipo": "mismo-patron"
+        },
+        {
+          "id": "press-hombro-maquina",
+          "tipo": "mismo-patron"
+        }
+      ],
+      "articulaciones": [
+        "hombro"
+      ]
+    },
+    {
+      "id": "press-hombro-smith",
+      "nombre": {
+        "es-AR": "Press de hombro en multipower",
+        "en-US": "Smith machine shoulder press",
+        "pt-BR": null,
+        "ja-JP": null
+      },
+      "patron": "empuje-vertical",
+      "equipamiento": "smith",
+      "lado": "bilateral",
+      "unidad": "reps",
+      "musculos": [
+        {
+          "id": "deltoides-anterior",
+          "rol": "principal"
+        },
+        {
+          "id": "triceps",
+          "rol": "secundario"
+        },
+        {
+          "id": "trapecio",
+          "rol": "secundario"
+        }
+      ],
+      "sustitutos": [
+        {
+          "id": "flexion-pica",
+          "tipo": "mismo-patron"
+        },
+        {
+          "id": "elevacion-frontal-mancuernas",
+          "tipo": "mismo-patron"
+        },
+        {
+          "id": "press-arnold",
+          "tipo": "mismo-patron"
+        }
+      ],
+      "articulaciones": [
+        "hombro",
+        "codo"
+      ]
+    },
+    {
+      "id": "press-hombro-kettlebell",
+      "nombre": {
+        "es-AR": "Press de hombro con pesa rusa",
+        "en-US": "Kettlebell shoulder press",
+        "pt-BR": null,
+        "ja-JP": null
+      },
+      "patron": "empuje-vertical",
+      "equipamiento": "kettlebell",
+      "lado": "unilateral",
+      "unidad": "reps",
+      "musculos": [
+        {
+          "id": "deltoides-anterior",
+          "rol": "principal"
+        },
+        {
+          "id": "triceps",
+          "rol": "secundario"
+        },
+        {
+          "id": "core",
+          "rol": "secundario"
+        }
+      ],
+      "sustitutos": [
+        {
+          "id": "flexion-pica",
+          "tipo": "mismo-patron"
+        },
+        {
+          "id": "elevacion-frontal-mancuernas",
+          "tipo": "mismo-patron"
+        },
+        {
+          "id": "press-arnold",
+          "tipo": "mismo-patron"
+        }
+      ],
+      "articulaciones": [
+        "hombro",
+        "codo"
+      ]
+    },
+    {
+      "id": "press-militar-parado-mancuernas",
+      "nombre": {
+        "es-AR": "Press militar de pie con mancuernas",
+        "en-US": "Standing dumbbell overhead press",
+        "pt-BR": null,
+        "ja-JP": null
+      },
+      "patron": "empuje-vertical",
+      "equipamiento": "mancuernas",
+      "lado": "bilateral",
+      "unidad": "reps",
+      "musculos": [
+        {
+          "id": "deltoides-anterior",
+          "rol": "principal"
+        },
+        {
+          "id": "triceps",
+          "rol": "secundario"
+        },
+        {
+          "id": "core",
+          "rol": "secundario"
+        }
+      ],
+      "sustitutos": [
+        {
+          "id": "flexion-pica",
+          "tipo": "mismo-patron"
+        },
+        {
+          "id": "press-hombro-kettlebell",
+          "tipo": "mismo-patron"
+        },
+        {
+          "id": "press-hombro-maquina",
+          "tipo": "mismo-patron"
+        }
+      ],
+      "articulaciones": [
+        "hombro",
+        "codo"
+      ]
+    },
+    {
+      "id": "jalon-agarre-neutro",
+      "nombre": {
+        "es-AR": "Jalón con agarre neutro",
+        "en-US": "Neutral-grip lat pulldown",
+        "pt-BR": null,
+        "ja-JP": null
+      },
+      "patron": "traccion-vertical",
+      "equipamiento": "maquina",
+      "lado": "bilateral",
+      "unidad": "reps",
+      "musculos": [
+        {
+          "id": "dorsal",
+          "rol": "principal"
+        },
+        {
+          "id": "biceps",
+          "rol": "secundario"
+        },
+        {
+          "id": "trapecio",
+          "rol": "secundario"
+        }
+      ],
+      "sustitutos": [
+        {
+          "id": "dominadas",
+          "tipo": "mismo-patron"
+        },
+        {
+          "id": "dominadas-banda",
+          "tipo": "mismo-patron"
+        },
+        {
+          "id": "dominadas-lastre",
+          "tipo": "mismo-patron"
+        }
+      ],
+      "articulaciones": [
+        "hombro",
+        "codo"
+      ]
+    },
+    {
+      "id": "jalon-supino",
+      "nombre": {
+        "es-AR": "Jalón con agarre supino",
+        "en-US": "Underhand lat pulldown",
+        "pt-BR": null,
+        "ja-JP": null
+      },
+      "patron": "traccion-vertical",
+      "equipamiento": "maquina",
+      "lado": "bilateral",
+      "unidad": "reps",
+      "musculos": [
+        {
+          "id": "dorsal",
+          "rol": "principal"
+        },
+        {
+          "id": "biceps",
+          "rol": "secundario"
+        }
+      ],
+      "sustitutos": [
+        {
+          "id": "dominadas",
+          "tipo": "mismo-patron"
+        },
+        {
+          "id": "dominadas-banda",
+          "tipo": "mismo-patron"
+        },
+        {
+          "id": "dominadas-lastre",
+          "tipo": "mismo-patron"
+        }
+      ],
+      "articulaciones": [
+        "hombro",
+        "codo"
+      ]
+    },
+    {
+      "id": "dominadas-supinas",
+      "nombre": {
+        "es-AR": "Dominadas supinas",
+        "en-US": "Chin-ups",
+        "pt-BR": null,
+        "ja-JP": null
+      },
+      "patron": "traccion-vertical",
+      "equipamiento": "barra-fija",
+      "lado": "bilateral",
+      "unidad": "reps",
+      "musculos": [
+        {
+          "id": "dorsal",
+          "rol": "principal"
+        },
+        {
+          "id": "biceps",
+          "rol": "secundario"
+        },
+        {
+          "id": "trapecio",
+          "rol": "secundario"
+        }
+      ],
+      "sustitutos": [
+        {
+          "id": "dominadas-asistidas",
+          "tipo": "mismo-patron"
+        },
+        {
+          "id": "dominadas-banda",
+          "tipo": "mismo-patron"
+        },
+        {
+          "id": "jalon-agarre-neutro",
+          "tipo": "mismo-patron"
+        }
+      ],
+      "articulaciones": [
+        "hombro",
+        "codo"
+      ]
+    },
+    {
+      "id": "dominadas-lastre",
+      "nombre": {
+        "es-AR": "Dominadas con lastre",
+        "en-US": "Weighted pull-ups",
+        "pt-BR": null,
+        "ja-JP": null
+      },
+      "patron": "traccion-vertical",
+      "equipamiento": "barra-fija",
+      "lado": "bilateral",
+      "unidad": "reps",
+      "musculos": [
+        {
+          "id": "dorsal",
+          "rol": "principal"
+        },
+        {
+          "id": "biceps",
+          "rol": "secundario"
+        },
+        {
+          "id": "trapecio",
+          "rol": "secundario"
+        },
+        {
+          "id": "core",
+          "rol": "secundario"
+        }
+      ],
+      "sustitutos": [
+        {
+          "id": "dominadas-asistidas",
+          "tipo": "mismo-patron"
+        },
+        {
+          "id": "dominadas-banda",
+          "tipo": "mismo-patron"
+        },
+        {
+          "id": "jalon-agarre-neutro",
+          "tipo": "mismo-patron"
+        }
+      ],
+      "articulaciones": [
+        "hombro",
+        "codo"
+      ]
+    },
+    {
+      "id": "dominadas-banda",
+      "nombre": {
+        "es-AR": "Dominadas con banda",
+        "en-US": "Band-assisted pull-ups",
+        "pt-BR": null,
+        "ja-JP": null
+      },
+      "patron": "traccion-vertical",
+      "equipamiento": "banda",
+      "lado": "bilateral",
+      "unidad": "reps",
+      "musculos": [
+        {
+          "id": "dorsal",
+          "rol": "principal"
+        },
+        {
+          "id": "biceps",
+          "rol": "secundario"
+        },
+        {
+          "id": "trapecio",
+          "rol": "secundario"
+        }
+      ],
+      "sustitutos": [
+        {
+          "id": "dominadas",
+          "tipo": "mismo-patron"
+        },
+        {
+          "id": "dominadas-asistidas",
+          "tipo": "mismo-patron"
+        },
+        {
+          "id": "dominadas-lastre",
+          "tipo": "mismo-patron"
+        }
+      ],
+      "articulaciones": [
+        "hombro",
+        "codo"
+      ]
+    },
+    {
+      "id": "jalon-un-brazo",
+      "nombre": {
+        "es-AR": "Jalón a un brazo en polea",
+        "en-US": "Single-arm lat pulldown",
+        "pt-BR": null,
+        "ja-JP": null
+      },
+      "patron": "traccion-vertical",
+      "equipamiento": "polea",
+      "lado": "unilateral",
+      "unidad": "reps",
+      "musculos": [
+        {
+          "id": "dorsal",
+          "rol": "principal"
+        },
+        {
+          "id": "biceps",
+          "rol": "secundario"
+        },
+        {
+          "id": "core",
+          "rol": "secundario"
+        }
+      ],
+      "sustitutos": [
+        {
+          "id": "dominadas",
+          "tipo": "mismo-patron"
+        },
+        {
+          "id": "dominadas-asistidas",
+          "tipo": "mismo-patron"
+        },
+        {
+          "id": "dominadas-banda",
+          "tipo": "mismo-patron"
+        }
+      ],
+      "articulaciones": [
+        "hombro",
+        "codo"
+      ]
+    },
+    {
+      "id": "pullover-polea",
+      "nombre": {
+        "es-AR": "Pullover en polea",
+        "en-US": "Cable straight-arm pullover",
+        "pt-BR": null,
+        "ja-JP": null
+      },
+      "patron": "traccion-vertical",
+      "equipamiento": "polea",
+      "lado": "bilateral",
+      "unidad": "reps",
+      "musculos": [
+        {
+          "id": "dorsal",
+          "rol": "principal"
+        },
+        {
+          "id": "triceps",
+          "rol": "secundario"
+        },
+        {
+          "id": "core",
+          "rol": "secundario"
+        }
+      ],
+      "sustitutos": [
+        {
+          "id": "dominadas",
+          "tipo": "mismo-patron"
+        },
+        {
+          "id": "dominadas-asistidas",
+          "tipo": "mismo-patron"
+        },
+        {
+          "id": "dominadas-banda",
+          "tipo": "mismo-patron"
+        }
+      ],
+      "articulaciones": [
+        "hombro"
+      ]
+    },
+    {
+      "id": "remo-t",
+      "nombre": {
+        "es-AR": "Remo en barra T",
+        "en-US": "T-bar row",
+        "pt-BR": null,
+        "ja-JP": null
+      },
+      "patron": "traccion-horizontal",
+      "equipamiento": "barra",
+      "lado": "bilateral",
+      "unidad": "reps",
+      "musculos": [
+        {
+          "id": "dorsal",
+          "rol": "principal"
+        },
+        {
+          "id": "romboides",
+          "rol": "secundario"
+        },
+        {
+          "id": "biceps",
+          "rol": "secundario"
+        },
+        {
+          "id": "trapecio",
+          "rol": "secundario"
+        }
+      ],
+      "sustitutos": [
+        {
+          "id": "remo-banda",
+          "tipo": "mismo-patron"
+        },
+        {
+          "id": "remo-invertido",
+          "tipo": "mismo-patron"
+        },
+        {
+          "id": "remo-kettlebell",
+          "tipo": "mismo-patron"
+        }
+      ],
+      "articulaciones": [
+        "hombro",
+        "codo",
+        "zona-lumbar"
+      ]
+    },
+    {
+      "id": "remo-maquina",
+      "nombre": {
+        "es-AR": "Remo en máquina",
+        "en-US": "Machine row",
+        "pt-BR": null,
+        "ja-JP": null
+      },
+      "patron": "traccion-horizontal",
+      "equipamiento": "maquina",
+      "lado": "bilateral",
+      "unidad": "reps",
+      "musculos": [
+        {
+          "id": "dorsal",
+          "rol": "principal"
+        },
+        {
+          "id": "romboides",
+          "rol": "secundario"
+        },
+        {
+          "id": "biceps",
+          "rol": "secundario"
+        }
+      ],
+      "sustitutos": [
+        {
+          "id": "remo-banda",
+          "tipo": "mismo-patron"
+        },
+        {
+          "id": "remo-barra",
+          "tipo": "mismo-patron"
+        },
+        {
+          "id": "remo-invertido",
+          "tipo": "mismo-patron"
+        }
+      ],
+      "articulaciones": [
+        "hombro",
+        "codo"
+      ]
+    },
+    {
+      "id": "remo-pecho-apoyado",
+      "nombre": {
+        "es-AR": "Remo con pecho apoyado",
+        "en-US": "Chest-supported row",
+        "pt-BR": null,
+        "ja-JP": null
+      },
+      "patron": "traccion-horizontal",
+      "equipamiento": "mancuernas",
+      "lado": "bilateral",
+      "unidad": "reps",
+      "musculos": [
+        {
+          "id": "romboides",
+          "rol": "principal"
+        },
+        {
+          "id": "dorsal",
+          "rol": "secundario"
+        },
+        {
+          "id": "deltoides-posterior",
+          "rol": "secundario"
+        },
+        {
+          "id": "biceps",
+          "rol": "secundario"
+        }
+      ],
+      "sustitutos": [
+        {
+          "id": "encogimientos-barra",
+          "tipo": "mismo-patron"
+        },
+        {
+          "id": "face-pull",
+          "tipo": "mismo-patron"
+        },
+        {
+          "id": "remo-banda",
+          "tipo": "mismo-patron"
+        }
+      ],
+      "articulaciones": [
+        "hombro",
+        "codo"
+      ]
+    },
+    {
+      "id": "remo-kettlebell",
+      "nombre": {
+        "es-AR": "Remo con pesa rusa",
+        "en-US": "Kettlebell row",
+        "pt-BR": null,
+        "ja-JP": null
+      },
+      "patron": "traccion-horizontal",
+      "equipamiento": "kettlebell",
+      "lado": "unilateral",
+      "unidad": "reps",
+      "musculos": [
+        {
+          "id": "dorsal",
+          "rol": "principal"
+        },
+        {
+          "id": "romboides",
+          "rol": "secundario"
+        },
+        {
+          "id": "biceps",
+          "rol": "secundario"
+        },
+        {
+          "id": "core",
+          "rol": "secundario"
+        }
+      ],
+      "sustitutos": [
+        {
+          "id": "remo-banda",
+          "tipo": "mismo-patron"
+        },
+        {
+          "id": "remo-barra",
+          "tipo": "mismo-patron"
+        },
+        {
+          "id": "remo-invertido",
+          "tipo": "mismo-patron"
+        }
+      ],
+      "articulaciones": [
+        "hombro",
+        "codo"
+      ]
+    },
+    {
+      "id": "remo-banda",
+      "nombre": {
+        "es-AR": "Remo con banda",
+        "en-US": "Band row",
+        "pt-BR": null,
+        "ja-JP": null
+      },
+      "patron": "traccion-horizontal",
+      "equipamiento": "banda",
+      "lado": "bilateral",
+      "unidad": "reps",
+      "musculos": [
+        {
+          "id": "dorsal",
+          "rol": "principal"
+        },
+        {
+          "id": "romboides",
+          "rol": "secundario"
+        },
+        {
+          "id": "biceps",
+          "rol": "secundario"
+        }
+      ],
+      "sustitutos": [
+        {
+          "id": "remo-barra",
+          "tipo": "mismo-patron"
+        },
+        {
+          "id": "remo-invertido",
+          "tipo": "mismo-patron"
+        },
+        {
+          "id": "remo-kettlebell",
+          "tipo": "mismo-patron"
+        }
+      ],
+      "articulaciones": [
+        "hombro",
+        "codo"
+      ]
+    },
+    {
+      "id": "pajaro-mancuernas",
+      "nombre": {
+        "es-AR": "Pájaro con mancuernas",
+        "en-US": "Rear delt fly",
+        "pt-BR": null,
+        "ja-JP": null
+      },
+      "patron": "traccion-horizontal",
+      "equipamiento": "mancuernas",
+      "lado": "bilateral",
+      "unidad": "reps",
+      "musculos": [
+        {
+          "id": "deltoides-posterior",
+          "rol": "principal"
+        },
+        {
+          "id": "romboides",
+          "rol": "secundario"
+        },
+        {
+          "id": "trapecio",
+          "rol": "secundario"
+        }
+      ],
+      "sustitutos": [
+        {
+          "id": "encogimientos-barra",
+          "tipo": "mismo-patron"
+        },
+        {
+          "id": "face-pull",
+          "tipo": "mismo-patron"
+        },
+        {
+          "id": "remo-banda",
+          "tipo": "mismo-patron"
+        }
+      ],
+      "articulaciones": [
+        "hombro"
+      ]
+    },
+    {
+      "id": "encogimientos-barra",
+      "nombre": {
+        "es-AR": "Encogimientos con barra",
+        "en-US": "Barbell shrugs",
+        "pt-BR": null,
+        "ja-JP": null
+      },
+      "patron": "traccion-horizontal",
+      "equipamiento": "barra",
+      "lado": "bilateral",
+      "unidad": "reps",
+      "musculos": [
+        {
+          "id": "trapecio",
+          "rol": "principal"
+        },
+        {
+          "id": "antebrazo",
+          "rol": "secundario"
+        }
+      ],
+      "sustitutos": [
+        {
+          "id": "encogimientos-mancuernas",
+          "tipo": "mismo-patron"
+        },
+        {
+          "id": "face-pull",
+          "tipo": "mismo-patron"
+        },
+        {
+          "id": "pajaro-mancuernas",
+          "tipo": "mismo-patron"
+        }
+      ],
+      "articulaciones": [
+        "hombro"
+      ]
+    },
+    {
+      "id": "encogimientos-mancuernas",
+      "nombre": {
+        "es-AR": "Encogimientos con mancuernas",
+        "en-US": "Dumbbell shrugs",
+        "pt-BR": null,
+        "ja-JP": null
+      },
+      "patron": "traccion-horizontal",
+      "equipamiento": "mancuernas",
+      "lado": "bilateral",
+      "unidad": "reps",
+      "musculos": [
+        {
+          "id": "trapecio",
+          "rol": "principal"
+        },
+        {
+          "id": "antebrazo",
+          "rol": "secundario"
+        }
+      ],
+      "sustitutos": [
+        {
+          "id": "encogimientos-barra",
+          "tipo": "mismo-patron"
+        },
+        {
+          "id": "face-pull",
+          "tipo": "mismo-patron"
+        },
+        {
+          "id": "remo-banda",
+          "tipo": "mismo-patron"
+        }
+      ],
+      "articulaciones": [
+        "hombro"
+      ]
+    },
+    {
+      "id": "sentadilla-smith",
+      "nombre": {
+        "es-AR": "Sentadilla en multipower",
+        "en-US": "Smith machine squat",
+        "pt-BR": null,
+        "ja-JP": null
+      },
+      "patron": "rodilla-bilateral",
+      "equipamiento": "smith",
+      "lado": "bilateral",
+      "unidad": "reps",
+      "musculos": [
+        {
+          "id": "cuadriceps",
+          "rol": "principal"
+        },
+        {
+          "id": "gluteo",
+          "rol": "secundario"
+        },
+        {
+          "id": "isquiotibiales",
+          "rol": "secundario"
+        }
+      ],
+      "sustitutos": [
+        {
+          "id": "sentadilla-libre",
+          "tipo": "mismo-patron"
+        },
+        {
+          "id": "sentadilla-pared",
+          "tipo": "mismo-patron"
+        },
+        {
+          "id": "extension-rodilla",
+          "tipo": "mismo-patron"
+        }
+      ],
+      "articulaciones": [
+        "rodilla",
+        "cadera"
+      ]
+    },
+    {
+      "id": "sentadilla-hack",
+      "nombre": {
+        "es-AR": "Sentadilla hack",
+        "en-US": "Hack squat",
+        "pt-BR": null,
+        "ja-JP": null
+      },
+      "patron": "rodilla-bilateral",
+      "equipamiento": "maquina",
+      "lado": "bilateral",
+      "unidad": "reps",
+      "musculos": [
+        {
+          "id": "cuadriceps",
+          "rol": "principal"
+        },
+        {
+          "id": "gluteo",
+          "rol": "secundario"
+        }
+      ],
+      "sustitutos": [
+        {
+          "id": "sentadilla-libre",
+          "tipo": "mismo-patron"
+        },
+        {
+          "id": "sentadilla-pared",
+          "tipo": "mismo-patron"
+        },
+        {
+          "id": "sentadilla-caja",
+          "tipo": "mismo-patron"
+        }
+      ],
+      "articulaciones": [
+        "rodilla",
+        "cadera"
+      ]
+    },
+    {
+      "id": "sentadilla-sumo",
+      "nombre": {
+        "es-AR": "Sentadilla sumo",
+        "en-US": "Sumo squat",
+        "pt-BR": null,
+        "ja-JP": null
+      },
+      "patron": "rodilla-bilateral",
+      "equipamiento": "barra",
+      "lado": "bilateral",
+      "unidad": "reps",
+      "musculos": [
+        {
+          "id": "cuadriceps",
+          "rol": "principal"
+        },
+        {
+          "id": "aductor",
+          "rol": "secundario"
+        },
+        {
+          "id": "gluteo",
+          "rol": "secundario"
+        }
+      ],
+      "sustitutos": [
+        {
+          "id": "sentadilla-libre",
+          "tipo": "mismo-patron"
+        },
+        {
+          "id": "sentadilla-pared",
+          "tipo": "mismo-patron"
+        },
+        {
+          "id": "extension-rodilla",
+          "tipo": "mismo-patron"
+        }
+      ],
+      "articulaciones": [
+        "rodilla",
+        "cadera"
+      ]
+    },
+    {
+      "id": "sentadilla-libre",
+      "nombre": {
+        "es-AR": "Sentadilla sin peso",
+        "en-US": "Bodyweight squat",
+        "pt-BR": null,
+        "ja-JP": null
+      },
+      "patron": "rodilla-bilateral",
+      "equipamiento": "ninguno",
+      "lado": "bilateral",
+      "unidad": "reps",
+      "musculos": [
+        {
+          "id": "cuadriceps",
+          "rol": "principal"
+        },
+        {
+          "id": "gluteo",
+          "rol": "secundario"
+        }
+      ],
+      "sustitutos": [
+        {
+          "id": "extension-rodilla",
+          "tipo": "mismo-patron"
+        },
+        {
+          "id": "prensa",
+          "tipo": "mismo-patron"
+        },
+        {
+          "id": "prensa-horizontal",
+          "tipo": "mismo-patron"
+        }
+      ],
+      "articulaciones": [
+        "rodilla",
+        "cadera"
+      ]
+    },
+    {
+      "id": "sentadilla-caja",
+      "nombre": {
+        "es-AR": "Sentadilla al cajón",
+        "en-US": "Box squat",
+        "pt-BR": null,
+        "ja-JP": null
+      },
+      "patron": "rodilla-bilateral",
+      "equipamiento": "banco",
+      "lado": "bilateral",
+      "unidad": "reps",
+      "musculos": [
+        {
+          "id": "cuadriceps",
+          "rol": "principal"
+        },
+        {
+          "id": "gluteo",
+          "rol": "secundario"
+        },
+        {
+          "id": "isquiotibiales",
+          "rol": "secundario"
+        }
+      ],
+      "sustitutos": [
+        {
+          "id": "sentadilla-libre",
+          "tipo": "mismo-patron"
+        },
+        {
+          "id": "sentadilla-pared",
+          "tipo": "mismo-patron"
+        },
+        {
+          "id": "extension-rodilla",
+          "tipo": "mismo-patron"
+        }
+      ],
+      "articulaciones": [
+        "rodilla",
+        "cadera"
+      ]
+    },
+    {
+      "id": "prensa-horizontal",
+      "nombre": {
+        "es-AR": "Prensa horizontal",
+        "en-US": "Horizontal leg press",
+        "pt-BR": null,
+        "ja-JP": null
+      },
+      "patron": "rodilla-bilateral",
+      "equipamiento": "maquina",
+      "lado": "bilateral",
+      "unidad": "reps",
+      "musculos": [
+        {
+          "id": "cuadriceps",
+          "rol": "principal"
+        },
+        {
+          "id": "gluteo",
+          "rol": "secundario"
+        }
+      ],
+      "sustitutos": [
+        {
+          "id": "sentadilla-libre",
+          "tipo": "mismo-patron"
+        },
+        {
+          "id": "sentadilla-pared",
+          "tipo": "mismo-patron"
+        },
+        {
+          "id": "sentadilla-caja",
+          "tipo": "mismo-patron"
+        }
+      ],
+      "articulaciones": [
+        "rodilla",
+        "cadera"
+      ]
+    },
+    {
+      "id": "sentadilla-pared",
+      "nombre": {
+        "es-AR": "Sentadilla isométrica en la pared",
+        "en-US": "Wall sit",
+        "pt-BR": null,
+        "ja-JP": null
+      },
+      "patron": "rodilla-bilateral",
+      "equipamiento": "ninguno",
+      "lado": "bilateral",
+      "unidad": "tiempo",
+      "musculos": [
+        {
+          "id": "cuadriceps",
+          "rol": "principal"
+        },
+        {
+          "id": "gluteo",
+          "rol": "secundario"
+        }
+      ],
+      "sustitutos": [
+        {
+          "id": "extension-rodilla",
+          "tipo": "mismo-patron"
+        },
+        {
+          "id": "prensa",
+          "tipo": "mismo-patron"
+        },
+        {
+          "id": "prensa-horizontal",
+          "tipo": "mismo-patron"
+        }
+      ],
+      "articulaciones": [
+        "rodilla",
+        "cadera"
+      ]
+    },
+    {
+      "id": "zancada-caminando",
+      "nombre": {
+        "es-AR": "Zancadas caminando",
+        "en-US": "Walking lunges",
+        "pt-BR": null,
+        "ja-JP": null
+      },
+      "patron": "rodilla-unilateral",
+      "equipamiento": "mancuernas",
+      "lado": "unilateral",
+      "unidad": "reps",
+      "musculos": [
+        {
+          "id": "cuadriceps",
+          "rol": "principal"
+        },
+        {
+          "id": "gluteo",
+          "rol": "secundario"
+        },
+        {
+          "id": "isquiotibiales",
+          "rol": "secundario"
+        }
+      ],
+      "sustitutos": [
+        {
+          "id": "sentadilla-patinador",
+          "tipo": "mismo-patron"
+        },
+        {
+          "id": "sentadilla-una-pierna",
+          "tipo": "mismo-patron"
+        },
+        {
+          "id": "extension-rodilla-una-pierna",
+          "tipo": "mismo-patron"
+        }
+      ],
+      "articulaciones": [
+        "rodilla",
+        "cadera"
+      ]
+    },
+    {
+      "id": "zancada-atras",
+      "nombre": {
+        "es-AR": "Zancada hacia atrás",
+        "en-US": "Reverse lunge",
+        "pt-BR": null,
+        "ja-JP": null
+      },
+      "patron": "rodilla-unilateral",
+      "equipamiento": "mancuernas",
+      "lado": "unilateral",
+      "unidad": "reps",
+      "musculos": [
+        {
+          "id": "gluteo",
+          "rol": "principal"
+        },
+        {
+          "id": "cuadriceps",
+          "rol": "secundario"
+        },
+        {
+          "id": "isquiotibiales",
+          "rol": "secundario"
+        }
+      ],
+      "sustitutos": [
+        {
+          "id": "sentadilla-patinador",
+          "tipo": "mismo-patron"
+        },
+        {
+          "id": "sentadilla-una-pierna",
+          "tipo": "mismo-patron"
+        },
+        {
+          "id": "estocada-deficit",
+          "tipo": "mismo-patron"
+        }
+      ],
+      "articulaciones": [
+        "rodilla",
+        "cadera"
+      ]
+    },
+    {
+      "id": "zancada-lateral",
+      "nombre": {
+        "es-AR": "Zancada lateral",
+        "en-US": "Lateral lunge",
+        "pt-BR": null,
+        "ja-JP": null
+      },
+      "patron": "rodilla-unilateral",
+      "equipamiento": "mancuernas",
+      "lado": "unilateral",
+      "unidad": "reps",
+      "musculos": [
+        {
+          "id": "aductor",
+          "rol": "principal"
+        },
+        {
+          "id": "cuadriceps",
+          "rol": "secundario"
+        },
+        {
+          "id": "gluteo",
+          "rol": "secundario"
+        }
+      ],
+      "sustitutos": [
+        {
+          "id": "sentadilla-patinador",
+          "tipo": "mismo-patron"
+        },
+        {
+          "id": "sentadilla-una-pierna",
+          "tipo": "mismo-patron"
+        },
+        {
+          "id": "estocada-deficit",
+          "tipo": "mismo-patron"
+        }
+      ],
+      "articulaciones": [
+        "rodilla",
+        "cadera"
+      ]
+    },
+    {
+      "id": "prensa-una-pierna",
+      "nombre": {
+        "es-AR": "Prensa a una pierna",
+        "en-US": "Single-leg press",
+        "pt-BR": null,
+        "ja-JP": null
+      },
+      "patron": "rodilla-unilateral",
+      "equipamiento": "maquina",
+      "lado": "unilateral",
+      "unidad": "reps",
+      "musculos": [
+        {
+          "id": "cuadriceps",
+          "rol": "principal"
+        },
+        {
+          "id": "gluteo",
+          "rol": "secundario"
+        }
+      ],
+      "sustitutos": [
+        {
+          "id": "sentadilla-patinador",
+          "tipo": "mismo-patron"
+        },
+        {
+          "id": "sentadilla-una-pierna",
+          "tipo": "mismo-patron"
+        },
+        {
+          "id": "sentadilla-bulgara",
+          "tipo": "mismo-patron"
+        }
+      ],
+      "articulaciones": [
+        "rodilla",
+        "cadera"
+      ]
+    },
+    {
+      "id": "extension-rodilla-una-pierna",
+      "nombre": {
+        "es-AR": "Extensión de rodilla a una pierna",
+        "en-US": "Single-leg extension",
+        "pt-BR": null,
+        "ja-JP": null
+      },
+      "patron": "rodilla-unilateral",
+      "equipamiento": "maquina",
+      "lado": "unilateral",
+      "unidad": "reps",
+      "musculos": [
+        {
+          "id": "cuadriceps",
+          "rol": "principal"
+        }
+      ],
+      "sustitutos": [
+        {
+          "id": "sentadilla-patinador",
+          "tipo": "mismo-patron"
+        },
+        {
+          "id": "sentadilla-una-pierna",
+          "tipo": "mismo-patron"
+        },
+        {
+          "id": "sentadilla-bulgara",
+          "tipo": "mismo-patron"
+        }
+      ],
+      "articulaciones": [
+        "rodilla"
+      ]
+    },
+    {
+      "id": "sentadilla-patinador",
+      "nombre": {
+        "es-AR": "Sentadilla del patinador",
+        "en-US": "Skater squat",
+        "pt-BR": null,
+        "ja-JP": null
+      },
+      "patron": "rodilla-unilateral",
+      "equipamiento": "ninguno",
+      "lado": "unilateral",
+      "unidad": "reps",
+      "musculos": [
+        {
+          "id": "cuadriceps",
+          "rol": "principal"
+        },
+        {
+          "id": "gluteo",
+          "rol": "secundario"
+        },
+        {
+          "id": "core",
+          "rol": "secundario"
+        }
+      ],
+      "sustitutos": [
+        {
+          "id": "extension-rodilla-una-pierna",
+          "tipo": "mismo-patron"
+        },
+        {
+          "id": "prensa-una-pierna",
+          "tipo": "mismo-patron"
+        },
+        {
+          "id": "sentadilla-bulgara",
+          "tipo": "mismo-patron"
+        }
+      ],
+      "articulaciones": [
+        "rodilla",
+        "cadera"
+      ]
+    },
+    {
+      "id": "estocada-deficit",
+      "nombre": {
+        "es-AR": "Zancada con déficit",
+        "en-US": "Deficit lunge",
+        "pt-BR": null,
+        "ja-JP": null
+      },
+      "patron": "rodilla-unilateral",
+      "equipamiento": "banco",
+      "lado": "unilateral",
+      "unidad": "reps",
+      "musculos": [
+        {
+          "id": "gluteo",
+          "rol": "principal"
+        },
+        {
+          "id": "cuadriceps",
+          "rol": "secundario"
+        },
+        {
+          "id": "isquiotibiales",
+          "rol": "secundario"
+        }
+      ],
+      "sustitutos": [
+        {
+          "id": "sentadilla-patinador",
+          "tipo": "mismo-patron"
+        },
+        {
+          "id": "sentadilla-una-pierna",
+          "tipo": "mismo-patron"
+        },
+        {
+          "id": "zancada-atras",
+          "tipo": "mismo-patron"
+        }
+      ],
+      "articulaciones": [
+        "rodilla",
+        "cadera"
+      ]
+    },
+    {
+      "id": "peso-muerto-sumo",
+      "nombre": {
+        "es-AR": "Peso muerto sumo",
+        "en-US": "Sumo deadlift",
+        "pt-BR": null,
+        "ja-JP": null
+      },
+      "patron": "cadera",
+      "equipamiento": "barra",
+      "lado": "bilateral",
+      "unidad": "reps",
+      "musculos": [
+        {
+          "id": "gluteo",
+          "rol": "principal"
+        },
+        {
+          "id": "aductor",
+          "rol": "secundario"
+        },
+        {
+          "id": "cuadriceps",
+          "rol": "secundario"
+        },
+        {
+          "id": "zona-lumbar",
+          "rol": "secundario"
+        }
+      ],
+      "sustitutos": [
+        {
+          "id": "puente-gluteo",
+          "tipo": "mismo-patron"
+        },
+        {
+          "id": "curl-nordico",
+          "tipo": "mismo-patron"
+        },
+        {
+          "id": "hip-thrust-una-pierna",
+          "tipo": "mismo-patron"
+        }
+      ],
+      "articulaciones": [
+        "cadera",
+        "rodilla",
+        "zona-lumbar"
+      ]
+    },
+    {
+      "id": "peso-muerto-piernas-rigidas",
+      "nombre": {
+        "es-AR": "Peso muerto con piernas rígidas",
+        "en-US": "Stiff-leg deadlift",
+        "pt-BR": null,
+        "ja-JP": null
+      },
+      "patron": "cadera",
+      "equipamiento": "barra",
+      "lado": "bilateral",
+      "unidad": "reps",
+      "musculos": [
+        {
+          "id": "isquiotibiales",
+          "rol": "principal"
+        },
+        {
+          "id": "gluteo",
+          "rol": "secundario"
+        },
+        {
+          "id": "zona-lumbar",
+          "rol": "secundario"
+        }
+      ],
+      "sustitutos": [
+        {
+          "id": "curl-nordico",
+          "tipo": "mismo-patron"
+        },
+        {
+          "id": "puente-gluteo",
+          "tipo": "mismo-patron"
+        },
+        {
+          "id": "buenos-dias-banda",
+          "tipo": "mismo-patron"
+        }
+      ],
+      "articulaciones": [
+        "cadera",
+        "zona-lumbar"
+      ]
+    },
+    {
+      "id": "peso-muerto-trap-bar",
+      "nombre": {
+        "es-AR": "Peso muerto con barra hexagonal",
+        "en-US": "Trap bar deadlift",
+        "pt-BR": null,
+        "ja-JP": null
+      },
+      "patron": "cadera",
+      "equipamiento": "barra",
+      "lado": "bilateral",
+      "unidad": "reps",
+      "musculos": [
+        {
+          "id": "gluteo",
+          "rol": "principal"
+        },
+        {
+          "id": "cuadriceps",
+          "rol": "secundario"
+        },
+        {
+          "id": "isquiotibiales",
+          "rol": "secundario"
+        },
+        {
+          "id": "trapecio",
+          "rol": "secundario"
+        }
+      ],
+      "sustitutos": [
+        {
+          "id": "puente-gluteo",
+          "tipo": "mismo-patron"
+        },
+        {
+          "id": "curl-nordico",
+          "tipo": "mismo-patron"
+        },
+        {
+          "id": "hip-thrust-una-pierna",
+          "tipo": "mismo-patron"
+        }
+      ],
+      "articulaciones": [
+        "cadera",
+        "rodilla",
+        "zona-lumbar"
+      ]
+    },
+    {
+      "id": "swing-kettlebell",
+      "nombre": {
+        "es-AR": "Swing con pesa rusa",
+        "en-US": "Kettlebell swing",
+        "pt-BR": null,
+        "ja-JP": null
+      },
+      "patron": "cadera",
+      "equipamiento": "kettlebell",
+      "lado": "bilateral",
+      "unidad": "reps",
+      "musculos": [
+        {
+          "id": "gluteo",
+          "rol": "principal"
+        },
+        {
+          "id": "isquiotibiales",
+          "rol": "secundario"
+        },
+        {
+          "id": "core",
+          "rol": "secundario"
+        }
+      ],
+      "sustitutos": [
+        {
+          "id": "puente-gluteo",
+          "tipo": "mismo-patron"
+        },
+        {
+          "id": "curl-nordico",
+          "tipo": "mismo-patron"
+        },
+        {
+          "id": "hip-thrust",
+          "tipo": "mismo-patron"
+        }
+      ],
+      "articulaciones": [
+        "cadera",
+        "zona-lumbar"
+      ]
+    },
+    {
+      "id": "curl-femoral-sentado",
+      "nombre": {
+        "es-AR": "Curl femoral sentado",
+        "en-US": "Seated leg curl",
+        "pt-BR": null,
+        "ja-JP": null
+      },
+      "patron": "cadera",
+      "equipamiento": "maquina",
+      "lado": "bilateral",
+      "unidad": "reps",
+      "musculos": [
+        {
+          "id": "isquiotibiales",
+          "rol": "principal"
+        },
+        {
+          "id": "gemelo",
+          "rol": "secundario"
+        }
+      ],
+      "sustitutos": [
+        {
+          "id": "curl-nordico",
+          "tipo": "mismo-patron"
+        },
+        {
+          "id": "puente-gluteo",
+          "tipo": "mismo-patron"
+        },
+        {
+          "id": "buenos-dias",
+          "tipo": "mismo-patron"
+        }
+      ],
+      "articulaciones": [
+        "rodilla"
+      ]
+    },
+    {
+      "id": "curl-nordico",
+      "nombre": {
+        "es-AR": "Curl nórdico",
+        "en-US": "Nordic hamstring curl",
+        "pt-BR": null,
+        "ja-JP": null
+      },
+      "patron": "cadera",
+      "equipamiento": "ninguno",
+      "lado": "bilateral",
+      "unidad": "reps",
+      "musculos": [
+        {
+          "id": "isquiotibiales",
+          "rol": "principal"
+        },
+        {
+          "id": "gluteo",
+          "rol": "secundario"
+        }
+      ],
+      "sustitutos": [
+        {
+          "id": "buenos-dias",
+          "tipo": "mismo-patron"
+        },
+        {
+          "id": "buenos-dias-banda",
+          "tipo": "mismo-patron"
+        },
+        {
+          "id": "curl-femoral",
+          "tipo": "mismo-patron"
+        }
+      ],
+      "articulaciones": [
+        "rodilla"
+      ]
+    },
+    {
+      "id": "hip-thrust-una-pierna",
+      "nombre": {
+        "es-AR": "Empuje de cadera a una pierna",
+        "en-US": "Single-leg hip thrust",
+        "pt-BR": null,
+        "ja-JP": null
+      },
+      "patron": "cadera",
+      "equipamiento": "banco",
+      "lado": "unilateral",
+      "unidad": "reps",
+      "musculos": [
+        {
+          "id": "gluteo",
+          "rol": "principal"
+        },
+        {
+          "id": "isquiotibiales",
+          "rol": "secundario"
+        },
+        {
+          "id": "core",
+          "rol": "secundario"
+        }
+      ],
+      "sustitutos": [
+        {
+          "id": "puente-gluteo",
+          "tipo": "mismo-patron"
+        },
+        {
+          "id": "curl-nordico",
+          "tipo": "mismo-patron"
+        },
+        {
+          "id": "hip-thrust",
+          "tipo": "mismo-patron"
+        }
+      ],
+      "articulaciones": [
+        "cadera"
+      ]
+    },
+    {
+      "id": "patada-gluteo-polea",
+      "nombre": {
+        "es-AR": "Patada de glúteo en polea",
+        "en-US": "Cable glute kickback",
+        "pt-BR": null,
+        "ja-JP": null
+      },
+      "patron": "cadera",
+      "equipamiento": "polea",
+      "lado": "unilateral",
+      "unidad": "reps",
+      "musculos": [
+        {
+          "id": "gluteo",
+          "rol": "principal"
+        },
+        {
+          "id": "isquiotibiales",
+          "rol": "secundario"
+        }
+      ],
+      "sustitutos": [
+        {
+          "id": "puente-gluteo",
+          "tipo": "mismo-patron"
+        },
+        {
+          "id": "curl-nordico",
+          "tipo": "mismo-patron"
+        },
+        {
+          "id": "hip-thrust",
+          "tipo": "mismo-patron"
+        }
+      ],
+      "articulaciones": [
+        "cadera"
+      ]
+    },
+    {
+      "id": "abduccion-cadera-maquina",
+      "nombre": {
+        "es-AR": "Abducción de cadera en máquina",
+        "en-US": "Hip abduction machine",
+        "pt-BR": null,
+        "ja-JP": null
+      },
+      "patron": "cadera",
+      "equipamiento": "maquina",
+      "lado": "bilateral",
+      "unidad": "reps",
+      "musculos": [
+        {
+          "id": "abductor",
+          "rol": "principal"
+        },
+        {
+          "id": "gluteo",
+          "rol": "secundario"
+        }
+      ],
+      "sustitutos": [
+        {
+          "id": "curl-nordico",
+          "tipo": "mismo-patron"
+        },
+        {
+          "id": "puente-gluteo",
+          "tipo": "mismo-patron"
+        },
+        {
+          "id": "buenos-dias",
+          "tipo": "mismo-patron"
+        }
+      ],
+      "articulaciones": [
+        "cadera"
+      ]
+    },
+    {
+      "id": "aduccion-cadera-maquina",
+      "nombre": {
+        "es-AR": "Aducción de cadera en máquina",
+        "en-US": "Hip adduction machine",
+        "pt-BR": null,
+        "ja-JP": null
+      },
+      "patron": "cadera",
+      "equipamiento": "maquina",
+      "lado": "bilateral",
+      "unidad": "reps",
+      "musculos": [
+        {
+          "id": "aductor",
+          "rol": "principal"
+        }
+      ],
+      "sustitutos": [
+        {
+          "id": "curl-nordico",
+          "tipo": "mismo-patron"
+        },
+        {
+          "id": "puente-gluteo",
+          "tipo": "mismo-patron"
+        },
+        {
+          "id": "buenos-dias",
+          "tipo": "mismo-patron"
+        }
+      ],
+      "articulaciones": [
+        "cadera"
+      ]
+    },
+    {
+      "id": "extension-lumbar",
+      "nombre": {
+        "es-AR": "Extensión lumbar en banco",
+        "en-US": "Back extension",
+        "pt-BR": null,
+        "ja-JP": null
+      },
+      "patron": "cadera",
+      "equipamiento": "banco",
+      "lado": "bilateral",
+      "unidad": "reps",
+      "musculos": [
+        {
+          "id": "zona-lumbar",
+          "rol": "principal"
+        },
+        {
+          "id": "gluteo",
+          "rol": "secundario"
+        },
+        {
+          "id": "isquiotibiales",
+          "rol": "secundario"
+        }
+      ],
+      "sustitutos": [
+        {
+          "id": "curl-nordico",
+          "tipo": "mismo-patron"
+        },
+        {
+          "id": "puente-gluteo",
+          "tipo": "mismo-patron"
+        },
+        {
+          "id": "abduccion-cadera-maquina",
+          "tipo": "mismo-patron"
+        }
+      ],
+      "articulaciones": [
+        "cadera",
+        "zona-lumbar"
+      ]
+    },
+    {
+      "id": "buenos-dias-banda",
+      "nombre": {
+        "es-AR": "Buenos días con banda",
+        "en-US": "Band good morning",
+        "pt-BR": null,
+        "ja-JP": null
+      },
+      "patron": "cadera",
+      "equipamiento": "banda",
+      "lado": "bilateral",
+      "unidad": "reps",
+      "musculos": [
+        {
+          "id": "isquiotibiales",
+          "rol": "principal"
+        },
+        {
+          "id": "gluteo",
+          "rol": "secundario"
+        },
+        {
+          "id": "zona-lumbar",
+          "rol": "secundario"
+        }
+      ],
+      "sustitutos": [
+        {
+          "id": "curl-nordico",
+          "tipo": "mismo-patron"
+        },
+        {
+          "id": "puente-gluteo",
+          "tipo": "mismo-patron"
+        },
+        {
+          "id": "buenos-dias",
+          "tipo": "mismo-patron"
+        }
+      ],
+      "articulaciones": [
+        "cadera",
+        "zona-lumbar"
+      ]
+    },
+    {
+      "id": "elevacion-talones-prensa",
+      "nombre": {
+        "es-AR": "Elevación de talones en prensa",
+        "en-US": "Leg press calf raise",
+        "pt-BR": null,
+        "ja-JP": null
+      },
+      "patron": "tobillo",
+      "equipamiento": "maquina",
+      "lado": "bilateral",
+      "unidad": "reps",
+      "musculos": [
+        {
+          "id": "gemelo",
+          "rol": "principal"
+        },
+        {
+          "id": "soleo",
+          "rol": "secundario"
+        }
+      ],
+      "sustitutos": [
+        {
+          "id": "elevacion-talones-peso-corporal",
+          "tipo": "mismo-patron"
+        },
+        {
+          "id": "elevacion-talones-una-pierna",
+          "tipo": "mismo-patron"
+        },
+        {
+          "id": "elevacion-talones-pie",
+          "tipo": "mismo-patron"
+        }
+      ],
+      "articulaciones": [
+        "tobillo"
+      ]
+    },
+    {
+      "id": "elevacion-talones-una-pierna",
+      "nombre": {
+        "es-AR": "Elevación de talones a una pierna",
+        "en-US": "Single-leg calf raise",
+        "pt-BR": null,
+        "ja-JP": null
+      },
+      "patron": "tobillo",
+      "equipamiento": "ninguno",
+      "lado": "unilateral",
+      "unidad": "reps",
+      "musculos": [
+        {
+          "id": "gemelo",
+          "rol": "principal"
+        },
+        {
+          "id": "soleo",
+          "rol": "secundario"
+        }
+      ],
+      "sustitutos": [
+        {
+          "id": "elevacion-talones-pie",
+          "tipo": "mismo-patron"
+        },
+        {
+          "id": "elevacion-talones-prensa",
+          "tipo": "mismo-patron"
+        },
+        {
+          "id": "elevacion-talones-smith",
+          "tipo": "mismo-patron"
+        }
+      ],
+      "articulaciones": [
+        "tobillo"
+      ]
+    },
+    {
+      "id": "elevacion-talones-smith",
+      "nombre": {
+        "es-AR": "Elevación de talones en multipower",
+        "en-US": "Smith machine calf raise",
+        "pt-BR": null,
+        "ja-JP": null
+      },
+      "patron": "tobillo",
+      "equipamiento": "smith",
+      "lado": "bilateral",
+      "unidad": "reps",
+      "musculos": [
+        {
+          "id": "gemelo",
+          "rol": "principal"
+        },
+        {
+          "id": "soleo",
+          "rol": "secundario"
+        }
+      ],
+      "sustitutos": [
+        {
+          "id": "elevacion-talones-peso-corporal",
+          "tipo": "mismo-patron"
+        },
+        {
+          "id": "elevacion-talones-una-pierna",
+          "tipo": "mismo-patron"
+        },
+        {
+          "id": "elevacion-talones-pie",
+          "tipo": "mismo-patron"
+        }
+      ],
+      "articulaciones": [
+        "tobillo"
+      ]
+    },
+    {
+      "id": "plancha-pies-elevados",
+      "nombre": {
+        "es-AR": "Plancha con pies elevados",
+        "en-US": "Feet-elevated plank",
+        "pt-BR": null,
+        "ja-JP": null
+      },
+      "patron": "antiextension",
+      "equipamiento": "banco",
+      "lado": "bilateral",
+      "unidad": "tiempo",
+      "musculos": [
+        {
+          "id": "core",
+          "rol": "principal"
+        },
+        {
+          "id": "deltoides-anterior",
+          "rol": "secundario"
+        },
+        {
+          "id": "gluteo",
+          "rol": "secundario"
+        }
+      ],
+      "sustitutos": [
+        {
+          "id": "bicho-muerto",
+          "tipo": "mismo-patron"
+        },
+        {
+          "id": "encogimiento-abdominal",
+          "tipo": "mismo-patron"
+        },
+        {
+          "id": "hollow-hold",
+          "tipo": "mismo-patron"
+        }
+      ],
+      "articulaciones": [
+        "hombro",
+        "zona-lumbar"
+      ]
+    },
+    {
+      "id": "rueda-rodillas",
+      "nombre": {
+        "es-AR": "Rueda abdominal de rodillas",
+        "en-US": "Kneeling ab wheel",
+        "pt-BR": null,
+        "ja-JP": null
+      },
+      "patron": "antiextension",
+      "equipamiento": "ninguno",
+      "lado": "bilateral",
+      "unidad": "reps",
+      "musculos": [
+        {
+          "id": "core",
+          "rol": "principal"
+        },
+        {
+          "id": "dorsal",
+          "rol": "secundario"
+        },
+        {
+          "id": "zona-lumbar",
+          "rol": "secundario"
+        }
+      ],
+      "sustitutos": [
+        {
+          "id": "crunch-polea",
+          "tipo": "mismo-patron"
+        },
+        {
+          "id": "elevacion-piernas-colgado",
+          "tipo": "mismo-patron"
+        },
+        {
+          "id": "elevacion-rodillas-colgado",
+          "tipo": "mismo-patron"
+        }
+      ],
+      "articulaciones": [
+        "hombro",
+        "zona-lumbar"
+      ]
+    },
+    {
+      "id": "encogimiento-abdominal",
+      "nombre": {
+        "es-AR": "Encogimiento abdominal",
+        "en-US": "Crunch",
+        "pt-BR": null,
+        "ja-JP": null
+      },
+      "patron": "antiextension",
+      "equipamiento": "ninguno",
+      "lado": "bilateral",
+      "unidad": "reps",
+      "musculos": [
+        {
+          "id": "core",
+          "rol": "principal"
+        },
+        {
+          "id": "oblicuo",
+          "rol": "secundario"
+        }
+      ],
+      "sustitutos": [
+        {
+          "id": "crunch-polea",
+          "tipo": "mismo-patron"
+        },
+        {
+          "id": "elevacion-piernas-colgado",
+          "tipo": "mismo-patron"
+        },
+        {
+          "id": "elevacion-rodillas-colgado",
+          "tipo": "mismo-patron"
+        }
+      ],
+      "articulaciones": [
+        "zona-lumbar"
+      ]
+    },
+    {
+      "id": "elevacion-piernas-colgado",
+      "nombre": {
+        "es-AR": "Elevación de piernas colgado",
+        "en-US": "Hanging leg raise",
+        "pt-BR": null,
+        "ja-JP": null
+      },
+      "patron": "antiextension",
+      "equipamiento": "barra-fija",
+      "lado": "bilateral",
+      "unidad": "reps",
+      "musculos": [
+        {
+          "id": "core",
+          "rol": "principal"
+        },
+        {
+          "id": "antebrazo",
+          "rol": "secundario"
+        },
+        {
+          "id": "oblicuo",
+          "rol": "secundario"
+        }
+      ],
+      "sustitutos": [
+        {
+          "id": "bicho-muerto",
+          "tipo": "mismo-patron"
+        },
+        {
+          "id": "encogimiento-abdominal",
+          "tipo": "mismo-patron"
+        },
+        {
+          "id": "hollow-hold",
+          "tipo": "mismo-patron"
+        }
+      ],
+      "articulaciones": [
+        "hombro",
+        "cadera"
+      ]
+    },
+    {
+      "id": "elevacion-rodillas-colgado",
+      "nombre": {
+        "es-AR": "Elevación de rodillas colgado",
+        "en-US": "Hanging knee raise",
+        "pt-BR": null,
+        "ja-JP": null
+      },
+      "patron": "antiextension",
+      "equipamiento": "barra-fija",
+      "lado": "bilateral",
+      "unidad": "reps",
+      "musculos": [
+        {
+          "id": "core",
+          "rol": "principal"
+        },
+        {
+          "id": "antebrazo",
+          "rol": "secundario"
+        }
+      ],
+      "sustitutos": [
+        {
+          "id": "bicho-muerto",
+          "tipo": "mismo-patron"
+        },
+        {
+          "id": "encogimiento-abdominal",
+          "tipo": "mismo-patron"
+        },
+        {
+          "id": "hollow-hold",
+          "tipo": "mismo-patron"
+        }
+      ],
+      "articulaciones": [
+        "hombro",
+        "cadera"
+      ]
+    },
+    {
+      "id": "crunch-polea",
+      "nombre": {
+        "es-AR": "Crunch en polea",
+        "en-US": "Cable crunch",
+        "pt-BR": null,
+        "ja-JP": null
+      },
+      "patron": "antiextension",
+      "equipamiento": "polea",
+      "lado": "bilateral",
+      "unidad": "reps",
+      "musculos": [
+        {
+          "id": "core",
+          "rol": "principal"
+        },
+        {
+          "id": "oblicuo",
+          "rol": "secundario"
+        }
+      ],
+      "sustitutos": [
+        {
+          "id": "bicho-muerto",
+          "tipo": "mismo-patron"
+        },
+        {
+          "id": "encogimiento-abdominal",
+          "tipo": "mismo-patron"
+        },
+        {
+          "id": "hollow-hold",
+          "tipo": "mismo-patron"
+        }
+      ],
+      "articulaciones": [
+        "zona-lumbar"
+      ]
+    },
+    {
+      "id": "hollow-hold",
+      "nombre": {
+        "es-AR": "Hollow hold",
+        "en-US": "Hollow hold",
+        "pt-BR": null,
+        "ja-JP": null
+      },
+      "patron": "antiextension",
+      "equipamiento": "ninguno",
+      "lado": "bilateral",
+      "unidad": "tiempo",
+      "musculos": [
+        {
+          "id": "core",
+          "rol": "principal"
+        },
+        {
+          "id": "cuadriceps",
+          "rol": "secundario"
+        }
+      ],
+      "sustitutos": [
+        {
+          "id": "crunch-polea",
+          "tipo": "mismo-patron"
+        },
+        {
+          "id": "elevacion-piernas-colgado",
+          "tipo": "mismo-patron"
+        },
+        {
+          "id": "elevacion-rodillas-colgado",
+          "tipo": "mismo-patron"
+        }
+      ],
+      "articulaciones": [
+        "zona-lumbar"
+      ]
+    },
+    {
+      "id": "plancha-alta",
+      "nombre": {
+        "es-AR": "Plancha alta",
+        "en-US": "High plank",
+        "pt-BR": null,
+        "ja-JP": null
+      },
+      "patron": "antiextension",
+      "equipamiento": "ninguno",
+      "lado": "bilateral",
+      "unidad": "tiempo",
+      "musculos": [
+        {
+          "id": "core",
+          "rol": "principal"
+        },
+        {
+          "id": "deltoides-anterior",
+          "rol": "secundario"
+        },
+        {
+          "id": "serrato",
+          "rol": "secundario"
+        }
+      ],
+      "sustitutos": [
+        {
+          "id": "crunch-polea",
+          "tipo": "mismo-patron"
+        },
+        {
+          "id": "elevacion-piernas-colgado",
+          "tipo": "mismo-patron"
+        },
+        {
+          "id": "elevacion-rodillas-colgado",
+          "tipo": "mismo-patron"
+        }
+      ],
+      "articulaciones": [
+        "hombro",
+        "muneca"
+      ]
+    },
+    {
+      "id": "paseo-maleta-kettlebell",
+      "nombre": {
+        "es-AR": "Paseo del maletero con pesa rusa",
+        "en-US": "Kettlebell suitcase carry",
+        "pt-BR": null,
+        "ja-JP": null
+      },
+      "patron": "antilateral",
+      "equipamiento": "kettlebell",
+      "lado": "unilateral",
+      "unidad": "tiempo",
+      "musculos": [
+        {
+          "id": "oblicuo",
+          "rol": "principal"
+        },
+        {
+          "id": "core",
+          "rol": "secundario"
+        },
+        {
+          "id": "trapecio",
+          "rol": "secundario"
+        },
+        {
+          "id": "antebrazo",
+          "rol": "secundario"
+        }
+      ],
+      "sustitutos": [
+        {
+          "id": "plancha-lateral-elevacion",
+          "tipo": "mismo-patron"
+        },
+        {
+          "id": "plancha-lateral",
+          "tipo": "mismo-patron"
+        },
+        {
+          "id": "plancha-lateral-rodillas",
+          "tipo": "mismo-patron"
+        }
+      ],
+      "articulaciones": [
+        "hombro",
+        "zona-lumbar"
+      ]
+    },
+    {
+      "id": "plancha-lateral-elevacion",
+      "nombre": {
+        "es-AR": "Plancha lateral con elevación de cadera",
+        "en-US": "Side plank hip lift",
+        "pt-BR": null,
+        "ja-JP": null
+      },
+      "patron": "antilateral",
+      "equipamiento": "ninguno",
+      "lado": "unilateral",
+      "unidad": "reps",
+      "musculos": [
+        {
+          "id": "oblicuo",
+          "rol": "principal"
+        },
+        {
+          "id": "core",
+          "rol": "secundario"
+        },
+        {
+          "id": "gluteo",
+          "rol": "secundario"
+        }
+      ],
+      "sustitutos": [
+        {
+          "id": "paseo-maleta-kettlebell",
+          "tipo": "mismo-patron"
+        },
+        {
+          "id": "paseo-maleta",
+          "tipo": "mismo-patron"
+        },
+        {
+          "id": "plancha-lateral",
+          "tipo": "mismo-patron"
+        }
+      ],
+      "articulaciones": [
+        "hombro",
+        "zona-lumbar"
+      ]
+    },
+    {
+      "id": "pallof-press-rodillas",
+      "nombre": {
+        "es-AR": "Pallof press de rodillas",
+        "en-US": "Half-kneeling Pallof press",
+        "pt-BR": null,
+        "ja-JP": null
+      },
+      "patron": "antirotacion",
+      "equipamiento": "polea",
+      "lado": "unilateral",
+      "unidad": "reps",
+      "musculos": [
+        {
+          "id": "core",
+          "rol": "principal"
+        },
+        {
+          "id": "oblicuo",
+          "rol": "secundario"
+        },
+        {
+          "id": "gluteo",
+          "rol": "secundario"
+        }
+      ],
+      "sustitutos": [
+        {
+          "id": "perro-pajaro",
+          "tipo": "mismo-patron"
+        },
+        {
+          "id": "toque-hombro-plancha",
+          "tipo": "mismo-patron"
+        },
+        {
+          "id": "pallof-press",
+          "tipo": "mismo-patron"
+        }
+      ],
+      "articulaciones": [
+        "zona-lumbar"
+      ]
+    },
+    {
+      "id": "plancha-arrastre",
+      "nombre": {
+        "es-AR": "Plancha con arrastre de peso",
+        "en-US": "Plank drag-through",
+        "pt-BR": null,
+        "ja-JP": null
+      },
+      "patron": "antirotacion",
+      "equipamiento": "mancuernas",
+      "lado": "unilateral",
+      "unidad": "reps",
+      "musculos": [
+        {
+          "id": "core",
+          "rol": "principal"
+        },
+        {
+          "id": "oblicuo",
+          "rol": "secundario"
+        },
+        {
+          "id": "deltoides-anterior",
+          "rol": "secundario"
+        }
+      ],
+      "sustitutos": [
+        {
+          "id": "perro-pajaro",
+          "tipo": "mismo-patron"
+        },
+        {
+          "id": "toque-hombro-plancha",
+          "tipo": "mismo-patron"
+        },
+        {
+          "id": "pallof-press",
+          "tipo": "mismo-patron"
+        }
+      ],
+      "articulaciones": [
+        "hombro",
+        "zona-lumbar"
+      ]
+    },
+    {
+      "id": "giro-ruso",
+      "nombre": {
+        "es-AR": "Giro ruso",
+        "en-US": "Russian twist",
+        "pt-BR": null,
+        "ja-JP": null
+      },
+      "patron": "rotacion",
+      "equipamiento": "disco",
+      "lado": "bilateral",
+      "unidad": "reps",
+      "musculos": [
+        {
+          "id": "oblicuo",
+          "rol": "principal"
+        },
+        {
+          "id": "core",
+          "rol": "secundario"
+        }
+      ],
+      "sustitutos": [
+        {
+          "id": "lena-polea",
+          "tipo": "mismo-patron"
+        },
+        {
+          "id": "rotacion-banda-de-pie",
+          "tipo": "mismo-patron"
+        }
+      ],
+      "articulaciones": [
+        "zona-lumbar"
+      ]
+    },
+    {
+      "id": "lena-polea",
+      "nombre": {
+        "es-AR": "Leñador en polea",
+        "en-US": "Cable woodchopper",
+        "pt-BR": null,
+        "ja-JP": null
+      },
+      "patron": "rotacion",
+      "equipamiento": "polea",
+      "lado": "unilateral",
+      "unidad": "reps",
+      "musculos": [
+        {
+          "id": "oblicuo",
+          "rol": "principal"
+        },
+        {
+          "id": "core",
+          "rol": "secundario"
+        },
+        {
+          "id": "gluteo",
+          "rol": "secundario"
+        }
+      ],
+      "sustitutos": [
+        {
+          "id": "giro-ruso",
+          "tipo": "mismo-patron"
+        },
+        {
+          "id": "rotacion-banda-de-pie",
+          "tipo": "mismo-patron"
+        }
+      ],
+      "articulaciones": [
+        "zona-lumbar",
+        "hombro"
+      ]
+    },
+    {
+      "id": "rotacion-banda-de-pie",
+      "nombre": {
+        "es-AR": "Rotación de tronco con banda",
+        "en-US": "Standing band rotation",
+        "pt-BR": null,
+        "ja-JP": null
+      },
+      "patron": "rotacion",
+      "equipamiento": "banda",
+      "lado": "unilateral",
+      "unidad": "reps",
+      "musculos": [
+        {
+          "id": "oblicuo",
+          "rol": "principal"
+        },
+        {
+          "id": "core",
+          "rol": "secundario"
+        }
+      ],
+      "sustitutos": [
+        {
+          "id": "giro-ruso",
+          "tipo": "mismo-patron"
+        },
+        {
+          "id": "lena-polea",
+          "tipo": "mismo-patron"
+        }
+      ],
+      "articulaciones": [
+        "zona-lumbar"
+      ]
+    },
+    {
+      "id": "paseo-granjero",
+      "nombre": {
+        "es-AR": "Paseo del granjero",
+        "en-US": "Farmer's walk",
+        "pt-BR": null,
+        "ja-JP": null
+      },
+      "patron": "acarreo",
+      "equipamiento": "mancuernas",
+      "lado": "bilateral",
+      "unidad": "tiempo",
+      "musculos": [
+        {
+          "id": "antebrazo",
+          "rol": "principal"
+        },
+        {
+          "id": "trapecio",
+          "rol": "secundario"
+        },
+        {
+          "id": "core",
+          "rol": "secundario"
+        }
+      ],
+      "sustitutos": [
+        {
+          "id": "paseo-frontal",
+          "tipo": "mismo-patron"
+        },
+        {
+          "id": "paseo-sobre-cabeza",
+          "tipo": "mismo-patron"
+        }
+      ],
+      "articulaciones": [
+        "hombro",
+        "zona-lumbar"
+      ]
+    },
+    {
+      "id": "paseo-sobre-cabeza",
+      "nombre": {
+        "es-AR": "Paseo con peso sobre la cabeza",
+        "en-US": "Overhead carry",
+        "pt-BR": null,
+        "ja-JP": null
+      },
+      "patron": "acarreo",
+      "equipamiento": "kettlebell",
+      "lado": "unilateral",
+      "unidad": "tiempo",
+      "musculos": [
+        {
+          "id": "deltoides-anterior",
+          "rol": "principal"
+        },
+        {
+          "id": "core",
+          "rol": "secundario"
+        },
+        {
+          "id": "trapecio",
+          "rol": "secundario"
+        }
+      ],
+      "sustitutos": [
+        {
+          "id": "paseo-granjero",
+          "tipo": "mismo-patron"
+        },
+        {
+          "id": "paseo-frontal",
+          "tipo": "mismo-patron"
+        }
+      ],
+      "articulaciones": [
+        "hombro",
+        "zona-lumbar"
+      ]
+    },
+    {
+      "id": "paseo-frontal",
+      "nombre": {
+        "es-AR": "Paseo con peso al pecho",
+        "en-US": "Front-racked carry",
+        "pt-BR": null,
+        "ja-JP": null
+      },
+      "patron": "acarreo",
+      "equipamiento": "kettlebell",
+      "lado": "bilateral",
+      "unidad": "tiempo",
+      "musculos": [
+        {
+          "id": "core",
+          "rol": "principal"
+        },
+        {
+          "id": "cuadriceps",
+          "rol": "secundario"
+        },
+        {
+          "id": "trapecio",
+          "rol": "secundario"
+        }
+      ],
+      "sustitutos": [
+        {
+          "id": "paseo-granjero",
+          "tipo": "mismo-patron"
+        },
+        {
+          "id": "paseo-sobre-cabeza",
+          "tipo": "mismo-patron"
+        }
+      ],
+      "articulaciones": [
+        "zona-lumbar",
+        "hombro"
+      ]
+    },
+    {
+      "id": "curl-martillo",
+      "nombre": {
+        "es-AR": "Curl martillo",
+        "en-US": "Hammer curl",
+        "pt-BR": null,
+        "ja-JP": null
+      },
+      "patron": "codo-flexion",
+      "equipamiento": "mancuernas",
+      "lado": "bilateral",
+      "unidad": "reps",
+      "musculos": [
+        {
+          "id": "biceps",
+          "rol": "principal"
+        },
+        {
+          "id": "antebrazo",
+          "rol": "secundario"
+        }
+      ],
+      "sustitutos": [
+        {
+          "id": "curl-banda",
+          "tipo": "mismo-patron"
+        },
+        {
+          "id": "curl-barra",
+          "tipo": "mismo-patron"
+        },
+        {
+          "id": "curl-barra-z",
+          "tipo": "mismo-patron"
+        }
+      ],
+      "articulaciones": [
+        "codo"
+      ]
+    },
+    {
+      "id": "curl-predicador",
+      "nombre": {
+        "es-AR": "Curl en banco predicador",
+        "en-US": "Preacher curl",
+        "pt-BR": null,
+        "ja-JP": null
+      },
+      "patron": "codo-flexion",
+      "equipamiento": "barra",
+      "lado": "bilateral",
+      "unidad": "reps",
+      "musculos": [
+        {
+          "id": "biceps",
+          "rol": "principal"
+        },
+        {
+          "id": "antebrazo",
+          "rol": "secundario"
+        }
+      ],
+      "sustitutos": [
+        {
+          "id": "curl-banda",
+          "tipo": "mismo-patron"
+        },
+        {
+          "id": "curl-biceps",
+          "tipo": "mismo-patron"
+        },
+        {
+          "id": "curl-concentrado",
+          "tipo": "mismo-patron"
+        }
+      ],
+      "articulaciones": [
+        "codo"
+      ]
+    },
+    {
+      "id": "curl-polea",
+      "nombre": {
+        "es-AR": "Curl en polea",
+        "en-US": "Cable curl",
+        "pt-BR": null,
+        "ja-JP": null
+      },
+      "patron": "codo-flexion",
+      "equipamiento": "polea",
+      "lado": "bilateral",
+      "unidad": "reps",
+      "musculos": [
+        {
+          "id": "biceps",
+          "rol": "principal"
+        },
+        {
+          "id": "antebrazo",
+          "rol": "secundario"
+        }
+      ],
+      "sustitutos": [
+        {
+          "id": "curl-banda",
+          "tipo": "mismo-patron"
+        },
+        {
+          "id": "curl-barra",
+          "tipo": "mismo-patron"
+        },
+        {
+          "id": "curl-barra-z",
+          "tipo": "mismo-patron"
+        }
+      ],
+      "articulaciones": [
+        "codo"
+      ]
+    },
+    {
+      "id": "curl-concentrado",
+      "nombre": {
+        "es-AR": "Curl concentrado",
+        "en-US": "Concentration curl",
+        "pt-BR": null,
+        "ja-JP": null
+      },
+      "patron": "codo-flexion",
+      "equipamiento": "mancuernas",
+      "lado": "unilateral",
+      "unidad": "reps",
+      "musculos": [
+        {
+          "id": "biceps",
+          "rol": "principal"
+        },
+        {
+          "id": "antebrazo",
+          "rol": "secundario"
+        }
+      ],
+      "sustitutos": [
+        {
+          "id": "curl-banda",
+          "tipo": "mismo-patron"
+        },
+        {
+          "id": "curl-barra",
+          "tipo": "mismo-patron"
+        },
+        {
+          "id": "curl-barra-z",
+          "tipo": "mismo-patron"
+        }
+      ],
+      "articulaciones": [
+        "codo"
+      ]
+    },
+    {
+      "id": "curl-inclinado",
+      "nombre": {
+        "es-AR": "Curl en banco inclinado",
+        "en-US": "Incline dumbbell curl",
+        "pt-BR": null,
+        "ja-JP": null
+      },
+      "patron": "codo-flexion",
+      "equipamiento": "mancuernas",
+      "lado": "bilateral",
+      "unidad": "reps",
+      "musculos": [
+        {
+          "id": "biceps",
+          "rol": "principal"
+        },
+        {
+          "id": "antebrazo",
+          "rol": "secundario"
+        }
+      ],
+      "sustitutos": [
+        {
+          "id": "curl-banda",
+          "tipo": "mismo-patron"
+        },
+        {
+          "id": "curl-barra",
+          "tipo": "mismo-patron"
+        },
+        {
+          "id": "curl-barra-z",
+          "tipo": "mismo-patron"
+        }
+      ],
+      "articulaciones": [
+        "codo",
+        "hombro"
+      ]
+    },
+    {
+      "id": "curl-barra-z",
+      "nombre": {
+        "es-AR": "Curl con barra Z",
+        "en-US": "EZ-bar curl",
+        "pt-BR": null,
+        "ja-JP": null
+      },
+      "patron": "codo-flexion",
+      "equipamiento": "barra",
+      "lado": "bilateral",
+      "unidad": "reps",
+      "musculos": [
+        {
+          "id": "biceps",
+          "rol": "principal"
+        },
+        {
+          "id": "antebrazo",
+          "rol": "secundario"
+        }
+      ],
+      "sustitutos": [
+        {
+          "id": "curl-banda",
+          "tipo": "mismo-patron"
+        },
+        {
+          "id": "curl-biceps",
+          "tipo": "mismo-patron"
+        },
+        {
+          "id": "curl-concentrado",
+          "tipo": "mismo-patron"
+        }
+      ],
+      "articulaciones": [
+        "codo"
+      ]
+    },
+    {
+      "id": "curl-banda",
+      "nombre": {
+        "es-AR": "Curl con banda",
+        "en-US": "Band curl",
+        "pt-BR": null,
+        "ja-JP": null
+      },
+      "patron": "codo-flexion",
+      "equipamiento": "banda",
+      "lado": "bilateral",
+      "unidad": "reps",
+      "musculos": [
+        {
+          "id": "biceps",
+          "rol": "principal"
+        },
+        {
+          "id": "antebrazo",
+          "rol": "secundario"
+        }
+      ],
+      "sustitutos": [
+        {
+          "id": "curl-barra",
+          "tipo": "mismo-patron"
+        },
+        {
+          "id": "curl-barra-z",
+          "tipo": "mismo-patron"
+        },
+        {
+          "id": "curl-biceps",
+          "tipo": "mismo-patron"
+        }
+      ],
+      "articulaciones": [
+        "codo"
+      ]
+    },
+    {
+      "id": "press-frances",
+      "nombre": {
+        "es-AR": "Press francés",
+        "en-US": "Skull crusher",
+        "pt-BR": null,
+        "ja-JP": null
+      },
+      "patron": "codo-extension",
+      "equipamiento": "barra",
+      "lado": "bilateral",
+      "unidad": "reps",
+      "musculos": [
+        {
+          "id": "triceps",
+          "rol": "principal"
+        }
+      ],
+      "sustitutos": [
+        {
+          "id": "fondos-banco",
+          "tipo": "mismo-patron"
+        },
+        {
+          "id": "extension-triceps-banda",
+          "tipo": "mismo-patron"
+        },
+        {
+          "id": "extension-triceps-mancuerna",
+          "tipo": "mismo-patron"
+        }
+      ],
+      "articulaciones": [
+        "codo"
+      ]
+    },
+    {
+      "id": "extension-triceps-sobre-cabeza",
+      "nombre": {
+        "es-AR": "Extensión de tríceps sobre la cabeza",
+        "en-US": "Overhead cable triceps extension",
+        "pt-BR": null,
+        "ja-JP": null
+      },
+      "patron": "codo-extension",
+      "equipamiento": "polea",
+      "lado": "bilateral",
+      "unidad": "reps",
+      "musculos": [
+        {
+          "id": "triceps",
+          "rol": "principal"
+        }
+      ],
+      "sustitutos": [
+        {
+          "id": "fondos-banco",
+          "tipo": "mismo-patron"
+        },
+        {
+          "id": "extension-triceps-banda",
+          "tipo": "mismo-patron"
+        },
+        {
+          "id": "extension-triceps-mancuerna",
+          "tipo": "mismo-patron"
+        }
+      ],
+      "articulaciones": [
+        "codo",
+        "hombro"
+      ]
+    },
+    {
+      "id": "patada-triceps",
+      "nombre": {
+        "es-AR": "Patada de tríceps",
+        "en-US": "Triceps kickback",
+        "pt-BR": null,
+        "ja-JP": null
+      },
+      "patron": "codo-extension",
+      "equipamiento": "mancuernas",
+      "lado": "unilateral",
+      "unidad": "reps",
+      "musculos": [
+        {
+          "id": "triceps",
+          "rol": "principal"
+        }
+      ],
+      "sustitutos": [
+        {
+          "id": "fondos-banco",
+          "tipo": "mismo-patron"
+        },
+        {
+          "id": "extension-triceps-banda",
+          "tipo": "mismo-patron"
+        },
+        {
+          "id": "extension-triceps-polea",
+          "tipo": "mismo-patron"
+        }
+      ],
+      "articulaciones": [
+        "codo"
+      ]
+    },
+    {
+      "id": "fondos-maquina",
+      "nombre": {
+        "es-AR": "Fondos en máquina",
+        "en-US": "Machine dip",
+        "pt-BR": null,
+        "ja-JP": null
+      },
+      "patron": "codo-extension",
+      "equipamiento": "maquina",
+      "lado": "bilateral",
+      "unidad": "reps",
+      "musculos": [
+        {
+          "id": "triceps",
+          "rol": "principal"
+        },
+        {
+          "id": "pectoral",
+          "rol": "secundario"
+        },
+        {
+          "id": "deltoides-anterior",
+          "rol": "secundario"
+        }
+      ],
+      "sustitutos": [
+        {
+          "id": "fondos-banco",
+          "tipo": "mismo-patron"
+        },
+        {
+          "id": "extension-triceps-banda",
+          "tipo": "mismo-patron"
+        },
+        {
+          "id": "extension-triceps-mancuerna",
+          "tipo": "mismo-patron"
+        }
+      ],
+      "articulaciones": [
+        "hombro",
+        "codo"
+      ]
+    },
+    {
+      "id": "press-cerrado-banca",
+      "nombre": {
+        "es-AR": "Press de banca con agarre cerrado",
+        "en-US": "Close-grip bench press",
+        "pt-BR": null,
+        "ja-JP": null
+      },
+      "patron": "codo-extension",
+      "equipamiento": "barra",
+      "lado": "bilateral",
+      "unidad": "reps",
+      "musculos": [
+        {
+          "id": "triceps",
+          "rol": "principal"
+        },
+        {
+          "id": "pectoral",
+          "rol": "secundario"
+        },
+        {
+          "id": "deltoides-anterior",
+          "rol": "secundario"
+        }
+      ],
+      "sustitutos": [
+        {
+          "id": "fondos-banco",
+          "tipo": "mismo-patron"
+        },
+        {
+          "id": "extension-triceps-banda",
+          "tipo": "mismo-patron"
+        },
+        {
+          "id": "extension-triceps-mancuerna",
+          "tipo": "mismo-patron"
+        }
+      ],
+      "articulaciones": [
+        "hombro",
+        "codo"
+      ]
+    },
+    {
+      "id": "extension-triceps-banda",
+      "nombre": {
+        "es-AR": "Extensión de tríceps con banda",
+        "en-US": "Band triceps extension",
+        "pt-BR": null,
+        "ja-JP": null
+      },
+      "patron": "codo-extension",
+      "equipamiento": "banda",
+      "lado": "bilateral",
+      "unidad": "reps",
+      "musculos": [
+        {
+          "id": "triceps",
+          "rol": "principal"
+        }
+      ],
+      "sustitutos": [
+        {
+          "id": "fondos-banco",
+          "tipo": "mismo-patron"
+        },
+        {
+          "id": "extension-triceps-mancuerna",
+          "tipo": "mismo-patron"
+        },
+        {
+          "id": "extension-triceps-polea",
+          "tipo": "mismo-patron"
+        }
+      ],
+      "articulaciones": [
+        "codo"
+      ]
+    },
+    {
+      "id": "curl-muneca",
+      "nombre": {
+        "es-AR": "Curl de muñeca",
+        "en-US": "Wrist curl",
+        "pt-BR": null,
+        "ja-JP": null
+      },
+      "patron": "agarre",
+      "equipamiento": "mancuernas",
+      "lado": "bilateral",
+      "unidad": "reps",
+      "musculos": [
+        {
+          "id": "antebrazo",
+          "rol": "principal"
+        }
+      ],
+      "sustitutos": [
+        {
+          "id": "colgarse-barra",
+          "tipo": "mismo-patron"
+        }
+      ],
+      "articulaciones": [
+        "muneca"
+      ]
+    },
+    {
+      "id": "colgarse-barra",
+      "nombre": {
+        "es-AR": "Colgarse de la barra",
+        "en-US": "Dead hang",
+        "pt-BR": null,
+        "ja-JP": null
+      },
+      "patron": "agarre",
+      "equipamiento": "barra-fija",
+      "lado": "bilateral",
+      "unidad": "tiempo",
+      "musculos": [
+        {
+          "id": "antebrazo",
+          "rol": "principal"
+        },
+        {
+          "id": "dorsal",
+          "rol": "secundario"
+        },
+        {
+          "id": "trapecio",
+          "rol": "secundario"
+        }
+      ],
+      "sustitutos": [
+        {
+          "id": "curl-muneca",
+          "tipo": "mismo-patron"
+        }
+      ],
+      "articulaciones": [
+        "hombro",
+        "muneca"
+      ]
+    }
+  ]
+}

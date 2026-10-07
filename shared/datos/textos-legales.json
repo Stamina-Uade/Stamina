@@ -1,0 +1,105 @@
+{
+  "_meta": {
+    "version": "0.1.0",
+    "fecha": "2026-09-09",
+
+    "_ESTADO": "🛑 BORRADOR. NINGUN TEXTO DE ESTE ARCHIVO FUE REVISADO POR UNA PERSONA CON FORMACION LEGAL.",
+
+    "_que_es_esto": "El aviso de salud que se muestra en el registro y los terminos y condiciones. Estan aca y NO en strings.xml por dos motivos: (1) hay que poder cambiarlos sin publicar una version nueva en la tienda, y (2) lo que se guarda cuando alguien acepta es la VERSION de este archivo, y eso solo sirve si la version vive con el texto.",
+
+    "_quien_los_escribio": "El agente, el 2026-09-09, a pedido de Ivan, con el encargo explicito de 'crea el aviso medico y unos terminos que creas mejor, por ahora'. NO SON ASESORAMIENTO LEGAL. El agente no es abogado y no conoce la jurisdiccion, la razon social ni el domicilio de la empresa.",
+
+    "_criterio_con_el_que_se_escribieron": "Decir la verdad sobre lo que la app hace y lo que NO hace, en castellano llano y corto. Un aviso que nadie lee no defiende a nadie: si tiene doce parrafos de jerga, la primera pregunta de la otra parte va a ser si la persona podia entenderlo. Se escribio para que se lea en menos de un minuto.",
+
+    "_como_se_cambia": "1) Edita el texto. 2) SUBI la version (es lo que se guarda cuando alguien acepta: si cambia el texto y no cambia la version, las aceptaciones viejas quedan apuntando a un texto que ya no existe). 3) Poné 'estado' en 'revisado' y llena 'revisado_por' y 'revisado_en'.",
+
+    "_que_pasa_mientras_no_se_revisen": "EL BACKEND SE NIEGA A ARRANCAR EN PRODUCCION mientras quede un texto en 'borrador', igual que con los guardarrailes de nutricion. En desarrollo arranca con un aviso.",
+
+    "_lo_que_falta_y_NO_se_invento": [
+      "La razon social, el domicilio y el pais cuya ley aplica: aparecen como {{EMPRESA}}, {{DOMICILIO}} y {{JURISDICCION}} y NO se completaron. Poner una jurisdiccion inventada es peor que no poner ninguna.",
+      "El correo de contacto: {{CORREO_CONTACTO}}.",
+      "La politica de privacidad completa (que datos se guardan, cuanto tiempo, con quien se comparten). Es un texto aparte y depende de decisiones que todavia no se tomaron: donde vive la base, quien la puede leer, si hay analitica.",
+      "El regimen de menores. AGENTS.md 9.2 los deja FUERA DE ALCANCE, y el texto lo dice; que edad minima se exige y como se verifica es una decision que no esta tomada."
+    ]
+  },
+
+  "textos": {
+    "aviso_de_salud": {
+      "estado": "borrador",
+      "revisado_por": null,
+      "revisado_en": null,
+      "titulo": "Antes de empezar, leé esto",
+      "resumen": "Trainer te arma un plan de entrenamiento y de alimentación a partir de los datos que cargás. No es un profesional de la salud y no te conoce.",
+      "puntos": [
+        {
+          "titulo": "Consultá a un profesional",
+          "cuerpo": "Antes de empezar un plan nuevo, hablá con tu médico o médica —y con un nutricionista si vas a cambiar cómo comés—. Es especialmente importante si tenés una condición cardíaca, respiratoria, metabólica o articular, si estás con alguna medicación, si volvés después de una lesión, o si hace mucho que no entrenás."
+        },
+        {
+          "titulo": "Esto no es un diagnóstico ni un tratamiento",
+          "cuerpo": "Trainer no diagnostica, no trata y no reemplaza a nadie con formación. Los números de calorías, hidratación y sales son ESTIMACIONES calculadas con fórmulas generales a partir de tu peso, tu altura y el clima. Tu cuerpo puede necesitar otra cosa."
+        },
+        {
+          "titulo": "Si algo te pasa, pará",
+          "cuerpo": "Dolor en el pecho, mareo, falta de aire que no cede, visión borrosa, confusión: parás y buscás ayuda. No hay ningún entrenamiento que valga eso. Ante una emergencia, llamá al número de emergencias de tu zona: la app no avisa a nadie por vos."
+        },
+        {
+          "titulo": "Hay gente para la que esta app todavía no sirve",
+          "cuerpo": "Trainer no da objetivos calóricos a menores de edad, ni durante el embarazo o la lactancia. No es un descuido: son situaciones que necesitan un seguimiento propio y la app no lo tiene. Si estás en alguna de las tres, usala solo para registrar entrenamientos y seguí las indicaciones de tu profesional."
+        },
+        {
+          "titulo": "Vos decidís",
+          "cuerpo": "El plan es una sugerencia. Cómo, cuándo y cuánto entrenás lo decidís vos, y sos responsable de eso. Si el plan te pide algo que no te cierra, no lo hagas."
+        }
+      ],
+      "aceptacion": "Leí el aviso, entiendo que Trainer no reemplaza a un profesional de la salud y voy a consultar si algo me hace ruido."
+    },
+
+    "terminos": {
+      "estado": "borrador",
+      "revisado_por": null,
+      "revisado_en": null,
+      "titulo": "Términos y condiciones",
+      "resumen": "Resumen: es una app de entrenamiento, no un servicio de salud. Tus datos son tuyos. No la uses para lastimarte ni para lastimar a otro.",
+      "secciones": [
+        {
+          "titulo": "1. Quiénes somos",
+          "cuerpo": "Trainer es un servicio de {{EMPRESA}}, con domicilio en {{DOMICILIO}}. Podés escribirnos a {{CORREO_CONTACTO}}."
+        },
+        {
+          "titulo": "2. Qué hace la app, y qué no",
+          "cuerpo": "Trainer arma planes de entrenamiento, hidratación y alimentación a partir de los datos que cargás, y registra lo que hacés. NO es un producto médico, no diagnostica, no trata ni previene ninguna enfermedad, y no reemplaza la consulta con un profesional. Todo lo que muestra son estimaciones calculadas con fórmulas generales. El aviso de salud que aceptaste al registrarte es parte de estos términos y se aplica entero."
+        },
+        {
+          "titulo": "3. Tu cuenta",
+          "cuerpo": "Necesitás una dirección de correo válida y una contraseña. La contraseña es tuya y es tu responsabilidad no compartirla. Si creés que alguien entró a tu cuenta, escribinos y cambiala. Podés cerrar tu cuenta cuando quieras."
+        },
+        {
+          "titulo": "4. Tu responsabilidad al entrenar",
+          "cuerpo": "Entrenar tiene riesgos: lesiones, golpes de calor, deshidratación, y en casos raros cosas peores. Al usar Trainer aceptás que entrenás por tu cuenta y riesgo, que consultaste o vas a consultar a un profesional, y que vas a parar si te sentís mal. No somos responsables por lesiones o daños derivados de que sigas —o de que no sigas— un plan de la app."
+        },
+        {
+          "titulo": "5. Tus datos",
+          "cuerpo": "Los datos que cargás son tuyos. Los usamos para armar y ajustar tu plan, y para nada más: no los vendemos ni se los damos a terceros para publicidad. Los datos de salud tienen tratamiento especial y no aparecen en registros técnicos. Podés pedirnos una copia o que los borremos escribiendo a {{CORREO_CONTACTO}}. El detalle completo está en la política de privacidad."
+        },
+        {
+          "titulo": "6. Edad mínima",
+          "cuerpo": "Trainer es para personas mayores de edad. Si sos menor, la app no te va a dar objetivos calóricos, y hay funciones que no vas a poder usar."
+        },
+        {
+          "titulo": "7. Uso indebido",
+          "cuerpo": "No uses Trainer para dañarte ni para presionar a otra persona a bajar de peso o a entrenar más allá de lo razonable. Si detectamos un uso que puede terminar en un daño, podemos limitar funciones o cerrar la cuenta."
+        },
+        {
+          "titulo": "8. Cambios",
+          "cuerpo": "Podemos cambiar la app y estos términos. Si el cambio te afecta de verdad, te avisamos antes por correo y te pedimos que aceptes la versión nueva. Guardamos qué versión aceptaste y cuándo."
+        },
+        {
+          "titulo": "9. Ley aplicable",
+          "cuerpo": "Estos términos se rigen por la ley de {{JURISDICCION}}."
+        }
+      ],
+      "aceptacion": "Acepto los términos y condiciones."
+    }
+  }
+}

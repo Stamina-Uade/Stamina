@@ -1,0 +1,48 @@
+# backend/docker-compose.yml
+#
+# 🛑 ESTO ES SÓLO PARA DESARROLLO LOCAL. AGENTS.md §2.2: Docker está instalado en
+# el EC2 y sin usar, y NO se usa para desplegar — agrega consumo de RAM justo en la
+# máquina donde la RAM es el cuello de botella. En el servidor, Trainer corre como
+# un proceso de systemd contra el Postgres y el Redis que ya están ahí.
+#
+# Levantar:  docker compose up -d
+# Migrar:    npm run build && npm run migrar
+# Correr:    npm run dev
+
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: trainer-postgres-local
+    environment:
+      POSTGRES_USER: trainer
+      POSTGRES_PASSWORD: trainer
+      POSTGRES_DB: trainer_db
+    ports:
+      # 5433 y no 5432 a propósito: si alguien tiene un Postgres local andando,
+      # que no choque y, sobre todo, que no se confunda de base.
+      - "127.0.0.1:5433:5432"
+    volumes:
+      - trainer-pg:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U trainer -d trainer_db"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+  redis:
+    image: redis:7-alpine
+    container_name: trainer-redis-local
+    # maxmemory con techo y política de expulsión: lo contrario de lo que tiene el
+    # Redis compartido del servidor (§2.3.2, maxmemory = 0). Que en local se parezca
+    # a lo que debería ser, no a lo que hay.
+    command: ["redis-server", "--save", "", "--maxmemory", "128mb", "--maxmemory-policy", "allkeys-lru"]
+    ports:
+      - "127.0.0.1:6380:6379"
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+volumes:
+  trainer-pg:
