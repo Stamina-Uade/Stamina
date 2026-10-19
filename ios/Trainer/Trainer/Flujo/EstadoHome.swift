@@ -3,6 +3,9 @@ import CoreLocation
 import Foundation
 import SwiftUI
 import TrainerCore
+#if canImport(MediaPlayer)
+import MediaPlayer
+#endif
 
 /// El estado de la app después del login: qué pestaña se ve, qué semana se mira,
 /// si hay una sesión corriendo, qué se comió hoy y qué series de gimnasio se
@@ -170,6 +173,28 @@ final class EstadoHome: ObservableObject {
                 self.seguimiento.terminar()
             case .descartar where self.seguimiento.fase != .detenida:
                 self.seguimiento.descartar()
+            case .musicaAlternar:
+                #if os(iOS)
+                let player = MPMusicPlayerController.systemMusicPlayer
+                if player.playbackState == .playing { player.pause() } else { player.play() }
+                #endif
+            case .musicaSiguiente:
+                #if os(iOS)
+                MPMusicPlayerController.systemMusicPlayer.skipToNextItem()
+                #endif
+            case .musicaAnterior:
+                #if os(iOS)
+                let player = MPMusicPlayerController.systemMusicPlayer
+                if player.currentPlaybackTime > 2.0 {
+                    player.skipToBeginning()
+                } else {
+                    player.skipToPreviousItem()
+                }
+                #endif
+            case .musicaRebobinar:
+                #if os(iOS)
+                MPMusicPlayerController.systemMusicPlayer.skipToBeginning()
+                #endif
             default: break
             }
         }
@@ -196,6 +221,7 @@ final class EstadoHome: ObservableObject {
                 self.recorridosLocales[salida.id] = salida.puntos
                 self.actividadesDeHoy.removeAll { $0.id == salida.id }
                 self.actividadesDeHoy.insert(nuevaActividad, at: 0)
+                AlmacenDeHitos.compartido.registrarActividad(nuevaActividad)
             }
             return aceptada
         }
@@ -296,6 +322,9 @@ final class EstadoHome: ObservableObject {
             }
         }
         actividadesDeHoy = fusionadas.sorted(by: { $0.startedAtMs > $1.startedAtMs })
+        for act in pagina.elementos {
+            AlmacenDeHitos.compartido.registrarActividad(act)
+        }
     }
 
     private func aplicar(_ nuevo: ContenidoDelHome) {
@@ -321,11 +350,15 @@ final class EstadoHome: ObservableObject {
         })
         let sesionCompartida: SesionCompartida? = {
             if let s = sesion {
+                let agua = s.avituallamiento?.mililitrosTotales
+                let sales = s.avituallamiento.map { $0.sodioMg > 0 ? max(1, Int(($0.sodioMg + 499) / 500)) : 0 }
                 return SesionCompartida(tipo: s.tipo,
                                         distanciaMetros: s.distanciaMetros,
                                         duracionMinutos: s.duracionMinutos,
                                         minutoDelDia: s.minutoDelDia,
                                         geles: s.avituallamiento?.geles,
+                                        aguaMl: agua,
+                                        sales: sales,
                                         esDescanso: false,
                                         esFuerza: false)
             } else if let hoy = nuevo.plan.valor?.hoy {
@@ -706,6 +739,7 @@ final class EstadoHome: ObservableObject {
             AlmacenDeRecorridos.compartido.guardar(id: terminada.id, puntos: terminada.puntos)
             actividadesDeHoy.removeAll { $0.id == terminada.id }
             actividadesDeHoy.insert(nuevaActividad, at: 0)
+            AlmacenDeHitos.compartido.registrarActividad(nuevaActividad)
         }
     }
 

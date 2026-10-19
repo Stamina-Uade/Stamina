@@ -6,9 +6,17 @@ import TrainerCore
 @Suite(.serialized)
 struct TrainerWatch_Watch_AppTests {
 
+    private static func limpiarEstado() {
+        UserDefaults.standard.removeObject(forKey: "usuario_vinculado_id_reloj")
+        if let archivo = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first?.appendingPathComponent("salidas_reloj.json") {
+            try? FileManager.default.removeItem(at: archivo)
+        }
+    }
+
     @MainActor
     @Test("Sin sesión iniciada el reloj arranca bloqueado en SinTelefonoView")
     func sinSesionArrancaBloqueado() async throws {
+        Self.limpiarEstado()
         let estado = EstadoReloj()
         #expect(!estado.estaAutenticado, "sin usuario vinculado ni remoto no debe estar autenticado")
         #expect(estado.pantalla == .sinTelefono, "la pantalla inicial debe ser sinTelefono")
@@ -32,6 +40,7 @@ struct TrainerWatch_Watch_AppTests {
     @MainActor
     @Test("Al recibir usuario remoto el reloj se desbloquea")
     func conUsuarioSeDesbloquea() async throws {
+        Self.limpiarEstado()
         let estado = EstadoReloj()
         #expect(!estado.estaAutenticado)
 

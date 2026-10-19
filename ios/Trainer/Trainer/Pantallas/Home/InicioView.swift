@@ -44,10 +44,15 @@ struct InicioView: View {
                     }
 
                     tarjetaCargaSemanal(plan)
+
+                    CalendarioDeHitosView()
                 } else {
                     if !estado.actividadesDeHoy.isEmpty {
                         seccionEntrenamientosDeHoy
                     }
+
+                    CalendarioDeHitosView()
+
                     SinDatosView(problema: estado.contenido.plan.problema, actualizando: estado.actualizando) {
                         Task { await estado.actualizar() }
                     }
@@ -486,7 +491,7 @@ struct InsigniaDeRacha: View {
                 Image(systemName: racha.dias > 0 && racha.activaHoy ? "flame.fill" : "flame")
                     .font(.system(size: TokensEspaciado.e16, weight: .bold))
                     .foregroundStyle(racha.dias > 0
-                        ? (racha.activaHoy ? Color.orange : Paleta.textoSecundario)
+                        ? (racha.activaHoy ? Paleta.acento : Paleta.textoSecundario)
                         : Paleta.textoTerciario)
                 Text("\(racha.dias)")
                     .font(.system(size: TokensEspaciado.e14, weight: .bold, design: .rounded))
@@ -498,13 +503,13 @@ struct InsigniaDeRacha: View {
             .background(
                 Capsule()
                     .fill(racha.dias > 0 && racha.activaHoy
-                        ? Color.orange.opacity(0.16)
+                        ? Paleta.acento.opacity(0.16)
                         : Paleta.superficieOverlay)
             )
             .overlay(
                 Capsule()
                     .strokeBorder(racha.dias > 0 && racha.activaHoy
-                        ? Color.orange.opacity(0.4)
+                        ? Paleta.acento.opacity(0.4)
                         : Paleta.bordeInput, lineWidth: TokensEspaciado.e1)
             )
         }
@@ -529,12 +534,12 @@ struct DetalleDeRachaView: View {
 
             ZStack {
                 Circle()
-                    .fill(racha.dias > 0 && racha.activaHoy ? Color.orange.opacity(0.18) : Paleta.superficieOverlay)
+                    .fill(racha.dias > 0 && racha.activaHoy ? Paleta.acento.opacity(0.18) : Paleta.superficieOverlay)
                     .frame(width: TokensEspaciado.e44 * 2,
                            height: TokensEspaciado.e44 * 2)
                 Image(systemName: racha.dias > 0 && racha.activaHoy ? "flame.fill" : "flame")
                     .font(.system(size: TokensEspaciado.e44, weight: .bold))
-                    .foregroundStyle(racha.dias > 0 && racha.activaHoy ? Color.orange : Paleta.textoSecundario)
+                    .foregroundStyle(racha.dias > 0 && racha.activaHoy ? Paleta.acento : Paleta.textoSecundario)
             }
             .padding(.top, TokensEspaciado.e12)
 

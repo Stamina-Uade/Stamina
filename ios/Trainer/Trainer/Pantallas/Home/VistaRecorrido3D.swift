@@ -4,7 +4,7 @@ import TrainerCore
 
 /// Vista en 3D del recorrido de un entrenamiento (Estilo Imagen 4 - Strava 3D):
 /// - Vista satelital con relieve y la cámara inclinada.
-/// - Ruta dibujada sobre el terreno con punto verde de inicio y punto naranja de fin.
+/// - Ruta dibujada sobre el terreno con punto verde de inicio y punto rosa de fin.
 /// - Datos del entrenamiento (ritmo, desnivel, distancia) arriba, sobre el cielo.
 struct VistaRecorrido3D: View {
     let puntos: [PuntoDeRecorrido]
@@ -210,8 +210,8 @@ struct MapaRecorrido3D: UIViewRepresentable {
         func mapView(_ mapView: MKMapView, rendererFor overlay: MKOverlay) -> MKOverlayRenderer {
             if let polyline = overlay as? MKPolyline {
                 let renderer = MKPolylineRenderer(polyline: polyline)
-                // Ruta en color naranja vivo (Imagen 4)
-                renderer.strokeColor = UIColor(red: 1.0, green: 0.38, blue: 0.05, alpha: 1.0)
+                // Ruta en color rosa vivo (#FF23A7)
+                renderer.strokeColor = UIColor(Paleta.acento)
                 renderer.lineWidth = 6.0
                 renderer.lineCap = .round
                 renderer.lineJoin = .round
@@ -243,16 +243,16 @@ struct MapaRecorrido3D: UIViewRepresentable {
                 view.addSubview(dot)
                 return view
             } else if titulo.contains("fin") {
-                let id = "MarcadorPuntoFinNaranja"
+                let id = "MarcadorPuntoFinRosa"
                 let view = mapView.dequeueReusableAnnotationView(withIdentifier: id) ?? MKAnnotationView(annotation: annotation, reuseIdentifier: id)
                 view.annotation = annotation
                 view.canShowCallout = false
                 view.frame = CGRect(x: 0, y: 0, width: 24, height: 24)
                 view.subviews.forEach { $0.removeFromSuperview() }
 
-                // Punto naranja con centro blanco en forma de rosquilla/bullseye (Imagen 4)
+                // Punto rosa con centro blanco en forma de rosquilla/bullseye
                 let outer = UIView(frame: CGRect(x: 2, y: 2, width: 20, height: 20))
-                outer.backgroundColor = UIColor(red: 1.0, green: 0.38, blue: 0.05, alpha: 1.0)
+                outer.backgroundColor = UIColor(Paleta.acento)
                 outer.layer.cornerRadius = 10
                 outer.layer.borderColor = UIColor.white.cgColor
                 outer.layer.borderWidth = 3.0

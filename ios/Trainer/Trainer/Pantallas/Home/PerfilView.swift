@@ -18,6 +18,7 @@ struct PerfilView: View {
             VStack(alignment: .leading, spacing: TokensEspaciado.e16) {
                 encabezado
                 tarjetaDeCuerpo
+                seccionHitos
                 seccionMetas
                 seccionDias
                 seccionAjustes
@@ -144,6 +145,12 @@ struct PerfilView: View {
         Rectangle()
             .fill(Paleta.divisor)
             .frame(width: TokensEspaciado.e1, height: TokensEspaciado.e34)
+    }
+
+    // MARK: - Hitos de Actividad (GitHub Heatmap)
+
+    private var seccionHitos: some View {
+        CalendarioDeHitosView()
     }
 
     // MARK: - Metas y Objetivos
