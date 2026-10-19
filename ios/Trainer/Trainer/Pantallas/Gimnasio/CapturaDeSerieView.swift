@@ -125,9 +125,9 @@ struct CapturaDeSerieView: View {
                     }
                     .frame(width: TokensEspaciado.e56, height: TokensTamano.objetivoTactilMinimo)
                     .background(hecha ? Paleta.acentoChipActivo : Paleta.superficieHundida)
-                    .clipShape(RoundedRectangle(cornerRadius: TokensRadio.celda, style: .continuous))
+                    .clipShape(RoundedRectangle(cornerRadius: TokensRadio.input, style: .continuous))
                     .overlay(
-                        RoundedRectangle(cornerRadius: TokensRadio.celda, style: .continuous)
+                        RoundedRectangle(cornerRadius: TokensRadio.input, style: .continuous)
                             .strokeBorder(bordeDe(hecha: hecha, actual: esActual, salteada: salteada),
                                           style: StrokeStyle(lineWidth: TokensEspaciado.e2,
                                                              dash: salteada ? [3, 3] : []))
@@ -141,10 +141,16 @@ struct CapturaDeSerieView: View {
 
             Button { extras += 1 } label: {
                 Image(systemName: "plus")
+                    .font(.system(size: TokensTipografia.tituloCardTamano, weight: .bold))
                     .foregroundStyle(Paleta.textoSecundario)
                     .frame(width: TokensEspaciado.e56, height: TokensTamano.objetivoTactilMinimo)
                     .background(Paleta.superficieHundida)
-                    .clipShape(RoundedRectangle(cornerRadius: TokensRadio.celda, style: .continuous))
+                    .clipShape(RoundedRectangle(cornerRadius: TokensRadio.input, style: .continuous))
+                    .overlay(
+                        RoundedRectangle(cornerRadius: TokensRadio.input, style: .continuous)
+                            .strokeBorder(Paleta.bordeSignificante,
+                                          style: StrokeStyle(lineWidth: TokensEspaciado.e1, dash: [4, 4]))
+                    )
                     .contentShape(Rectangle())
             }
             .buttonStyle(EstiloPresionado())
@@ -167,7 +173,7 @@ struct CapturaDeSerieView: View {
     private func stepper(_ etiqueta: String, valor: String,
                          bajar: @escaping () -> Void, subir: @escaping () -> Void) -> some View {
         VStack(alignment: .leading, spacing: TokensEspaciado.e10) {
-            Text(etiqueta).estilo(.tituloCard)
+            Text(etiqueta).estilo(.labelCampo, color: Paleta.textoSecundario)
             StepperDeValor(etiqueta: etiqueta, valor: valor, bajar: bajar, subir: subir)
         }
         .padding(TokensEspaciado.e14)
@@ -260,37 +266,57 @@ struct CapturaDeSerieView: View {
 /// 🛑 Al llegar a cero avisa con **ícono, texto y vibración**, nunca sólo con
 /// color (AGENTS.md §10.1). "Saltar" es imprescindible en superseries.
 ///
-/// 🪤 Lo que falta: seguir contando con la app en segundo plano y la pantalla
-/// apagada. Eso es una notificación local programada, y pedir permiso de
-/// notificaciones necesita la pantalla previa que explica por qué —que
-/// `ESPECIFICACION.md` §8.1 declara **no diseñada**—. Está en la decisión 0007.
+/// 🪤 El descanso se mide contra una HORA DE FIN, no restando de a uno: un
+/// `Timer` no corre con el teléfono bloqueado ni con la app suspendida, y
+/// `segundos -= 1` volvía atrasado (bloqueabas 90 s y al volver faltaban 85).
+/// Cada tick —y cada vuelta a primer plano— recalcula lo que falta desde `fin`.
+///
+/// Lo que sigue faltando: AVISAR con la app en segundo plano. Eso es una
+/// notificación local programada, y pedir permiso de notificaciones necesita la
+/// pantalla previa que explica por qué —que `ESPECIFICACION.md` §8.1 declara
+/// **no diseñada**—. Está en la decisión 0007.
 struct DescansoView: View {
     @Binding var segundos: Int
     let ejercicio: String
     let seriesQueFaltan: Int
     let alTerminar: () -> Void
 
+    @Environment(\.scenePhase) private var fase
     @State private var temporizador: Timer?
     @State private var termino = false
+    /// Cuándo termina el descanso. "+30 s" la corre; lo que se ve sale de acá.
+    @State private var fin: Date?
+    /// Lo que dura el descanso entero, con los +30 sumados: el total del anillo.
+    @State private var duracion = 0
 
     var body: some View {
         VStack(spacing: TokensEspaciado.e20) {
             Spacer()
 
             if termino {
-                Image(systemName: "bell.fill")
-                    .font(.system(size: TokensTipografia.numeroDatoTamano))
-                    .foregroundStyle(Paleta.acento)
+                AnilloDeDescanso(fraccion: 0, termino: true) {
+                    Image(systemName: "bell.fill")
+                        .font(.system(size: TokensTipografia.numeroDatoTamano))
+                        .foregroundStyle(Paleta.acento)
+                        .accessibilityHidden(true)
+                }
                 Text(Textos.descansoFin)
-                    .estilo(.tituloConfirmacion)
+                    .estilo(.display)
+                    .multilineTextAlignment(.center)
                 Text(Textos.descansoFinDetalle(ejercicio))
                     .estilo(.cuerpoSecundario, color: Paleta.textoSecundario)
                     .multilineTextAlignment(.center)
             } else {
-                Text(Textos.descansoTitulo)
-                    .estilo(.etiquetaSeccion, color: Paleta.textoTerciario)
-                Text(Formato.cronometro(segundos: segundos))
-                    .estilo(.numeroDato)
+                PildoraDeEstado(Textos.descansoTitulo, simbolo: "timer", tono: .acento)
+                AnilloDeDescanso(fraccion: fraccionRestante, termino: false) {
+                    Text(Formato.cronometro(segundos: segundos))
+                        .estilo(.metricaHeroe)
+                        .lineLimit(1)
+                        .minimumScaleFactor(0.5)
+                        .padding(.horizontal, TokensEspaciado.e16)
+                        .accessibilityLabel(Text(Textos.descansoTitulo) + Text(", ")
+                                            + Text(Formato.cronometro(segundos: segundos)))
+                }
                 Text(Textos.descansoFaltan(seriesQueFaltan))
                     .estilo(.cuerpoSecundario, color: Paleta.textoSecundario)
             }
@@ -299,9 +325,7 @@ struct DescansoView: View {
 
             VStack(spacing: TokensEspaciado.e10) {
                 if !termino {
-                    BotonSecundario(accion: { segundos += 30 }) {
-                        Text(Textos.descansoMas).estilo(.botonPrimario, color: Paleta.textoPrimario)
-                    }
+                    BotonTonal(Textos.descansoMas) { sumar(30) }
                 }
                 BotonPrimario(termino ? Textos.comunListo : Textos.descansoSaltar) { terminar() }
             }
@@ -311,26 +335,74 @@ struct DescansoView: View {
         .frame(maxWidth: .infinity, maxHeight: .infinity)
         .onAppear(perform: arrancar)
         .onDisappear { temporizador?.invalidate() }
+        // Al volver del bloqueo, lo que falta se recalcula enseguida, sin
+        // esperar al próximo tick.
+        .onChange(of: fase) { nueva in
+            if nueva == .active { actualizar() }
+        }
+    }
+
+    private var fraccionRestante: Double {
+        guard duracion > 0 else { return 0 }
+        return min(1, max(0, Double(segundos) / Double(duracion)))
     }
 
     private func arrancar() {
         temporizador?.invalidate()
-        temporizador = Timer.scheduledTimer(withTimeInterval: 1, repeats: true) { _ in
-            Task { @MainActor in
-                if segundos > 0 {
-                    segundos -= 1
-                } else if !termino {
-                    termino = true
-                    temporizador?.invalidate()
-                    Vibracion.avisar()
-                }
-            }
+        duracion = max(0, segundos)
+        fin = Date().addingTimeInterval(TimeInterval(max(0, segundos)))
+        // Medio segundo: el número cambia a tiempo aunque el tick se corra un poco.
+        temporizador = Timer.scheduledTimer(withTimeInterval: 0.5, repeats: true) { _ in
+            Task { @MainActor in actualizar() }
         }
+    }
+
+    /// Lo que falta, siempre desde la hora de fin.
+    private func actualizar() {
+        guard let fin, !termino else { return }
+        let restante = max(0, Int(fin.timeIntervalSinceNow.rounded(.up)))
+        if segundos != restante { segundos = restante }
+        if restante == 0 {
+            termino = true
+            temporizador?.invalidate()
+            Vibracion.avisar()
+        }
+    }
+
+    /// "+30 s": corre la hora de fin, no sólo el número.
+    private func sumar(_ extra: Int) {
+        guard let actual = fin, !termino else { return }
+        fin = actual.addingTimeInterval(TimeInterval(extra))
+        duracion += extra
+        actualizar()
     }
 
     private func terminar() {
         temporizador?.invalidate()
         alTerminar()
+    }
+}
+
+/// El anillo del descanso: la parte que falta en rosa, con el halo de lo "vivo".
+private struct AnilloDeDescanso<Contenido: View>: View {
+    let fraccion: Double
+    let termino: Bool
+    @ViewBuilder let contenido: () -> Contenido
+
+    var body: some View {
+        ZStack {
+            Circle()
+                .stroke(Paleta.superficieControl, lineWidth: TokensEspaciado.e8)
+            Circle()
+                .trim(from: 0, to: termino ? 1 : fraccion)
+                .stroke(Paleta.acento, style: StrokeStyle(lineWidth: TokensEspaciado.e8, lineCap: .round))
+                .rotationEffect(.degrees(-90))
+                .shadow(color: Paleta.acentoBrillo, radius: TokensEspaciado.e12)
+                .animation(.linear(duration: TokensMovimiento.media), value: fraccion)
+            contenido()
+        }
+        .frame(width: TokensEspaciado.e56 * 4, height: TokensEspaciado.e56 * 4)
+        .accessibilityElement(children: .combine)
     }
 }
 

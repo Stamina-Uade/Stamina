@@ -10,6 +10,12 @@ public enum ModoApariencia: String, CaseIterable, Identifiable {
 
     public static let clave = "ajuste_modo_apariencia"
 
+    /// El modo con el que arranca quien nunca eligió uno. El rediseño 2026-10
+    /// es negro con acento rosa, así que arranca en modo noche. Quien ya eligió
+    /// en Ajustes conserva su elección: `@AppStorage` sólo usa este valor
+    /// cuando la clave no existe.
+    public static let predeterminado: ModoApariencia = .oscuro
+
     public var titulo: String {
         switch self {
         case .automatico: return "Automático"

@@ -97,7 +97,7 @@ struct RegObjetivoView: View {
             VStack(alignment: .leading, spacing: TokensEspaciado.e13) {
                 VStack(alignment: .leading, spacing: TokensEspaciado.e8) {
                     Text(Textos.regObjetivoElegi)
-                        .estilo(.labelCampo, color: Paleta.textoTerciario)
+                        .estilo(.etiquetaSeccion, color: Paleta.textoTerciario)
                     Text("Podés elegir varios. El primero será tu plan principal.")
                         .estilo(.notaLegal, color: Paleta.textoTerciario)
                     ForEach(objetivos, id: \.0) { valor, titulo, distancia in
@@ -124,15 +124,42 @@ struct RegObjetivoView: View {
                               etiquetaMesAnterior: Textos.regObjetivoMesAnterior,
                               etiquetaMesSiguiente: Textos.regObjetivoMesSiguiente)
 
-                Text(lineaDeFecha)
-                    .estilo(.labelCampo,
-                            color: flujo.datos.fechaObjetivo == nil
-                                ? Paleta.textoTerciario : Paleta.acento)
-                    .fixedSize(horizontal: false, vertical: true)
+                lineaDeFechaVista
             }
             .disabled(flujo.enCurso)
         } pie: {
             PieDePerfil(habilitado: flujo.datos.objetivo != nil)
+        }
+    }
+
+    /// Con fecha elegida, la píldora rosa con tilde del mockup; sin fecha, la
+    /// línea apagada que dice que se puede seguir igual.
+    @ViewBuilder
+    private var lineaDeFechaVista: some View {
+        if flujo.datos.fechaObjetivo == nil {
+            Text(lineaDeFecha)
+                .estilo(.labelCampo, color: Paleta.textoTerciario)
+                .fixedSize(horizontal: false, vertical: true)
+        } else {
+            HStack(alignment: .top, spacing: TokensEspaciado.e6) {
+                Image(systemName: "checkmark")
+                    .font(.system(size: TokensTipografia.chipTamano, weight: .heavy))
+                    .foregroundStyle(Paleta.acento)
+                    .padding(.top, TokensEspaciado.e2)
+                    .accessibilityHidden(true)
+                Text(lineaDeFecha)
+                    .estilo(.chip, color: Paleta.textoPrimario)
+                    .fixedSize(horizontal: false, vertical: true)
+            }
+            .padding(.horizontal, TokensEspaciado.e12)
+            .padding(.vertical, TokensEspaciado.e7)
+            .background(Paleta.acentoChipActivo)
+            .clipShape(RoundedRectangle(cornerRadius: TokensRadio.card, style: .continuous))
+            .overlay(
+                RoundedRectangle(cornerRadius: TokensRadio.card, style: .continuous)
+                    .strokeBorder(Paleta.acentoSuaveBorde, lineWidth: TokensEspaciado.e1)
+            )
+            .accessibilityElement(children: .combine)
         }
     }
 

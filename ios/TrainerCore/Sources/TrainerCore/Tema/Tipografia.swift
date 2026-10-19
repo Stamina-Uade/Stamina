@@ -151,6 +151,41 @@ extension EstiloTipografico {
         peso: TokensTipografia.notaLegalPeso,
         interlineado: 1.5, referencia: .caption)
 
+    // ---- rediseño 2026-10: los roles pesados del mockup ----
+
+    /// "Tu plan", "Buen día, Sofi", "¡Llegaste!": el título de una pestaña o
+    /// de un momento. Pesado y apretado, como el mockup.
+    public static let display = EstiloTipografico(
+        tamano: TokensTipografia.displayTamano,
+        peso: TokensTipografia.displayPeso,
+        interlineado: 1.05, espaciadoLetrasEm: -0.035, referencia: .largeTitle)
+
+    /// El número protagonista: distancia en vivo, días que faltan, distancia final.
+    public static let metricaHeroe = EstiloTipografico(
+        tamano: TokensTipografia.metricaHeroeTamano,
+        peso: TokensTipografia.metricaHeroePeso,
+        interlineado: 1.0, espaciadoLetrasEm: -0.045,
+        cifrasTabulares: true, referencia: .largeTitle)
+
+    /// La unidad pegada al número protagonista: "km", "días".
+    public static let unidadHeroe = EstiloTipografico(
+        tamano: TokensTipografia.unidadHeroeTamano,
+        peso: TokensTipografia.unidadHeroePeso,
+        espaciadoLetrasEm: -0.02, referencia: .title2)
+
+    /// El valor de una tarjeta de métrica: tiempo, ritmo, pulso.
+    public static let metricaMedia = EstiloTipografico(
+        tamano: TokensTipografia.metricaMediaTamano,
+        peso: TokensTipografia.metricaMediaPeso,
+        interlineado: 1.0, espaciadoLetrasEm: -0.02,
+        cifrasTabulares: true, referencia: .title3)
+
+    /// Encabezado de sección dentro de una pestaña: "Semana de carrera".
+    public static let tituloSeccion = EstiloTipografico(
+        tamano: TokensTipografia.tituloSeccionTamano,
+        peso: TokensTipografia.tituloSeccionPeso,
+        espaciadoLetrasEm: -0.02, referencia: .headline)
+
     public static let etiquetaSeccion = EstiloTipografico(
         tamano: TokensTipografia.etiquetaSeccionTamano,
         peso: TokensTipografia.etiquetaSeccionPeso,

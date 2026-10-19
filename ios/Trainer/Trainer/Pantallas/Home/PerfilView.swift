@@ -17,7 +17,8 @@ struct PerfilView: View {
         ScrollView {
             VStack(alignment: .leading, spacing: TokensEspaciado.e16) {
                 encabezado
-                tarjetaDeCuerpo
+                tarjetaDeIdentidad
+                datosDelCuerpo
                 seccionHitos
                 seccionMetas
                 seccionDias
@@ -40,111 +41,78 @@ struct PerfilView: View {
 
     // MARK: - Encabezado
 
+    /// "Perfil" grande, como las otras pestañas, y el engranaje que lleva a ajustes.
     private var encabezado: some View {
+        EncabezadoDePestana(Textos.homeTabPerfil) {
+            BotonCircular("gearshape", etiqueta: Textos.perfilVerAjustes) {
+                estado.ir(a: .ajustes)
+            }
+        }
+    }
+
+    /// Las iniciales con el halo rosa, el nombre y la píldora de deporte y nivel.
+    private var tarjetaDeIdentidad: some View {
         HStack(alignment: .center, spacing: TokensEspaciado.e14) {
             ZStack {
                 Circle()
                     .fill(
                         LinearGradient(
-                            colors: [Paleta.acentoChipActivo, Paleta.superficie],
+                            colors: [Paleta.acentoProfundo, Paleta.superficie],
                             startPoint: .topLeading,
                             endPoint: .bottomTrailing
                         )
                     )
-                    .overlay(
-                        Circle().strokeBorder(Paleta.acento.opacity(0.35), lineWidth: 1.5)
-                    )
+                    .overlay(Circle().strokeBorder(Paleta.acentoSuaveBorde, lineWidth: TokensEspaciado.e2))
+                    .shadow(color: Paleta.acentoBrillo, radius: TokensEspaciado.e12)
                 Text(estado.iniciales)
-                    .font(.system(size: 22, weight: .bold, design: .rounded))
-                    .foregroundStyle(Paleta.acento)
+                    .estilo(.unidadHeroe, color: Paleta.acento)
             }
-            .frame(width: 58, height: 58)
+            .frame(width: TokensEspaciado.e56, height: TokensEspaciado.e56)
             .accessibilityLabel(Textos.perfilSinFoto)
 
-            VStack(alignment: .leading, spacing: 3) {
+            VStack(alignment: .leading, spacing: TokensEspaciado.e6) {
                 Text(estado.nombreCompleto)
-                    .font(.system(size: 20, weight: .bold, design: .rounded))
-                    .foregroundStyle(Paleta.textoPrimario)
+                    .estilo(.tituloSeccion)
+                    .fixedSize(horizontal: false, vertical: true)
                     .accessibilityAddTraits(.isHeader)
 
-                HStack(spacing: 6) {
-                    Image(systemName: iconoDeporte)
-                        .font(.system(size: 11, weight: .bold))
-                        .foregroundStyle(Paleta.acento)
+                HStack(spacing: TokensEspaciado.e6) {
+                    IconoDeporte(deporte: deporteDeLaSesion, color: Paleta.acento,
+                                 tamano: TokensTipografia.chipTamano)
+                        .accessibilityHidden(true)
                     Text(deporteYNivel)
-                        .font(.system(size: 12.5, weight: .semibold, design: .rounded))
-                        .foregroundStyle(Paleta.textoSecundario)
+                        .estilo(.chip, color: Paleta.textoSecundario)
+                        .lineLimit(1)
                 }
+                .padding(.horizontal, TokensEspaciado.e10)
+                .padding(.vertical, TokensEspaciado.e6)
+                .background(Paleta.acentoChipActivo)
+                .clipShape(Capsule())
+                .overlay(Capsule().strokeBorder(Paleta.acentoSuaveBorde, lineWidth: TokensEspaciado.e1))
+                .accessibilityElement(children: .combine)
             }
 
             Spacer(minLength: 0)
-
-            Button {
-                estado.ir(a: .ajustes)
-            } label: {
-                Image(systemName: "gearshape")
-                    .font(.system(size: 17, weight: .semibold))
-                    .foregroundStyle(Paleta.textoSecundario)
-                    .frame(width: 40, height: 40)
-                    .background(Paleta.superficie)
-                    .clipShape(Circle())
-                    .overlay(Circle().strokeBorder(Paleta.bordeSuperficie, lineWidth: 1))
-            }
-            .buttonStyle(EstiloPresionado())
-            .accessibilityLabel(Textos.perfilVerAjustes)
         }
-        .padding(.vertical, 2)
+        .padding(TokensEspaciado.e14)
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .tarjeta()
     }
 
-    // MARK: - Tarjeta de Métricas
+    // MARK: - Datos del cuerpo
 
-    private var tarjetaDeCuerpo: some View {
-        HStack(spacing: 0) {
-            dato(titulo: Textos.perfilPeso, valor: estado.perfil?.weightG.map {
-                Formato.peso(Int($0), unidades: estado.sistemaDeUnidades)
-            } ?? "—", icono: "scalemass")
-
-            divisor
-
-            dato(titulo: Textos.perfilAltura, valor: altura, icono: "ruler")
-
-            divisor
-
-            dato(titulo: Textos.perfilEdad, valor: edad.map(Textos.perfilAnios) ?? "—", icono: "calendar")
+    /// Peso, altura y edad: tres tarjetas de métrica en fila, como las del entreno.
+    private var datosDelCuerpo: some View {
+        HStack(spacing: TokensEspaciado.e8) {
+            TarjetaMetrica(Textos.perfilPeso,
+                           valor: estado.perfil?.weightG.map {
+                               Formato.peso(Int($0), unidades: estado.sistemaDeUnidades)
+                           } ?? "—",
+                           simbolo: "scalemass")
+            TarjetaMetrica(Textos.perfilAltura, valor: altura, simbolo: "ruler")
+            TarjetaMetrica(Textos.perfilEdad, valor: edad.map(Textos.perfilAnios) ?? "—",
+                           simbolo: "calendar")
         }
-        .padding(.vertical, TokensEspaciado.e14)
-        .frame(maxWidth: .infinity)
-        .background(Paleta.superficie)
-        .clipShape(RoundedRectangle(cornerRadius: TokensRadio.card, style: .continuous))
-        .overlay(
-            RoundedRectangle(cornerRadius: TokensRadio.card, style: .continuous)
-                .strokeBorder(Paleta.bordeSuperficie, lineWidth: 1)
-        )
-    }
-
-    private func dato(titulo: String, valor: String, icono: String) -> some View {
-        VStack(spacing: 4) {
-            Image(systemName: icono)
-                .font(.system(size: 13, weight: .semibold))
-                .foregroundStyle(Paleta.acento.opacity(0.85))
-
-            Text(valor)
-                .font(.system(size: 17, weight: .bold, design: .rounded))
-                .foregroundStyle(Paleta.textoPrimario)
-                .monospacedDigit()
-
-            Text(titulo)
-                .font(.system(size: 11, weight: .medium))
-                .foregroundStyle(Paleta.textoTerciario)
-        }
-        .frame(maxWidth: .infinity)
-        .accessibilityElement(children: .combine)
-    }
-
-    private var divisor: some View {
-        Rectangle()
-            .fill(Paleta.divisor)
-            .frame(width: TokensEspaciado.e1, height: TokensEspaciado.e34)
     }
 
     // MARK: - Hitos de Actividad (GitHub Heatmap)
@@ -157,60 +125,12 @@ struct PerfilView: View {
 
     private var seccionMetas: some View {
         VStack(alignment: .leading, spacing: TokensEspaciado.e10) {
-            HStack {
-                Text("Metas y objetivos")
-                    .font(.system(size: 15, weight: .bold, design: .rounded))
-                    .foregroundStyle(Paleta.textoPrimario)
-
-                Spacer()
-
-                Button {
-                    estado.ir(a: .ajustes)
-                } label: {
-                    Text("+ Gestionar")
-                        .font(.system(size: 12.5, weight: .bold, design: .rounded))
-                        .foregroundStyle(Paleta.acento)
-                }
+            EncabezadoDeSeccion("Metas y objetivos", accion: "+ Gestionar") {
+                estado.ir(a: .ajustes)
             }
 
             if metasActivas.isEmpty {
-                VStack(spacing: 8) {
-                    Image(systemName: "flag.slash")
-                        .font(.system(size: 26, weight: .bold))
-                        .foregroundStyle(Paleta.textoTerciario)
-
-                    Text("Sin metas activas")
-                        .font(.system(size: 14, weight: .bold, design: .rounded))
-                        .foregroundStyle(Paleta.textoPrimario)
-
-                    Text("Tus metas anteriores ya finalizaron. Definí una nueva meta para comenzar tu próximo plan.")
-                        .font(.system(size: 12, weight: .medium))
-                        .foregroundStyle(Paleta.textoTerciario)
-                        .multilineTextAlignment(.center)
-                        .padding(.horizontal, 12)
-
-                    Button {
-                        estado.ir(a: .plan)
-                    } label: {
-                        Text("Elegir nueva meta")
-                            .font(.system(size: 13, weight: .bold, design: .rounded))
-                            .foregroundStyle(Paleta.fondo)
-                            .padding(.horizontal, 18)
-                            .padding(.vertical, 8)
-                            .background(Paleta.acento)
-                            .clipShape(Capsule())
-                    }
-                    .buttonStyle(.plain)
-                    .padding(.top, 4)
-                }
-                .padding(.vertical, 18)
-                .frame(maxWidth: .infinity)
-                .background(Paleta.superficie)
-                .clipShape(RoundedRectangle(cornerRadius: TokensRadio.card, style: .continuous))
-                .overlay(
-                    RoundedRectangle(cornerRadius: TokensRadio.card, style: .continuous)
-                        .strokeBorder(Paleta.bordeSuperficie, lineWidth: 1)
-                )
+                sinMetas
             } else {
                 VStack(spacing: TokensEspaciado.e8) {
                     ForEach(metasActivas.indices, id: \.self) { idx in
@@ -221,31 +141,60 @@ struct PerfilView: View {
         }
     }
 
+    private var sinMetas: some View {
+        VStack(spacing: TokensEspaciado.e8) {
+            Image(systemName: "flag.slash")
+                .font(.system(size: TokensTipografia.tituloEjercicioTamano, weight: .bold))
+                .foregroundStyle(Paleta.textoTerciario)
+                .accessibilityHidden(true)
+
+            Text("Sin metas activas")
+                .estilo(.opcionTitulo)
+
+            Text("Tus metas anteriores ya finalizaron. Definí una nueva meta para comenzar tu próximo plan.")
+                .estilo(.cuerpoSecundario, color: Paleta.textoTerciario)
+                .multilineTextAlignment(.center)
+                .fixedSize(horizontal: false, vertical: true)
+                .padding(.horizontal, TokensEspaciado.e12)
+
+            Button {
+                estado.ir(a: .plan)
+            } label: {
+                Text("Elegir nueva meta")
+                    .estilo(.tituloCard, color: Paleta.sobreAcento)
+                    .padding(.horizontal, TokensEspaciado.e20)
+                    .frame(minHeight: TokensTamano.objetivoTactilMinimo)
+                    .background(Paleta.acento)
+                    .clipShape(Capsule())
+                    .shadow(color: Paleta.acentoBrillo, radius: TokensEspaciado.e8)
+            }
+            .buttonStyle(EstiloPresionado())
+            .padding(.top, TokensEspaciado.e4)
+        }
+        .padding(.vertical, TokensEspaciado.e20)
+        .frame(maxWidth: .infinity)
+        .tarjeta()
+    }
+
     private func tarjetaMeta(_ meta: ObjetivoDeUsuario, indice: Int) -> some View {
-        HStack(spacing: 12) {
+        HStack(spacing: TokensEspaciado.e12) {
             ZStack {
                 Circle()
                     .fill(Paleta.acentoChipActivo)
-                    .frame(width: 40, height: 40)
+                    .overlay(Circle().strokeBorder(Paleta.acentoSuaveBorde, lineWidth: TokensEspaciado.e1))
                 Image(systemName: iconoParaObjetivo(meta.goal))
-                    .font(.system(size: 16, weight: .bold))
+                    .font(.system(size: TokensTipografia.valorDatoTamano, weight: .bold))
                     .foregroundStyle(Paleta.acento)
             }
+            .frame(width: TokensEspaciado.e40, height: TokensEspaciado.e40)
+            .accessibilityHidden(true)
 
-            VStack(alignment: .leading, spacing: 3) {
-                Text(nombreDelObjetivo(meta.goal))
-                    .font(.system(size: 15, weight: .bold, design: .rounded))
-                    .foregroundStyle(Paleta.textoPrimario)
+            VStack(alignment: .leading, spacing: TokensEspaciado.e3) {
+                Text(TraduccionDelServidor.nombre(de: meta.goal))
+                    .estilo(.opcionTitulo)
 
-                if let fechaMs = meta.goalDateMs {
-                    Text(formatoFecha(fechaMs))
-                        .font(.system(size: 12, weight: .medium))
-                        .foregroundStyle(Paleta.textoTerciario)
-                } else {
-                    Text("Plan sin fecha fija")
-                        .font(.system(size: 12, weight: .medium))
-                        .foregroundStyle(Paleta.textoTerciario)
-                }
+                Text(meta.goalDateMs.map(formatoFecha) ?? "Plan sin fecha fija")
+                    .estilo(.notaLegal, color: Paleta.textoTerciario)
             }
 
             Spacer(minLength: 0)
@@ -253,43 +202,24 @@ struct PerfilView: View {
             if let fechaMs = meta.goalDateMs {
                 let semanas = semanasRestantes(fechaMs)
                 if semanas > 0 {
-                    Text("Faltan \(semanas) sem")
-                        .font(.system(size: 11.5, weight: .bold, design: .rounded))
-                        .foregroundStyle(Paleta.acento)
-                        .padding(.horizontal, 9)
-                        .padding(.vertical, 4)
-                        .background(Paleta.acentoChipActivo)
-                        .clipShape(Capsule())
+                    PildoraDeEstado("Faltan \(semanas) sem", simbolo: "flag.fill", tono: .acento)
                 } else {
-                    Text("¡Esta semana!")
-                        .font(.system(size: 11.5, weight: .bold, design: .rounded))
-                        .foregroundStyle(Paleta.exito)
-                        .padding(.horizontal, 9)
-                        .padding(.vertical, 4)
-                        .background(Paleta.exito.opacity(0.15))
-                        .clipShape(Capsule())
+                    PildoraDeEstado("¡Esta semana!", simbolo: "bolt.fill", tono: .acento)
                 }
             }
         }
         .padding(TokensEspaciado.e12)
         .frame(maxWidth: .infinity, alignment: .leading)
-        .background(Paleta.superficie)
-        .clipShape(RoundedRectangle(cornerRadius: TokensRadio.card, style: .continuous))
-        .overlay(
-            RoundedRectangle(cornerRadius: TokensRadio.card, style: .continuous)
-                .strokeBorder(Paleta.bordeSuperficie, lineWidth: 1)
-        )
+        .tarjeta()
     }
 
     // MARK: - Días de Entrenamiento
 
     private var seccionDias: some View {
         VStack(alignment: .leading, spacing: TokensEspaciado.e10) {
-            Text("Días de entrenamiento")
-                .font(.system(size: 15, weight: .bold, design: .rounded))
-                .foregroundStyle(Paleta.textoPrimario)
+            EncabezadoDeSeccion("Días de entrenamiento")
 
-            HStack(spacing: 6) {
+            HStack(spacing: TokensEspaciado.e6) {
                 ForEach(1...7, id: \.self) { weekday in
                     chipDia(weekday: weekday)
                 }
@@ -302,36 +232,35 @@ struct PerfilView: View {
         let activo = diaConfigurado != nil
         let nombreDia = nombreCortoDia(weekday)
 
-        return VStack(spacing: 4) {
+        return VStack(spacing: TokensEspaciado.e4) {
             Text(nombreDia)
-                .font(.system(size: 11, weight: .bold, design: .rounded))
-                .foregroundStyle(activo ? Paleta.acento : Paleta.textoTerciario)
+                .estilo(.chip, color: activo ? Paleta.acento : Paleta.textoTerciario)
+
+            Circle()
+                .fill(activo ? Paleta.acento : Paleta.superficieControl)
+                .frame(width: TokensEspaciado.e6, height: TokensEspaciado.e6)
 
             if let diaConfigurado {
-                Circle()
-                    .fill(Paleta.acento)
-                    .frame(width: 6, height: 6)
                 Text(Formato.hora(minutoDelDia: Int(diaConfigurado.minuteOfDay)))
-                    .font(.system(size: 9, weight: .semibold))
-                    .foregroundStyle(Paleta.textoSecundario)
+                    .estilo(.etiquetaSeccion.enMinusculas, color: Paleta.textoSecundario)
                     .monospacedDigit()
+                    .lineLimit(1)
+                    .minimumScaleFactor(0.7)
             } else {
-                Circle()
-                    .fill(Paleta.textoTerciario.opacity(0.2))
-                    .frame(width: 6, height: 6)
                 Text("—")
-                    .font(.system(size: 9, weight: .regular))
-                    .foregroundStyle(Paleta.textoTerciario.opacity(0.6))
+                    .estilo(.etiquetaSeccion.enMinusculas, color: Paleta.textoTerciario)
             }
         }
         .frame(maxWidth: .infinity)
-        .padding(.vertical, 8)
+        .padding(.vertical, TokensEspaciado.e8)
         .background(activo ? Paleta.acentoChipActivo : Paleta.superficie)
-        .clipShape(RoundedRectangle(cornerRadius: 10, style: .continuous))
+        .clipShape(RoundedRectangle(cornerRadius: TokensRadio.input, style: .continuous))
         .overlay(
-            RoundedRectangle(cornerRadius: 10, style: .continuous)
-                .strokeBorder(activo ? Paleta.acento.opacity(0.4) : Paleta.bordeSuperficie, lineWidth: 1)
+            RoundedRectangle(cornerRadius: TokensRadio.input, style: .continuous)
+                .strokeBorder(activo ? Paleta.acentoSuaveBorde : Paleta.bordeSuperficie,
+                              lineWidth: TokensEspaciado.e1)
         )
+        .accessibilityElement(children: .combine)
     }
 
     // MARK: - Sección Ajustes
@@ -344,14 +273,10 @@ struct PerfilView: View {
 
     // MARK: - Auxiliares
 
-    private var iconoDeporte: String {
-        switch estado.perfil?.sport {
-        case .running: "figure.run"
-        case .ciclismo: "bicycle"
-        case .trekking: "figure.walk"
-        case .triatlon: "figure.mixed.cardio"
-        default: "figure.run"
-        }
+    /// El deporte del perfil como deporte de sesión, para `IconoDeporte` y
+    /// `nombreVisible`: los dos enums comparten los valores crudos.
+    private var deporteDeLaSesion: DeporteDeSesion {
+        estado.perfil?.sport.flatMap { DeporteDeSesion(rawValue: $0.rawValue) } ?? .running
     }
 
     private func iconoParaObjetivo(_ obj: Objetivo) -> String {
@@ -392,29 +317,6 @@ struct PerfilView: View {
         }
     }
 
-    private func nombreDelObjetivo(_ objetivo: Objetivo) -> String {
-        switch objetivo {
-        case .c5k: return Textos.regObjetivoC5k
-        case .c10k: return Textos.regObjetivoC10k
-        case .mediaMaraton: return Textos.regObjetivoMediaMaraton
-        case .maraton: return Textos.regObjetivoMaraton
-        case .trailMontana: return Textos.regObjetivoTrailMontana
-        case .triatlonOlimpico: return Textos.regObjetivoTriatlonOlimpico
-        case .volverSinLesiones: return Textos.regObjetivoVolverSinLesiones
-        }
-    }
-
-    private var dias: String {
-        guard let dias = estado.perfil?.trainingDays, !dias.isEmpty else { return "—" }
-        let formatter = DateFormatter()
-        formatter.locale = .current
-        let nombres = formatter.shortWeekdaySymbols ?? []
-        return dias.sorted { $0.weekday < $1.weekday }.compactMap { dia in
-            guard (1...7).contains(dia.weekday), nombres.count == 7 else { return nil }
-            return "\(nombres[Int(dia.weekday) % 7]) \(Formato.hora(minutoDelDia: Int(dia.minuteOfDay)))"
-        }.joined(separator: " · ")
-    }
-
     private var altura: String {
         guard let mm = estado.perfil?.heightMm else { return "—" }
         switch estado.sistemaDeUnidades {
@@ -439,13 +341,8 @@ struct PerfilView: View {
 
     private var deporteYNivel: String {
         guard let perfil = estado.perfil else { return "—" }
-        let deporte: String? = switch perfil.sport {
-        case .running: Textos.regDeporteRunning
-        case .ciclismo: Textos.regDeporteCiclismo
-        case .trekking: Textos.regDeporteTrekking
-        case .triatlon: Textos.regDeporteTriatlon
-        case nil: nil
-        }
+        let deporte: String? = perfil.sport
+            .flatMap { DeporteDeSesion(rawValue: $0.rawValue) }?.nombreVisible
         let nivel: String? = switch perfil.level {
         case .principiante: Textos.regNivelPrincipiante
         case .intermedio: Textos.regNivelIntermedio
@@ -453,23 +350,6 @@ struct PerfilView: View {
         case nil: nil
         }
         return [deporte, nivel].compactMap { $0 }.joined(separator: " · ")
-    }
-}
-
-private struct FilaDatoDePerfil: View {
-    let titulo: String
-    let valor: String
-
-    var body: some View {
-        HStack(spacing: TokensEspaciado.e12) {
-            Text(titulo).estilo(.tituloCard)
-            Spacer()
-            Text(valor).estilo(.notaLegal, color: Paleta.textoTerciario)
-                .multilineTextAlignment(.trailing)
-        }
-        .padding(TokensEspaciado.e14)
-        .frame(maxWidth: .infinity)
-        .tarjeta(radio: TokensRadio.boton)
     }
 }
 

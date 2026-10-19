@@ -70,21 +70,16 @@ struct BienvenidaView: View {
     private var carousel: some View {
         ZStack {
             ForEach(Array(fotos.enumerated()), id: \.offset) { indice, foto in
+                // Rediseño 2026-10: foto en blanco y negro, como las tarjetas
+                // héroe del mockup. El rosa queda para lo que importa.
                 Image(foto.recurso)
                     .resizable()
                     .scaledToFill()
+                    .grayscale(1)
                     .opacity(indice == actual ? 1 : 0)
                     .accessibilityLabel(foto.descripcion)
             }
-            // El degradado que funde la foto con el fondo, tal cual el diseño.
-            LinearGradient(
-                stops: [
-                    .init(color: Paleta.fondo.opacity(0.15), location: 0.20),
-                    .init(color: Paleta.fondo, location: 0.62),
-                    .init(color: Paleta.fondo, location: 1.0),
-                ],
-                startPoint: .top, endPoint: .bottom
-            )
+            veloDeLaFoto
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
         .clipped()
@@ -93,11 +88,32 @@ struct BienvenidaView: View {
         .accessibilityElement(children: .contain)
     }
 
+    /// El velo: oscurece la foto entera y la funde con el fondo abajo, donde va
+    /// el texto. Abajo a la derecha, el halo rosa de la marca.
+    private var veloDeLaFoto: some View {
+        ZStack {
+            LinearGradient(
+                stops: [
+                    .init(color: Paleta.fondo.opacity(0.35), location: 0.0),
+                    .init(color: Paleta.fondo.opacity(0.15), location: 0.25),
+                    .init(color: Paleta.fondo.opacity(0.85), location: 0.55),
+                    .init(color: Paleta.fondo, location: 0.72),
+                    .init(color: Paleta.fondo, location: 1.0),
+                ],
+                startPoint: .top, endPoint: .bottom
+            )
+            RadialGradient(colors: [Paleta.acentoProfundo, Color.clear],
+                           center: .bottomTrailing, startRadius: 0,
+                           endRadius: TokensEspaciado.e56 * 6)
+        }
+        .accessibilityHidden(true)
+    }
+
     private var pie: some View {
         VStack(alignment: .leading, spacing: TokensEspaciado.e16) {
             HStack(spacing: TokensEspaciado.e9) {
                 LogoApp()
-                Text(MarcaApp.nombre).estilo(.marca)
+                Text(MarcaApp.nombre).estilo(.marca, color: Paleta.textoAcento)
             }
             .accessibilityElement(children: .ignore)
             .accessibilityLabel(MarcaApp.nombre)
@@ -110,7 +126,7 @@ struct BienvenidaView: View {
             VStack(alignment: .leading, spacing: TokensEspaciado.e12) {
                 conElAltoDelMasAlto(fotos.map(\.titulo)) { titulo in
                     Text(titulo)
-                        .estilo(.tituloBienvenida)
+                        .estilo(.display)
                         .fixedSize(horizontal: false, vertical: true)
                 }
                 conElAltoDelMasAlto(fotos.map(\.texto)) { texto in
@@ -125,12 +141,12 @@ struct BienvenidaView: View {
 
             indicadores
 
-            VStack(spacing: TokensEspaciado.e10) {
+            VStack(spacing: TokensEspaciado.e8) {
                 BotonPrimario(Textos.bienvenidaCrearCuenta) { flujo.ir(a: .regCorreo) }
                 BotonTexto(Textos.bienvenidaYaTengoCuenta) { flujo.ir(a: .login) }
             }
         }
-        .padding(.horizontal, TokensEspaciado.e26)
+        .padding(.horizontal, TokensEspaciado.e22)
         .padding(.bottom, TokensEspaciado.e12)
     }
 
@@ -161,9 +177,14 @@ struct BienvenidaView: View {
                     actual = indice
                     arrancarAutoplay()
                 } label: {
+                    // La actual es más larga y rosa, con halo: no se distingue
+                    // sólo por color.
                     Capsule()
                         .fill(indice == actual ? Paleta.acento : Paleta.bordeSignificante)
-                        .frame(width: TokensEspaciado.e26, height: TokensEspaciado.e3)
+                        .frame(width: indice == actual ? TokensEspaciado.e34 : TokensEspaciado.e16,
+                               height: TokensEspaciado.e4)
+                        .shadow(color: indice == actual ? Paleta.acentoBrillo : Color.clear,
+                                radius: TokensEspaciado.e4)
                         .objetivoTactil()
                 }
                 .accessibilityLabel(Textos.bienvenidaIrAFoto(indice + 1, fotos.count))

@@ -160,6 +160,9 @@ final class SeguimientoDelReloj: NSObject, ObservableObject,
     }
 
     func desconectarUsuarioPorCierreDeSesion() {
+        // 🛑 La salida a medias sigue siendo de quien la empezó. Con usuario vacío,
+        // `enviarPendientes` se la asignaba a la PRÓXIMA cuenta que se vinculara.
+        let duenoAnterior = usuarioVinculadoId ?? ""
         usuarioVinculadoId = nil
         if let activaActual = activa, (segundos > 0 || metros > 0) {
             if fase == .corriendo, let inicioDelTramo {
@@ -174,7 +177,7 @@ final class SeguimientoDelReloj: NSObject, ObservableObject,
             }
             let salidaGuardada = SalidaDelReloj(
                 id: activaActual.id,
-                usuarioId: "",
+                usuarioId: activaActual.usuarioId.isEmpty ? duenoAnterior : activaActual.usuarioId,
                 deporte: activaActual.esTriatlon == true ? .triatlon : activaActual.deporte,
                 inicioMs: activaActual.inicioMs,
                 segundos: max(1, segundos),

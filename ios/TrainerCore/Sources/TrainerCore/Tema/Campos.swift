@@ -68,16 +68,19 @@ public struct CampoTexto: View {
             Text(etiqueta)
                 .estilo(.labelCampo, color: Paleta.textoTerciario)
 
+            // Rediseño 2026-10: el campo es una tarjeta oscura, como las del
+            // mockup; en foco el borde se vuelve rosa y más grueso.
             campo
                 .estilo(estilo)
-                .padding(.horizontal, TokensEspaciado.e14)
-                .frame(minHeight: TokensTamano.objetivoTactilMinimo)
-                .background(Paleta.superficieInput)
-                .clipShape(RoundedRectangle(cornerRadius: TokensRadio.input, style: .continuous))
+                .padding(.horizontal, TokensEspaciado.e16)
+                .padding(.vertical, TokensEspaciado.e6)
+                .frame(minHeight: TokensTamano.objetivoTactilMinimo + TokensEspaciado.e4)
+                .background(Paleta.superficie)
+                .clipShape(RoundedRectangle(cornerRadius: TokensRadio.card, style: .continuous))
                 .overlay(
-                    RoundedRectangle(cornerRadius: TokensRadio.input, style: .continuous)
+                    RoundedRectangle(cornerRadius: TokensRadio.card, style: .continuous)
                         .strokeBorder(enfocado ? Paleta.bordeEnfocado : Paleta.bordeInput,
-                                      lineWidth: TokensEspaciado.e1)
+                                      lineWidth: enfocado ? TokensEspaciado.e2 : TokensEspaciado.e1)
                 )
                 .animation(.easeOut(duration: TokensMovimiento.rapida), value: enfocado)
                 .focused($enfocado)
@@ -124,16 +127,19 @@ public struct CampoCodigo: View {
             .applyKeyboard(.codigo)
             .contenidoDeTexto(.codigoUnaVez)
             .autocorrectionDisabled()
-            .padding(.vertical, TokensEspaciado.e16)
+            .padding(.vertical, TokensEspaciado.e20)
             .padding(.horizontal, TokensEspaciado.e10)
             .frame(maxWidth: .infinity)
-            .background(Paleta.superficieInput)
-            .clipShape(RoundedRectangle(cornerRadius: TokensRadio.boton, style: .continuous))
+            .background(Paleta.superficie)
+            .clipShape(RoundedRectangle(cornerRadius: TokensRadio.cardDestacada, style: .continuous))
             .overlay(
-                RoundedRectangle(cornerRadius: TokensRadio.boton, style: .continuous)
+                RoundedRectangle(cornerRadius: TokensRadio.cardDestacada, style: .continuous)
                     .strokeBorder(enfocado ? Paleta.bordeEnfocado : Paleta.bordeInput,
-                                  lineWidth: TokensEspaciado.e1)
+                                  lineWidth: enfocado ? TokensEspaciado.e2 : TokensEspaciado.e1)
             )
+            // El halo rosa de lo "vivo": el código se está escribiendo.
+            .shadow(color: enfocado ? Paleta.acentoProfundo : Color.clear, radius: TokensEspaciado.e12)
+            .animation(.easeOut(duration: TokensMovimiento.rapida), value: enfocado)
             .focused($enfocado)
             .onChange(of: codigo) { nuevo in
                 // El servidor espera 6 alfanuméricos en mayúscula. Se normaliza

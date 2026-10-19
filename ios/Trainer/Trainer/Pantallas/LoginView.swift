@@ -18,7 +18,8 @@ struct LoginView: View {
             ScrollView {
                 VStack(alignment: .leading, spacing: TokensEspaciado.e20) {
                     Text(Textos.loginTitulo)
-                        .estilo(.tituloPantalla)
+                        .estilo(.display)
+                        .fixedSize(horizontal: false, vertical: true)
                         .accessibilityAddTraits(.isHeader)
 
                     // Llegar acá de rebote —la sesión venció o se cerró desde otro
@@ -88,7 +89,7 @@ struct LoginView: View {
                         }
                     }
                 }
-                .padding(.horizontal, TokensEspaciado.e26)
+                .padding(.horizontal, TokensEspaciado.e22)
                 .padding(.top, TokensEspaciado.e12)
             }
             .scrollDismissesKeyboardCompat()
@@ -106,7 +107,7 @@ struct LoginView: View {
                     .buttonStyle(.plain)
                 }
             }
-            .padding(.horizontal, TokensEspaciado.e26)
+            .padding(.horizontal, TokensEspaciado.e22)
             .padding(.bottom, TokensEspaciado.e34)
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
@@ -118,7 +119,7 @@ struct LoginView: View {
     private var separador: some View {
         HStack(spacing: TokensEspaciado.e12) {
             Rectangle().fill(Paleta.divisor).frame(height: TokensEspaciado.e1)
-            Text(Textos.loginO).estilo(.notaLegal, color: Paleta.textoTerciario)
+            Text(Textos.loginO).estilo(.chip, color: Paleta.textoTerciario)
             Rectangle().fill(Paleta.divisor).frame(height: TokensEspaciado.e1)
         }
         .accessibilityHidden(true)

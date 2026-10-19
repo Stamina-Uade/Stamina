@@ -87,48 +87,31 @@ struct VistaRecorrido3D: View {
             MapaRecorrido3D(puntos: puntos)
                 .ignoresSafeArea()
 
-            // 2. Encabezado y datos del entrenamiento arriba, sobre el cielo (Imagen 4)
-            VStack(spacing: TokensEspaciado.e10) {
+            // 2. Encabezado y datos del entrenamiento arriba, sobre el cielo
+            VStack(spacing: TokensEspaciado.e8) {
                 // Barra de acciones superiores
                 HStack {
                     if let alCerrar {
-                        Button(action: alCerrar) {
-                            Image(systemName: "chevron.down")
-                                .font(.system(size: 15, weight: .bold))
-                                .foregroundStyle(Color.white)
-                                .frame(width: 38, height: 38)
-                                .background(Color.black.opacity(0.55))
-                                .clipShape(Circle())
-                        }
+                        BotonCircular("chevron.down", etiqueta: "Cerrar", accion: alCerrar)
                     }
                     Spacer()
-                    // Menú de opciones (tres puntos, Imagen 4)
-                    Button {
+                    // Menú de opciones (todavía sin acciones)
+                    BotonCircular("ellipsis", etiqueta: "Más opciones") {
                         // Acciones adicionales
-                    } label: {
-                        Image(systemName: "ellipsis")
-                            .font(.system(size: 16, weight: .bold))
-                            .foregroundStyle(Color.white)
-                            .frame(width: 38, height: 38)
-                            .background(Color.black.opacity(0.55))
-                            .clipShape(Circle())
                     }
                 }
-                .padding(.horizontal, TokensEspaciado.e16)
+                .padding(.horizontal, TokensEspaciado.e12)
                 .padding(.top, TokensEspaciado.e6)
 
-                // Título de Marca STAMINA (en Imagen 4 es STRAVA)
+                // La marca, en el rosa del acento
                 Text("STAMINA")
-                    .font(.system(size: 21, weight: .black, design: .rounded))
-                    .tracking(2.5)
-                    .foregroundStyle(Color.white)
+                    .estilo(.marca, color: Paleta.acento)
 
                 // Subtítulo de actividad (ej: "Carrera de noche")
                 Text(tituloActividad)
-                    .font(.system(size: 13, weight: .bold))
-                    .foregroundStyle(Color.white.opacity(0.85))
+                    .estilo(.tituloCard, color: Paleta.textoCuerpo)
 
-                // Tres columnas: Ritmo, Desnivel, Distancia (Imagen 4)
+                // Tres columnas: Ritmo, Desnivel, Distancia
                 HStack(spacing: 0) {
                     // Columna 1: Ritmo (o Velocidad)
                     columnaMetrica(
@@ -159,7 +142,7 @@ struct VistaRecorrido3D: View {
                 LinearGradient(
                     colors: [
                         Color.black.opacity(0.85),
-                        Color.black.opacity(0.60),
+                        Paleta.veloFoto,
                         Color.black.opacity(0.20),
                         Color.clear
                     ],
@@ -168,27 +151,26 @@ struct VistaRecorrido3D: View {
                 )
                 .ignoresSafeArea(edges: .top)
             )
+            // El mapa es siempre oscuro: el texto encima, también.
+            .environment(\.colorScheme, .dark)
         }
     }
 
     private func columnaMetrica(etiqueta: String, valor: String, unidad: String) -> some View {
-        VStack(spacing: 2) {
+        VStack(spacing: TokensEspaciado.e2) {
             Text(etiqueta)
-                .font(.system(size: 12, weight: .semibold))
-                .foregroundStyle(Color.white.opacity(0.85))
+                .estilo(.labelCampo, color: Paleta.textoSecundario)
 
             Text(valor)
-                .font(.system(size: 32, weight: .heavy, design: .rounded))
-                .foregroundStyle(Color.white)
-                .monospacedDigit()
+                .estilo(.numeroGrande)
                 .lineLimit(1)
                 .minimumScaleFactor(0.7)
 
             Text(unidad)
-                .font(.system(size: 13, weight: .bold))
-                .foregroundStyle(Color.white.opacity(0.85))
+                .estilo(.chip, color: Paleta.acento)
         }
         .frame(maxWidth: .infinity)
+        .accessibilityElement(children: .combine)
     }
 }
 
@@ -202,6 +184,10 @@ struct MapaRecorrido3D: UIViewRepresentable {
     final class Coordinator: NSObject, MKMapViewDelegate {
         var parent: MapaRecorrido3D
         var rutaPolyline: MKPolyline?
+        /// Cuántos puntos tenía la ruta la última vez que se configuró el mapa.
+        /// Con un solo punto no hay polilínea, y sin esto cada update volvía a
+        /// poner la cámara (y pisaba lo que la persona había movido).
+        var puntosConfigurados = 0
 
         init(_ parent: MapaRecorrido3D) {
             self.parent = parent
@@ -210,7 +196,7 @@ struct MapaRecorrido3D: UIViewRepresentable {
         func mapView(_ mapView: MKMapView, rendererFor overlay: MKOverlay) -> MKOverlayRenderer {
             if let polyline = overlay as? MKPolyline {
                 let renderer = MKPolylineRenderer(polyline: polyline)
-                // Ruta en color rosa vivo (#FF23A7)
+                // Ruta en el rosa del acento
                 renderer.strokeColor = UIColor(Paleta.acento)
                 renderer.lineWidth = 6.0
                 renderer.lineCap = .round
@@ -298,12 +284,15 @@ struct MapaRecorrido3D: UIViewRepresentable {
     }
 
     func updateUIView(_ mapa: MKMapView, context: Context) {
-        if context.coordinator.rutaPolyline == nil && !puntos.isEmpty {
+        let coordinador = context.coordinator
+        if coordinador.rutaPolyline == nil && !puntos.isEmpty
+            && puntos.count != coordinador.puntosConfigurados {
             configurarMapa(mapa, context: context)
         }
     }
 
     private func configurarMapa(_ mapa: MKMapView, context: Context) {
+        context.coordinator.puntosConfigurados = puntos.count
         guard puntos.count >= 2 else {
             if let primero = puntos.first {
                 let coord = CLLocationCoordinate2D(latitude: primero.lat, longitude: primero.lon)

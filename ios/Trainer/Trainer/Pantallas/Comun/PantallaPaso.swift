@@ -37,37 +37,73 @@ struct PantallaPaso<Contenido: View, Pie: View>: View {
         self.pie = pie()
     }
 
+    /// Rediseño 2026-10: el título es el `display` pesado del mockup. Los que
+    /// llegan largos —el aviso legal baja del servidor, el de
+    /// nacimiento lleva el nombre adentro— vuelven al rol de pantalla: a 34 pt
+    /// ocuparían media pantalla antes del primer campo.
+    static func estiloDeTitulo(_ titulo: String) -> EstiloTipografico {
+        titulo.count > largoMaximoDeTituloDisplay ? .tituloPantalla : .display
+    }
+
+    static var largoMaximoDeTituloDisplay: Int { 34 }
+
     var body: some View {
         VStack(spacing: 0) {
             ScrollView {
-                VStack(alignment: .leading, spacing: TokensEspaciado.e14) {
-                    Text(titulo)
-                        .estilo(.tituloPantalla)
-                        .fixedSize(horizontal: false, vertical: true)
-                        .accessibilityAddTraits(.isHeader)
-
-                    if let texto {
-                        Text(texto)
-                            .estilo(.cuerpo, color: Paleta.textoSecundario)
+                VStack(alignment: .leading, spacing: TokensEspaciado.e16) {
+                    VStack(alignment: .leading, spacing: TokensEspaciado.e8) {
+                        Text(titulo)
+                            .estilo(Self.estiloDeTitulo(titulo))
                             .fixedSize(horizontal: false, vertical: true)
+                            .accessibilityAddTraits(.isHeader)
+
+                        if let texto {
+                            Text(texto)
+                                .estilo(.cuerpoSecundario, color: Paleta.textoSecundario)
+                                .fixedSize(horizontal: false, vertical: true)
+                        }
                     }
+                    .padding(.bottom, TokensEspaciado.e6)
 
                     contenido
                 }
                 .frame(maxWidth: .infinity, alignment: .leading)
-                .padding(.horizontal, TokensEspaciado.e26)
+                .padding(.horizontal, TokensEspaciado.e22)
                 .padding(.top, TokensEspaciado.e12)
                 .padding(.bottom, TokensEspaciado.e20)
             }
             .scrollDismissesKeyboardCompat()
 
-            VStack(spacing: TokensEspaciado.e10) { pie }
-                .padding(.horizontal, TokensEspaciado.e26)
-                .padding(.bottom, TokensEspaciado.e34)
-                .padding(.top, TokensEspaciado.e12)
+            PieDePaso { pie }
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
         .background(Paleta.fondo)
+    }
+}
+
+/// El pie fijo de los andamios: la cápsula primaria y lo que la acompaña, con un
+/// fundido arriba para que el contenido que scrollea se pierda debajo en vez de
+/// cortarse en seco.
+private struct PieDePaso<Contenido: View>: View {
+    private let contenido: Contenido
+
+    init(@ViewBuilder _ contenido: () -> Contenido) {
+        self.contenido = contenido()
+    }
+
+    var body: some View {
+        VStack(spacing: TokensEspaciado.e10) { contenido }
+            .padding(.horizontal, TokensEspaciado.e22)
+            .padding(.bottom, TokensEspaciado.e34)
+            .padding(.top, TokensEspaciado.e12)
+            .background(alignment: .top) {
+                LinearGradient(colors: [Paleta.fondo.opacity(0), Paleta.fondo],
+                               startPoint: .top, endPoint: .bottom)
+                    .frame(height: TokensEspaciado.e20)
+                    .offset(y: -TokensEspaciado.e20)
+                    .allowsHitTesting(false)
+                    .accessibilityHidden(true)
+            }
     }
 }
 
@@ -96,13 +132,10 @@ struct PantallaCierre<Contenido: View, Pie: View>: View {
         VStack(spacing: 0) {
             ScrollView {
                 VStack(alignment: .leading, spacing: TokensEspaciado.e16) {
-                    RoundedRectangle(cornerRadius: TokensRadio.card, style: .continuous)
-                        .fill(Paleta.acento)
-                        .frame(width: TokensEspaciado.e52, height: TokensEspaciado.e52)
-                        .accessibilityHidden(true)
+                    SelloDeCierre()
 
                     Text(titulo)
-                        .estilo(.tituloConfirmacion)
+                        .estilo(.display)
                         .fixedSize(horizontal: false, vertical: true)
                         .accessibilityAddTraits(.isHeader)
 
@@ -113,18 +146,41 @@ struct PantallaCierre<Contenido: View, Pie: View>: View {
                     contenido
                 }
                 .frame(maxWidth: .infinity, alignment: .leading)
-                .padding(.horizontal, TokensEspaciado.e26)
+                .padding(.horizontal, TokensEspaciado.e22)
                 .padding(.top, TokensEspaciado.e26)
                 .padding(.bottom, TokensEspaciado.e20)
             }
 
-            VStack(spacing: TokensEspaciado.e10) { pie }
-                .padding(.horizontal, TokensEspaciado.e26)
-                .padding(.bottom, TokensEspaciado.e34)
-                .padding(.top, TokensEspaciado.e12)
+            PieDePaso { pie }
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
-        .background(Paleta.fondo)
+        // El halo rosa de lo "vivo", detrás del sello: es un final, no un paso.
+        .background(
+            ZStack {
+                Paleta.fondo
+                RadialGradient(colors: [Paleta.acentoProfundo, Color.clear],
+                               center: .topLeading, startRadius: 0,
+                               endRadius: TokensEspaciado.e56 * 4)
+            }
+            .accessibilityHidden(true)
+        )
+    }
+}
+
+/// El círculo rosa con tilde de los cierres. Reemplaza al cuadrado de acento del
+/// diseño viejo: el mockup marca lo hecho con la tilde rosa.
+private struct SelloDeCierre: View {
+    var body: some View {
+        ZStack {
+            Circle()
+                .fill(Paleta.acento)
+                .shadow(color: Paleta.acentoBrillo, radius: TokensEspaciado.e20)
+            Image(systemName: "checkmark")
+                .font(.system(size: TokensTipografia.displayTamano * 0.7, weight: .heavy))
+                .foregroundStyle(Paleta.sobreAcento)
+        }
+        .frame(width: TokensEspaciado.e56, height: TokensEspaciado.e56)
+        .accessibilityHidden(true)
     }
 }
 
@@ -181,10 +237,15 @@ struct FlechaVolver: View {
 
     var body: some View {
         Button(action: accion) {
+            // El círculo oscuro chico del mockup; responde en 48 igual.
             Image(systemName: "chevron.left")
-                .font(.system(size: TokensTipografia.tituloCardTamano,
-                              weight: TokensTipografia.tituloCardPeso))
-                .foregroundStyle(Paleta.textoSecundario)
+                .font(.system(size: TokensTipografia.labelCampoTamano, weight: .bold))
+                .foregroundStyle(Paleta.textoPrimario)
+                .frame(width: TokensTamano.botonCircularCalendario + TokensEspaciado.e4,
+                       height: TokensTamano.botonCircularCalendario + TokensEspaciado.e4)
+                .background(Paleta.superficieAlterna)
+                .clipShape(Circle())
+                .overlay(Circle().strokeBorder(Paleta.bordeSuperficie, lineWidth: TokensEspaciado.e1))
                 .objetivoTactil()
         }
         .accessibilityLabel(Textos.comunVolver)

@@ -30,15 +30,15 @@ public enum TokensColor {
     /// procedencia: home reloj
     public static let estadoErrorFondo = Color(.sRGB, red: 1.0000, green: 0.5490, blue: 0.4706, opacity: 0.14)
     /// procedencia: app home reloj · Pantone 802 C. Expuesto como variable CSS --ac / --ac-rgb y como parametro 'accent' del tablero. Ver parametros_del_tablero.accent.
-    public static let marcaAcento = Color(.sRGB, red: 0.2667, green: 0.8392, blue: 0.1725, opacity: 1)
+    public static let marcaAcento = Color(.sRGB, red: 1.0000, green: 0.1373, blue: 0.6549, opacity: 1)
     /// procedencia: app · Relleno del boton primario DESHABILITADO.
-    public static let marcaAcentoApagado = Color(.sRGB, red: 0.2667, green: 0.8392, blue: 0.1725, opacity: 0.35)
+    public static let marcaAcentoApagado = Color(.sRGB, red: 1.0000, green: 0.1373, blue: 0.6549, opacity: 0.35)
     /// procedencia: app home reloj
-    public static let marcaAcentoChipActivo = Color(.sRGB, red: 0.2667, green: 0.8392, blue: 0.1725, opacity: 0.14)
+    public static let marcaAcentoChipActivo = Color(.sRGB, red: 1.0000, green: 0.1373, blue: 0.6549, opacity: 0.14)
     /// procedencia: app home
-    public static let marcaAcentoSuaveBorde = Color(.sRGB, red: 0.2667, green: 0.8392, blue: 0.1725, opacity: 0.25)
+    public static let marcaAcentoSuaveBorde = Color(.sRGB, red: 1.0000, green: 0.1373, blue: 0.6549, opacity: 0.25)
     /// procedencia: app home
-    public static let marcaAcentoSuaveFondo = Color(.sRGB, red: 0.2667, green: 0.8392, blue: 0.1725, opacity: 0.08)
+    public static let marcaAcentoSuaveFondo = Color(.sRGB, red: 1.0000, green: 0.1373, blue: 0.6549, opacity: 0.08)
     /// procedencia: app home reloj · Pantone Violet C. Color secundario de la app.
     public static let marcaSecundario = Color(.sRGB, red: 0.2667, green: 0.0000, blue: 0.6000, opacity: 1)
     /// procedencia: app home reloj
@@ -200,6 +200,24 @@ public enum TokensTipografia {
     public static let notaLegalTamano: CGFloat = 11
     public static let notaLegalPeso: Font.Weight = .regular
     public static let notaLegalInterlineado: CGFloat = 16.5
+    public static let displayTamano: CGFloat = 34
+    public static let displayPeso: Font.Weight = .heavy
+    public static let displayInterlineado: CGFloat = 35.7
+    public static let displayEspaciadoLetras: CGFloat = -1.19
+    public static let metricaHeroeTamano: CGFloat = 64
+    public static let metricaHeroePeso: Font.Weight = .heavy
+    public static let metricaHeroeInterlineado: CGFloat = 64
+    public static let metricaHeroeEspaciadoLetras: CGFloat = -2.88
+    public static let unidadHeroeTamano: CGFloat = 22
+    public static let unidadHeroePeso: Font.Weight = .bold
+    public static let unidadHeroeEspaciadoLetras: CGFloat = -0.44
+    public static let metricaMediaTamano: CGFloat = 20
+    public static let metricaMediaPeso: Font.Weight = .bold
+    public static let metricaMediaInterlineado: CGFloat = 20
+    public static let metricaMediaEspaciadoLetras: CGFloat = -0.4
+    public static let tituloSeccionTamano: CGFloat = 17
+    public static let tituloSeccionPeso: Font.Weight = .bold
+    public static let tituloSeccionEspaciadoLetras: CGFloat = -0.34
     public static let relojCronometroTamano: CGFloat = 62
     public static let relojCronometroPeso: Font.Weight = .bold
     public static let relojCronometroInterlineado: CGFloat = 62
@@ -300,7 +318,7 @@ public enum TokensTamano {
 public enum TokensAcento {
     /// El valor de tokens.json. Es el RESPALDO: se usa si el catálogo de assets
     /// no está disponible (previews del paquete, tests fuera de la app).
-    public static let respaldo = Color(.sRGB, red: 0.2667, green: 0.8392, blue: 0.1725, opacity: 1)
+    public static let respaldo = Color(.sRGB, red: 1.0000, green: 0.1373, blue: 0.6549, opacity: 1)
     /// El nombre del color en el catálogo de assets.
     public static let nombreEnAssets = "Acento"
     public static let alfaApagado: Double = 0.35

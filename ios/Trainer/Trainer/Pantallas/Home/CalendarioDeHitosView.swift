@@ -1,8 +1,8 @@
 import SwiftUI
 import TrainerCore
 
-/// Calendario de hitos estilo GitHub ("Yearly" activity contribution graph).
-/// Muestra los días entrenados a lo largo del año con diferentes niveles de intensidad rosa (#FF23A7).
+/// Calendario de hitos estilo GitHub (el gráfico de contribuciones del año).
+/// Muestra los días entrenados de las últimas 52 semanas con niveles de intensidad del acento.
 /// Permite tocar cualquier día para inspeccionar los pasos guardados y la lista de entrenamientos
 /// realizados en esa jornada (por ejemplo, 1 km corriendo y 2 km corriendo en un mismo día).
 struct CalendarioDeHitosView: View {
@@ -16,6 +16,22 @@ struct CalendarioDeHitosView: View {
     @State private var actividadElegidaParaDetalle: Actividad? = nil
     @State private var mostrandoEditorPasos: Bool = false
     @State private var textoPasosInput: String = ""
+
+    /// El lado de una celda del mapa de calor y el hueco entre celdas.
+    private let celda = TokensEspaciado.e12
+    private let hueco = TokensEspaciado.e3
+
+    /// El idioma de la app, no el del sistema: los nombres de días y meses tienen
+    /// que coincidir con el resto de los textos.
+    private static var idioma: Locale {
+        Locale(identifier: Bundle.main.preferredLocalizations.first ?? "es")
+    }
+
+    private static var calendarioLocal: Calendar {
+        var cal = Calendar.current
+        cal.locale = idioma
+        return cal
+    }
 
     // Estructura de semanas calculada para los últimos 364 días (52 semanas)
     private var semanasDelAnio: [[Date]] {
@@ -48,6 +64,13 @@ struct CalendarioDeHitosView: View {
         return semanas
     }
 
+    /// Los nombres cortos de lunes a domingo, del calendario en el idioma de la app.
+    private var nombresDeDias: [String] {
+        let simbolos = Self.calendarioLocal.shortWeekdaySymbols // arranca en domingo
+        guard simbolos.count == 7 else { return [] }
+        return Array(simbolos[1...]) + [simbolos[0]]
+    }
+
     var body: some View {
         VStack(alignment: .leading, spacing: TokensEspaciado.e14) {
             encabezado
@@ -58,12 +81,7 @@ struct CalendarioDeHitosView: View {
             inspectorDelDiaSeleccionado
         }
         .padding(TokensEspaciado.e16)
-        .background(Paleta.superficie)
-        .clipShape(RoundedRectangle(cornerRadius: TokensRadio.card, style: .continuous))
-        .overlay(
-            RoundedRectangle(cornerRadius: TokensRadio.card, style: .continuous)
-                .strokeBorder(Paleta.bordeSuperficie, lineWidth: 1)
-        )
+        .tarjeta()
         .sheet(item: $actividadElegidaParaDetalle) { actividad in
             DetalleDeActividadView(
                 actividad: actividad,
@@ -90,27 +108,21 @@ struct CalendarioDeHitosView: View {
     private var encabezado: some View {
         HStack(alignment: .center, spacing: TokensEspaciado.e8) {
             Image(systemName: "calendar.badge.clock")
-                .font(.system(size: 16, weight: .bold))
+                .font(.system(size: TokensEspaciado.e16, weight: .bold))
                 .foregroundStyle(Paleta.acento)
+                .accessibilityHidden(true)
 
-            VStack(alignment: .leading, spacing: 1) {
-                Text("Yearly")
-                    .font(.system(size: 17, weight: .bold, design: .rounded))
-                    .foregroundStyle(Paleta.textoPrimario)
+            VStack(alignment: .leading, spacing: TokensEspaciado.e1) {
+                Text(String(localized: "Tu año", comment: "Título del calendario de hitos"))
+                    .estilo(.tituloSeccion)
+                    .accessibilityAddTraits(.isHeader)
                 Text("Hitos y entrenamientos estilo GitHub")
-                    .font(.system(size: 11.5, weight: .medium))
-                    .foregroundStyle(Paleta.textoTerciario)
+                    .estilo(.labelCampo, color: Paleta.textoTerciario)
             }
 
             Spacer()
 
-            Text("2026")
-                .font(.system(size: 11.5, weight: .bold, design: .rounded))
-                .foregroundStyle(Paleta.acento)
-                .padding(.horizontal, 9)
-                .padding(.vertical, 4)
-                .background(Paleta.acentoChipActivo)
-                .clipShape(Capsule())
+            PildoraDeEstado(Date().formatted(.dateTime.year().locale(Self.idioma)), tono: .acento)
         }
     }
 
@@ -118,45 +130,16 @@ struct CalendarioDeHitosView: View {
 
     private var resumenEstadisticas: some View {
         let stats = almacen.resumenAnual()
-        return HStack(spacing: TokensEspaciado.e8) {
-            itemEstadistica(valor: "\(stats.totalSesiones)", etiqueta: "Sesiones", icono: "figure.run")
-            divisorVertical
-            itemEstadistica(valor: String(format: "%.1f", stats.totalKm).replacingOccurrences(of: ".", with: ","), etiqueta: "km totales", icono: "map")
-            divisorVertical
-            itemEstadistica(valor: Formato.pasos(stats.totalPasos), etiqueta: "Pasos", icono: "figure.walk")
-            divisorVertical
-            itemEstadistica(valor: "\(stats.diasEntrenados)", etiqueta: "Días activos", icono: "flame.fill")
+        let columnas = [GridItem(.flexible(), spacing: TokensEspaciado.e8),
+                        GridItem(.flexible(), spacing: TokensEspaciado.e8)]
+        return LazyVGrid(columns: columnas, spacing: TokensEspaciado.e8) {
+            TarjetaMetrica(String(localized: "Sesiones", comment: "Calendario de hitos"), valor: "\(stats.totalSesiones)", simbolo: "figure.run")
+            TarjetaMetrica(String(localized: "km totales", comment: "Calendario de hitos"),
+                           valor: Formato.kilometros(Int((stats.totalKm * 1000).rounded())),
+                           unidad: "km", simbolo: "map")
+            TarjetaMetrica(String(localized: "Pasos", comment: "Calendario de hitos"), valor: Formato.pasos(stats.totalPasos), simbolo: "figure.walk")
+            TarjetaMetrica(String(localized: "Días activos", comment: "Calendario de hitos"), valor: "\(stats.diasEntrenados)", simbolo: "flame.fill", destacada: true)
         }
-        .padding(.vertical, 8)
-        .padding(.horizontal, 10)
-        .background(Paleta.superficieAlterna.opacity(0.6))
-        .clipShape(RoundedRectangle(cornerRadius: 12, style: .continuous))
-    }
-
-    private func itemEstadistica(valor: String, etiqueta: String, icono: String) -> some View {
-        VStack(spacing: 2) {
-            HStack(spacing: 3) {
-                Image(systemName: icono)
-                    .font(.system(size: 9, weight: .bold))
-                    .foregroundStyle(Paleta.acento)
-                Text(valor)
-                    .font(.system(size: 13, weight: .bold, design: .rounded))
-                    .foregroundStyle(Paleta.textoPrimario)
-                    .monospacedDigit()
-                    .lineLimit(1)
-                    .minimumScaleFactor(0.8)
-            }
-            Text(etiqueta)
-                .font(.system(size: 9.5, weight: .medium))
-                .foregroundStyle(Paleta.textoTerciario)
-        }
-        .frame(maxWidth: .infinity)
-    }
-
-    private var divisorVertical: some View {
-        Rectangle()
-            .fill(Paleta.divisor)
-            .frame(width: 1, height: 20)
     }
 
     // MARK: - Matriz GitHub Heatmap
@@ -166,32 +149,22 @@ struct CalendarioDeHitosView: View {
 
         return ScrollViewReader { proxy in
             ScrollView(.horizontal, showsIndicators: false) {
-                HStack(alignment: .top, spacing: 6) {
-                    // Columna con los días de la semana a la izquierda
-                    VStack(alignment: .trailing, spacing: 3) {
-                        Text("").frame(height: 14) // espacio para la fila de meses
-                        Text("Mon").font(.system(size: 9, weight: .semibold)).foregroundStyle(Paleta.textoTerciario).frame(height: 12)
-                        Text("Tue").font(.system(size: 9, weight: .semibold)).foregroundStyle(Paleta.textoTerciario).frame(height: 12)
-                        Text("Wed").font(.system(size: 9, weight: .semibold)).foregroundStyle(Paleta.textoTerciario).frame(height: 12)
-                        Text("Thu").font(.system(size: 9, weight: .semibold)).foregroundStyle(Paleta.textoTerciario).frame(height: 12)
-                        Text("Fri").font(.system(size: 9, weight: .semibold)).foregroundStyle(Paleta.textoTerciario).frame(height: 12)
-                        Text("Sat").font(.system(size: 9, weight: .semibold)).foregroundStyle(Paleta.textoTerciario).frame(height: 12)
-                        Text("Sun").font(.system(size: 9, weight: .semibold)).foregroundStyle(Paleta.textoTerciario).frame(height: 12)
-                    }
+                HStack(alignment: .top, spacing: TokensEspaciado.e6) {
+                    columnaDeDias
 
                     // Cuadrícula de 52 semanas
-                    HStack(spacing: 3) {
+                    HStack(spacing: hueco) {
                         ForEach(Array(semanas.enumerated()), id: \.offset) { semanaIdx, diasDeSemana in
-                            VStack(spacing: 3) {
+                            VStack(spacing: hueco) {
                                 // Etiqueta del mes sobre la primera semana del mes
                                 if let primerDia = diasDeSemana.first, esInicioDeMes(primerDia) {
                                     Text(nombreMes(primerDia))
-                                        .font(.system(size: 9, weight: .bold))
-                                        .foregroundStyle(Paleta.textoSecundario)
-                                        .frame(height: 14, alignment: .leading)
+                                        .estilo(.etiquetaSeccion.enMinusculas, color: Paleta.textoSecundario)
+                                        .fixedSize()
+                                        .frame(width: celda, height: TokensEspaciado.e14, alignment: .leading)
                                 } else {
-                                    Text("")
-                                        .frame(height: 14)
+                                    Color.clear
+                                        .frame(width: celda, height: TokensEspaciado.e14)
                                 }
 
                                 // 7 celdas (Lunes a Domingo)
@@ -203,8 +176,8 @@ struct CalendarioDeHitosView: View {
                         }
                     }
                 }
-                .padding(.vertical, 4)
-                .padding(.horizontal, 2)
+                .padding(.vertical, TokensEspaciado.e4)
+                .padding(.horizontal, TokensEspaciado.e2)
             }
             .onAppear {
                 // Hacer scroll automático a la derecha (semana actual de hoy)
@@ -215,6 +188,21 @@ struct CalendarioDeHitosView: View {
                 }
             }
         }
+    }
+
+    /// Lunes a domingo, a la izquierda de la cuadrícula.
+    private var columnaDeDias: some View {
+        VStack(alignment: .trailing, spacing: hueco) {
+            Color.clear.frame(height: TokensEspaciado.e14) // espacio para la fila de meses
+            ForEach(Array(nombresDeDias.enumerated()), id: \.offset) { _, nombre in
+                Text(nombre)
+                    .estilo(.etiquetaSeccion.enMinusculas, color: Paleta.textoTerciario)
+                    .lineLimit(1)
+                    .minimumScaleFactor(0.5)
+                    .frame(height: celda)
+            }
+        }
+        .accessibilityHidden(true)
     }
 
     private func celdaDia(_ dia: Date) -> some View {
@@ -230,21 +218,22 @@ struct CalendarioDeHitosView: View {
                 fechaSeleccionada = dia
             }
         } label: {
-            RoundedRectangle(cornerRadius: 3, style: .continuous)
+            RoundedRectangle(cornerRadius: hueco, style: .continuous)
                 .fill(colorParaNivel(nivel, esFuturo: esFuturo))
-                .frame(width: 12, height: 12)
+                .frame(width: celda, height: celda)
                 .overlay(
-                    RoundedRectangle(cornerRadius: 3, style: .continuous)
+                    RoundedRectangle(cornerRadius: hueco, style: .continuous)
                         .strokeBorder(
-                            esSeleccionado ? Color.white : (esHoy ? Paleta.acento : Color.clear),
-                            lineWidth: esSeleccionado ? 1.8 : 1.0
+                            esSeleccionado ? Paleta.textoPrimario : (esHoy ? Paleta.acento : Color.clear),
+                            lineWidth: esSeleccionado ? TokensEspaciado.e2 : TokensEspaciado.e1
                         )
                 )
-                .shadow(color: esSeleccionado ? Paleta.acento.opacity(0.8) : Color.clear, radius: 2)
+                .shadow(color: esSeleccionado ? Paleta.acentoBrillo : Color.clear, radius: TokensEspaciado.e2)
         }
         .buttonStyle(.plain)
         .disabled(esFuturo)
         .accessibilityLabel(descripcionAccesibilidad(dia: dia, nivel: nivel))
+        .accessibilityAddTraits(esSeleccionado ? [.isButton, .isSelected] : .isButton)
     }
 
     private func colorParaNivel(_ nivel: Int, esFuturo: Bool) -> Color {
@@ -259,7 +248,7 @@ struct CalendarioDeHitosView: View {
         case 3:
             return Paleta.acento.opacity(0.80)
         case 4:
-            return Paleta.acento // #FF23A7 vivo
+            return Paleta.acento // el acento vivo
         default:
             return Paleta.superficieAlterna.opacity(0.45)
         }
@@ -272,13 +261,14 @@ struct CalendarioDeHitosView: View {
 
     private func nombreMes(_ fecha: Date) -> String {
         let df = DateFormatter()
-        df.locale = Locale(identifier: "es_AR")
-        df.dateFormat = "MMM"
+        df.locale = Self.idioma
+        df.setLocalizedDateFormatFromTemplate("MMM")
         return df.string(from: fecha).capitalized
     }
 
     private func descripcionAccesibilidad(dia: Date, nivel: Int) -> String {
         let df = DateFormatter()
+        df.locale = Self.idioma
         df.dateStyle = .medium
         return "\(df.string(from: dia)): nivel de actividad \(nivel)"
     }
@@ -286,36 +276,35 @@ struct CalendarioDeHitosView: View {
     // MARK: - Leyenda de Intensidad
 
     private var leyendaYAyuda: some View {
-        HStack {
+        HStack(spacing: TokensEspaciado.e6) {
             Text("Menos")
-                .font(.system(size: 10, weight: .medium))
-                .foregroundStyle(Paleta.textoTerciario)
+                .estilo(.etiquetaSeccion.enMinusculas, color: Paleta.textoTerciario)
 
-            HStack(spacing: 3) {
-                RoundedRectangle(cornerRadius: 2).fill(colorParaNivel(0, esFuturo: false)).frame(width: 10, height: 10)
-                RoundedRectangle(cornerRadius: 2).fill(colorParaNivel(1, esFuturo: false)).frame(width: 10, height: 10)
-                RoundedRectangle(cornerRadius: 2).fill(colorParaNivel(2, esFuturo: false)).frame(width: 10, height: 10)
-                RoundedRectangle(cornerRadius: 2).fill(colorParaNivel(3, esFuturo: false)).frame(width: 10, height: 10)
-                RoundedRectangle(cornerRadius: 2).fill(colorParaNivel(4, esFuturo: false)).frame(width: 10, height: 10)
+            HStack(spacing: hueco) {
+                ForEach(0..<5) { nivel in
+                    RoundedRectangle(cornerRadius: TokensRadio.minimo)
+                        .fill(colorParaNivel(nivel, esFuturo: false))
+                        .frame(width: TokensEspaciado.e10, height: TokensEspaciado.e10)
+                }
             }
+            .accessibilityHidden(true)
 
             Text("Más")
-                .font(.system(size: 10, weight: .medium))
-                .foregroundStyle(Paleta.textoTerciario)
+                .estilo(.etiquetaSeccion.enMinusculas, color: Paleta.textoTerciario)
 
-            Spacer()
+            Spacer(minLength: TokensEspaciado.e6)
 
             Text("Tocá un día para ver detalle")
-                .font(.system(size: 10.5, weight: .medium))
-                .foregroundStyle(Paleta.textoTerciario)
+                .estilo(.etiquetaSeccion.enMinusculas, color: Paleta.textoTerciario)
+                .multilineTextAlignment(.trailing)
         }
-        .padding(.horizontal, 2)
+        .padding(.horizontal, TokensEspaciado.e2)
     }
 
     private var divisor: some View {
         Rectangle()
             .fill(Paleta.divisor)
-            .frame(height: 1)
+            .frame(height: TokensEspaciado.e1)
     }
 
     // MARK: - Inspector del Día Seleccionado
@@ -325,110 +314,26 @@ struct CalendarioDeHitosView: View {
         let pasos = almacen.pasos(para: fechaSeleccionada)
 
         return VStack(alignment: .leading, spacing: TokensEspaciado.e12) {
-            // Título de la fecha
-            HStack {
-                VStack(alignment: .leading, spacing: 2) {
-                    Text(tituloFecha(fechaSeleccionada))
-                        .font(.system(size: 15, weight: .bold, design: .rounded))
-                        .foregroundStyle(Paleta.textoPrimario)
-                    Text(subtituloFecha(fechaSeleccionada))
-                        .font(.system(size: 11, weight: .medium))
-                        .foregroundStyle(Paleta.textoTerciario)
-                }
-
-                Spacer()
-
-                if entrenamientos.isEmpty {
-                    Text("Día de descanso")
-                        .font(.system(size: 11, weight: .semibold, design: .rounded))
-                        .foregroundStyle(Paleta.textoSecundario)
-                        .padding(.horizontal, 8)
-                        .padding(.vertical, 4)
-                        .background(Paleta.superficieAlterna)
-                        .clipShape(Capsule())
-                } else {
-                    Text("\(entrenamientos.count) \(entrenamientos.count == 1 ? "entrenamiento" : "entrenamientos")")
-                        .font(.system(size: 11, weight: .bold, design: .rounded))
-                        .foregroundStyle(Paleta.acento)
-                        .padding(.horizontal, 8)
-                        .padding(.vertical, 4)
-                        .background(Paleta.acentoChipActivo)
-                        .clipShape(Capsule())
-                }
-            }
-
-            // Tarjeta de Pasos del Día (Requerimiento explícito: "que se guarde la cantidad de pasos")
-            HStack(spacing: TokensEspaciado.e12) {
-                ZStack {
-                    Circle()
-                        .fill(Paleta.acento.opacity(0.18))
-                        .frame(width: 42, height: 42)
-                    Image(systemName: "figure.walk")
-                        .font(.system(size: 18, weight: .bold))
-                        .foregroundStyle(Paleta.acento)
-                }
-
-                VStack(alignment: .leading, spacing: 2) {
-                    Text("\(Formato.pasos(pasos)) pasos")
-                        .font(.system(size: 18, weight: .bold, design: .rounded))
-                        .foregroundStyle(Paleta.textoPrimario)
-                        .monospacedDigit()
-                    Text("Pasos registrados en el día")
-                        .font(.system(size: 11, weight: .medium))
-                        .foregroundStyle(Paleta.textoTerciario)
-                }
-
-                Spacer()
-
-                Button {
-                    textoPasosInput = pasos > 0 ? "\(pasos)" : "5000"
-                    mostrandoEditorPasos = true
-                } label: {
-                    Text("Editar")
-                        .font(.system(size: 12, weight: .bold, design: .rounded))
-                        .foregroundStyle(Paleta.acento)
-                        .padding(.horizontal, 12)
-                        .padding(.vertical, 6)
-                        .background(Paleta.acentoChipActivo)
-                        .clipShape(Capsule())
-                }
-                .buttonStyle(EstiloPresionado())
-            }
-            .padding(TokensEspaciado.e10)
-            .background(Paleta.superficieAlterna)
-            .clipShape(RoundedRectangle(cornerRadius: 12, style: .continuous))
+            encabezadoDelDia(cantidad: entrenamientos.count)
+            tarjetaDePasos(pasos)
 
             // Lista de Entrenamientos (Requerimiento explícito: "si fueron distintos entrenamientos el mismo día que se muestre una lista")
             if entrenamientos.isEmpty {
-                VStack(spacing: 8) {
+                VStack(spacing: TokensEspaciado.e8) {
                     Text("No se registraron salidas deportivas este día.")
-                        .font(.system(size: 12.5, weight: .medium))
-                        .foregroundStyle(Paleta.textoTerciario)
+                        .estilo(.cuerpoSecundario, color: Paleta.textoTerciario)
                         .frame(maxWidth: .infinity, alignment: .leading)
 
-                    Button {
-                        simularEntrenamientoParaFecha(fechaSeleccionada)
-                    } label: {
-                        HStack(spacing: 6) {
-                            Image(systemName: "plus.circle.fill")
-                                .font(.system(size: 13, weight: .bold))
-                            Text("Añadir 1 km running a este día")
-                                .font(.system(size: 12.5, weight: .bold, design: .rounded))
-                        }
-                        .foregroundStyle(Paleta.acento)
-                        .frame(maxWidth: .infinity)
-                        .padding(.vertical, 8)
-                        .background(Paleta.acentoChipActivo)
-                        .clipShape(RoundedRectangle(cornerRadius: 8))
-                    }
-                    .buttonStyle(EstiloPresionado())
+                    #if DEBUG
+                    botonDeSimulacion
+                    #endif
                 }
-                .padding(.top, 2)
+                .padding(.top, TokensEspaciado.e2)
             } else {
                 VStack(alignment: .leading, spacing: TokensEspaciado.e8) {
-                    Text("ENTRENAMIENTOS REALIZADOS")
-                        .font(.system(size: 10, weight: .bold))
-                        .foregroundStyle(Paleta.textoTerciario)
+                    Text("Entrenamientos realizados")
+                        .estilo(.etiquetaSeccion, color: Paleta.textoTerciario)
+                        .accessibilityAddTraits(.isHeader)
 
                     ForEach(Array(entrenamientos.enumerated()), id: \.element.id) { indice, act in
                         filaEntrenamiento(act, indice: indice)
@@ -436,7 +341,76 @@ struct CalendarioDeHitosView: View {
                 }
             }
         }
-        .padding(.top, 4)
+        .padding(.top, TokensEspaciado.e4)
+    }
+
+    private func encabezadoDelDia(cantidad: Int) -> some View {
+        HStack {
+            VStack(alignment: .leading, spacing: TokensEspaciado.e2) {
+                Text(tituloFecha(fechaSeleccionada))
+                    .estilo(.opcionTitulo)
+                Text(subtituloFecha(fechaSeleccionada))
+                    .estilo(.labelCampo, color: Paleta.textoTerciario)
+            }
+
+            Spacer()
+
+            if cantidad == 0 {
+                PildoraDeEstado(String(localized: "Día de descanso", comment: "Calendario de hitos: día sin entrenamientos"),
+                                simbolo: "moon.zzz.fill")
+            } else {
+                PildoraDeEstado(cantidad == 1
+                                ? String(localized: "1 entrenamiento", comment: "Calendario de hitos")
+                                : String(localized: "\(cantidad) entrenamientos", comment: "Calendario de hitos"),
+                                tono: .acento)
+            }
+        }
+    }
+
+    /// Tarjeta de Pasos del Día (Requerimiento explícito: "que se guarde la cantidad de pasos")
+    private func tarjetaDePasos(_ pasos: Int) -> some View {
+        HStack(spacing: TokensEspaciado.e12) {
+            ZStack {
+                Circle().fill(Paleta.acentoChipActivo)
+                Image(systemName: "figure.walk")
+                    .font(.system(size: TokensTipografia.tituloCardGrandeTamano, weight: .bold))
+                    .foregroundStyle(Paleta.acento)
+            }
+            .frame(width: TokensEspaciado.e44, height: TokensEspaciado.e44)
+            .accessibilityHidden(true)
+
+            VStack(alignment: .leading, spacing: TokensEspaciado.e2) {
+                HStack(alignment: .firstTextBaseline, spacing: TokensEspaciado.e4) {
+                    Text(Formato.pasos(pasos))
+                        .estilo(.metricaMedia)
+                    Text("pasos")
+                        .estilo(.labelCampo, color: Paleta.acento)
+                }
+                Text("Pasos registrados en el día")
+                    .estilo(.labelCampo, color: Paleta.textoTerciario)
+            }
+            .accessibilityElement(children: .combine)
+
+            Spacer()
+
+            Button {
+                textoPasosInput = pasos > 0 ? "\(pasos)" : "5000"
+                mostrandoEditorPasos = true
+            } label: {
+                Text("Editar")
+                    .estilo(.tituloCard, color: Paleta.acento)
+                    .padding(.horizontal, TokensEspaciado.e14)
+                    .frame(minHeight: TokensEspaciado.e36)
+                    .background(Paleta.acentoChipActivo)
+                    .clipShape(Capsule())
+                    .frame(minHeight: TokensTamano.objetivoTactilMinimo)
+                    .contentShape(Rectangle())
+            }
+            .buttonStyle(EstiloPresionado())
+        }
+        .padding(TokensEspaciado.e10)
+        .background(Paleta.superficieAlterna)
+        .clipShape(RoundedRectangle(cornerRadius: TokensRadio.boton, style: .continuous))
     }
 
     private func filaEntrenamiento(_ actividad: Actividad, indice: Int) -> some View {
@@ -445,92 +419,109 @@ struct CalendarioDeHitosView: View {
         } label: {
             HStack(spacing: TokensEspaciado.e12) {
                 ZStack {
-                    Circle()
-                        .fill(Paleta.acentoChipActivo)
-                        .frame(width: 40, height: 40)
-                    IconoDeporte(deporte: actividad.sport, color: Paleta.acento, tamano: 18)
+                    Circle().fill(Paleta.acentoChipActivo)
+                    IconoDeporte(deporte: actividad.sport, color: Paleta.acento, tamano: TokensEspaciado.e16)
                 }
+                .frame(width: TokensEspaciado.e40, height: TokensEspaciado.e40)
+                .accessibilityHidden(true)
 
-                VStack(alignment: .leading, spacing: 3) {
-                    HStack(spacing: 6) {
-                        Text(nombreDeporte(actividad.sport))
-                            .font(.system(size: 14.5, weight: .bold, design: .rounded))
-                            .foregroundStyle(Paleta.textoPrimario)
+                VStack(alignment: .leading, spacing: TokensEspaciado.e3) {
+                    HStack(spacing: TokensEspaciado.e6) {
+                        Text(actividad.sport.nombreVisible)
+                            .estilo(.cuerpoDestacado)
 
                         if let dist = actividad.distanceM {
                             Text(Formato.distancia(Int(dist), unidades: .metrico))
-                                .font(.system(size: 13, weight: .bold, design: .rounded))
-                                .foregroundStyle(Paleta.acento)
+                                .estilo(.tituloCard, color: Paleta.acento)
                                 .monospacedDigit()
                         }
                     }
 
-                    HStack(spacing: 8) {
+                    HStack(spacing: TokensEspaciado.e8) {
                         Text(Formato.cronometro(segundos: Int(actividad.durationS)))
-                            .font(.system(size: 11.5, weight: .medium))
-                            .foregroundStyle(Paleta.textoSecundario)
+                            .estilo(.labelCampo, color: Paleta.textoSecundario)
                             .monospacedDigit()
 
                         if let dist = actividad.distanceM, dist > 0 {
                             let km = Double(dist) / 1000.0
                             let segPorKm = Int(Double(actividad.durationS) / km)
                             Text("· \(Formato.ritmo(segundosPorKm: segPorKm, unidades: .metrico)) /km")
-                                .font(.system(size: 11.5, weight: .medium))
-                                .foregroundStyle(Paleta.textoTerciario)
+                                .estilo(.labelCampo, color: Paleta.textoTerciario)
+                                .monospacedDigit()
                         }
 
-                        let hora = Date(timeIntervalSince1970: Double(actividad.startedAtMs) / 1000)
-                            .formatted(date: .omitted, time: .shortened)
-                        Text("· \(hora)")
-                            .font(.system(size: 11, weight: .regular))
-                            .foregroundStyle(Paleta.textoTerciario)
+                        Text("· \(horaDe(actividad))")
+                            .estilo(.labelCampo, color: Paleta.textoTerciario)
                     }
                 }
 
                 Spacer()
 
                 Image(systemName: "chevron.right")
-                    .font(.system(size: 12, weight: .semibold))
+                    .font(.system(size: TokensTipografia.notaLegalTamano, weight: .semibold))
                     .foregroundStyle(Paleta.textoTerciario)
+                    .accessibilityHidden(true)
             }
             .padding(TokensEspaciado.e10)
             .background(Paleta.superficieAlterna)
-            .clipShape(RoundedRectangle(cornerRadius: 12, style: .continuous))
+            .clipShape(RoundedRectangle(cornerRadius: TokensRadio.boton, style: .continuous))
+            .contentShape(Rectangle())
         }
         .buttonStyle(EstiloPresionado())
     }
 
     // MARK: - Auxiliares de Formato de Fechas
 
+    private func horaDe(_ actividad: Actividad) -> String {
+        Date(timeIntervalSince1970: Double(actividad.startedAtMs) / 1000)
+            .formatted(date: .omitted, time: .shortened)
+    }
+
     private func tituloFecha(_ fecha: Date) -> String {
         let cal = Calendar.current
         if cal.isDateInToday(fecha) {
-            return "Hoy"
+            return String(localized: "Hoy", comment: "Día elegido en el calendario de hitos")
         } else if cal.isDateInYesterday(fecha) {
-            return "Ayer"
+            return String(localized: "Ayer", comment: "Día elegido en el calendario de hitos")
         } else {
             let df = DateFormatter()
-            df.locale = Locale(identifier: "es_AR")
-            df.dateFormat = "EEEE d 'de' MMMM"
+            df.locale = Self.idioma
+            // "lunes 13 de octubre" en castellano, "Monday, October 13" en inglés.
+            df.setLocalizedDateFormatFromTemplate("EEEEdMMMM")
             return df.string(from: fecha).capitalized
         }
     }
 
     private func subtituloFecha(_ fecha: Date) -> String {
         let df = DateFormatter()
-        df.locale = Locale(identifier: "es_AR")
+        df.locale = Self.idioma
         df.dateStyle = .long
         return df.string(from: fecha)
     }
 
-    private func nombreDeporte(_ sport: DeporteDeSesion) -> String {
-        switch sport {
-        case .running: return Textos.regDeporteRunning
-        case .ciclismo: return Textos.regDeporteCiclismo
-        case .trekking: return Textos.regDeporteTrekking
-        case .triatlon: return Textos.regDeporteTriatlon
-        default: return sport.rawValue.capitalized
+    // MARK: - Sólo en desarrollo
+
+    #if DEBUG
+    /// Crea una salida de 1 km de mentira en el día elegido. Sirve para probar
+    /// el mapa de calor; en una build de la tienda no existe, para que nadie
+    /// pueda inventarse actividades.
+    private var botonDeSimulacion: some View {
+        Button {
+            simularEntrenamientoParaFecha(fechaSeleccionada)
+        } label: {
+            HStack(spacing: TokensEspaciado.e6) {
+                Image(systemName: "plus.circle.fill")
+                    .font(.system(size: TokensTipografia.tituloCardTamano, weight: .bold))
+                Text("Añadir 1 km running a este día")
+                    .estilo(.tituloCard, color: Paleta.acento)
+            }
+            .foregroundStyle(Paleta.acento)
+            .frame(maxWidth: .infinity)
+            .frame(minHeight: TokensTamano.objetivoTactilMinimo)
+            .background(Paleta.acentoChipActivo)
+            .clipShape(Capsule())
         }
+        .buttonStyle(EstiloPresionado())
     }
 
     private func simularEntrenamientoParaFecha(_ fecha: Date) {
@@ -552,4 +543,5 @@ struct CalendarioDeHitosView: View {
         )
         almacen.registrarActividad(nuevo)
     }
+    #endif
 }

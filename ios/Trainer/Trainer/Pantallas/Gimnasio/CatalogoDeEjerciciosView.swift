@@ -96,15 +96,18 @@ struct CatalogoDeEjerciciosView: View {
                 // accionable que no llegaba al mínimo (ESPECIFICACION §6.5).
                 .frame(height: TokensEspaciado.e56)
                 .background(Paleta.superficieInput)
-                .clipShape(RoundedRectangle(cornerRadius: TokensRadio.input, style: .continuous))
+                .clipShape(Capsule())
+                .overlay(Capsule().strokeBorder(Paleta.bordeInput, lineWidth: TokensEspaciado.e1))
 
                 Button { mostrandoFiltros = true } label: {
                     Image(systemName: "line.3.horizontal.decrease")
                         .foregroundStyle(hayFiltros ? Paleta.acento : Paleta.textoSecundario)
                         .frame(width: TokensEspaciado.e56, height: TokensEspaciado.e56)
                         .background(hayFiltros ? Paleta.acentoChipActivo : Paleta.superficieInput)
-                        .clipShape(RoundedRectangle(cornerRadius: TokensRadio.input, style: .continuous))
-                        .contentShape(Rectangle())
+                        .clipShape(Circle())
+                        .overlay(Circle().strokeBorder(hayFiltros ? Paleta.acentoSuaveBorde : Paleta.bordeInput,
+                                                       lineWidth: TokensEspaciado.e1))
+                        .contentShape(Circle())
                 }
                 .buttonStyle(EstiloPresionado())
                 .accessibilityLabel(Textos.catalogoFiltros)
@@ -123,8 +126,10 @@ struct CatalogoDeEjerciciosView: View {
                     .foregroundStyle(sinEquipo ? Paleta.acento : Paleta.textoSecundario)
                     .padding(.horizontal, TokensEspaciado.e12)
                     .frame(minHeight: TokensTamano.objetivoTactilMinimo)
-                    .background(sinEquipo ? Paleta.acentoChipActivo : Paleta.superficieHundida)
+                    .background(sinEquipo ? Paleta.acentoChipActivo : Paleta.superficie)
                     .clipShape(Capsule())
+                    .overlay(Capsule().strokeBorder(sinEquipo ? Paleta.acentoSuaveBorde : Paleta.bordeSuperficie,
+                                                    lineWidth: TokensEspaciado.e1))
                     .contentShape(Rectangle())
                 }
                 .buttonStyle(EstiloPresionado())
@@ -141,7 +146,7 @@ struct CatalogoDeEjerciciosView: View {
         Button { fichaAbierta = ejercicio } label: {
             HStack(spacing: TokensEspaciado.e12) {
                 VStack(alignment: .leading, spacing: TokensEspaciado.e2) {
-                    Text(catalogo.nombre(de: ejercicio)).estilo(.tituloCard)
+                    Text(catalogo.nombre(de: ejercicio)).estilo(.opcionTitulo)
                     Text(descripcionCorta(ejercicio))
                         .estilo(.notaLegal, color: Paleta.textoTerciario)
                 }
@@ -259,13 +264,15 @@ struct HojaDeFiltros: View {
                                                   weight: TokensTipografia.tituloCardPeso))
                             }
                             Text(nombre(clave))
-                                .estilo(.labelCampo, color: elegido ? Paleta.acento : Paleta.textoSecundario)
+                                .estilo(.chip, color: elegido ? Paleta.acento : Paleta.textoSecundario)
                         }
                         .foregroundStyle(elegido ? Paleta.acento : Paleta.textoSecundario)
                         .padding(.horizontal, TokensEspaciado.e12)
                         .frame(minHeight: TokensTamano.objetivoTactilMinimo)
-                        .background(elegido ? Paleta.acentoChipActivo : Paleta.superficieHundida)
+                        .background(elegido ? Paleta.acentoChipActivo : Paleta.superficie)
                         .clipShape(Capsule())
+                        .overlay(Capsule().strokeBorder(elegido ? Paleta.acentoSuaveBorde : Paleta.bordeSuperficie,
+                                                        lineWidth: TokensEspaciado.e1))
                         .contentShape(Rectangle())
                     }
                     .buttonStyle(EstiloPresionado())
@@ -290,6 +297,12 @@ struct FichaDeEjercicioView: View {
         NavigationStack {
             ScrollView {
                 VStack(alignment: .leading, spacing: TokensEspaciado.e14) {
+                    // El nombre grande arriba, como los títulos del rediseño: la
+                    // barra de navegación lo lleva chico y se corta.
+                    Text(catalogo.nombre(de: ejercicio))
+                        .estilo(.display)
+                        .fixedSize(horizontal: false, vertical: true)
+                        .accessibilityAddTraits(.isHeader)
                     dato(Textos.fichaMusculoPrincipal, principales)
                     if !secundarios.isEmpty {
                         dato(Textos.fichaMusculoSecundario, secundarios)
@@ -332,8 +345,8 @@ struct FichaDeEjercicioView: View {
 
     private func dato(_ etiqueta: String, _ valor: String) -> some View {
         VStack(alignment: .leading, spacing: TokensEspaciado.e3) {
-            Text(etiqueta).estilo(.notaLegal, color: Paleta.textoTerciario)
-            Text(valor).estilo(.cuerpoSecundario, color: Paleta.textoCuerpo)
+            Text(etiqueta).estilo(.etiquetaSeccion, color: Paleta.textoTerciario)
+            Text(valor).estilo(.opcionTitulo, color: Paleta.textoPrimario)
         }
         .padding(TokensEspaciado.e14)
         .frame(maxWidth: .infinity, alignment: .leading)
@@ -356,11 +369,11 @@ struct SustitutosView: View {
                         if let ejercicio = catalogo.ejercicio(sustituto.id) {
                             Button { alElegir(ejercicio) } label: {
                                 VStack(alignment: .leading, spacing: TokensEspaciado.e3) {
-                                    Text(catalogo.nombre(de: ejercicio)).estilo(.tituloCard)
+                                    Text(catalogo.nombre(de: ejercicio)).estilo(.opcionTitulo)
                                     // El MOTIVO de cada sustituto, que es lo que
                                     // el diseño pide mostrar y no sólo el nombre.
                                     Text(motivo(sustituto.tipo))
-                                        .estilo(.notaLegal, color: Paleta.acento)
+                                        .estilo(.chip, color: Paleta.acento)
                                 }
                                 .padding(TokensEspaciado.e14)
                                 .frame(maxWidth: .infinity, alignment: .leading)

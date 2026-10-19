@@ -20,9 +20,18 @@ struct SinDatosView: View {
                         .estilo(.cuerpoSecundario, color: Paleta.textoSecundario)
                 }
             } else {
-                Text(texto)
-                    .estilo(.cuerpoSecundario, color: Paleta.textoSecundario)
-                    .fixedSize(horizontal: false, vertical: true)
+                HStack(alignment: .top, spacing: TokensEspaciado.e10) {
+                    Image(systemName: simbolo)
+                        .font(.system(size: TokensTipografia.tituloCardTamano, weight: .bold))
+                        .foregroundStyle(Paleta.textoTerciario)
+                        .frame(width: TokensEspaciado.e34, height: TokensEspaciado.e34)
+                        .background(Paleta.superficieHundida)
+                        .clipShape(Circle())
+                        .accessibilityHidden(true)
+                    Text(texto)
+                        .estilo(.cuerpoSecundario, color: Paleta.textoSecundario)
+                        .fixedSize(horizontal: false, vertical: true)
+                }
                 // Reintentar no completa un perfil: para eso está el aviso de arriba.
                 if problema != .perfilIncompleto {
                     BotonTexto(Textos.homeDatosReintentar, accion: reintentar)
@@ -32,6 +41,16 @@ struct SinDatosView: View {
         .padding(TokensEspaciado.e16)
         .frame(maxWidth: .infinity, alignment: .leading)
         .tarjeta()
+    }
+
+    /// El ícono acompaña al texto, nunca lo reemplaza.
+    private var simbolo: String {
+        switch problema {
+        case .sinRed: return "wifi.slash"
+        case .perfilIncompleto: return "person.crop.circle.badge.exclamationmark"
+        case .servidor: return "exclamationmark.icloud"
+        case nil: return "tray"
+        }
     }
 
     private var texto: String {

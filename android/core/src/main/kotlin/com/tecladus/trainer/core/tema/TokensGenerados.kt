@@ -45,15 +45,15 @@ object TokensColor {
     /** procedencia: home reloj */
     val estadoErrorFondo: Color = Color(0x24FF8C78)
     /** procedencia: app home reloj · Pantone 802 C. Expuesto como variable CSS --ac / --ac-rgb y como parametro 'accent' del tablero. Ver parametros_del_tablero.accent. */
-    val marcaAcento: Color = Color(0xFF44D62C)
+    val marcaAcento: Color = Color(0xFFFF23A7)
     /** procedencia: app · Relleno del boton primario DESHABILITADO. */
-    val marcaAcentoApagado: Color = Color(0x5944D62C)
+    val marcaAcentoApagado: Color = Color(0x59FF23A7)
     /** procedencia: app home reloj */
-    val marcaAcentoChipActivo: Color = Color(0x2444D62C)
+    val marcaAcentoChipActivo: Color = Color(0x24FF23A7)
     /** procedencia: app home */
-    val marcaAcentoSuaveBorde: Color = Color(0x4044D62C)
+    val marcaAcentoSuaveBorde: Color = Color(0x40FF23A7)
     /** procedencia: app home */
-    val marcaAcentoSuaveFondo: Color = Color(0x1444D62C)
+    val marcaAcentoSuaveFondo: Color = Color(0x14FF23A7)
     /** procedencia: app home reloj · Pantone Violet C. Color secundario de la app. */
     val marcaSecundario: Color = Color(0xFF440099)
     /** procedencia: app home reloj */
@@ -215,6 +215,24 @@ object TokensTipografia {
     val notaLegalTamano: TextUnit = 11.sp
     val notaLegalPeso: FontWeight = FontWeight(400)
     val notaLegalInterlineado: TextUnit = 16.5.sp
+    val displayTamano: TextUnit = 34.sp
+    val displayPeso: FontWeight = FontWeight(800)
+    val displayInterlineado: TextUnit = 35.7.sp
+    val displayEspaciadoLetras: TextUnit = (-0.035).em
+    val metricaHeroeTamano: TextUnit = 64.sp
+    val metricaHeroePeso: FontWeight = FontWeight(800)
+    val metricaHeroeInterlineado: TextUnit = 64.sp
+    val metricaHeroeEspaciadoLetras: TextUnit = (-0.045).em
+    val unidadHeroeTamano: TextUnit = 22.sp
+    val unidadHeroePeso: FontWeight = FontWeight(700)
+    val unidadHeroeEspaciadoLetras: TextUnit = (-0.02).em
+    val metricaMediaTamano: TextUnit = 20.sp
+    val metricaMediaPeso: FontWeight = FontWeight(700)
+    val metricaMediaInterlineado: TextUnit = 20.sp
+    val metricaMediaEspaciadoLetras: TextUnit = (-0.02).em
+    val tituloSeccionTamano: TextUnit = 17.sp
+    val tituloSeccionPeso: FontWeight = FontWeight(700)
+    val tituloSeccionEspaciadoLetras: TextUnit = (-0.02).em
     val relojCronometroTamano: TextUnit = 62.sp
     val relojCronometroPeso: FontWeight = FontWeight(700)
     val relojCronometroInterlineado: TextUnit = 62.sp

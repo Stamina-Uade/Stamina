@@ -43,16 +43,15 @@ public struct RuedaDeNacimiento: View {
 
     public var body: some View {
         VStack(spacing: TokensEspaciado.e8) {
+            // Rediseño 2026-10: la rueda vive dentro de una tarjeta oscura, como
+            // el selector de fecha del mockup.
             DatePicker("", selection: $fecha, in: Self.rango, displayedComponents: .date)
                 .labelsHidden()
                 .datePickerStyleRueda()
+                .padding(.horizontal, TokensEspaciado.e8)
+                .padding(.vertical, TokensEspaciado.e4)
                 .frame(maxWidth: .infinity)
-                .background(Paleta.superficie)
-                .clipShape(RoundedRectangle(cornerRadius: TokensRadio.card, style: .continuous))
-                .overlay(
-                    RoundedRectangle(cornerRadius: TokensRadio.card, style: .continuous)
-                        .strokeBorder(Paleta.bordeSuperficie, lineWidth: TokensEspaciado.e1)
-                )
+                .tarjetaDeFecha()
 
             Text(nota)
                 .estilo(.labelCampo, color: Paleta.textoTerciario)
@@ -70,6 +69,17 @@ public struct RuedaDeNacimiento: View {
 }
 
 extension View {
+    /// La tarjeta oscura de los dos selectores: mismo radio y borde que las
+    /// opciones del registro.
+    fileprivate func tarjetaDeFecha() -> some View {
+        background(Paleta.superficie)
+            .clipShape(RoundedRectangle(cornerRadius: TokensRadio.cardDestacada, style: .continuous))
+            .overlay(
+                RoundedRectangle(cornerRadius: TokensRadio.cardDestacada, style: .continuous)
+                    .strokeBorder(Paleta.bordeSuperficie, lineWidth: TokensEspaciado.e1)
+            )
+    }
+
     @ViewBuilder
     func datePickerStyleRueda() -> some View {
         #if os(iOS)
@@ -113,21 +123,16 @@ public struct CalendarioMes: View {
             encabezado
             grilla
         }
-        .padding(TokensEspaciado.e8)
+        .padding(TokensEspaciado.e12)
         .frame(maxWidth: .infinity)
-        .background(Paleta.superficie)
-        .clipShape(RoundedRectangle(cornerRadius: TokensRadio.card, style: .continuous))
-        .overlay(
-            RoundedRectangle(cornerRadius: TokensRadio.card, style: .continuous)
-                .strokeBorder(Paleta.bordeSuperficie, lineWidth: TokensEspaciado.e1)
-        )
+        .tarjetaDeFecha()
     }
 
     private var encabezado: some View {
         HStack {
             botonDeMes(-1, sistema: "chevron.left", etiqueta: etiquetaMesAnterior)
             Spacer()
-            Text(tituloDelMes).estilo(.tituloCard)
+            Text(tituloDelMes).estilo(.tituloSeccion)
             Spacer()
             botonDeMes(1, sistema: "chevron.right", etiqueta: etiquetaMesSiguiente)
         }
@@ -145,8 +150,9 @@ public struct CalendarioMes: View {
                 .foregroundStyle(Paleta.textoSecundario)
                 .frame(width: TokensTamano.botonCircularCalendario,
                        height: TokensTamano.botonCircularCalendario)
-                .background(Paleta.superficieHundida)
-                .clipShape(RoundedRectangle(cornerRadius: TokensRadio.celda, style: .continuous))
+                .background(Paleta.superficieAlterna)
+                .clipShape(Circle())
+                .overlay(Circle().strokeBorder(Paleta.bordeSuperficie, lineWidth: TokensEspaciado.e1))
                 // Las flechas del diseño miden 30 pt (ESPECIFICACION §9.2). Se
                 // dibujan igual y responden en 48.
                 .objetivoTactil()
@@ -194,7 +200,8 @@ public struct CalendarioMes: View {
                     // como "crece la fila".
                     .frame(height: TokensTamano.objetivoTactilMinimo)
                     .background(elegida ? Paleta.acento : Color.clear)
-                    .clipShape(RoundedRectangle(cornerRadius: TokensRadio.celda, style: .continuous))
+                    .clipShape(RoundedRectangle(cornerRadius: TokensRadio.input, style: .continuous))
+                    .shadow(color: elegida ? Paleta.acentoBrillo : Color.clear, radius: TokensEspaciado.e8)
                     // Sin esto, un día NO elegido es relleno transparente y no
                     // se puede tocar: sólo respondería el número.
                     .contentShape(Rectangle())

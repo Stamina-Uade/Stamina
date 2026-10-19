@@ -59,7 +59,8 @@ public struct BotonPrimario: View {
             .frame(maxWidth: .infinity)
             .frame(minHeight: TokensTamano.botonPrimario)
             .background(habilitado ? Paleta.acento : Paleta.superficieInput)
-            .clipShape(RoundedRectangle(cornerRadius: TokensRadio.boton, style: .continuous))
+            // Rediseño 2026-10: la acción principal es una cápsula, como el mockup.
+            .clipShape(Capsule())
             .opacity(habilitado ? 1.0 : 0.5)
             .objetivoTactilAlto()
         }
@@ -85,7 +86,7 @@ public struct BotonSecundario<Contenido: View>: View {
                 .frame(maxWidth: .infinity)
                 .frame(minHeight: TokensTamano.botonPrimario)
                 .overlay(
-                    RoundedRectangle(cornerRadius: TokensRadio.input, style: .continuous)
+                    Capsule()
                         .strokeBorder(Paleta.bordeBotonSecundario, lineWidth: TokensEspaciado.e1)
                 )
                 .objetivoTactilAlto()

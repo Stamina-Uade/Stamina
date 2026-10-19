@@ -64,7 +64,13 @@ public final class AlmacenDeTransferenciasDeSalida: @unchecked Sendable {
     public func leerRecibidas() -> [SalidaDelReloj] {
         guard let archivoDeEntrada,
               let datos = try? Data(contentsOf: archivoDeEntrada) else { return [] }
-        return (try? JSONDecoder().decode([SalidaDelReloj].self, from: datos)) ?? []
+        guard let recibidas = try? JSONDecoder().decode([SalidaDelReloj].self, from: datos) else {
+            // 🛑 Ilegible: se aparta. Devolver [] sin más dejaba que el próximo
+            // `guardarRecibidas` pisara salidas del reloj que nunca se incorporaron.
+            ArchivoIlegible.apartar(archivoDeEntrada)
+            return []
+        }
+        return recibidas
     }
 
     public func guardarRecibidas(_ recibidas: [SalidaDelReloj]) {
@@ -107,5 +113,32 @@ public final class AlmacenDeTransferenciasDeSalida: @unchecked Sendable {
             .replacingOccurrences(of: "/", with: "_")
             .replacingOccurrences(of: "+", with: "-")
             .replacingOccurrences(of: "=", with: "")
+    }
+}
+
+/// Un archivo propio que existe pero no se puede decodificar (una versión vieja,
+/// un corte a mitad de escritura) se mueve a `<nombre>.corrupto-<timestamp>` en la
+/// misma carpeta. Así el lector puede seguir con una lista vacía sin que el próximo
+/// guardado pise datos de la persona: quedan ahí para recuperarlos a mano.
+public enum ArchivoIlegible {
+    @discardableResult
+    public static func apartar(_ url: URL, ahora: Date = Date()) -> URL? {
+        guard FileManager.default.fileExists(atPath: url.path) else { return nil }
+        let marca = Int64((ahora.timeIntervalSince1970 * 1000).rounded())
+        var destino = url.deletingLastPathComponent()
+            .appendingPathComponent(url.lastPathComponent + ".corrupto-\(marca)")
+        var intento = 1
+        while FileManager.default.fileExists(atPath: destino.path) {
+            destino = url.deletingLastPathComponent()
+                .appendingPathComponent(url.lastPathComponent + ".corrupto-\(marca)-\(intento)")
+            intento += 1
+        }
+        do {
+            try FileManager.default.moveItem(at: url, to: destino)
+            return destino
+        } catch {
+            // Si no se puede mover, por lo menos queda una copia.
+            return (try? FileManager.default.copyItem(at: url, to: destino)) != nil ? destino : nil
+        }
     }
 }

@@ -27,6 +27,12 @@ struct RegistrarComidaView: View {
         NavigationStack {
             ScrollView {
                 VStack(alignment: .leading, spacing: TokensEspaciado.e16) {
+                    // Lo que se está por anotar, grande: es lo único que la
+                    // persona escribe y conviene ver antes de guardar.
+                    MetricaHeroe(Int(kcal).map(Formato.kcal) ?? "0", unidad: "kcal",
+                                 etiquetaAccesible: Textos.logTitulo)
+                        .frame(maxWidth: .infinity, alignment: .leading)
+
                     Text(Textos.logManualDetalle)
                         .estilo(.cuerpoSecundario, color: Paleta.textoSecundario)
                         .fixedSize(horizontal: false, vertical: true)
@@ -57,6 +63,7 @@ struct RegistrarComidaView: View {
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
                     Button(Textos.comunCancelar) { cerrar() }
+                        .tint(Paleta.acento)
                 }
             }
         }

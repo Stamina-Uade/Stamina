@@ -71,27 +71,25 @@ struct GimnasioView: View {
         let total = estado.seriesTotalesDeLaRutina
         let fraccion = Double(hechas) / Double(max(total, 1))
 
-        return VStack(alignment: .leading, spacing: TokensEspaciado.e11) {
-            HStack(alignment: .bottom) {
-                VStack(alignment: .leading, spacing: TokensEspaciado.e2) {
-                    Text("\(hechas) / \(total)").estilo(.marca)
-                    Text(Textos.gymSeriesCompletadas)
-                        .estilo(.notaLegal, color: Paleta.textoTerciario)
+        // Las series hechas son el número protagonista, sobre el halo rosa.
+        return TarjetaHeroe(alto: TokensEspaciado.e56 * 3) {
+            VStack(alignment: .leading, spacing: TokensEspaciado.e10) {
+                HStack(alignment: .lastTextBaseline) {
+                    MetricaHeroe("\(hechas)", unidad: "/ \(total)")
+                    Spacer(minLength: TokensEspaciado.e8)
+                    PildoraDeEstado(fraccion.formatted(.percent.precision(.fractionLength(0))),
+                                    simbolo: "dumbbell.fill", tono: .acento)
                 }
-                Spacer()
-                Text(fraccion, format: .percent.precision(.fractionLength(0)))
-                    .estilo(.labelCampo, color: Paleta.acento)
+                Text(Textos.gymSeriesCompletadas)
+                    .estilo(.cuerpoSecundario, color: Paleta.textoSecundario)
+
+                BarraDeProgreso(fraccion: fraccion, descripcion: Textos.gymProgreso(hechas, total))
+
+                Text(Textos.gymNota)
+                    .estilo(.notaLegal, color: Paleta.textoTerciario)
+                    .fixedSize(horizontal: false, vertical: true)
             }
-
-            BarraDeProgreso(fraccion: fraccion, descripcion: Textos.gymProgreso(hechas, total))
-
-            Text(Textos.gymNota)
-                .estilo(.notaLegal, color: Paleta.textoTerciario)
-                .fixedSize(horizontal: false, vertical: true)
         }
-        .padding(TokensEspaciado.e16)
-        .frame(maxWidth: .infinity)
-        .tarjeta()
     }
 }
 
@@ -106,7 +104,7 @@ struct TarjetaDeEjercicio: View {
         VStack(alignment: .leading, spacing: TokensEspaciado.e10) {
             HStack(alignment: .top, spacing: TokensEspaciado.e10) {
                 VStack(alignment: .leading, spacing: TokensEspaciado.e3) {
-                    Text(ejercicio.nombre).estilo(.tituloCard)
+                    Text(ejercicio.nombre).estilo(.opcionTitulo)
                     Text(prescripcionLegible)
                         .estilo(.notaLegal, color: Paleta.textoTerciario)
                     // La columna PREVIA: con esto la persona elige la carga, que el motor
@@ -118,13 +116,8 @@ struct TarjetaDeEjercicio: View {
                     }
                 }
                 Spacer(minLength: 0)
-                Text(ejercicio.etiqueta)
-                    .estilo(.etiquetaSeccion.enMinusculas,
-                            color: ejercicio.etiqueta == "Para correr" ? Paleta.acento : Paleta.textoSecundario)
-                    .padding(.horizontal, TokensEspaciado.e8)
-                    .padding(.vertical, TokensEspaciado.e4)
-                    .background(ejercicio.etiqueta == "Para correr" ? Paleta.acentoChipActivo : Paleta.superficieHundida)
-                    .clipShape(Capsule())
+                PildoraDeEstado(ejercicio.etiqueta,
+                                tono: ejercicio.etiqueta == "Para correr" ? .acento : .neutro)
             }
 
             HStack(spacing: TokensEspaciado.e7) {
@@ -191,21 +184,24 @@ struct ChipDeSerie: View {
                 if hecha {
                     Image(systemName: "checkmark")
                         .font(.system(size: TokensTipografia.etiquetaSeccionTamano,
-                                      weight: TokensTipografia.tituloCardPeso))
+                                      weight: .heavy))
                 }
                 Text(etiqueta)
-                    .estilo(.etiquetaSeccion.enMinusculas,
-                            color: hecha ? Paleta.acento : Paleta.textoSecundario)
+                    .estilo(.chip, color: hecha ? Paleta.sobreAcento : Paleta.textoSecundario)
+                    .lineLimit(1)
+                    .minimumScaleFactor(0.7)
             }
-            .foregroundStyle(hecha ? Paleta.acento : Paleta.textoSecundario)
+            // Hecha: relleno rosa lleno, tilde y halo. Nunca sólo color.
+            .foregroundStyle(hecha ? Paleta.sobreAcento : Paleta.textoSecundario)
             .frame(maxWidth: .infinity)
             .frame(height: TokensTamano.objetivoTactilMinimo)
-            .background(hecha ? Paleta.acentoChipActivo : Paleta.superficieHundida)
-            .clipShape(RoundedRectangle(cornerRadius: TokensRadio.celda, style: .continuous))
+            .background(hecha ? Paleta.acento : Paleta.superficieHundida)
+            .clipShape(RoundedRectangle(cornerRadius: TokensRadio.input, style: .continuous))
             .overlay(
-                RoundedRectangle(cornerRadius: TokensRadio.celda, style: .continuous)
-                    .strokeBorder(hecha ? Paleta.acento : Color.clear, lineWidth: TokensEspaciado.e1)
+                RoundedRectangle(cornerRadius: TokensRadio.input, style: .continuous)
+                    .strokeBorder(hecha ? Paleta.acento : Paleta.bordeSuperficie, lineWidth: TokensEspaciado.e1)
             )
+            .shadow(color: hecha ? Paleta.acentoBrillo : Color.clear, radius: TokensEspaciado.e6)
             .contentShape(Rectangle())
         }
         .buttonStyle(EstiloPresionado())

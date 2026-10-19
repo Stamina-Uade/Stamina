@@ -346,7 +346,7 @@ ${pendientes.map((p) => `        ${JSON.stringify(p)}`).join(",\n")}
 `);
 
 function pesoSwift(n) {
-  return { 400: ".regular", 500: ".medium", 600: ".semibold", 700: ".bold" }[n] ?? ".regular";
+  return { 400: ".regular", 500: ".medium", 600: ".semibold", 700: ".bold", 800: ".heavy", 900: ".black" }[n] ?? ".regular";
 }
 
 /** El `.colorset` que Xcode muestra y deja editar con el selector de color. */

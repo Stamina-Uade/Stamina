@@ -1,7 +1,9 @@
+import Combine
 import CoreLocation
 import Foundation
 import HealthKit
 import TrainerCore
+import UIKit
 
 /// Una salida real se guarda en disco desde el primer punto. El archivo es una
 /// cola local de datos capturados, nunca una fuente de datos de ejemplo.
@@ -17,11 +19,17 @@ struct SalidaCapturada: Codable {
     var dispositivo: DispositivoDeOrigen?
     var pulsoMedio: Int?
     var pulsoMaximo: Int?
+    /// La cuenta dueña de la salida. `nil` en las guardadas antes de que existiera:
+    /// ésas se suben con la sesión que haya, como siempre.
+    var usuarioId: String?
 }
 
 private struct SalidasEnDisco: Codable {
     var activa: SalidaCapturada?
     var pendientes: [SalidaCapturada]
+    /// Las que el servidor rechazó para siempre (un 4xx que no se arregla
+    /// reintentando). 🛑 No se borran nunca: son entrenamientos de la persona.
+    var cuarentena: [SalidaCapturada]?
 }
 
 final class AlmacenDeSalidas {
@@ -33,14 +41,22 @@ final class AlmacenDeSalidas {
             .appendingPathComponent(nombre)
     }
 
-    fileprivate func leer() -> (SalidaCapturada?, [SalidaCapturada]) {
-        guard let archivo, let datos = try? Data(contentsOf: archivo),
-              let guardado = try? JSONDecoder().decode(SalidasEnDisco.self, from: datos) else { return (nil, []) }
-        return (guardado.activa, guardado.pendientes)
+    fileprivate func leer() -> SalidasEnDisco {
+        let vacio = SalidasEnDisco(activa: nil, pendientes: [], cuarentena: [])
+        guard let archivo, let datos = try? Data(contentsOf: archivo) else { return vacio }
+        guard let guardado = try? JSONDecoder().decode(SalidasEnDisco.self, from: datos) else {
+            // 🛑 Ilegible: se aparta antes de seguir. Si no, el próximo guardado
+            // pisaba con una cola vacía las salidas que todavía no se subieron.
+            ArchivoIlegible.apartar(archivo)
+            return vacio
+        }
+        return guardado
     }
 
-    fileprivate func guardar(activa: SalidaCapturada?, pendientes: [SalidaCapturada]) {
-        guard var archivo, let datos = try? JSONEncoder().encode(SalidasEnDisco(activa: activa, pendientes: pendientes)) else { return }
+    fileprivate func guardar(activa: SalidaCapturada?, pendientes: [SalidaCapturada],
+                             cuarentena: [SalidaCapturada]) {
+        let contenido = SalidasEnDisco(activa: activa, pendientes: pendientes, cuarentena: cuarentena)
+        guard var archivo, let datos = try? JSONEncoder().encode(contenido) else { return }
         try? datos.write(to: archivo, options: [.atomic, .completeFileProtectionUntilFirstUserAuthentication])
         var recursos = URLResourceValues()
         recursos.isExcludedFromBackup = true
@@ -50,6 +66,29 @@ final class AlmacenDeSalidas {
     func borrar() {
         guard let archivo else { return }
         try? FileManager.default.removeItem(at: archivo)
+    }
+
+    /// Al cerrar sesión: las salidas sin dueño quedan a nombre de quien se va. Nada
+    /// se borra —puede no haber llegado al servidor— y, con dueño, la próxima cuenta
+    /// no las ve ni las sube (`SeguimientoDeSalida.esDeLaCuentaActual`).
+    func asignarDueno(_ usuario: String?) {
+        guard let usuario, !usuario.isEmpty, let archivo,
+              FileManager.default.fileExists(atPath: archivo.path) else { return }
+        var contenido = leer()
+        contenido.activa = contenido.activa.map { SalidaCapturada.conDueno($0, usuario) }
+        contenido.pendientes = contenido.pendientes.map { SalidaCapturada.conDueno($0, usuario) }
+        let cuarentena = (contenido.cuarentena ?? []).map { SalidaCapturada.conDueno($0, usuario) }
+        guardar(activa: contenido.activa, pendientes: contenido.pendientes, cuarentena: cuarentena)
+    }
+}
+
+extension SalidaCapturada {
+    /// La misma salida, a nombre de `usuario` si todavía no tenía dueño.
+    static func conDueno(_ salida: SalidaCapturada, _ usuario: String) -> SalidaCapturada {
+        guard salida.usuarioId == nil else { return salida }
+        var conDueno = salida
+        conDueno.usuarioId = usuario
+        return conDueno
     }
 }
 
@@ -77,6 +116,7 @@ final class SeguimientoDeSalida: NSObject, ObservableObject, CLLocationManagerDe
     private let servicio: (any ServicioDeActividades)?
     private var activa: SalidaCapturada?
     private var cola: [SalidaCapturada]
+    private var cuarentena: [SalidaCapturada]
     private var inicioDelTramo: Date?
     private var segundosAcumulados = 0
     private var filtroDeDistancia = FiltroDeDistanciaGPS()
@@ -94,10 +134,25 @@ final class SeguimientoDeSalida: NSObject, ObservableObject, CLLocationManagerDe
     private var inicioPausaMs: Int64 = 0
     private var inicioPausaCoords: CLLocationCoordinate2D?
 
+    /// Escritura a disco con cada fix: como mucho cada `intervaloDeGuardadoMs` o
+    /// cada `puntosPorGuardado` muestras. Pausar, reanudar, terminar y pasar a
+    /// segundo plano guardan siempre. Un cierre forzado pierde, a lo sumo, esa ventana.
+    static let intervaloDeGuardadoMs: Int64 = 10_000
+    static let puntosPorGuardado = 20
+    private var ultimoGuardadoMs: Int64 = 0
+    private var muestrasSinGuardar = 0
+    /// La pantalla previa al entreno pidió el mapa: el GPS y la brújula quedan
+    /// prendidos aunque no haya salida. Sin eso, en reposo sólo se pide un fix.
+    private var mapaPedido = false
+    private var suscripciones = Set<AnyCancellable>()
+
     init(servicio: (any ServicioDeActividades)?, almacen: AlmacenDeSalidas = AlmacenDeSalidas()) {
         self.servicio = servicio
         self.almacen = almacen
-        (activa, cola) = almacen.leer()
+        let guardado = almacen.leer()
+        activa = guardado.activa
+        cola = guardado.pendientes
+        cuarentena = guardado.cuarentena ?? []
         permiso = manager.authorizationStatus
         super.init()
         manager.delegate = self
@@ -107,7 +162,6 @@ final class SeguimientoDeSalida: NSObject, ObservableObject, CLLocationManagerDe
         manager.pausesLocationUpdatesAutomatically = false
         if CLLocationManager.headingAvailable() {
             manager.headingFilter = kCLHeadingFilterNone
-            manager.startUpdatingHeading()
         }
         // Si el proceso murió en plena salida, se recupera PAUSADA: nunca se
         // suma tiempo ni distancia sin observación del sensor.
@@ -120,17 +174,98 @@ final class SeguimientoDeSalida: NSObject, ObservableObject, CLLocationManagerDe
             segmentos = activa.segmentos ?? []
             pausas = activa.pausas ?? []
             ubicacion = activa.puntos.last.map { CLLocationCoordinate2D(latitude: $0.lat, longitude: $0.lon) }
+            // La pausa empieza en lo último que se observó, no en el epoch: si no,
+            // reanudar o terminar registraba una pausa de 50 años.
+            inicioPausaMs = Self.inicioDePausaRecuperada(activa, ahoraMs: Self.ahoraEnMs())
+            inicioPausaCoords = ubicacion
         }
         if ubicacion == nil, let loc = manager.location?.coordinate {
             ubicacion = loc
         }
         if permiso == .authorizedWhenInUse || permiso == .authorizedAlways {
-            manager.startUpdatingLocation()
+            // En reposo alcanza con un fix (el mapa centrado, el aviso de calor). El
+            // GPS continuo y la brújula, sólo con una salida o con el mapa pedido.
+            if fase != .detenida { encenderSensores() } else { manager.requestLocation() }
         }
-        pendientes = cola.count
-        for salida in cola where !salida.puntos.isEmpty {
+        actualizarPendientes()
+        for salida in cola where !salida.puntos.isEmpty && esDeLaCuentaActual(salida) {
             AlmacenDeRecorridos.compartido.guardar(id: salida.id, puntos: salida.puntos)
         }
+        escucharLaApp()
+    }
+
+    static func ahoraEnMs() -> Int64 { Int64((Date().timeIntervalSince1970 * 1000).rounded()) }
+
+    /// Lo último observado de una salida que quedó a medias: el último punto, el
+    /// cierre del último tramo (si murió en pausa) o de la última pausa.
+    static func inicioDePausaRecuperada(_ salida: SalidaCapturada, ahoraMs: Int64) -> Int64 {
+        let candidatos: [Int64] = [salida.puntos.last?.atMs, salida.segmentos?.last?.finMs,
+                                   salida.pausas?.last?.finMs].compactMap { $0 }.filter { $0 > 0 }
+        guard let ultimo = candidatos.max() else { return ahoraMs }
+        return min(ultimo, ahoraMs)
+    }
+
+    private func encenderSensores() {
+        manager.startUpdatingLocation()
+        if CLLocationManager.headingAvailable() { manager.startUpdatingHeading() }
+    }
+
+    private func apagarSensores() {
+        manager.stopUpdatingLocation()
+        manager.stopUpdatingHeading()
+        manager.allowsBackgroundLocationUpdates = false
+        mapaPedido = false
+    }
+
+    private func escucharLaApp() {
+        // Al irse a segundo plano (o cerrarse) se guarda lo que la ventana de
+        // `guardarSiToca` todavía no escribió.
+        NotificationCenter.default.publisher(for: UIApplication.didEnterBackgroundNotification)
+            .merge(with: NotificationCenter.default.publisher(for: UIApplication.willTerminateNotification))
+            .receive(on: DispatchQueue.main)
+            .sink { [weak self] _ in
+                guard let self, self.activa != nil else { return }
+                self.guardar()
+            }
+            .store(in: &suscripciones)
+        NotificationCenter.default.publisher(for: DuenoDeLosDatosLocales.cambio)
+            .receive(on: DispatchQueue.main)
+            .sink { [weak self] aviso in
+                let usuario = aviso.userInfo?[DuenoDeLosDatosLocales.claveUsuario] as? String
+                let anterior = aviso.userInfo?[DuenoDeLosDatosLocales.claveAnterior] as? String
+                self?.cambioDeCuenta(usuario: usuario, anterior: anterior)
+            }
+            .store(in: &suscripciones)
+    }
+
+    // MARK: - Cuenta
+
+    /// Una salida con dueño sólo se sube (y se cuenta como pendiente) con la sesión
+    /// de ese dueño. Sin dueño —guardadas antes de esta versión— con la que haya.
+    func esDeLaCuentaActual(_ salida: SalidaCapturada) -> Bool {
+        guard let dueno = salida.usuarioId else { return true }
+        return dueno == DuenoDeLosDatosLocales.actual
+    }
+
+    /// Las que el servidor rechazó para siempre y esperan en disco.
+    var cantidadEnCuarentena: Int { cuarentena.count }
+
+    private func actualizarPendientes() {
+        pendientes = cola.filter { esDeLaCuentaActual($0) }.count
+    }
+
+    /// 🛑 Cerrar sesión no borra la cola: lo que no llegó al servidor se perdería.
+    /// Lo que no tenía dueño queda a nombre de quien sale; la próxima cuenta no lo
+    /// sube ni lo cuenta, y vuelve a salir cuando esa persona entra de nuevo.
+    private func cambioDeCuenta(usuario: String?, anterior: String?) {
+        if usuario == nil, let anterior {
+            activa = activa.map { SalidaCapturada.conDueno($0, anterior) }
+            cola = cola.map { SalidaCapturada.conDueno($0, anterior) }
+            cuarentena = cuarentena.map { SalidaCapturada.conDueno($0, anterior) }
+            guardar()
+        }
+        actualizarPendientes()
+        if usuario != nil { Task { await subirPendientes() } }
     }
 
     var ritmoSegPorKm: Int? {
@@ -145,9 +280,10 @@ final class SeguimientoDeSalida: NSObject, ObservableObject, CLLocationManagerDe
         if let loc = manager.location?.coordinate {
             ubicacion = loc
         }
+        mapaPedido = true
         switch manager.authorizationStatus {
         case .authorizedWhenInUse, .authorizedAlways:
-            manager.startUpdatingLocation()
+            encenderSensores()
         case .notDetermined:
             manager.requestWhenInUseAuthorization()
         default:
@@ -178,7 +314,8 @@ final class SeguimientoDeSalida: NSObject, ObservableObject, CLLocationManagerDe
                                 segundos: 0, metros: 0, puntos: [],
                                 segmentos: [], pausas: [],
                                 dispositivo: .telefono,
-                                pulsoMedio: nil, pulsoMaximo: nil)
+                                pulsoMedio: nil, pulsoMaximo: nil,
+                                usuarioId: DuenoDeLosDatosLocales.actual)
         segundos = 0
         metros = 0
         puntos = []
@@ -298,7 +435,7 @@ final class SeguimientoDeSalida: NSObject, ObservableObject, CLLocationManagerDe
     private func continuarGPS(desde fecha: Date) {
         inicioDelTramo = fecha
         manager.allowsBackgroundLocationUpdates = true
-        manager.startUpdatingLocation()
+        encenderSensores()
         reloj?.invalidate()
         reloj = Timer.scheduledTimer(withTimeInterval: 1, repeats: true) { [weak self] _ in
             Task { @MainActor in self?.actualizarReloj() }
@@ -358,8 +495,7 @@ final class SeguimientoDeSalida: NSObject, ObservableObject, CLLocationManagerDe
             pausas.append(p)
         }
 
-        manager.stopUpdatingLocation()
-        manager.allowsBackgroundLocationUpdates = false
+        apagarSensores()
         reloj?.invalidate()
         reloj = nil
         inicioDelTramo = nil
@@ -379,7 +515,7 @@ final class SeguimientoDeSalida: NSObject, ObservableObject, CLLocationManagerDe
         }
         publicarSiCorresponde(forzar: true)
         activa = nil
-        pendientes = cola.count
+        actualizarPendientes()
         guardar()
         Task { await subirPendientes() }
         return guardada
@@ -389,8 +525,7 @@ final class SeguimientoDeSalida: NSObject, ObservableObject, CLLocationManagerDe
     func descartar() {
         guard activa != nil else { return }
         if fase == .corriendo { actualizarReloj() }
-        manager.stopUpdatingLocation()
-        manager.allowsBackgroundLocationUpdates = false
+        apagarSensores()
         reloj?.invalidate()
         reloj = nil
         inicioDelTramo = nil
@@ -411,23 +546,52 @@ final class SeguimientoDeSalida: NSObject, ObservableObject, CLLocationManagerDe
         guardar()
     }
 
+    enum DesenlaceDeSubida: Equatable {
+        case aceptada
+        /// Sin red, 5xx, sesión por renovar, demasiados pedidos: se reintenta después,
+        /// en orden, sin saltear.
+        case reintentar
+        /// Un 4xx que no cambia reintentando: va a la cuarentena y sigue la próxima.
+        case rechazada
+    }
+
+    static func desenlace<Valor>(_ resultado: Resultado<Valor>) -> DesenlaceDeSubida {
+        switch resultado {
+        case .ok: return .aceptada
+        case .sinRed, .respuestaRara: return .reintentar
+        case .rechazado(_, let http):
+            if [401, 403, 408, 425, 429].contains(http) { return .reintentar }
+            return (400..<500).contains(http) ? .rechazada : .reintentar
+        }
+    }
+
     func subirPendientes() async {
         guard !subiendo, let servicio else { return }
         subiendo = true
         defer { subiendo = false }
-        while let salida = cola.first {
+        while let salida = cola.first(where: { esDeLaCuentaActual($0) }) {
             let cuerpo = ActividadEntrada(sport: salida.deporte, startedAtMs: salida.inicioMs,
                                           durationS: Int64(salida.segundos), distanceM: Int64(salida.metros),
                                           avgHrBpm: salida.pulsoMedio.map(Int64.init),
                                           maxHrBpm: salida.pulsoMaximo.map(Int64.init),
                                           device: salida.dispositivo ?? .telefono)
-            guard case .ok = await servicio.guardarActividad(id: salida.id, cuerpo) else { break }
-            if !salida.puntos.isEmpty {
+            let respuesta = await servicio.guardarActividad(id: salida.id, cuerpo)
+            var veredicto = Self.desenlace(respuesta)
+            if veredicto == .aceptada, !salida.puntos.isEmpty {
                 let recorrido = RecorridoParaServidor.preparar(salida.puntos)
-                guard case .ok = await servicio.guardarRecorrido(id: salida.id, recorrido) else { break }
+                let respuestaDelRecorrido = await servicio.guardarRecorrido(id: salida.id, recorrido)
+                veredicto = Self.desenlace(respuestaDelRecorrido)
             }
-            cola.removeFirst()
-            pendientes = cola.count
+            if veredicto == .reintentar { return }
+            // Mientras se esperaba al servidor la cola pudo cambiar: se busca por id.
+            guard let indice = cola.firstIndex(where: { $0.id == salida.id }) else { return }
+            let sacada = cola.remove(at: indice)
+            if veredicto == .rechazada, !cuarentena.contains(where: { $0.id == sacada.id }) {
+                // 🛑 Un rechazo permanente ya no frena a las que vienen detrás, pero
+                // tampoco se borra: queda en disco para revisarla.
+                cuarentena.append(sacada)
+            }
+            actualizarPendientes()
             guardar()
         }
     }
@@ -439,10 +603,11 @@ final class SeguimientoDeSalida: NSObject, ObservableObject, CLLocationManagerDe
                                         inicioMs: salida.inicioMs, segundos: salida.segundos,
                                         metros: salida.metros, puntos: salida.puntos,
                                         dispositivo: .reloj, pulsoMedio: salida.pulsoMedio,
-                                        pulsoMaximo: salida.pulsoMaximo)
+                                        pulsoMaximo: salida.pulsoMaximo,
+                                        usuarioId: salida.usuarioId.isEmpty ? nil : salida.usuarioId)
         AlmacenDeRecorridos.compartido.guardar(id: salida.id, puntos: salida.puntos)
         cola.append(capturada)
-        pendientes = cola.count
+        actualizarPendientes()
         guardar()
         // La felicitación pertenece al iPhone incluso cuando toda la medición se
         // hizo en el reloj. Se programa después de incorporar la ruta a la cola.
@@ -477,8 +642,21 @@ final class SeguimientoDeSalida: NSObject, ObservableObject, CLLocationManagerDe
         activa?.puntos = puntos
         activa?.segmentos = segmentos
         activa?.pausas = pausas
-        almacen.guardar(activa: activa, pendientes: cola)
+        almacen.guardar(activa: activa, pendientes: cola, cuarentena: cuarentena)
+        ultimoGuardadoMs = Self.ahoraEnMs()
+        muestrasSinGuardar = 0
         publicarSiCorresponde()
+    }
+
+    /// Para cada fix del GPS: guarda si pasó la ventana; si no, sólo publica.
+    private func guardarSiToca() {
+        muestrasSinGuardar += 1
+        if muestrasSinGuardar >= Self.puntosPorGuardado
+            || Self.ahoraEnMs() - ultimoGuardadoMs >= Self.intervaloDeGuardadoMs {
+            guardar()
+        } else {
+            publicarSiCorresponde()
+        }
     }
 
     private func publicarSiCorresponde(forzar: Bool = false) {
@@ -498,7 +676,7 @@ final class SeguimientoDeSalida: NSObject, ObservableObject, CLLocationManagerDe
             permiso = manager.authorizationStatus
             if inicioSolicitado == nil,
                permiso == .authorizedWhenInUse || permiso == .authorizedAlways {
-                manager.startUpdatingLocation()
+                if mapaPedido || fase != .detenida { encenderSensores() } else { manager.requestLocation() }
             }
             if let deporte = inicioSolicitado {
                 inicioSolicitado = nil
@@ -547,42 +725,44 @@ final class SeguimientoDeSalida: NSObject, ObservableObject, CLLocationManagerDe
                     } else {
                         puntosPausaActual.append(puntoPausa)
                     }
-                    guardar()
+                    guardarSiToca()
                     continue
                 }
 
                 guard fase == .corriendo else { continue }
                 guard lugar.horizontalAccuracy <= 35 else { continue }
                 guard let deporte = activa?.deporte else { continue }
-                let deltaMetros = filtroDeDistancia.agregar(
-                    MuestraGPS(latitud: lugar.coordinate.latitude,
-                               longitud: lugar.coordinate.longitude,
-                               instanteMs: Int64((lugar.timestamp.timeIntervalSince1970 * 1_000).rounded()),
-                               precisionMetros: lugar.horizontalAccuracy,
-                               velocidadMetrosPorSegundo: lugar.speed),
-                    deporte: deporte)
-                metros += deltaMetros
+                let instanteMs = Int64((lugar.timestamp.timeIntervalSince1970 * 1000).rounded())
                 let punto = PuntoDeRecorrido(lat: lugar.coordinate.latitude, lon: lugar.coordinate.longitude,
-                                             atMs: Int64((lugar.timestamp.timeIntervalSince1970 * 1000).rounded()))
+                                             atMs: instanteMs)
+                var agregarPunto = true
                 if let ultimo = puntos.last {
                     let dist = SegmentadorDeRecorrido.distanciaMetros(lat1: ultimo.lat, lon1: ultimo.lon,
                                                                      lat2: punto.lat, lon2: punto.lon)
                     let dt = Double(punto.atMs - ultimo.atMs) / 1000.0
                     let velMax: Double = deporte == .ciclismo ? 28.0 : 14.0
+                    // 🛑 Un salto imposible se descarta ANTES de medir: antes la
+                    // distancia ya se había sumado y sólo se salteaba el punto.
+                    // Tampoco entra al filtro, que sigue anclado en la última buena.
                     if dt > 0 && (dist / dt) > velMax { continue }
                     if lugar.speed >= 0, dt > 0 {
                         let distMax = max(lugar.speed * 2.2, 5.0) * dt + max(8.0, lugar.horizontalAccuracy)
                         if dist > distMax { continue }
                     }
-                    if dist >= 2.0 || (dt >= 3.0 && dist >= 0.8) {
-                        puntos.append(punto)
-                        puntosSegmentoActual.append(punto)
-                    }
-                } else {
+                    agregarPunto = dist >= 2.0 || (dt >= 3.0 && dist >= 0.8)
+                }
+                metros += filtroDeDistancia.agregar(
+                    MuestraGPS(latitud: lugar.coordinate.latitude,
+                               longitud: lugar.coordinate.longitude,
+                               instanteMs: instanteMs,
+                               precisionMetros: lugar.horizontalAccuracy,
+                               velocidadMetrosPorSegundo: lugar.speed),
+                    deporte: deporte)
+                if agregarPunto {
                     puntos.append(punto)
                     puntosSegmentoActual.append(punto)
                 }
-                guardar()
+                guardarSiToca()
             }
         }
     }

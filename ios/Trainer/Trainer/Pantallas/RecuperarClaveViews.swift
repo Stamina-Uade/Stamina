@@ -204,7 +204,7 @@ struct MedidorDeClave: View {
                 ForEach(0..<3, id: \.self) { i in
                     Capsule()
                         .fill(i < cumplidas ? Paleta.acento : Paleta.superficieControl)
-                        .frame(height: TokensEspaciado.e3)
+                        .frame(height: TokensEspaciado.e4)
                 }
             }
             .accessibilityElement()

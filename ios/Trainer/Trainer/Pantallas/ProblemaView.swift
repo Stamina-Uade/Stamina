@@ -31,7 +31,7 @@ struct ProblemaView: View {
             ScrollView {
                 VStack(alignment: .leading, spacing: TokensEspaciado.e26) {
                     Text(Textos.problemaTitulo)
-                        .estilo(.tituloPantalla)
+                        .estilo(.display)
                         .fixedSize(horizontal: false, vertical: true)
                         .accessibilityAddTraits(.isHeader)
 
@@ -43,9 +43,12 @@ struct ProblemaView: View {
                                     .frame(height: TokensEspaciado.e1)
                             }
                             VStack(alignment: .leading, spacing: TokensEspaciado.e4) {
+                                // El número protagonista del mockup: enorme y apretado.
                                 Text(dato.valor)
-                                    .estilo(.numeroDato,
+                                    .estilo(.metricaHeroe,
                                             color: dato.enAcento ? Paleta.acento : Paleta.textoPrimario)
+                                    .lineLimit(1)
+                                    .minimumScaleFactor(0.5)
                                 Text(dato.texto)
                                     .estilo(.cuerpoSecundario, color: Paleta.textoSecundario)
                                     .fixedSize(horizontal: false, vertical: true)
@@ -55,12 +58,12 @@ struct ProblemaView: View {
                     }
                 }
                 .frame(maxWidth: .infinity, alignment: .leading)
-                .padding(.horizontal, TokensEspaciado.e26)
+                .padding(.horizontal, TokensEspaciado.e22)
                 .padding(.vertical, TokensEspaciado.e26)
             }
 
             BotonPrimario(Textos.problemaSeguir) { flujo.ir(a: .previewPlan) }
-                .padding(.horizontal, TokensEspaciado.e26)
+                .padding(.horizontal, TokensEspaciado.e22)
                 .padding(.bottom, TokensEspaciado.e34)
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)

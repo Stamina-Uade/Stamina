@@ -46,7 +46,11 @@ public struct BarraDePestanas: View {
     }
 
     public var body: some View {
-        HStack(alignment: .top, spacing: 0) {
+        // Rediseño 2026-10: la barra FLOTA, como en el mockup. Es una cápsula
+        // apoyada sobre el fondo, separada de los bordes, con el botón central
+        // rosa sobresaliendo y con halo. El hueco de abajo sigue siendo zona
+        // táctil (ver la nota de arriba sobre los 48 pt).
+        HStack(alignment: .center, spacing: 0) {
             ForEach(Array(items.prefix(2))) { item in
                 boton(item)
             }
@@ -55,25 +59,35 @@ public struct BarraDePestanas: View {
             // 🪤 El `height` no es decorativo: `Color` es elástico en los DOS
             // ejes, así que sin alto fijo este hueco estira la barra entera
             // hasta ocupar la pantalla y deja al contenido con su altura ideal.
-            // El fondo de la barra es casi negro, así que el síntoma no se ve:
-            // parece que el contenido se cortó.
             Color.clear
-                .frame(width: TokensEspaciado.e56 + TokensEspaciado.e20,
+                .frame(width: TokensEspaciado.e56 + TokensEspaciado.e14,
                        height: TokensEspaciado.e1)
             ForEach(Array(items.dropFirst(2))) { item in
                 boton(item)
             }
         }
-        .padding(.horizontal, TokensEspaciado.e10)
-        .padding(.top, TokensEspaciado.e10)
-        .padding(.bottom, TokensEspaciado.e22)
-        .background(Paleta.fondoBarra)
-        .overlay(alignment: .top) {
-            Rectangle()
-                .fill(Paleta.divisor)
-                .frame(height: TokensEspaciado.e1)
-        }
-        .overlay(alignment: .top) { botonCentral }
+        .padding(.horizontal, TokensEspaciado.e8)
+        .padding(.vertical, TokensEspaciado.e6)
+        .background(
+            RoundedRectangle(cornerRadius: TokensRadio.cardDestacada + TokensEspaciado.e8, style: .continuous)
+                .fill(Paleta.superficieBarra)
+        )
+        .overlay(
+            RoundedRectangle(cornerRadius: TokensRadio.cardDestacada + TokensEspaciado.e8, style: .continuous)
+                .strokeBorder(Paleta.bordeSuperficie, lineWidth: TokensEspaciado.e1)
+        )
+        .overlay(alignment: .center) { botonCentral }
+        .padding(.horizontal, TokensEspaciado.e16)
+        .padding(.top, TokensEspaciado.e6)
+        .padding(.bottom, TokensEspaciado.e6)
+        .background(
+            // Un degradado al fondo para que el contenido que pasa por detrás
+            // de la barra no compita con ella.
+            LinearGradient(colors: [Paleta.fondo.opacity(0), Paleta.fondo],
+                           startPoint: .top, endPoint: .center)
+                .ignoresSafeArea(edges: .bottom)
+                .accessibilityHidden(true)
+        )
     }
 
     private func boton(_ item: ItemDePestana) -> some View {
@@ -87,7 +101,14 @@ public struct BarraDePestanas: View {
                     .textCase(nil)
             }
             .foregroundStyle(activa ? Paleta.pestanaActiva : Paleta.pestanaInactiva)
+            .padding(.vertical, TokensEspaciado.e6)
             .frame(maxWidth: .infinity)
+            .background {
+                if activa {
+                    RoundedRectangle(cornerRadius: TokensRadio.card, style: .continuous)
+                        .fill(Paleta.acentoChipActivo)
+                }
+            }
             .objetivoTactilAlto()
         }
         .buttonStyle(EstiloPresionado())
@@ -97,25 +118,22 @@ public struct BarraDePestanas: View {
 
     private var botonCentral: some View {
         Button(action: alTocarCentral) {
-            VStack(spacing: TokensEspaciado.e4) {
-                ZStack {
-                    Circle().fill(Paleta.acento)
-                    Circle().strokeBorder(Paleta.fondoBarra, lineWidth: TokensEspaciado.e4)
-                    Image(systemName: central.simbolo)
-                        .font(.system(size: TokensEspaciado.e26, weight: TokensTipografia.tituloCardPeso))
-                        .foregroundStyle(Paleta.sobreAcento)
-                }
-                .frame(width: TokensTamano.objetivoTactilMinimo + TokensEspaciado.e14,
-                       height: TokensTamano.objetivoTactilMinimo + TokensEspaciado.e14)
-
-                Text(central.titulo)
-                    .estilo(.etiquetaSeccion, color: elegida == central.id ? Paleta.pestanaActiva : Paleta.pestanaInactiva)
-                    .textCase(nil)
+            ZStack {
+                Circle()
+                    .fill(Paleta.acento)
+                    .shadow(color: Paleta.acentoBrillo, radius: TokensEspaciado.e16)
+                Circle().strokeBorder(Paleta.fondo, lineWidth: TokensEspaciado.e4)
+                Image(systemName: central.simbolo)
+                    .font(.system(size: TokensEspaciado.e22, weight: .heavy))
+                    .foregroundStyle(Paleta.sobreAcento)
             }
-            .contentShape(Rectangle())
+            .frame(width: TokensEspaciado.e56 + TokensEspaciado.e4,
+                   height: TokensEspaciado.e56 + TokensEspaciado.e4)
+            .contentShape(Circle())
         }
         .buttonStyle(EstiloPresionado())
-        .offset(y: -TokensEspaciado.e26)
+        .offset(y: -TokensEspaciado.e16)
         .accessibilityLabel(central.titulo)
+        .accessibilityAddTraits(elegida == central.id ? [.isButton, .isSelected] : .isButton)
     }
 }

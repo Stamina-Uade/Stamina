@@ -22,7 +22,7 @@ struct RaizFlujoView: View {
         self.repositorioDelHome = repositorioDelHome
     }
 
-    @AppStorage(ModoApariencia.clave) private var modoApariencia: ModoApariencia = .automatico
+    @AppStorage(ModoApariencia.clave) private var modoApariencia: ModoApariencia = ModoApariencia.predeterminado
 
     var body: some View {
         ZStack {
@@ -113,9 +113,9 @@ struct RaizFlujoView: View {
 
             switch flujo.pantalla.cabecera {
             case .volverYAvance, .soloAvance:
-                BarraAvance(paso: flujo.pantalla.numeroDePaso ?? 1,
-                            total: Pantalla.pasosDelRegistro.count,
-                            descripcion: Textos.comunAvanceRegistro)
+                BarraAvanceSegmentada(paso: flujo.pantalla.numeroDePaso ?? 1,
+                                      total: Pantalla.pasosDelRegistro.count,
+                                      descripcion: Textos.comunAvanceRegistro)
             case .soloVolver, .ninguna:
                 Spacer()
             }
@@ -123,8 +123,10 @@ struct RaizFlujoView: View {
         // El mismo alto con flecha o sin ella: si no, el contenido del primer paso
         // de perfil quedaría más arriba que el de los demás.
         .frame(minHeight: TokensTamano.objetivoTactilMinimo)
-        .padding(.horizontal, TokensEspaciado.e22)
-        .padding(.bottom, TokensEspaciado.e12)
+        // Con flecha, el círculo ya trae su aire dentro de los 48 pt táctiles.
+        .padding(.leading, flujo.pantalla.cabecera == .soloAvance ? TokensEspaciado.e22 : TokensEspaciado.e14)
+        .padding(.trailing, TokensEspaciado.e22)
+        .padding(.bottom, TokensEspaciado.e8)
     }
 
     @ViewBuilder
@@ -171,5 +173,34 @@ struct RaizFlujoView: View {
     /// el alta, si se acaba de hacer.
     private var nombreParaElHome: String {
         "\(flujo.datos.nombre) \(flujo.datos.apellido)".trimmingCharacters(in: .whitespaces)
+    }
+}
+
+/// La barra de avance del registro con el look del mockup: un segmento por paso,
+/// rosas los hechos y el actual, con su halo.
+///
+/// Dice a VoiceOver exactamente lo mismo que `BarraAvance` (TrainerCore): la
+/// descripción y "paso/total". Tampoco muestra el número en pantalla: es la
+/// decisión del tablero (ver el comentario de `RaizFlujoView`).
+private struct BarraAvanceSegmentada: View {
+    let paso: Int
+    let total: Int
+    let descripcion: String
+
+    var body: some View {
+        HStack(spacing: TokensEspaciado.e3) {
+            ForEach(0..<max(total, 1), id: \.self) { indice in
+                Capsule()
+                    .fill(indice < paso ? Paleta.acento : Paleta.superficieControl)
+                    .frame(height: TokensEspaciado.e4)
+                    .shadow(color: indice == paso - 1 ? Paleta.acentoBrillo : Color.clear,
+                            radius: TokensEspaciado.e4)
+            }
+        }
+        .frame(maxWidth: .infinity)
+        .animation(.easeInOut(duration: TokensMovimiento.media), value: paso)
+        .accessibilityElement()
+        .accessibilityLabel(descripcion)
+        .accessibilityValue(Text(verbatim: "\(paso)/\(total)"))
     }
 }

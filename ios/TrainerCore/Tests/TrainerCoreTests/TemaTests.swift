@@ -42,6 +42,15 @@ final class TemaTests: XCTestCase {
         XCTAssertTrue(EstiloTipografico.campoNumero.cifrasTabulares)
         XCTAssertTrue(EstiloTipografico.numeroDato.cifrasTabulares)
         XCTAssertFalse(EstiloTipografico.cuerpo.cifrasTabulares)
+        XCTAssertTrue(EstiloTipografico.metricaHeroe.cifrasTabulares)
+        XCTAssertTrue(EstiloTipografico.metricaMedia.cifrasTabulares)
+    }
+
+    /// Rediseño 2026-10: los roles pesados salen de tokens.json, no de la pantalla.
+    func testLosRolesDelRedisenoSalenDeLosTokens() {
+        XCTAssertEqual(EstiloTipografico.display.tamano, TokensTipografia.displayTamano)
+        XCTAssertEqual(EstiloTipografico.metricaHeroe.tamano, TokensTipografia.metricaHeroeTamano)
+        XCTAssertEqual(EstiloTipografico.metricaHeroe.peso, .heavy)
     }
 
     /// AGENTS.md §1: la marca del producto está centralizada y el nombre comercial

@@ -180,6 +180,45 @@ public struct SalidaDelReloj: Codable, Sendable {
     }
 }
 
+/// De qué cuenta son los datos que este teléfono guarda en disco (hitos, salidas
+/// por subir). Lo actualiza `SincronizadorDeSesion` —por donde pasa cada cambio de
+/// cuenta— y lo escuchan los almacenes, que separan lo guardado por cuenta en vez
+/// de borrarlo: lo que todavía no llegó al servidor no se puede perder.
+///
+/// Es un id opaco del servidor, no un dato personal: va en `UserDefaults` para que
+/// se pueda leer sin actor desde el cierre de sesión del renovador.
+public enum DuenoDeLosDatosLocales {
+    /// `userInfo`: `claveUsuario` (ausente al cerrar sesión) y `claveAnterior`.
+    public static let cambio = Notification.Name("DuenoDeLosDatosLocales.cambio")
+    public static let claveUsuario = "usuarioId"
+    public static let claveAnterior = "anteriorId"
+    static let claveGuardada = "stamina_dueno_de_los_datos_locales"
+
+    public static var actual: String? {
+        guard let id = UserDefaults.standard.string(forKey: claveGuardada), !id.isEmpty else { return nil }
+        return id
+    }
+
+    static func identificar(_ id: String) {
+        let anterior = actual
+        UserDefaults.standard.set(id, forKey: claveGuardada)
+        avisar(usuario: id, anterior: anterior)
+    }
+
+    static func olvidar() {
+        let anterior = actual
+        UserDefaults.standard.removeObject(forKey: claveGuardada)
+        avisar(usuario: nil, anterior: anterior)
+    }
+
+    private static func avisar(usuario: String?, anterior: String?) {
+        var info: [String: String] = [:]
+        if let usuario { info[claveUsuario] = usuario }
+        if let anterior { info[claveAnterior] = anterior }
+        NotificationCenter.default.post(name: cambio, object: nil, userInfo: info)
+    }
+}
+
 @MainActor
 public final class SincronizadorDeSesion: NSObject, ObservableObject {
 
@@ -200,6 +239,10 @@ public final class SincronizadorDeSesion: NSObject, ObservableObject {
     private var sesionPublicada: SesionCompartida?
     private var cronogramaPublicado: [DiaPlanificadoCompartido] = []
     private var usuarioPublicadoId: String?
+    /// Se cerró la sesión (o se arrancó sin ninguna). Distinto de "todavía no se
+    /// sabe quién es", que es el arranque con sesión guardada y el perfil sin cargar:
+    /// ahí el reloj NO se tiene que desvincular.
+    private var sinSesion = false
     public var alComandoDeSalida: ((ComandoDeSalida) -> Void)?
     /// Devuelve `true` cuando el teléfono ya incorporó la salida a su propia cola
     /// durable. Hasta entonces queda en el buzón de entrada y se vuelve a entregar.
@@ -305,7 +348,17 @@ public final class SincronizadorDeSesion: NSObject, ObservableObject {
     }
 
     public func publicarUsuario(_ id: String?) {
-        usuarioPublicadoId = id
+        if let id, !id.isEmpty {
+            usuarioPublicadoId = id
+            sinSesion = false
+            DuenoDeLosDatosLocales.identificar(id)
+        } else {
+            // Quienes llaman con `nil` lo hacen porque no hay sesión: el arranque
+            // sin cuenta, la sesión vencida o el perfil que se va al cerrar.
+            usuarioPublicadoId = nil
+            sinSesion = true
+            DuenoDeLosDatosLocales.olvidar()
+        }
         propagar()
     }
 
@@ -327,6 +380,8 @@ public final class SincronizadorDeSesion: NSObject, ObservableObject {
     /// Limpia el usuario y el contenido publicado y notifica al reloj que la sesión se cerró.
     public func cerrarSesion() {
         usuarioPublicadoId = nil
+        sinSesion = true
+        DuenoDeLosDatosLocales.olvidar()
         salidaPublicada = nil
         rutinaPublicada = nil
         sesionPublicada = nil
@@ -340,15 +395,31 @@ public final class SincronizadorDeSesion: NSObject, ObservableObject {
         #if canImport(WatchConnectivity)
         if WCSession.isSupported() {
             let sesion = WCSession.default
-            if sesion.activationState == .activated {
-                try? sesion.updateApplicationContext(["cerrarSesion": true, "usuarioId": ""])
-                if sesion.isReachable {
-                    sesion.sendMessage(["cerrarSesion": true, "usuarioId": ""], replyHandler: nil, errorHandler: nil)
-                }
+            if sesion.activationState == .activated, sesion.isReachable {
+                sesion.sendMessage(["cerrarSesion": true, "usuarioId": ""], replyHandler: nil, errorHandler: nil)
             }
         }
         #endif
+        // 🪤 El aviso durable va DENTRO del snapshot: el application context guarda
+        // sólo el último, así que un contexto aparte con `cerrarSesion` lo pisaba el
+        // siguiente `propagar()` y un reloj lejos se quedaba vinculado.
         propagar()
+    }
+
+    /// Lo que el teléfono dice sobre la cuenta, en el contexto y en el `pong`.
+    /// Sin dato (perfil todavía cargando) no dice nada: el reloj se queda como está.
+    private func campoDeCuenta() -> [String: Any] {
+        if let usuarioPublicadoId, !usuarioPublicadoId.isEmpty { return ["usuarioId": usuarioPublicadoId] }
+        if sinSesion { return ["usuarioId": "", "cerrarSesion": true] }
+        return [:]
+    }
+
+    /// Lo que el reloj entiende de un contexto o un `pong`: `nil` es "no dice
+    /// nada"; `.some(nil)`, sesión cerrada (un id vacío también lo es).
+    nonisolated static func cuentaInformada(en diccionario: [String: Any]) -> String?? {
+        if let cerrar = diccionario["cerrarSesion"] as? Bool, cerrar { return .some(nil) }
+        guard let usuario = diccionario["usuarioId"] as? String else { return nil }
+        return usuario.isEmpty ? .some(nil) : .some(usuario)
     }
 
     public func verificarConexion() {
@@ -368,10 +439,8 @@ public final class SincronizadorDeSesion: NSObject, ObservableObject {
             sesion.sendMessage(["ping": true], replyHandler: { [weak self] respuesta in
                 Task { @MainActor in
                     self?.telefonoAlcanzable = true
-                    if let cerrar = respuesta["cerrarSesion"] as? Bool, cerrar {
-                        self?.usuarioRemotoId = nil
-                    } else if let usuario = respuesta["usuarioId"] as? String, !usuario.isEmpty {
-                        self?.usuarioRemotoId = usuario
+                    if let cuenta = SincronizadorDeSesion.cuentaInformada(en: respuesta) {
+                        self?.usuarioRemotoId = cuenta
                     }
                 }
             }, errorHandler: { [weak self] _ in
@@ -497,7 +566,7 @@ public final class SincronizadorDeSesion: NSObject, ObservableObject {
             contexto["rutina"] = rutina
         }
         #if !os(watchOS)
-        contexto["usuarioId"] = usuarioPublicadoId ?? ""
+        contexto.merge(campoDeCuenta()) { _, nuevo in nuevo }
         #endif
         contexto["sesionPlanificada"] = sesionPublicada.flatMap { try? JSONEncoder().encode($0) } ?? Data()
         if let cronogramaData = try? JSONEncoder().encode(cronogramaPublicado), !cronogramaPublicado.isEmpty {
@@ -547,7 +616,9 @@ extension SincronizadorDeSesion: WCSessionDelegate {
                                     replyHandler: @escaping ([String: Any]) -> Void) {
         if message["ping"] as? Bool == true {
             Task { @MainActor in
-                replyHandler(["pong": true, "usuarioId": self.usuarioPublicadoId ?? ""])
+                var respuesta: [String: Any] = ["pong": true]
+                respuesta.merge(self.campoDeCuenta()) { _, nuevo in nuevo }
+                replyHandler(respuesta)
             }
             return
         }
@@ -628,10 +699,8 @@ extension SincronizadorDeSesion: WCSessionDelegate {
             #if os(watchOS)
             self.telefonoAlcanzable = session.isReachable
             let contexto = session.receivedApplicationContext
-            if let cerrar = contexto["cerrarSesion"] as? Bool, cerrar {
-                self.usuarioRemotoId = nil
-            } else if let usuario = contexto["usuarioId"] as? String, !usuario.isEmpty {
-                self.usuarioRemotoId = usuario
+            if let cuenta = SincronizadorDeSesion.cuentaInformada(en: contexto) {
+                self.usuarioRemotoId = cuenta
             }
             if let salidaData = contexto["salida"] as? Data,
                let salida = try? JSONDecoder().decode(EstadoDeSalidaCompartido.self, from: salidaData) {
@@ -688,10 +757,8 @@ extension SincronizadorDeSesion: WCSessionDelegate {
             if let rutina { self.rutinaRemota = rutina }
             self.sesionRemota = sesionPlanificada
             if let cronograma { self.cronogramaRemoto = cronograma }
-            if let cerrar = contexto["cerrarSesion"] as? Bool, cerrar {
-                self.usuarioRemotoId = nil
-            } else if let usuario = contexto["usuarioId"] as? String, !usuario.isEmpty {
-                self.usuarioRemotoId = usuario
+            if let cuenta = SincronizadorDeSesion.cuentaInformada(en: contexto) {
+                self.usuarioRemotoId = cuenta
             }
         }
     }
@@ -732,7 +799,12 @@ public final class AlmacenDeSeries: @unchecked Sendable {
 
     public func leer() -> [SerieRegistrada] {
         guard let archivo, let datos = try? Data(contentsOf: archivo) else { return [] }
-        return (try? JSONDecoder().decode([SerieRegistrada].self, from: datos)) ?? []
+        guard let series = try? JSONDecoder().decode([SerieRegistrada].self, from: datos) else {
+            // Ilegible: se aparta antes de que el próximo guardado lo pise.
+            ArchivoIlegible.apartar(archivo)
+            return []
+        }
+        return series
     }
 
     public func guardar(_ series: [SerieRegistrada]) {

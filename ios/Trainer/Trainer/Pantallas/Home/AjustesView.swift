@@ -12,7 +12,7 @@ struct AjustesView: View {
     /// volver a la bienvenida y olvidar lo que quedó en memoria.
     @EnvironmentObject private var flujo: FlujoEntrada
 
-    @AppStorage(ModoApariencia.clave) private var modoApariencia: ModoApariencia = .automatico
+    @AppStorage(ModoApariencia.clave) private var modoApariencia: ModoApariencia = ModoApariencia.predeterminado
     @AppStorage("ajuste_notif_manana") private var notificacionManana = true
     @AppStorage("ajuste_notif_recordatorio_antes") private var notificacionPrevio = true
     @AppStorage("ajuste_notif_calor") private var notificacionCalor = true
@@ -94,18 +94,20 @@ struct AjustesView: View {
             ForEach(ModoApariencia.allCases) { modo in
                 let elegido = modo == modoApariencia
                 Button {
-                    withAnimation(.easeInOut(duration: 0.2)) {
+                    withAnimation(.easeInOut(duration: TokensMovimiento.rapida)) {
                         modoApariencia = modo
                     }
                 } label: {
                     HStack(spacing: TokensEspaciado.e12) {
-                        Text(icono(de: modo))
-                            .font(.system(size: 20))
-                            .frame(width: 34, height: 34)
+                        Image(systemName: icono(de: modo))
+                            .font(.system(size: TokensTipografia.valorFilaTamano, weight: .bold))
+                            .foregroundStyle(elegido ? Paleta.acento : Paleta.textoSecundario)
+                            .frame(width: TokensEspaciado.e34, height: TokensEspaciado.e34)
                             .background(elegido ? Paleta.seleccionadoFondo : Paleta.superficieHundida)
                             .clipShape(Circle())
+                            .accessibilityHidden(true)
 
-                        VStack(alignment: .leading, spacing: 2) {
+                        VStack(alignment: .leading, spacing: TokensEspaciado.e2) {
                             Text(modo.titulo)
                                 .estilo(.tituloCard, color: elegido ? Paleta.textoAcento : Paleta.textoPrimario)
                             Text(descripcion(de: modo))
@@ -117,12 +119,14 @@ struct AjustesView: View {
 
                         ZStack {
                             Circle()
-                                .strokeBorder(elegido ? Paleta.seleccionadoBorde : Paleta.bordeInput, lineWidth: 1.5)
-                                .frame(width: 22, height: 22)
+                                .strokeBorder(elegido ? Paleta.seleccionadoBorde : Paleta.bordeInput,
+                                              lineWidth: TokensEspaciado.e2)
+                                .frame(width: TokensEspaciado.e22, height: TokensEspaciado.e22)
                             if elegido {
                                 Circle()
                                     .fill(Paleta.acento)
-                                    .frame(width: 12, height: 12)
+                                    .frame(width: TokensEspaciado.e12, height: TokensEspaciado.e12)
+                                    .shadow(color: Paleta.acentoBrillo, radius: TokensEspaciado.e6)
                             }
                         }
                     }
@@ -145,24 +149,24 @@ struct AjustesView: View {
 
     private func icono(de modo: ModoApariencia) -> String {
         switch modo {
-        case .automatico: return "🌗"
-        case .claro: return "☀️"
-        case .oscuro: return "🌙"
+        case .automatico: return "circle.lefthalf.filled"
+        case .claro: return "sun.max.fill"
+        case .oscuro: return "moon.fill"
         }
     }
 
     private func descripcion(de modo: ModoApariencia) -> String {
         switch modo {
         case .automatico: return "Sigue la apariencia del sistema operativo de tu iPhone"
-        case .claro: return "Fondo blanco puro con acentos en violeta legibles bajo la luz solar"
-        case .oscuro: return "Fondo negro puro con acentos en verde lima de alto contraste"
+        case .claro: return "Fondo blanco puro con el acento rosa, legible bajo la luz solar"
+        case .oscuro: return "Fondo negro puro con el acento rosa de alto contraste"
         }
     }
 
     private var ajustesDeNotificaciones: some View {
         VStack(alignment: .leading, spacing: TokensEspaciado.e12) {
             Toggle(isOn: $notificacionManana) {
-                VStack(alignment: .leading, spacing: 2) {
+                VStack(alignment: .leading, spacing: TokensEspaciado.e2) {
                     Text("Aviso de la mañana")
                         .estilo(.tituloCard, color: Paleta.textoPrimario)
                     Text("Buen día, hoy es día de entreno. Hoy a las ... toca hacer ...")
@@ -175,7 +179,7 @@ struct AjustesView: View {
             Divider().background(Paleta.divisor)
 
             Toggle(isOn: $notificacionPrevio) {
-                VStack(alignment: .leading, spacing: 2) {
+                VStack(alignment: .leading, spacing: TokensEspaciado.e2) {
                     Text("Recordatorio previo")
                         .estilo(.tituloCard, color: Paleta.textoPrimario)
                     Text("30 minutos antes de la hora definida para el entrenamiento")
@@ -187,7 +191,7 @@ struct AjustesView: View {
 
             Divider().background(Paleta.divisor)
             Toggle(isOn: $notificacionCalor) {
-                VStack(alignment: .leading, spacing: 2) {
+                VStack(alignment: .leading, spacing: TokensEspaciado.e2) {
                     Text("Aviso de calor")
                         .estilo(.tituloCard, color: Paleta.textoPrimario)
                     Text("Si el pronóstico supera los 30 °C antes de entrenar, te avisamos por la mañana.")
@@ -197,7 +201,7 @@ struct AjustesView: View {
             .tint(Paleta.interruptorActivo)
             Link("Datos meteorológicos: MET Norway (CC BY 4.0)",
                  destination: URL(string: "https://api.met.no/weatherapi/locationforecast/2.0/")!)
-                .font(.footnote)
+                .estilo(.notaLegal, color: Paleta.textoAcento)
         }
         .padding(TokensEspaciado.e14)
         .frame(maxWidth: .infinity)
@@ -262,12 +266,13 @@ struct AjustesView: View {
                         Text(indice == 0 ? "Plan principal" : "Plan \(indice + 1)")
                             .estilo(.labelCampo, color: Paleta.textoTerciario)
                         Spacer()
-                        Button("Quitar") { objetivosEnEdicion.remove(at: indice) }
-                            .foregroundStyle(Paleta.error)
+                        Button { objetivosEnEdicion.remove(at: indice) } label: {
+                            Text("Quitar").estilo(.tituloCard, color: Paleta.error)
+                        }
                     }
                     Menu {
                         ForEach(Objetivo.allCases, id: \.self) { objetivo in
-                            Button(nombreDelObjetivo(objetivo)) {
+                            Button(TraduccionDelServidor.nombre(de: objetivo)) {
                                 let anterior = objetivosEnEdicion[indice]
                                 objetivosEnEdicion[indice] = ObjetivoDeUsuario(
                                     id: anterior.id, goal: objetivo, goalDateMs: anterior.goalDateMs)
@@ -275,54 +280,74 @@ struct AjustesView: View {
                         }
                     } label: {
                         HStack {
-                            Text(nombreDelObjetivo(objetivosEnEdicion[indice].goal))
+                            Text(TraduccionDelServidor.nombre(de: objetivosEnEdicion[indice].goal))
+                                .estilo(.opcionTitulo)
                             Spacer()
                             Image(systemName: "chevron.down")
+                                .font(.system(size: TokensTipografia.labelCampoTamano, weight: .bold))
+                                .foregroundStyle(Paleta.acento)
                         }
                         .frame(minHeight: TokensTamano.objetivoTactilMinimo)
                     }
                     if let fechaMs = objetivosEnEdicion[indice].goalDateMs {
-                        DatePicker("Fecha del evento", selection: Binding(
+                        DatePicker(selection: Binding(
                             get: { fechaLocalDeObjetivo(fechaMs) },
                             set: { nueva in
                                 let anterior = objetivosEnEdicion[indice]
                                 objetivosEnEdicion[indice] = ObjetivoDeUsuario(
                                     id: anterior.id, goal: anterior.goal,
                                     goalDateMs: DatosRegistro.fechaDelCalendarioEnMs(nueva, zona: .current))
-                            }), displayedComponents: .date)
-                        Button("Quitar fecha") {
+                            }), displayedComponents: .date) {
+                            Text("Fecha del evento").estilo(.cuerpoSecundario, color: Paleta.textoSecundario)
+                        }
+                        .tint(Paleta.acento)
+                        Button {
                             let anterior = objetivosEnEdicion[indice]
                             objetivosEnEdicion[indice] = ObjetivoDeUsuario(
                                 id: anterior.id, goal: anterior.goal, goalDateMs: nil)
+                        } label: {
+                            Text("Quitar fecha").estilo(.tituloCard, color: Paleta.textoSecundario)
                         }
                     } else {
-                        Button("Agregar fecha del evento") {
+                        Button {
                             let anterior = objetivosEnEdicion[indice]
                             objetivosEnEdicion[indice] = ObjetivoDeUsuario(
                                 id: anterior.id, goal: anterior.goal,
                                 goalDateMs: DatosRegistro.fechaDelCalendarioEnMs(Date(), zona: .current))
+                        } label: {
+                            Text("Agregar fecha del evento").estilo(.tituloCard, color: Paleta.textoAcento)
                         }
                     }
                 }
                 .padding(TokensEspaciado.e12)
                 .background(Paleta.superficieHundida)
-                .clipShape(RoundedRectangle(cornerRadius: TokensRadio.celda))
+                .clipShape(RoundedRectangle(cornerRadius: TokensRadio.input, style: .continuous))
+                .overlay(
+                    RoundedRectangle(cornerRadius: TokensRadio.input, style: .continuous)
+                        .strokeBorder(indice == 0 ? Paleta.acentoSuaveBorde : Paleta.bordeSuperficie,
+                                      lineWidth: TokensEspaciado.e1)
+                )
             }
             if objetivosEnEdicion.count < 10 {
                 Menu {
                     ForEach(Objetivo.allCases, id: \.self) { objetivo in
-                        Button(nombreDelObjetivo(objetivo)) {
+                        Button(TraduccionDelServidor.nombre(de: objetivo)) {
                             objetivosEnEdicion.append(ObjetivoDeUsuario(
                                 id: objetivosEnEdicion.isEmpty ? "principal" : "",
                                 goal: objetivo, goalDateMs: nil))
                         }
                     }
                 } label: {
-                    Label("Agregar objetivo", systemImage: "plus.circle")
-                        .frame(maxWidth: .infinity, minHeight: TokensTamano.objetivoTactilMinimo)
+                    Label {
+                        Text("Agregar objetivo").estilo(.tituloCard, color: Paleta.textoAcento)
+                    } icon: {
+                        Image(systemName: "plus.circle")
+                            .foregroundStyle(Paleta.acento)
+                    }
+                    .frame(maxWidth: .infinity, minHeight: TokensTamano.objetivoTactilMinimo)
                 }
             }
-            Button("Guardar objetivos") {
+            BotonTonal("Guardar objetivos") {
                 guardandoObjetivos = true
                 let normalizados = objetivosEnEdicion.enumerated().map { indice, valor in
                     ObjetivoDeUsuario(id: indice == 0 ? "principal" :
@@ -340,7 +365,7 @@ struct AjustesView: View {
                 }
             }
             .disabled(guardandoObjetivos)
-            .frame(maxWidth: .infinity, minHeight: TokensTamano.objetivoTactilMinimo)
+            .opacity(guardandoObjetivos ? 0.5 : 1)
         }
         .padding(TokensEspaciado.e14)
         .frame(maxWidth: .infinity)
@@ -356,18 +381,6 @@ struct AjustesView: View {
             ?? Date(timeIntervalSince1970: Double(ms) / 1000)
     }
 
-    private func nombreDelObjetivo(_ objetivo: Objetivo) -> String {
-        switch objetivo {
-        case .c5k: return Textos.regObjetivoC5k
-        case .c10k: return Textos.regObjetivoC10k
-        case .mediaMaraton: return Textos.regObjetivoMediaMaraton
-        case .maraton: return Textos.regObjetivoMaraton
-        case .trailMontana: return Textos.regObjetivoTrailMontana
-        case .triatlonOlimpico: return Textos.regObjetivoTriatlonOlimpico
-        case .volverSinLesiones: return Textos.regObjetivoVolverSinLesiones
-        }
-    }
-
     private var botonDeCerrarSesion: some View {
         Button {
             // El llavero se borra antes de salir, sin esperar a la red: sin señal
@@ -376,16 +389,13 @@ struct AjustesView: View {
             Task { await flujo.cerrarSesion() }
         } label: {
             Text(Textos.ajustesCerrarSesion)
-                .estilo(.tituloCard, color: Paleta.error)
+                .estilo(.botonPrimario, color: Paleta.error)
                 .frame(maxWidth: .infinity)
-                .frame(minHeight: TokensTamano.objetivoTactilMinimo)
+                .frame(minHeight: TokensTamano.botonPrimario)
                 .background(Paleta.errorFondo)
-                .clipShape(RoundedRectangle(cornerRadius: TokensRadio.boton, style: .continuous))
-                .overlay(
-                    RoundedRectangle(cornerRadius: TokensRadio.boton, style: .continuous)
-                        .strokeBorder(Paleta.errorBorde, lineWidth: TokensEspaciado.e1)
-                )
-                .contentShape(Rectangle())
+                .clipShape(Capsule())
+                .overlay(Capsule().strokeBorder(Paleta.errorBorde, lineWidth: TokensEspaciado.e1))
+                .contentShape(Capsule())
         }
         .buttonStyle(EstiloPresionado())
     }

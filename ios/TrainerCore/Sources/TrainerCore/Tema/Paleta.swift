@@ -30,21 +30,38 @@ public enum Paleta {
     }
 
     // ---- fondo y superficies ----
+    //
+    // 🎨 Rediseño 2026-10 (mockup "7 pantallas principales del MVP"): en modo
+    // noche las superficies son grises NEUTROS sobre negro puro. Los de
+    // `tokens.json` tienen un tinte verde que venía del acento lima de antes, y
+    // con el acento rosa ese tinte se lee sucio. Los valores claros no cambian.
+    // Android sigue leyendo los de `tokens.json`: es una divergencia de iOS,
+    // escrita acá y en `docs/REDISENO-IOS-2026-10.md`.
 
-    public static let fondo = dinamico(claro: Color.white, oscuro: TokensColor.telefonoFondo)
-    public static let superficie = dinamico(claro: Color(red: 0.96, green: 0.96, blue: 0.97), oscuro: TokensColor.telefonoSuperficie)
-    public static let superficieAlterna = dinamico(claro: Color(red: 0.91, green: 0.92, blue: 0.94), oscuro: TokensColor.telefonoSuperficieAlterna)
-    public static let superficieInput = dinamico(claro: Color.white, oscuro: TokensColor.telefonoSuperficieInput)
+    private enum Neutro {
+        static let fondo = Color(red: 0, green: 0, blue: 0)
+        static let superficie = Color(red: 0.086, green: 0.086, blue: 0.094)          // card
+        static let superficieAlterna = Color(red: 0.118, green: 0.118, blue: 0.129)
+        static let superficieInput = Color(red: 0.094, green: 0.094, blue: 0.102)
+        static let superficieDestacada = Color(red: 0.149, green: 0.149, blue: 0.161)
+        static let superficieBarra = Color(red: 0.067, green: 0.067, blue: 0.075)
+        static let superficieOverlay = Color(red: 0.086, green: 0.086, blue: 0.094, opacity: 0.94)
+    }
+
+    public static let fondo = dinamico(claro: Color.white, oscuro: Neutro.fondo)
+    public static let superficie = dinamico(claro: Color(red: 0.96, green: 0.96, blue: 0.97), oscuro: Neutro.superficie)
+    public static let superficieAlterna = dinamico(claro: Color(red: 0.91, green: 0.92, blue: 0.94), oscuro: Neutro.superficieAlterna)
+    public static let superficieInput = dinamico(claro: Color.white, oscuro: Neutro.superficieInput)
     /// Relleno de un control apoyado sobre una card, y del botón deshabilitado.
     public static let superficieHundida = dinamico(claro: Color(red: 0.92, green: 0.93, blue: 0.95), oscuro: TokensColor.telefonoSuperficieHundida)
     public static let superficieControl = dinamico(claro: Color(red: 0.88, green: 0.89, blue: 0.91), oscuro: TokensColor.telefonoSuperficieControl)
     /// Hoja inferior y tarjetas apoyadas sobre el mapa: superficie al 94 %.
-    public static let superficieOverlay = dinamico(claro: Color.white.opacity(0.96), oscuro: TokensColor.telefonoSuperficieOverlay)
+    public static let superficieOverlay = dinamico(claro: Color.white.opacity(0.96), oscuro: Neutro.superficieOverlay)
     /// El fondo oscurecido de un control circular sobre el mapa.
     public static let superficieOverlayFondo = dinamico(claro: Color(red: 0.92, green: 0.93, blue: 0.95, opacity: 0.92), oscuro: TokensColor.telefonoVelo)
     /// Extremo claro del degradado de la card de sesión.
-    public static let superficieDestacada = dinamico(claro: Color(red: 0.88, green: 0.90, blue: 0.93), oscuro: TokensColor.telefonoSuperficieDestacada)
-    public static let superficieBarra = dinamico(claro: Color.white, oscuro: TokensColor.telefonoSuperficieBarra)
+    public static let superficieDestacada = dinamico(claro: Color(red: 0.88, green: 0.90, blue: 0.93), oscuro: Neutro.superficieDestacada)
+    public static let superficieBarra = dinamico(claro: Color.white, oscuro: Neutro.superficieBarra)
 
     // ---- texto ----
 
@@ -84,7 +101,7 @@ public enum Paleta {
     /// Si el catálogo no está disponible —previews del paquete, `swift test`
     /// fuera de la app— cae al valor generado desde `tokens.json`, que es el
     /// mismo número.
-    public static let acento: Color = acentoDelCatalogo ?? Color(red: 1.0, green: 35.0 / 255.0, blue: 167.0 / 255.0)
+    public static let acento: Color = acentoDelCatalogo ?? TokensAcento.respaldo
 
     private static var acentoDelCatalogo: Color? {
         #if canImport(UIKit)
@@ -112,6 +129,16 @@ public enum Paleta {
     public static let secundario = acento
     public static let secundarioSuaveFondo = acento.opacity(TokensAcento.alfaChipActivo)
     public static let secundarioSuaveBorde = acento.opacity(TokensAcento.alfaSuaveBorde)
+
+    // ---- rediseño 2026-10: brillo y degradados del acento ----
+
+    /// El halo rosa de lo que está vivo: el botón central, la ruta en el mapa,
+    /// el botón de pausa. Va SIEMPRE detrás de algo que ya se lee sin él.
+    public static let acentoBrillo = acento.opacity(0.45)
+    /// El acento sobre negro, para el pie de las cards con foto o degradado.
+    public static let acentoProfundo = acento.opacity(0.28)
+    /// El velo que oscurece una foto para que el texto blanco encima se lea.
+    public static let veloFoto = Color.black.opacity(0.55)
 
     // ---- barra de pestañas ----
     public static let fondoBarra = dinamico(claro: Color.white, oscuro: Color.black)

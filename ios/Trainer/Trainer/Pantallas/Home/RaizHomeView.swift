@@ -57,7 +57,7 @@ struct RaizHomeView: View {
                         ],
                         elegida: estado.pestana == .entreno ? estado.pestanaPrevia.rawValue : estado.pestana.rawValue,
                         central: ItemDePestana(id: PestanaHome.entreno.rawValue,
-                                               titulo: Textos.homeTabEntreno, simbolo: "figure.run"),
+                                               titulo: Textos.homeTabEntreno, simbolo: "bolt.fill"),
                         alElegir: { id in
                             if let destino = PestanaHome(rawValue: id) { estado.ir(a: destino) }
                         },
@@ -171,7 +171,8 @@ struct AvisoDePerfilIncompleto: View {
 // MARK: - Piezas compartidas por las pestañas
 
 /// El encabezado de una pantalla secundaria (gimnasio, ajustes): flecha para
-/// volver y título. Las pestañas de la barra no lo llevan.
+/// volver y título. Las pestañas de la barra no lo llevan: ellas usan
+/// `EncabezadoDePestana`, con el título grande del rediseño.
 struct CabeceraSecundaria: View {
     let titulo: String
     let volver: () -> Void
@@ -180,7 +181,8 @@ struct CabeceraSecundaria: View {
         HStack(spacing: TokensEspaciado.e12) {
             FlechaVolver(accion: volver)
             Text(titulo)
-                .estilo(.tituloCardGrande)
+                .estilo(.tituloSeccion)
+                .lineLimit(1)
                 .accessibilityAddTraits(.isHeader)
             Spacer()
         }
@@ -189,7 +191,8 @@ struct CabeceraSecundaria: View {
     }
 }
 
-/// Título de una sección dentro de una pestaña.
+/// Título de una sección dentro de una pestaña: el "Semana de carrera" del
+/// mockup, pesado y apretado.
 struct TituloDeSeccion: View {
     private let texto: String
 
@@ -197,23 +200,28 @@ struct TituloDeSeccion: View {
 
     var body: some View {
         Text(texto)
-            .estilo(.tituloCard)
+            .estilo(.tituloSeccion)
             .frame(maxWidth: .infinity, alignment: .leading)
             .accessibilityAddTraits(.isHeader)
     }
 }
 
 /// Un chip informativo: los del plan de avituallamiento y los de la sesión.
+/// Tiene la forma de las píldoras del rediseño: cápsula con borde finito.
 struct ChipInformativo: View {
     let texto: String
     var destacado: Bool = false
 
     var body: some View {
         Text(texto)
-            .estilo(.etiquetaSeccion.enMinusculas, color: destacado ? Paleta.acento : Paleta.textoCuerpo)
-            .padding(.horizontal, TokensEspaciado.e9)
-            .padding(.vertical, TokensEspaciado.e5)
-            .background(destacado ? Paleta.acentoChipActivo : Paleta.superficieHundida)
+            .estilo(.chip, color: destacado ? Paleta.acento : Paleta.textoCuerpo)
+            .padding(.horizontal, TokensEspaciado.e10)
+            .padding(.vertical, TokensEspaciado.e6)
+            .background(destacado ? Paleta.acentoChipActivo : Paleta.superficie)
             .clipShape(Capsule())
+            .overlay(
+                Capsule().strokeBorder(destacado ? Paleta.acentoSuaveBorde : Paleta.bordeSuperficie,
+                                       lineWidth: TokensEspaciado.e1)
+            )
     }
 }

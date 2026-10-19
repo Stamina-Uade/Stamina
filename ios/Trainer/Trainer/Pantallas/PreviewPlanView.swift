@@ -19,9 +19,9 @@ struct PreviewPlanView: View {
                             Text(Textos.previewEtiqueta).estilo(.etiquetaSeccion, color: Paleta.acento)
                             Text(Textos.previewSesion).estilo(.tituloCardGrande)
                             HStack(spacing: TokensEspaciado.e6) {
-                                chip(Textos.previewChipLiquido, destacado: false)
-                                chip(Textos.previewChipGel, destacado: true)
-                                chip(Textos.previewChipSodio, destacado: false)
+                                PildoraDeEstado(Textos.previewChipLiquido, simbolo: "drop.fill")
+                                PildoraDeEstado(Textos.previewChipGel, simbolo: "bolt.fill", tono: .acento)
+                                PildoraDeEstado(Textos.previewChipSodio)
                             }
                         }
                     }
@@ -36,13 +36,13 @@ struct PreviewPlanView: View {
                         }
                     }
                 }
-                .padding(.horizontal, TokensEspaciado.e26)
+                .padding(.horizontal, TokensEspaciado.e22)
                 .padding(.top, TokensEspaciado.e26)
             }
 
             VStack(spacing: TokensEspaciado.e16) {
                 Text(Textos.previewCtaTitulo)
-                    .estilo(.tituloPantalla)
+                    .estilo(.display)
                     .multilineTextAlignment(.center)
                     .fixedSize(horizontal: false, vertical: true)
 
@@ -58,19 +58,10 @@ struct PreviewPlanView: View {
                     }
                 }
             }
-            .padding(.horizontal, TokensEspaciado.e26)
+            .padding(.horizontal, TokensEspaciado.e22)
             .padding(.bottom, TokensEspaciado.e34)
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
         .background(Paleta.fondo)
-    }
-
-    private func chip(_ texto: String, destacado: Bool) -> some View {
-        Text(texto)
-            .estilo(.notaLegal, color: destacado ? Paleta.acento : Paleta.textoPrimario)
-            .padding(.vertical, TokensEspaciado.e5)
-            .padding(.horizontal, TokensEspaciado.e9)
-            .background(destacado ? Paleta.acentoChipActivo : Paleta.superficieControl)
-            .clipShape(Capsule())
     }
 }

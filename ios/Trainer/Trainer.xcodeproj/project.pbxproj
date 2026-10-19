@@ -661,6 +661,7 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_ENTITLEMENTS = Trainer.entitlements;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 2;
 				DEVELOPMENT_ASSET_PATHS = "\"Trainer/Preview Content\"";
@@ -697,6 +698,7 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_ENTITLEMENTS = Trainer.entitlements;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 2;
 				DEVELOPMENT_ASSET_PATHS = "\"Trainer/Preview Content\"";
@@ -815,8 +817,8 @@
 				INFOPLIST_FILE = "TrainerWatch-Info.plist";
 				INFOPLIST_KEY_CFBundleDisplayName = Stamina;
 				INFOPLIST_KEY_CFBundleName = Stamina;
-				INFOPLIST_KEY_NSHealthShareUsageDescription = "Guardamos tu entrenamiento en Salud.";
-				INFOPLIST_KEY_NSHealthUpdateUsageDescription = "Leemos el pulso durante tu entrenamiento.";
+				INFOPLIST_KEY_NSHealthShareUsageDescription = "Leemos el pulso durante tu entrenamiento.";
+				INFOPLIST_KEY_NSHealthUpdateUsageDescription = "Guardamos tu entrenamiento en Salud.";
 				INFOPLIST_KEY_NSLocationWhenInUseUsageDescription = "Usamos tu ubicación durante la salida para medir distancia y dibujar el recorrido.";
 				INFOPLIST_KEY_UISupportedInterfaceOrientations = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown";
 				INFOPLIST_KEY_WKCompanionAppBundleIdentifier = com.tecladus.Trainer;
@@ -851,8 +853,8 @@
 				INFOPLIST_FILE = "TrainerWatch-Info.plist";
 				INFOPLIST_KEY_CFBundleDisplayName = Stamina;
 				INFOPLIST_KEY_CFBundleName = Stamina;
-				INFOPLIST_KEY_NSHealthShareUsageDescription = "Guardamos tu entrenamiento en Salud.";
-				INFOPLIST_KEY_NSHealthUpdateUsageDescription = "Leemos el pulso durante tu entrenamiento.";
+				INFOPLIST_KEY_NSHealthShareUsageDescription = "Leemos el pulso durante tu entrenamiento.";
+				INFOPLIST_KEY_NSHealthUpdateUsageDescription = "Guardamos tu entrenamiento en Salud.";
 				INFOPLIST_KEY_NSLocationWhenInUseUsageDescription = "Usamos tu ubicación durante la salida para medir distancia y dibujar el recorrido.";
 				INFOPLIST_KEY_UISupportedInterfaceOrientations = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown";
 				INFOPLIST_KEY_WKCompanionAppBundleIdentifier = com.tecladus.Trainer;

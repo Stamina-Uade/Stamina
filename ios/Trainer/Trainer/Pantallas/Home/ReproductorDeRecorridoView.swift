@@ -113,40 +113,21 @@ struct ReproductorDeRecorridoView: View {
                 // 2. Capa superior: Botón cerrar + Selector de velocidad
                 VStack(spacing: TokensEspaciado.e12) {
                     HStack(alignment: .center) {
-                        Button {
+                        BotonCircular("xmark", etiqueta: "Cerrar reproducción") {
                             pausar()
                             if let alCerrar {
                                 alCerrar()
                             } else {
                                 dismiss()
                             }
-                        } label: {
-                            Image(systemName: "xmark")
-                                .font(.system(size: 13, weight: .bold))
-                                .foregroundStyle(Color.white)
-                                .frame(width: 44, height: 44)
-                                .background(Color.black.opacity(0.65))
-                                .clipShape(Circle())
-                                .overlay(Circle().strokeBorder(Color.white.opacity(0.2), lineWidth: 1))
                         }
-                        .buttonStyle(EstiloPresionado())
-                        .accessibilityLabel("Cerrar reproducción")
 
                         Spacer()
 
-                        // Selector de velocidad
-                        HStack(spacing: 6) {
-                            botonVelocidad(titulo: "1x", mult: 5.0)
-                            botonVelocidad(titulo: "2x", mult: 10.0)
-                            botonVelocidad(titulo: "4x", mult: 20.0)
-                        }
-                        .padding(4)
-                        .background(Color.black.opacity(0.65))
-                        .clipShape(Capsule())
-                        .overlay(Capsule().strokeBorder(Color.white.opacity(0.2), lineWidth: 1))
+                        selectorDeVelocidad
                     }
                     .padding(.horizontal, TokensEspaciado.e16)
-                    .padding(.top, max(geo.safeAreaInsets.top, 50))
+                    .padding(.top, max(geo.safeAreaInsets.top, TokensEspaciado.e52))
 
                     // 3. Telemetría flotante requerida: tiempo transcurrido, ritmo, velocidad, kilómetro actual
                     hudTelemetria
@@ -163,8 +144,10 @@ struct ReproductorDeRecorridoView: View {
                     // 5. Controles inferiores (Barra de progreso / Play / Pause / Reiniciar)
                     panelInferiorControles
                         .padding(.horizontal, TokensEspaciado.e16)
-                        .padding(.bottom, max(geo.safeAreaInsets.bottom, 24))
+                        .padding(.bottom, max(geo.safeAreaInsets.bottom, TokensEspaciado.e26))
                 }
+                // El mapa es siempre oscuro: los controles encima, también.
+                .environment(\.colorScheme, .dark)
             }
         }
         .background(Color.black)
@@ -177,46 +160,55 @@ struct ReproductorDeRecorridoView: View {
         }
     }
 
+    // MARK: - Superficie de los paneles flotantes
+
+    /// El vidrio oscuro con borde finito de todos los paneles sobre el mapa.
+    private func panelFlotante<Contenido: View>(_ contenido: Contenido) -> some View {
+        contenido
+            .background(Paleta.superficieOverlay)
+            .clipShape(RoundedRectangle(cornerRadius: TokensRadio.card, style: .continuous))
+            .overlay(
+                RoundedRectangle(cornerRadius: TokensRadio.card, style: .continuous)
+                    .strokeBorder(Paleta.bordeSuperficie, lineWidth: TokensEspaciado.e1)
+            )
+    }
+
     // MARK: - HUD de Telemetría (4 métricas requeridas sobre el mapa)
 
     private var hudTelemetria: some View {
-        HStack(spacing: 0) {
-            columnaHUD(titulo: "TIEMPO", valor: Formato.cronometroCompleto(segundos: Int(tiempoActual)))
-            divisorHUD
-            columnaHUD(titulo: "RITMO", valor: valorRitmoTexto)
-            divisorHUD
-            columnaHUD(titulo: "VELOCIDAD", valor: valorVelocidadTexto)
-            divisorHUD
-            columnaHUD(titulo: "KILÓMETRO", valor: kilometroActualTexto)
-        }
-        .padding(.vertical, TokensEspaciado.e10)
-        .background(Color.black.opacity(0.78))
-        .clipShape(RoundedRectangle(cornerRadius: TokensRadio.card, style: .continuous))
-        .overlay(
-            RoundedRectangle(cornerRadius: TokensRadio.card, style: .continuous)
-                .strokeBorder(Color.white.opacity(0.14), lineWidth: 1)
+        panelFlotante(
+            HStack(spacing: 0) {
+                columnaHUD(titulo: "TIEMPO", valor: Formato.cronometroCompleto(segundos: Int(tiempoActual)))
+                divisorHUD
+                columnaHUD(titulo: "RITMO", valor: valorRitmoTexto)
+                divisorHUD
+                columnaHUD(titulo: "VELOCIDAD", valor: valorVelocidadTexto)
+                divisorHUD
+                columnaHUD(titulo: "KILÓMETRO", valor: kilometroActualTexto)
+            }
+            .padding(.vertical, TokensEspaciado.e12)
         )
     }
 
     private func columnaHUD(titulo: String, valor: String) -> some View {
-        VStack(spacing: 2) {
+        VStack(spacing: TokensEspaciado.e4) {
             Text(valor)
-                .font(.system(size: 13, weight: .bold, design: .rounded))
-                .foregroundStyle(Color.white)
-                .monospacedDigit()
+                .estilo(.resumenCifraFila)
+                .lineLimit(1)
+                .minimumScaleFactor(0.7)
+            Text(titulo)
+                .estilo(.etiquetaSeccion, color: Paleta.textoTerciario)
                 .lineLimit(1)
                 .minimumScaleFactor(0.8)
-            Text(titulo)
-                .font(.system(size: 8.5, weight: .bold))
-                .foregroundStyle(Color.white.opacity(0.55))
         }
         .frame(maxWidth: .infinity)
+        .accessibilityElement(children: .combine)
     }
 
     private var divisorHUD: some View {
         Rectangle()
-            .fill(Color.white.opacity(0.15))
-            .frame(width: 1, height: 24)
+            .fill(Paleta.divisor)
+            .frame(width: TokensEspaciado.e1, height: TokensEspaciado.e26)
     }
 
     // MARK: - Tarjeta de Tiempo Total al Finalizar
@@ -225,118 +217,106 @@ struct ReproductorDeRecorridoView: View {
         VStack(spacing: TokensEspaciado.e6) {
             HStack(spacing: TokensEspaciado.e8) {
                 Image(systemName: "flag.checkered")
-                    .font(.system(size: 16, weight: .bold))
+                    .font(.system(size: TokensTipografia.valorDatoTamano, weight: .bold))
                     .foregroundStyle(Paleta.acento)
+                    .accessibilityHidden(true)
                 Text("TIEMPO TOTAL")
-                    .font(.system(size: 12, weight: .bold))
-                    .foregroundStyle(Color.white.opacity(0.9))
+                    .estilo(.etiquetaSeccion, color: Paleta.textoSecundario)
             }
             Text(Formato.cronometroCompleto(segundos: duracionTotalSegundos))
-                .font(.system(size: 26, weight: .heavy, design: .rounded))
-                .foregroundStyle(Paleta.acento)
-                .monospacedDigit()
+                .estilo(.numeroGrande, color: Paleta.acento)
         }
-        .padding(.vertical, TokensEspaciado.e10)
+        .padding(.vertical, TokensEspaciado.e12)
         .padding(.horizontal, TokensEspaciado.e20)
-        .background(Color.black.opacity(0.88))
+        .background(Paleta.superficieOverlay)
         .clipShape(RoundedRectangle(cornerRadius: TokensRadio.card, style: .continuous))
         .overlay(
             RoundedRectangle(cornerRadius: TokensRadio.card, style: .continuous)
-                .strokeBorder(Paleta.acento.opacity(0.7), lineWidth: 1.5)
+                .strokeBorder(Paleta.acentoSuaveBorde, lineWidth: TokensEspaciado.e1)
         )
-        .shadow(color: Color.black.opacity(0.6), radius: 10, y: 4)
+        .shadow(color: Paleta.acentoBrillo, radius: TokensEspaciado.e16)
+        .accessibilityElement(children: .combine)
         .transition(.scale.combined(with: .opacity))
     }
 
     // MARK: - Panel Inferior de Controles
 
     private var panelInferiorControles: some View {
-        VStack(spacing: TokensEspaciado.e10) {
-            // Scrubber
-            VStack(spacing: 3) {
-                Slider(
-                    value: $tiempoActual,
-                    in: 0...duracionEfectiva,
-                    onEditingChanged: { editando in
-                        if editando {
-                            pausar()
+        panelFlotante(
+            VStack(spacing: TokensEspaciado.e10) {
+                // Scrubber
+                VStack(spacing: TokensEspaciado.e3) {
+                    Slider(
+                        value: $tiempoActual,
+                        in: 0...duracionEfectiva,
+                        onEditingChanged: { editando in
+                            if editando {
+                                pausar()
+                            }
                         }
+                    )
+                    .tint(Paleta.acento)
+
+                    HStack {
+                        Text(Formato.cronometro(segundos: Int(tiempoActual)))
+                            .estilo(.resumenCifraChica, color: Paleta.textoSecundario)
+                        Spacer()
+                        Text(Formato.cronometro(segundos: Int(duracionEfectiva)))
+                            .estilo(.resumenCifraChica, color: Paleta.textoTerciario)
                     }
-                )
-                .tint(Paleta.acento)
-
-                HStack {
-                    Text(Formato.cronometro(segundos: Int(tiempoActual)))
-                        .font(.system(size: 11, weight: .medium))
-                        .foregroundStyle(Color.white.opacity(0.8))
-                        .monospacedDigit()
-                    Spacer()
-                    Text(Formato.cronometro(segundos: Int(duracionEfectiva)))
-                        .font(.system(size: 11, weight: .medium))
-                        .foregroundStyle(Color.white.opacity(0.55))
-                        .monospacedDigit()
                 }
-            }
 
-            // Botones
-            HStack(spacing: TokensEspaciado.e20) {
-                Button {
-                    tiempoActual = 0.0
-                    reproducir()
-                } label: {
-                    Image(systemName: "backward.end.fill")
-                        .font(.system(size: 18))
-                        .foregroundStyle(Color.white.opacity(0.85))
-                        .frame(width: 44, height: 44)
-                        .background(Color.black.opacity(0.65))
-                        .clipShape(Circle())
-                        .overlay(Circle().strokeBorder(Color.white.opacity(0.18), lineWidth: 1))
-                }
-                .buttonStyle(EstiloPresionado())
-
-                Button {
-                    if reproduciendo {
-                        pausar()
-                    } else {
+                // Botones
+                HStack(spacing: TokensEspaciado.e22) {
+                    BotonCircular("backward.end.fill", etiqueta: "Reiniciar reproducción") {
+                        tiempoActual = 0.0
                         reproducir()
                     }
-                } label: {
-                    ZStack {
-                        Circle()
-                            .fill(Paleta.acento)
-                            .frame(width: 58, height: 58)
-                            .shadow(color: Paleta.acento.opacity(0.4), radius: 6, y: 3)
-                        Image(systemName: reproduciendo ? "pause.fill" : "play.fill")
-                            .font(.system(size: 24, weight: .bold))
-                            .foregroundStyle(Paleta.sobreAcento)
-                            .offset(x: reproduciendo ? 0 : 2)
+
+                    BotonCircular(reproduciendo ? "pause.fill" : "play.fill",
+                                  etiqueta: reproduciendo ? "Pausar" : "Reproducir",
+                                  estilo: .primario,
+                                  diametro: TokensEspaciado.e56) {
+                        if reproduciendo {
+                            pausar()
+                        } else {
+                            reproducir()
+                        }
                     }
                 }
-                .buttonStyle(EstiloPresionado())
             }
-        }
-        .padding(TokensEspaciado.e14)
-        .background(Color.black.opacity(0.78))
-        .clipShape(RoundedRectangle(cornerRadius: TokensRadio.card, style: .continuous))
-        .overlay(
-            RoundedRectangle(cornerRadius: TokensRadio.card, style: .continuous)
-                .strokeBorder(Color.white.opacity(0.14), lineWidth: 1)
+            .padding(TokensEspaciado.e14)
         )
     }
 
+    private var selectorDeVelocidad: some View {
+        HStack(spacing: TokensEspaciado.e4) {
+            botonVelocidad(titulo: "1x", mult: 5.0)
+            botonVelocidad(titulo: "2x", mult: 10.0)
+            botonVelocidad(titulo: "4x", mult: 20.0)
+        }
+        .padding(TokensEspaciado.e4)
+        .background(Paleta.superficieOverlay)
+        .clipShape(Capsule())
+        .overlay(Capsule().strokeBorder(Paleta.bordeSuperficie, lineWidth: TokensEspaciado.e1))
+    }
+
     private func botonVelocidad(titulo: String, mult: Double) -> some View {
-        Button {
+        let activo = velocidadMultiplicador == mult
+        return Button {
             velocidadMultiplicador = mult
         } label: {
             Text(titulo)
-                .font(.system(size: 12, weight: .bold))
-                .foregroundStyle(velocidadMultiplicador == mult ? Paleta.sobreAcento : Color.white.opacity(0.75))
-                .padding(.horizontal, 10)
-                .padding(.vertical, 6)
-                .background(velocidadMultiplicador == mult ? Paleta.acento : Color.clear)
+                .estilo(.chip, color: activo ? Paleta.sobreAcento : Paleta.textoSecundario)
+                .padding(.horizontal, TokensEspaciado.e12)
+                .frame(minHeight: TokensEspaciado.e40)
+                .background(activo ? Paleta.acento : Color.clear)
                 .clipShape(Capsule())
+                .contentShape(Capsule())
         }
         .buttonStyle(EstiloPresionado())
+        .accessibilityLabel(Text("Velocidad \(titulo)"))
+        .accessibilityAddTraits(activo ? .isSelected : [])
     }
 
     private func reproducir() {
@@ -389,7 +369,7 @@ private struct MapaReproductor: UIViewRepresentable {
         func mapView(_ mapView: MKMapView, rendererFor overlay: MKOverlay) -> MKOverlayRenderer {
             if let polyline = overlay as? MKPolyline {
                 let renderer = MKPolylineRenderer(polyline: polyline)
-                // Ruta en color rosa vivo (#FF23A7) trazándose dinámicamente
+                // Ruta en el rosa del acento, trazándose a medida que avanza
                 renderer.strokeColor = UIColor(Paleta.acento)
                 renderer.lineWidth = 5.5
                 renderer.lineCap = .round

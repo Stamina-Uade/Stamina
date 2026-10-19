@@ -12,13 +12,7 @@ struct NutricionView: View {
     var body: some View {
         ScrollView {
             VStack(alignment: .leading, spacing: TokensEspaciado.e13) {
-                VStack(alignment: .leading, spacing: TokensEspaciado.e2) {
-                    Text(Textos.homeTabNutricion)
-                        .estilo(.marca)
-                        .accessibilityAddTraits(.isHeader)
-                    Text(Textos.nutricionSubtitulo)
-                        .estilo(.labelCampo, color: Paleta.textoTerciario)
-                }
+                EncabezadoDePestana(Textos.homeTabNutricion, sobretitulo: Textos.nutricionSubtitulo)
 
                 if let nutricion = estado.contenido.nutricion.valor {
                     AvisoDeLoGuardado(seccion: estado.contenido.nutricion)
@@ -46,29 +40,35 @@ struct NutricionView: View {
 
     // MARK: - Calorías y macros
 
+    /// Lo comido es el número protagonista, sobre el halo rosa; el objetivo y lo
+    /// que falta van chicos. Las macros, debajo, como tarjetas de métrica.
     private func tarjetaDeCalorias(_ objetivo: ObjetivoNutricional, provisional: Bool) -> some View {
         let comido = estado.consumido
         let restantes = max(0, objetivo.kcal - comido.kcal)
 
-        return VStack(alignment: .leading, spacing: TokensEspaciado.e13) {
-            HStack(alignment: .bottom) {
-                VStack(alignment: .leading, spacing: TokensEspaciado.e2) {
-                    Text(Formato.kcal(comido.kcal)).estilo(.numeroGrande)
-                    Text(Textos.nutricionDeObjetivo(Formato.kcal(objetivo.kcal)))
-                        .estilo(.notaLegal, color: Paleta.textoTerciario)
+        return VStack(alignment: .leading, spacing: TokensEspaciado.e10) {
+            TarjetaHeroe(alto: TokensEspaciado.e56 * 3) {
+                VStack(alignment: .leading, spacing: TokensEspaciado.e10) {
+                    PildoraDeEstado(Textos.nutricionKcalRestantes(Formato.kcal(restantes)),
+                                    simbolo: "flame.fill", tono: .acento)
+                    VStack(alignment: .leading, spacing: TokensEspaciado.e2) {
+                        MetricaHeroe(Formato.kcal(comido.kcal), unidad: "kcal",
+                                     etiquetaAccesible: Textos.nutricionTitulo)
+                        Text(Textos.nutricionDeObjetivo(Formato.kcal(objetivo.kcal)))
+                            .estilo(.cuerpoSecundario, color: Paleta.textoSecundario)
+                    }
+                    BarraDeProgreso(fraccion: Double(comido.kcal) / Double(max(objetivo.kcal, 1)),
+                                    descripcion: Textos.nutricionTitulo)
                 }
-                Spacer()
-                Text(Textos.nutricionKcalRestantes(Formato.kcal(restantes)))
-                    .estilo(.labelCampo, color: Paleta.acento)
             }
 
-            BarraDeProgreso(fraccion: Double(comido.kcal) / Double(max(objetivo.kcal, 1)),
-                            descripcion: Textos.nutricionTitulo)
-
-            HStack(spacing: TokensEspaciado.e10) {
-                macro(Textos.nutricionCarbos, comido.carbohidratosG, objetivo.carbohidratosG)
-                macro(Textos.nutricionProteina, comido.proteinaG, objetivo.proteinaG)
-                macro(Textos.nutricionGrasa, comido.grasaG, objetivo.grasaG)
+            HStack(spacing: TokensEspaciado.e8) {
+                TarjetaDeMacro(nombre: Textos.nutricionCarbos, actual: comido.carbohidratosG,
+                               objetivo: objetivo.carbohidratosG)
+                TarjetaDeMacro(nombre: Textos.nutricionProteina, actual: comido.proteinaG,
+                               objetivo: objetivo.proteinaG)
+                TarjetaDeMacro(nombre: Textos.nutricionGrasa, actual: comido.grasaG,
+                               objetivo: objetivo.grasaG)
             }
 
             Text(Textos.nutricionHint)
@@ -82,20 +82,6 @@ struct NutricionView: View {
                     .fixedSize(horizontal: false, vertical: true)
             }
         }
-        .padding(TokensEspaciado.e16)
-        .frame(maxWidth: .infinity)
-        .tarjeta()
-    }
-
-    private func macro(_ nombre: String, _ actual: Int, _ objetivo: Int) -> some View {
-        VStack(alignment: .leading, spacing: TokensEspaciado.e6) {
-            BarraDeProgreso(fraccion: Double(actual) / Double(max(objetivo, 1)),
-                            alto: TokensEspaciado.e4,
-                            descripcion: nombre)
-            Text("\(nombre) \(actual)/\(objetivo) g")
-                .estilo(.etiquetaSeccion.enMinusculas, color: Paleta.textoSecundario)
-        }
-        .frame(maxWidth: .infinity)
     }
 
     // MARK: - Sin objetivos
@@ -134,21 +120,29 @@ struct NutricionView: View {
     private func tarjetaDeHidratacion(_ objetivo: ObjetivoNutricional, tomadaMl: Int?) -> some View {
         if let objetivoMl = objetivo.aguaMl, objetivoMl > 0 {
             VStack(alignment: .leading, spacing: TokensEspaciado.e11) {
-                HStack(alignment: .firstTextBaseline) {
-                    Text(Textos.nutricionHidratacion).estilo(.tituloCard)
+                HStack(alignment: .firstTextBaseline, spacing: TokensEspaciado.e6) {
+                    Image(systemName: "drop.fill")
+                        .font(.system(size: TokensTipografia.tituloCardTamano, weight: .bold))
+                        .foregroundStyle(Paleta.acento)
+                        .accessibilityHidden(true)
+                    Text(Textos.nutricionHidratacion)
+                        .estilo(.tituloSeccion)
+                        .accessibilityAddTraits(.isHeader)
                     Spacer()
-                    Text(textoDelAgua(objetivoMl: objetivoMl, tomadaMl: tomadaMl))
-                        .estilo(.notaLegal, color: Paleta.textoTerciario)
-                        .monospacedDigit()
                 }
+
+                Text(textoDelAgua(objetivoMl: objetivoMl, tomadaMl: tomadaMl))
+                    .estilo(.metricaMedia)
 
                 // 8 vasos de 400 ml. Los llenos salen de lo que ya se tomó.
                 if let tomadaMl {
                     HStack(spacing: TokensEspaciado.e5) {
                         ForEach(0..<8, id: \.self) { indice in
+                            let lleno = indice < tomadaMl * 8 / objetivoMl
                             RoundedRectangle(cornerRadius: TokensRadio.celda, style: .continuous)
-                                .fill(indice < tomadaMl * 8 / objetivoMl
-                                      ? Paleta.acento.opacity(0.85) : Paleta.superficieControl)
+                                .fill(lleno ? Paleta.acento : Paleta.superficieControl)
+                                .shadow(color: lleno ? Paleta.acentoBrillo : Color.clear,
+                                        radius: TokensEspaciado.e4)
                                 .frame(maxWidth: .infinity)
                                 .frame(height: TokensEspaciado.e26)
                         }
@@ -159,13 +153,12 @@ struct NutricionView: View {
                 }
 
                 if let mililitros = estado.sesion?.avituallamiento?.mililitrosTotales {
-                    Text(Textos.nutricionHidratacionNota(Formato.litros(mililitros)))
-                        .estilo(.etiquetaSeccion.enMinusculas, color: Paleta.textoTerciario)
+                    AvisoSuave(Textos.nutricionHidratacionNota(Formato.litros(mililitros)))
                 }
             }
             .padding(.horizontal, TokensEspaciado.e16)
             .padding(.vertical, TokensEspaciado.e16)
-            .frame(maxWidth: .infinity)
+            .frame(maxWidth: .infinity, alignment: .leading)
             .tarjeta()
         }
     }
@@ -179,11 +172,9 @@ struct NutricionView: View {
 
     private var seccionDeComidas: some View {
         VStack(alignment: .leading, spacing: TokensEspaciado.e8) {
-            HStack(alignment: .firstTextBaseline) {
-                TituloDeSeccion(Textos.nutricionComidasDeHoy)
-                Text(Textos.nutricionResumenComidas(estado.comidas.count, estado.comidas.count + 2))
-                    .estilo(.notaLegal, color: Paleta.textoTerciario)
-            }
+            EncabezadoDeSeccion(Textos.nutricionComidasDeHoy,
+                                detalle: Textos.nutricionResumenComidas(estado.comidas.count,
+                                                                        estado.comidas.count + 2))
 
             ForEach(estado.comidas) { comida in
                 FilaDeComida(comida: comida)
@@ -208,9 +199,40 @@ struct NutricionView: View {
         }
     }
 
-    // MARK: - Descanso y sueño
+}
 
+/// Una macro del día: el nombre, lo comido contra el objetivo y su barra rosa.
+/// Tiene la forma de `TarjetaMetrica`, más la barra, que esa no lleva.
+private struct TarjetaDeMacro: View {
+    let nombre: String
+    let actual: Int
+    let objetivo: Int
 
+    var body: some View {
+        VStack(alignment: .leading, spacing: TokensEspaciado.e8) {
+            Text(nombre)
+                .estilo(.labelCampo, color: Paleta.textoSecundario)
+                .lineLimit(1)
+            HStack(alignment: .firstTextBaseline, spacing: TokensEspaciado.e2) {
+                Text("\(actual)")
+                    .estilo(.metricaMedia)
+                    .lineLimit(1)
+                    .minimumScaleFactor(0.6)
+                Text("/\(objetivo) g")
+                    .estilo(.labelCampo, color: Paleta.textoTerciario)
+                    .lineLimit(1)
+                    .minimumScaleFactor(0.7)
+            }
+            BarraDeProgreso(fraccion: Double(actual) / Double(max(objetivo, 1)),
+                            alto: TokensEspaciado.e4,
+                            descripcion: nombre)
+        }
+        .padding(.horizontal, TokensEspaciado.e12)
+        .padding(.vertical, TokensEspaciado.e11)
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .tarjeta(radio: TokensRadio.boton)
+        .accessibilityElement(children: .combine)
+    }
 }
 
 // MARK: - Filas

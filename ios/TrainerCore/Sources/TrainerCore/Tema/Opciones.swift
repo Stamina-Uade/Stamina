@@ -9,7 +9,7 @@ import SwiftUI
 // expone el rasgo `.isSelected` para VoiceOver.
 // =============================================================================
 
-/// Fila de opción única: un punto, un título y una explicación.
+/// Fila de opción única: un título, una explicación y la marca a la derecha.
 /// `reg-sexo`, `reg-deporte`, `reg-nivel` y `reg-medicion`.
 public struct FilaOpcion: View {
     private let titulo: String
@@ -18,9 +18,9 @@ public struct FilaOpcion: View {
     private let conMarca: Bool
     private let accion: () -> Void
 
-    /// - Parameter conMarca: `reg-nivel` apila título y detalle sin el punto.
-    ///   Lo elegido se sigue viendo por relleno y borde, y VoiceOver lo sabe por
-    ///   el rasgo `.isSelected`.
+    /// - Parameter conMarca: `reg-nivel` apila título y detalle sin el aro vacío;
+    ///   la elegida igual lleva su tilde, además del borde rosa, y VoiceOver lo
+    ///   sabe por el rasgo `.isSelected`.
     public init(
         titulo: String,
         detalle: String? = nil,
@@ -37,13 +37,8 @@ public struct FilaOpcion: View {
 
     public var body: some View {
         Button(action: accion) {
-            HStack(alignment: .top, spacing: TokensEspaciado.e12) {
-                if conMarca {
-                    Marca(elegida: elegida)
-                        .padding(.top, TokensEspaciado.e4)
-                }
-
-                VStack(alignment: .leading, spacing: TokensEspaciado.e2) {
+            HStack(alignment: .center, spacing: TokensEspaciado.e12) {
+                VStack(alignment: .leading, spacing: TokensEspaciado.e3) {
                     Text(titulo).estilo(.opcionTitulo)
                     if let detalle {
                         Text(detalle)
@@ -52,8 +47,14 @@ public struct FilaOpcion: View {
                     }
                 }
                 Spacer(minLength: 0)
+                // Rediseño 2026-10: la tilde rosa va a la derecha, como en el
+                // mockup. Sin marca, sólo aparece cuando está elegida.
+                if conMarca || elegida {
+                    Marca(elegida: elegida)
+                }
             }
-            .padding(TokensEspaciado.e16)
+            .padding(.horizontal, TokensEspaciado.e16)
+            .padding(.vertical, TokensEspaciado.e14)
             .frame(maxWidth: .infinity, alignment: .leading)
             .fondoDeOpcion(elegida: elegida)
             .objetivoTactilAlto()
@@ -81,14 +82,15 @@ public struct FilaObjetivo: View {
     public var body: some View {
         Button(action: accion) {
             HStack(spacing: TokensEspaciado.e11) {
-                Marca(elegida: elegido)
                 Text(titulo)
-                    .estilo(.tituloCard)
+                    .estilo(.opcionTitulo)
                     .frame(maxWidth: .infinity, alignment: .leading)
                 Text(distancia)
-                    .estilo(.notaLegal, color: Paleta.textoTerciario)
+                    .estilo(.chip, color: elegido ? Paleta.textoAcento : Paleta.textoTerciario)
+                Marca(elegida: elegido)
             }
-            .padding(TokensEspaciado.e13)
+            .padding(.horizontal, TokensEspaciado.e16)
+            .padding(.vertical, TokensEspaciado.e13)
             .fondoDeOpcion(elegida: elegido)
             .objetivoTactilAlto()
         }
@@ -117,11 +119,18 @@ public struct ChipDia: View {
 
     public var body: some View {
         Button(action: accion) {
+            // Elegido es la píldora rosa llena: cambia relleno, borde y color de
+            // texto a la vez, y VoiceOver lo sabe por `.isSelected`.
             Text(abreviatura)
-                .estilo(.cuerpoSecundario, color: elegido ? Paleta.textoAcento : Paleta.textoPrimario)
+                .estilo(.chip, color: elegido ? Paleta.sobreAcento : Paleta.textoPrimario)
                 .frame(maxWidth: .infinity)
                 .frame(height: TokensTamano.chipDia)
-                .fondoDeOpcion(elegida: elegido, radio: TokensRadio.chip)
+                .background(elegido ? Paleta.acento : Paleta.superficie)
+                .clipShape(Capsule())
+                .overlay(
+                    Capsule().strokeBorder(elegido ? Paleta.acento : Paleta.bordeSuperficie,
+                                           lineWidth: TokensEspaciado.e1)
+                )
                 .objetivoTactilAlto()
         }
         .buttonStyle(EstiloPresionado())
@@ -143,29 +152,33 @@ public struct Casilla: View {
 
     public var body: some View {
         Button { marcada.toggle() } label: {
-            HStack(alignment: .top, spacing: TokensEspaciado.e11) {
+            // El mockup la dibuja suelta, sin tarjeta: un círculo y el texto. El
+            // círculo se llena de rosa con tilde; el borde apagado es
+            // `borde_significante` (3.58:1), no decorativo.
+            HStack(alignment: .top, spacing: TokensEspaciado.e12) {
                 ZStack {
-                    RoundedRectangle(cornerRadius: TokensRadio.celda, style: .continuous)
-                        .fill(marcada ? Paleta.seleccionadoBorde : Color.clear)
-                    RoundedRectangle(cornerRadius: TokensRadio.celda, style: .continuous)
-                        .strokeBorder(marcada ? Paleta.seleccionadoBorde : Paleta.bordeSignificante,
+                    Circle()
+                        .fill(marcada ? Paleta.acento : Color.clear)
+                    Circle()
+                        .strokeBorder(marcada ? Paleta.acento : Paleta.bordeSignificante,
                                       lineWidth: TokensEspaciado.e2)
                     if marcada {
                         Image(systemName: "checkmark")
                             .font(.system(size: TokensTipografia.notaLegalTamano,
-                                          weight: TokensTipografia.tituloCardPeso))
-                            .foregroundStyle(Paleta.dinamico(claro: Color.white, oscuro: Paleta.sobreAcento))
+                                          weight: .heavy))
+                            .foregroundStyle(Paleta.sobreAcento)
                     }
                 }
-                .frame(width: TokensEspaciado.e20, height: TokensEspaciado.e20)
+                .frame(width: TokensEspaciado.e22, height: TokensEspaciado.e22)
+                .animation(.easeOut(duration: TokensMovimiento.rapida), value: marcada)
 
                 Text(texto)
                     .estilo(.cuerpoSecundario, color: Paleta.textoCuerpo)
                     .fixedSize(horizontal: false, vertical: true)
                     .frame(maxWidth: .infinity, alignment: .leading)
             }
-            .padding(TokensEspaciado.e14)
-            .fondoDeOpcion(elegida: marcada)
+            .padding(.vertical, TokensEspaciado.e10)
+            .frame(maxWidth: .infinity, alignment: .leading)
             .objetivoTactilAlto()
         }
         .buttonStyle(EstiloPresionado())
@@ -176,31 +189,41 @@ public struct Casilla: View {
 
 // -----------------------------------------------------------------------------
 
-/// El punto que marca la opción elegida.
+/// La marca de la opción: un aro vacío o el círculo rosa con tilde.
 ///
-/// El diseño lo dibuja en blanco al 20 % cuando no está elegido: **2.01:1**, por
-/// debajo del 3.0 que WCAG 1.4.11 pide para un componente que significa algo
-/// (`design/ESPECIFICACION.md` §9.1). Acá va en `borde_significante` (3.58:1).
-/// Y el punto nunca es la única señal: la fila entera cambia relleno y borde.
+/// El aro apagado va en `borde_significante` (3.58:1) y no en el blanco al 20 %
+/// del diseño original (2.01:1, por debajo de WCAG 1.4.11). Y la marca nunca es
+/// la única señal: la fila entera cambia de borde y VoiceOver lee `.isSelected`.
 private struct Marca: View {
     let elegida: Bool
 
     var body: some View {
-        Circle()
-            .fill(elegida ? Paleta.seleccionadoBorde : Paleta.bordeSignificante)
-            .frame(width: TokensEspaciado.e9, height: TokensEspaciado.e9)
+        ZStack {
+            if elegida {
+                Circle().fill(Paleta.acento)
+                Image(systemName: "checkmark")
+                    .font(.system(size: TokensTipografia.notaLegalTamano, weight: .heavy))
+                    .foregroundStyle(Paleta.sobreAcento)
+            } else {
+                Circle().strokeBorder(Paleta.bordeSignificante, lineWidth: TokensEspaciado.e2)
+            }
+        }
+        .frame(width: TokensEspaciado.e22, height: TokensEspaciado.e22)
+        .animation(.easeOut(duration: TokensMovimiento.rapida), value: elegida)
+        .accessibilityHidden(true)
     }
 }
 
 extension View {
-    /// El relleno y el borde compartidos por todo control elegible.
-    fileprivate func fondoDeOpcion(elegida: Bool, radio: CGFloat = TokensRadio.boton) -> some View {
-        background(elegida ? Paleta.seleccionadoFondo : Paleta.superficie)
+    /// La tarjeta oscura compartida por todo control elegible: elegida, el borde
+    /// se vuelve rosa y más grueso (rediseño 2026-10).
+    fileprivate func fondoDeOpcion(elegida: Bool, radio: CGFloat = TokensRadio.card) -> some View {
+        background(elegida ? Paleta.acentoSuaveFondo : Paleta.superficie)
             .clipShape(RoundedRectangle(cornerRadius: radio, style: .continuous))
             .overlay(
                 RoundedRectangle(cornerRadius: radio, style: .continuous)
                     .strokeBorder(elegida ? Paleta.seleccionadoBorde : Paleta.bordeSuperficie,
-                                  lineWidth: TokensEspaciado.e1)
+                                  lineWidth: elegida ? TokensEspaciado.e2 : TokensEspaciado.e1)
             )
     }
 }

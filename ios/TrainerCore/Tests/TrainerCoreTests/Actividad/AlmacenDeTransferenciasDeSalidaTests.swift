@@ -34,6 +34,34 @@ final class AlmacenDeTransferenciasDeSalidaTests: XCTestCase {
         XCTAssertEqual(despuesDeReabrir.leerRecibidas().first?.puntos, salida.puntos)
     }
 
+    func testUnaEntradaIlegibleSeAparta_yNoLaPisaElProximoGuardado() throws {
+        let nombre = "transferencias-test-\(UUID().uuidString)"
+        let almacen = AlmacenDeTransferenciasDeSalida(nombre: nombre)
+        defer { almacen.borrarTodo() }
+        let carpeta = try FileManager.default.url(for: .applicationSupportDirectory, in: .userDomainMask,
+                                                  appropriateFor: nil, create: true)
+            .appendingPathComponent(nombre, isDirectory: true)
+        let entrada = carpeta.appendingPathComponent("entrada.json")
+        let basura = Data("{ esto no es una lista".utf8)
+        try basura.write(to: entrada)
+
+        XCTAssertTrue(almacen.leerRecibidas().isEmpty)
+        almacen.guardarRecibida(salida(cantidadDePuntos: 2))
+
+        let apartados = try FileManager.default.contentsOfDirectory(atPath: carpeta.path)
+            .filter { $0.hasPrefix("entrada.json.corrupto-") }
+        XCTAssertEqual(apartados.count, 1, "el archivo ilegible se conserva aparte")
+        let apartado = try XCTUnwrap(apartados.first)
+        let conservado = try Data(contentsOf: carpeta.appendingPathComponent(apartado))
+        XCTAssertEqual(conservado, basura)
+        XCTAssertEqual(almacen.leerRecibidas().count, 1)
+    }
+
+    func testApartarUnArchivoQueNoExisteNoHaceNada() {
+        let url = FileManager.default.temporaryDirectory.appendingPathComponent("no-existe-\(UUID().uuidString)")
+        XCTAssertNil(ArchivoIlegible.apartar(url))
+    }
+
     private func nuevoAlmacen() -> AlmacenDeTransferenciasDeSalida {
         AlmacenDeTransferenciasDeSalida(nombre: "transferencias-test-\(UUID().uuidString)")
     }

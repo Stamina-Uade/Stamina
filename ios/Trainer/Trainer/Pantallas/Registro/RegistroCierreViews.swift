@@ -94,7 +94,7 @@ struct RegDiasView: View {
     var body: some View {
         PantallaPaso(titulo: Textos.regDiasTitulo, texto: Textos.regDiasTexto) {
             VStack(alignment: .leading, spacing: TokensEspaciado.e13) {
-                HStack(spacing: TokensEspaciado.e6) {
+                HStack(spacing: TokensEspaciado.e5) {
                     ForEach(diasEnOrden, id: \.self) { iso in
                         ChipDia(abreviatura: Self.abreviatura(iso),
                                 nombreCompleto: Self.nombre(iso),
@@ -133,12 +133,12 @@ struct RegDiasView: View {
             .labelsHidden()
         }
         .padding(.vertical, TokensEspaciado.e8)
-        .padding(.horizontal, TokensEspaciado.e14)
+        .padding(.horizontal, TokensEspaciado.e16)
         .frame(minHeight: TokensTamano.objetivoTactilMinimo)
         .background(Paleta.superficie)
-        .clipShape(RoundedRectangle(cornerRadius: TokensRadio.celda, style: .continuous))
+        .clipShape(RoundedRectangle(cornerRadius: TokensRadio.card, style: .continuous))
         .overlay(
-            RoundedRectangle(cornerRadius: TokensRadio.celda, style: .continuous)
+            RoundedRectangle(cornerRadius: TokensRadio.card, style: .continuous)
                 .strokeBorder(Paleta.bordeSuperficie, lineWidth: TokensEspaciado.e1)
         )
     }

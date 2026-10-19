@@ -59,12 +59,19 @@ struct ServiciosDeLaApp {
         // motivo —"Cerrar sesión" o una revocación del servidor—. Si no, la próxima
         // persona que entra en este teléfono arranca con el entrenamiento y los datos
         // de salud de otra.
+        //
+        // 🛑 Las salidas GPS NO se borran: las que esperan subir pueden no estar en el
+        // servidor todavía. Quedan a nombre de quien sale (`asignarDueno`) y sólo se
+        // suben con su sesión. Las que llegaron del reloj ya traen su `usuarioId` y
+        // `EstadoHome` sólo acepta las de la cuenta abierta: se quedan en su buzón.
+        // Los recorridos en caché sí se borran: cada uno está en el servidor o
+        // adentro de esa cola, y se vuelven a bajar.
         let renovador = RenovadorDeSesion(cliente: cliente, almacen: almacen,
                                           alCerrar: {
                                               series.borrar()
                                               cache.borrarTodo()
-                                              AlmacenDeSalidas().borrar()
-                                              AlmacenDeTransferenciasDeSalida().borrarTodo()
+                                              AlmacenDeSalidas().asignarDueno(DuenoDeLosDatosLocales.actual)
+                                              AlmacenDeRecorridos.compartido.borrarTodo()
                                               if let sincronizador {
                                                   Task { @MainActor in
                                                       sincronizador.cerrarSesion()

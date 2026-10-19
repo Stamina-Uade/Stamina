@@ -68,6 +68,9 @@ public struct Interruptor: View {
                     Capsule()
                         .fill(encendido ? Paleta.interruptorActivo : Paleta.superficieControl)
                         .frame(width: TokensEspaciado.e44, height: TokensEspaciado.e26)
+                        // El halo rosa de lo que está prendido, como el mockup.
+                        .shadow(color: encendido ? Paleta.acentoProfundo : Color.clear,
+                                radius: TokensEspaciado.e6)
                     Circle()
                         .fill(encendido ? Paleta.interruptorThumb : Paleta.textoTerciario)
                         .frame(width: TokensEspaciado.e20, height: TokensEspaciado.e20)
@@ -79,10 +82,10 @@ public struct Interruptor: View {
             .padding(.vertical, TokensEspaciado.e12)
             .frame(maxWidth: .infinity)
             .background(Paleta.superficie)
-            .clipShape(RoundedRectangle(cornerRadius: TokensRadio.boton, style: .continuous))
+            .clipShape(RoundedRectangle(cornerRadius: TokensRadio.card, style: .continuous))
             .overlay(
-                RoundedRectangle(cornerRadius: TokensRadio.boton, style: .continuous)
-                    .strokeBorder(Paleta.divisor, lineWidth: TokensEspaciado.e1)
+                RoundedRectangle(cornerRadius: TokensRadio.card, style: .continuous)
+                    .strokeBorder(Paleta.bordeSuperficie, lineWidth: TokensEspaciado.e1)
             )
             .objetivoTactilAlto()
         }
@@ -141,9 +144,10 @@ public struct StepperDeValor: View {
                 .foregroundStyle(habilitado ? Paleta.textoPrimario : Paleta.textoTerciario)
                 .frame(width: TokensTamano.objetivoTactilMinimo,
                        height: TokensTamano.objetivoTactilMinimo)
-                .background(Paleta.superficieControl)
-                .clipShape(RoundedRectangle(cornerRadius: TokensRadio.celda, style: .continuous))
-                .contentShape(Rectangle())
+                .background(Paleta.superficieAlterna)
+                .clipShape(Circle())
+                .overlay(Circle().strokeBorder(Paleta.bordeSuperficie, lineWidth: TokensEspaciado.e1))
+                .contentShape(Circle())
         }
         .buttonStyle(EstiloPresionado())
         .disabled(!habilitado)
@@ -172,7 +176,7 @@ public struct BotonAgregar: View {
             .frame(maxWidth: .infinity)
             .frame(minHeight: TokensTamano.objetivoTactilMinimo)
             .overlay(
-                RoundedRectangle(cornerRadius: TokensRadio.boton, style: .continuous)
+                RoundedRectangle(cornerRadius: TokensRadio.card, style: .continuous)
                     .strokeBorder(Paleta.bordeSignificante,
                                   style: StrokeStyle(lineWidth: TokensEspaciado.e1, dash: [4, 4]))
             )
