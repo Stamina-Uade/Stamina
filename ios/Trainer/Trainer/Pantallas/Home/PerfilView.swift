@@ -334,7 +334,7 @@ struct PerfilView: View {
 
     private var seccionMetas: some View {
         VStack(alignment: .leading, spacing: TokensEspaciado.e10) {
-            EncabezadoDeSeccion("Metas y objetivos", accion: "+ Gestionar") {
+            EncabezadoDeSeccion(String(localized: "Metas y objetivos", comment: "Perfil: sección de metas"), accion: String(localized: "+ Gestionar", comment: "Perfil: acción de la sección de metas")) {
                 Haptico.toque()
                 estado.ir(a: .ajustes)
             }
@@ -486,7 +486,7 @@ struct PerfilView: View {
     private var seccionDias: some View {
         let elegidos = estado.perfil?.trainingDays?.count ?? 0
         return VStack(alignment: .leading, spacing: TokensEspaciado.e10) {
-            EncabezadoDeSeccion("Días de entrenamiento",
+            EncabezadoDeSeccion(String(localized: "Días de entrenamiento", comment: "Perfil: sección de días de entrenamiento"),
                                 detalle: elegidos > 0
                                     ? String(localized: "\(elegidos) por semana", comment: "Cantidad de días de entrenamiento")
                                     : nil)

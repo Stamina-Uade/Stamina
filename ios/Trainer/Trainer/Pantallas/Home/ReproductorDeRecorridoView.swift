@@ -113,7 +113,7 @@ struct ReproductorDeRecorridoView: View {
                 // 2. Capa superior: Botón cerrar + Selector de velocidad
                 VStack(spacing: TokensEspaciado.e12) {
                     HStack(alignment: .center) {
-                        BotonCircular("xmark", etiqueta: "Cerrar reproducción") {
+                        BotonCircular("xmark", etiqueta: String(localized: "Cerrar reproducción", comment: "Reproductor de recorrido: botón para cerrar")) {
                             pausar()
                             if let alCerrar {
                                 alCerrar()
@@ -178,13 +178,13 @@ struct ReproductorDeRecorridoView: View {
     private var hudTelemetria: some View {
         panelFlotante(
             HStack(spacing: 0) {
-                columnaHUD(titulo: "TIEMPO", valor: Formato.cronometroCompleto(segundos: Int(tiempoActual)))
+                columnaHUD(titulo: String(localized: "TIEMPO", comment: "Reproductor de recorrido: etiqueta del panel de datos"), valor: Formato.cronometroCompleto(segundos: Int(tiempoActual)))
                 divisorHUD
-                columnaHUD(titulo: "RITMO", valor: valorRitmoTexto)
+                columnaHUD(titulo: String(localized: "RITMO", comment: "Reproductor de recorrido: etiqueta del panel de datos"), valor: valorRitmoTexto)
                 divisorHUD
-                columnaHUD(titulo: "VELOCIDAD", valor: valorVelocidadTexto)
+                columnaHUD(titulo: String(localized: "VELOCIDAD", comment: "Reproductor de recorrido: etiqueta del panel de datos"), valor: valorVelocidadTexto)
                 divisorHUD
-                columnaHUD(titulo: "KILÓMETRO", valor: kilometroActualTexto)
+                columnaHUD(titulo: String(localized: "KILÓMETRO", comment: "Reproductor de recorrido: etiqueta del panel de datos"), valor: kilometroActualTexto)
             }
             .padding(.vertical, TokensEspaciado.e12)
         )
@@ -268,7 +268,7 @@ struct ReproductorDeRecorridoView: View {
 
                 // Botones
                 HStack(spacing: TokensEspaciado.e22) {
-                    BotonCircular("backward.end.fill", etiqueta: "Reiniciar reproducción") {
+                    BotonCircular("backward.end.fill", etiqueta: String(localized: "Reiniciar reproducción", comment: "Reproductor de recorrido: volver al principio")) {
                         tiempoActual = 0.0
                         reproducir()
                     }

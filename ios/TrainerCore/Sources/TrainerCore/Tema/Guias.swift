@@ -63,7 +63,7 @@ public struct TarjetaDeGuia: View {
                     .buttonStyle(EstiloPresionado())
                     .padding(.top, -TokensEspaciado.e14)
                     .padding(.trailing, -TokensEspaciado.e12)
-                    .accessibilityLabel(String(localized: "Entendido, ocultar la guía", comment: "Cierra la tarjeta de ayuda"))
+                    .accessibilityLabel(String(localized: "Entendido, ocultar la guía", bundle: .main, comment: "Cierra la tarjeta de ayuda"))
                 }
                 ForEach(puntos) { punto in
                     HStack(alignment: .top, spacing: TokensEspaciado.e10) {
@@ -108,7 +108,7 @@ public struct BotonDeAyuda: View {
     }
 
     public var body: some View {
-        BotonCircular("questionmark", etiqueta: String(localized: "¿Qué hay en esta pantalla?", comment: "Botón de ayuda")) {
+        BotonCircular("questionmark", etiqueta: String(localized: "¿Qué hay en esta pantalla?", bundle: .main, comment: "Botón de ayuda")) {
             Haptico.toque()
             withAnimation(.easeOut(duration: TokensMovimiento.media)) { cerrada = false }
         }

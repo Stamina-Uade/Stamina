@@ -18,27 +18,27 @@ struct SelectorInteractivoDeMetasView: View {
     }
 
     private let todasLasMetas: [MetaDidactica] = [
-        MetaDidactica(id: .c5k, titulo: "5K Express", distancia: "5 km", icono: "figure.run",
-                      descripcion: "Velocidad y consistencia. Ideal para iniciarse o mejorar marca personal.",
-                      semanasRecomendadas: "6 a 8 semanas", semanasMinimas: 6),
-        MetaDidactica(id: .c10k, titulo: "10K Progresivo", distancia: "10 km", icono: "figure.run",
-                      descripcion: "El equilibrio clásico entre fondo aeróbico y ritmo de carrera.",
-                      semanasRecomendadas: "8 a 12 semanas", semanasMinimas: 8),
-        MetaDidactica(id: .mediaMaraton, titulo: "Media Maratón", distancia: "21.1 km", icono: "figure.run",
-                      descripcion: "Prueba intermedia exigente. Requiere fondos largos progresivos y nutrición en ruta.",
-                      semanasRecomendadas: "12 a 16 semanas", semanasMinimas: 12),
-        MetaDidactica(id: .maraton, titulo: "Maratón", distancia: "42.2 km", icono: "figure.run",
-                      descripcion: "El desafío supremo de resistencia aeróbica, fuerza mental y fondo.",
-                      semanasRecomendadas: "16 a 24 semanas", semanasMinimas: 16),
-        MetaDidactica(id: .trailMontana, titulo: "Trail Montaña", distancia: "Desnivel +", icono: "figure.hiking",
-                      descripcion: "Terrenos técnicos, cuestas y adaptación a senderos y montaña.",
-                      semanasRecomendadas: "10 a 14 semanas", semanasMinimas: 10),
-        MetaDidactica(id: .triatlonOlimpico, titulo: "Triatlón Olímpico", distancia: "1.5K · 40K · 10K", icono: "figure.mixed.cardio",
-                      descripcion: "Natación en aguas abiertas, ciclismo y carrera en transiciones.",
-                      semanasRecomendadas: "14 a 20 semanas", semanasMinimas: 14),
-        MetaDidactica(id: .volverSinLesiones, titulo: "Volver sin lesiones", distancia: "Salud y base", icono: "heart.text.square",
-                      descripcion: "Acondicionamiento físico suave para retomar el hábito con seguridad.",
-                      semanasRecomendadas: "6 a 10 semanas", semanasMinimas: 6)
+        MetaDidactica(id: .c5k, titulo: String(localized: "5K Express", comment: "Selector de metas: nombre de la meta"), distancia: "5 km", icono: "figure.run",
+                      descripcion: String(localized: "Velocidad y consistencia. Ideal para iniciarse o mejorar marca personal.", comment: "Selector de metas: descripción de la meta"),
+                      semanasRecomendadas: String(localized: "6 a 8 semanas", comment: "Selector de metas: semanas de preparación recomendadas"), semanasMinimas: 6),
+        MetaDidactica(id: .c10k, titulo: String(localized: "10K Progresivo", comment: "Selector de metas: nombre de la meta"), distancia: "10 km", icono: "figure.run",
+                      descripcion: String(localized: "El equilibrio clásico entre fondo aeróbico y ritmo de carrera.", comment: "Selector de metas: descripción de la meta"),
+                      semanasRecomendadas: String(localized: "8 a 12 semanas", comment: "Selector de metas: semanas de preparación recomendadas"), semanasMinimas: 8),
+        MetaDidactica(id: .mediaMaraton, titulo: String(localized: "Media Maratón", comment: "Selector de metas: nombre de la meta"), distancia: "21.1 km", icono: "figure.run",
+                      descripcion: String(localized: "Prueba intermedia exigente. Requiere fondos largos progresivos y nutrición en ruta.", comment: "Selector de metas: descripción de la meta"),
+                      semanasRecomendadas: String(localized: "12 a 16 semanas", comment: "Selector de metas: semanas de preparación recomendadas"), semanasMinimas: 12),
+        MetaDidactica(id: .maraton, titulo: String(localized: "Maratón", comment: "Selector de metas: nombre de la meta"), distancia: "42.2 km", icono: "figure.run",
+                      descripcion: String(localized: "El desafío supremo de resistencia aeróbica, fuerza mental y fondo.", comment: "Selector de metas: descripción de la meta"),
+                      semanasRecomendadas: String(localized: "16 a 24 semanas", comment: "Selector de metas: semanas de preparación recomendadas"), semanasMinimas: 16),
+        MetaDidactica(id: .trailMontana, titulo: String(localized: "Trail Montaña", comment: "Selector de metas: nombre de la meta"), distancia: String(localized: "Desnivel +", comment: "Selector de metas: distancia o foco de la meta"), icono: "figure.hiking",
+                      descripcion: String(localized: "Terrenos técnicos, cuestas y adaptación a senderos y montaña.", comment: "Selector de metas: descripción de la meta"),
+                      semanasRecomendadas: String(localized: "10 a 14 semanas", comment: "Selector de metas: semanas de preparación recomendadas"), semanasMinimas: 10),
+        MetaDidactica(id: .triatlonOlimpico, titulo: String(localized: "Triatlón Olímpico", comment: "Selector de metas: nombre de la meta"), distancia: "1.5K · 40K · 10K", icono: "figure.mixed.cardio",
+                      descripcion: String(localized: "Natación en aguas abiertas, ciclismo y carrera en transiciones.", comment: "Selector de metas: descripción de la meta"),
+                      semanasRecomendadas: String(localized: "14 a 20 semanas", comment: "Selector de metas: semanas de preparación recomendadas"), semanasMinimas: 14),
+        MetaDidactica(id: .volverSinLesiones, titulo: String(localized: "Volver sin lesiones", comment: "Selector de metas: nombre de la meta"), distancia: String(localized: "Salud y base", comment: "Selector de metas: distancia o foco de la meta"), icono: "heart.text.square",
+                      descripcion: String(localized: "Acondicionamiento físico suave para retomar el hábito con seguridad.", comment: "Selector de metas: descripción de la meta"),
+                      semanasRecomendadas: String(localized: "6 a 10 semanas", comment: "Selector de metas: semanas de preparación recomendadas"), semanasMinimas: 6)
     ]
 
     /// Las que se ofrecen: el MVP (sólo running) esconde el triatlón.

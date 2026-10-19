@@ -120,3 +120,45 @@ pulso en vivo en el teléfono) **no se inventó**.
 - **Sesiones de bici:** el motor usaba el deporte del perfil para todas las sesiones. Con la llave, siempre
   running (+ fuerza). Triatlón olímpico se planifica como 10K. 182/182 tests unitarios del backend pasan
   (14 nuevos). Los de integración necesitan Postgres/Redis.
+
+## Cómo subir todo a producción y probarlo
+
+**1. Backend (una sola línea, desde la Mac):**
+
+```bash
+cd ~/Desarrollo/Trainer && git checkout rediseno-ios-2026-10 && scripts/desplegar-backend.sh
+```
+
+Qué hace `scripts/desplegar-backend.sh`, en orden:
+1. `npm ci`, `npm run build` y los tests unitarios del backend en la Mac. Si algo falla, **no despliega**.
+2. Arma el paquete (`dist/`, migraciones, systemd, `shared/datos`) y lo sube por SSH al EC2
+   (`honnelink` vía Cloudflare si está configurado; si no, `ubuntu@52.200.205.163:49152` con la llave
+   `~/Desarrollo/Ubuntu-WorkApp.pem`).
+3. En el servidor corre `backend/deploy/servidor/activar-release.sh`: instala dependencias de producción,
+   aplica migraciones (en esta tanda **no hay migraciones nuevas**), reinicia `trainer-api` y, si el health
+   no responde, **vuelve solo a la versión anterior**.
+4. Prueba desde afuera `https://stamina.com.ar/v1/health` y `https://honnelink.com/network/info`.
+
+Cómo verificar que quedó lo nuevo:
+- `curl https://stamina.com.ar/v1/health` → `ok`.
+- Elegir un objetivo **sin fecha** desde Plan: antes daba "No se pudo guardar el objetivo"; ahora se guarda.
+- El plan no trae sesiones de bici ni natación, aunque el perfil diga ciclismo o triatlón.
+- Una salida de más de 20 minutos sube con su recorrido (antes el recorrido daba 413).
+
+Si algo sale mal: el script ya vuelve atrás solo si el health falla. Para volver a mano a la versión
+anterior, desplegar desde el commit previo: `git checkout 16ea9fb && scripts/desplegar-backend.sh`.
+
+🛑 Ojo: el EC2 es compartido con HonneLink. El script no toca nada de HonneLink, pero conviene desplegar
+cuando no haya tráfico pico.
+
+**2. App de iPhone y reloj:** abrir `ios/Trainer/Trainer.xcodeproj` en Xcode, elegir el esquema **Trainer**,
+el iPhone físico como destino y ⌘R. Para el reloj, esquema **TrainerWatch** con el Apple Watch emparejado
+(o instalar la app del reloj desde la app Watch del iPhone). La primera vez, en Signing & Capabilities del
+target Trainer, agregar **HealthKit** si Xcode lo pide.
+
+**3. Qué probar en el celular y el reloj:**
+- Primera apertura: el tour con la mascota.
+- Ajustes → Aspecto: cambiar el color y mirar el reloj: tiene que cambiar al instante.
+- Barra: Inicio · Plan · ⚡ · Historial · Perfil. Sólo running en todos lados.
+- Plan: elegir objetivo (por ejemplo 10K), salir y volver a entrar: tiene que seguir elegido.
+- Una salida desde el reloj: termina, pasa al teléfono y aparece en Historial.

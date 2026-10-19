@@ -92,11 +92,11 @@ struct VistaRecorrido3D: View {
                 // Barra de acciones superiores
                 HStack {
                     if let alCerrar {
-                        BotonCircular("chevron.down", etiqueta: "Cerrar", accion: alCerrar)
+                        BotonCircular("chevron.down", etiqueta: String(localized: "Cerrar", comment: "Vista 3D: botón para cerrar"), accion: alCerrar)
                     }
                     Spacer()
                     // Menú de opciones (todavía sin acciones)
-                    BotonCircular("ellipsis", etiqueta: "Más opciones") {
+                    BotonCircular("ellipsis", etiqueta: String(localized: "Más opciones", comment: "Vista 3D: menú de opciones")) {
                         // Acciones adicionales
                     }
                 }
@@ -115,21 +115,21 @@ struct VistaRecorrido3D: View {
                 HStack(spacing: 0) {
                     // Columna 1: Ritmo (o Velocidad)
                     columnaMetrica(
-                        etiqueta: deporte == .ciclismo ? "Velocidad" : "Ritmo",
+                        etiqueta: deporte == .ciclismo ? String(localized: "Velocidad", comment: "Vista 3D: etiqueta de métrica") : String(localized: "Ritmo", comment: "Vista 3D: etiqueta de métrica"),
                         valor: valorRitmo,
                         unidad: unidadRitmo
                     )
 
                     // Columna 2: Desnivel
                     columnaMetrica(
-                        etiqueta: "Desnivel",
+                        etiqueta: String(localized: "Desnivel", comment: "Vista 3D: etiqueta de métrica"),
                         valor: valorDesnivel,
                         unidad: unidadDesnivel
                     )
 
                     // Columna 3: Distancia
                     columnaMetrica(
-                        etiqueta: "Distancia",
+                        etiqueta: String(localized: "Distancia", comment: "Vista 3D: etiqueta de métrica"),
                         valor: valorDistancia,
                         unidad: unidadDistancia
                     )

@@ -9,7 +9,7 @@
 // números y unidades se formatean con el locale del sistema. Esto resuelve lo
 // primero; lo segundo es de quien presenta el dato.
 //
-// 526 claves · idioma de autoría: es
+// 608 claves · idioma de autoría: es
 // =============================================================================
 
 import Foundation
@@ -18,20 +18,179 @@ import Foundation
 /// clave deja de ser un bug de producción y pasa a ser un error de compilación.
 enum Textos {
 
+    /// Abierta
+    static var Abierta: String { String(localized: "Abierta") }
+
+    /// Abierto
+    static var Abierto: String { String(localized: "Abierto") }
+
+    /// Aceptar
+    static var Aceptar: String { String(localized: "Aceptar") }
+
+    /// Agua
+    static var Agua: String { String(localized: "Agua") }
+
+    /// Amarillo
+    static var Amarillo: String { String(localized: "Amarillo") }
+
+    /// Apagadas
+    static var Apagadas: String { String(localized: "Apagadas") }
+
+    /// Aspecto
+    static var Aspecto: String { String(localized: "Aspecto") }
+
+    /// Ayer
+    static var Ayer: String { String(localized: "Ayer") }
+
+    /// Azul
+    static var Azul: String { String(localized: "Azul") }
+
+    /// Calor
+    static var Calor: String { String(localized: "Calor") }
+
+    /// Cancelar
+    static var Cancelar: String { String(localized: "Cancelar") }
+
+    /// Carbohidratos
+    static var Carbohidratos: String { String(localized: "Carbohidratos") }
+
+    /// Centrar
+    static var Centrar: String { String(localized: "Centrar") }
+
+    /// Cerrada
+    static var Cerrada: String { String(localized: "Cerrada") }
+
+    /// Cerrado
+    static var Cerrado: String { String(localized: "Cerrado") }
+
+    /// Cerrar
+    static var Cerrar: String { String(localized: "Cerrar") }
+
+    /// Cian
+    static var Cian: String { String(localized: "Cian") }
+
+    /// Claro
+    static var Claro: String { String(localized: "Claro") }
+
+    /// Color
+    static var Color: String { String(localized: "Color") }
+
+    /// Completada
+    static var Completada: String { String(localized: "Completada") }
+
+    /// Confirmar
+    static var Confirmar: String { String(localized: "Confirmar") }
+
+    /// Coral
+    static var Coral: String { String(localized: "Coral") }
+
     /// DISTANCIA
     static var DISTANCIA: String { String(localized: "DISTANCIA") }
+
+    /// Deporte
+    static var Deporte: String { String(localized: "Deporte") }
 
     /// Descartar
     static var Descartar: String { String(localized: "Descartar") }
 
+    /// Desnivel
+    static var Desnivel: String { String(localized: "Desnivel") }
+
+    /// Distancia
+    static var Distancia: String { String(localized: "Distancia") }
+
     /// E
     static var E: String { String(localized: "E") }
+
+    /// Editar
+    static var Editar: String { String(localized: "Editar") }
+
+    /// Empezar
+    static var Empezar: String { String(localized: "Empezar") }
+
+    /// Entendido
+    static var Entendido: String { String(localized: "Entendido") }
+
+    /// Faltan
+    static var Faltan: String { String(localized: "Faltan") }
+
+    /// Fecha
+    static var Fecha: String { String(localized: "Fecha") }
+
+    /// Vie
+    static var Fri: String { String(localized: "Fri") }
+
+    /// Fucsia
+    static var Fucsia: String { String(localized: "Fucsia") }
+
+    /// Fuerza
+    static var Fuerza: String { String(localized: "Fuerza") }
+
+    /// Geles
+    static var Geles: String { String(localized: "Geles") }
+
+    /// Guardar
+    static var Guardar: String { String(localized: "Guardar") }
+
+    /// Hecho
+    static var Hecho: String { String(localized: "Hecho") }
+
+    /// Historial
+    static var Historial: String { String(localized: "Historial") }
+
+    /// Hoy
+    static var Hoy: String { String(localized: "Hoy") }
+
+    /// Menos
+    static var Menos: String { String(localized: "Menos") }
+
+    /// Menta
+    static var Menta: String { String(localized: "Menta") }
+
+    /// Mes
+    static var Mes: String { String(localized: "Mes") }
+
+    /// Millas
+    static var Millas: String { String(localized: "Millas") }
+
+    /// Lun
+    static var Mon: String { String(localized: "Mon") }
 
     /// N
     static var N: String { String(localized: "N") }
 
+    /// Naranja
+    static var Naranja: String { String(localized: "Naranja") }
+
+    /// Notificaciones
+    static var Notificaciones: String { String(localized: "Notificaciones") }
+
     /// O
     static var O: String { String(localized: "O") }
+
+    /// Objetivo
+    static var Objetivo: String { String(localized: "Objetivo") }
+
+    /// Objetivos
+    static var Objetivos: String { String(localized: "Objetivos") }
+
+    /// Oscuro
+    static var Oscuro: String { String(localized: "Oscuro") }
+
+    /// Otro
+    static var Otro: String { String(localized: "Otro") }
+
+    /// Parciales
+    static var Parciales: String { String(localized: "Parciales") }
+
+    /// Pasos
+    static var Pasos: String { String(localized: "Pasos") }
+
+    /// Personalizado
+    static var Personalizado: String { String(localized: "Personalizado") }
+
+    /// Quitar
+    static var Quitar: String { String(localized: "Quitar") }
 
     /// RECORRIDO
     static var RECORRIDO: String { String(localized: "RECORRIDO") }
@@ -42,8 +201,20 @@ enum Textos {
     /// Reanudar
     static var Reanudar: String { String(localized: "Reanudar") }
 
+    /// Recorrido
+    static var Recorrido: String { String(localized: "Recorrido") }
+
+    /// Reintentar
+    static var Reintentar: String { String(localized: "Reintentar") }
+
     /// Reloj
     static var Reloj: String { String(localized: "Reloj") }
+
+    /// Restablecer
+    static var Restablecer: String { String(localized: "Restablecer") }
+
+    /// Ritmo
+    static var Ritmo: String { String(localized: "Ritmo") }
 
     /// Rutas
     static var Rutas: String { String(localized: "Rutas") }
@@ -51,14 +222,77 @@ enum Textos {
     /// S
     static var S: String { String(localized: "S") }
 
+    /// STAMINA
+    static var STAMINA: String { String(localized: "STAMINA") }
+
+    /// Salidas
+    static var Salidas: String { String(localized: "Salidas") }
+
+    /// Saltar
+    static var Saltar: String { String(localized: "Saltar") }
+
+    /// Sáb
+    static var Sat: String { String(localized: "Sat") }
+
+    /// Seguir
+    static var Seguir: String { String(localized: "Seguir") }
+
+    /// Semana
+    static var Semana: String { String(localized: "Semana") }
+
+    /// Sesiones
+    static var Sesiones: String { String(localized: "Sesiones") }
+
+    /// Siguiente
+    static var Siguiente: String { String(localized: "Siguiente") }
+
+    /// Sodio
+    static var Sodio: String { String(localized: "Sodio") }
+
+    /// Dom
+    static var Sun: String { String(localized: "Sun") }
+
     /// TIEMPO
     static var TIEMPO: String { String(localized: "TIEMPO") }
+
+    /// Jue
+    static var Thu: String { String(localized: "Thu") }
+
+    /// Tiempo
+    static var Tiempo: String { String(localized: "Tiempo") }
+
+    /// Todo
+    static var Todo: String { String(localized: "Todo") }
+
+    /// Todos
+    static var Todos: String { String(localized: "Todos") }
+
+    /// Mar
+    static var Tue: String { String(localized: "Tue") }
+
+    /// Usar
+    static var Usar: String { String(localized: "Usar") }
 
     /// VELOCIDAD
     static var VELOCIDAD: String { String(localized: "VELOCIDAD") }
 
+    /// Velocidad
+    static var Velocidad: String { String(localized: "Velocidad") }
+
+    /// Vencimiento
+    static var Vencimiento: String { String(localized: "Vencimiento") }
+
+    /// Violeta
+    static var Violeta: String { String(localized: "Violeta") }
+
     /// O
     static var W: String { String(localized: "W") }
+
+    /// Mié
+    static var Wed: String { String(localized: "Wed") }
+
+    /// Anual
+    static var Yearly: String { String(localized: "Yearly") }
 
     /// Gimnasio · tren superior y core
     static var agendaGimnasio: String { String(localized: "agenda.gimnasio") }
@@ -559,6 +793,9 @@ enum Textos {
     /// Esa contraseña es fácil de adivinar. Probá una más larga o menos común.
     static var errorWeakPassword: String { String(localized: "error.weak_password") }
 
+    /// faltan
+    static var faltan: String { String(localized: "faltan") }
+
     /// Músculo principal
     static var fichaMusculoPrincipal: String { String(localized: "ficha.musculo_principal") }
 
@@ -714,6 +951,9 @@ enum Textos {
 
     /// Plan
     static var homeTabPlan: String { String(localized: "home.tab.plan") }
+
+    /// hoy
+    static var hoy: String { String(localized: "hoy") }
 
     /// iPhone
     static var iPhone: String { String(localized: "iPhone") }
@@ -1080,6 +1320,9 @@ enum Textos {
 
     /// Nutrición de hoy
     static var nutricionTitulo: String { String(localized: "nutricion.titulo") }
+
+    /// pasos
+    static var pasos: String { String(localized: "pasos") }
 
     /// Altura
     static var perfilAltura: String { String(localized: "perfil.altura") }
@@ -1622,6 +1865,9 @@ enum Textos {
 
     /// Resumen del entrenamiento
     static var resumenSalidaTitulo: String { String(localized: "resumen.salida_titulo") }
+
+    /// semanas
+    static var semanas: String { String(localized: "semanas") }
 
     /// Serie %1$lld hecha · %2$@
     static func serieConfirmar(_ arg1: Int, _ arg2: String) -> String {

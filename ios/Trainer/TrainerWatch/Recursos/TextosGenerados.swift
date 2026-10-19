@@ -9,7 +9,7 @@
 // números y unidades se formatean con el locale del sistema. Esto resuelve lo
 // primero; lo segundo es de quien presenta el dato.
 //
-// 145 claves · idioma de autoría: es
+// 149 claves · idioma de autoría: es
 // =============================================================================
 
 import Foundation
@@ -20,6 +20,9 @@ enum TextosReloj {
 
     /// ACTUAL
     static var ACTUAL: String { String(localized: "ACTUAL") }
+
+    /// Alertas
+    static var Alertas: String { String(localized: "Alertas") }
 
     /// Autopausado
     static var Autopausado: String { String(localized: "Autopausado") }
@@ -50,6 +53,15 @@ enum TextosReloj {
 
     /// Finalizar
     static var Finalizar: String { String(localized: "Finalizar") }
+
+    /// Gimnasio
+    static var Gimnasio: String { String(localized: "Gimnasio") }
+
+    /// Iniciar
+    static var Iniciar: String { String(localized: "Iniciar") }
+
+    /// No
+    static var No: String { String(localized: "No") }
 
     /// PROMEDIO
     static var PROMEDIO: String { String(localized: "PROMEDIO") }

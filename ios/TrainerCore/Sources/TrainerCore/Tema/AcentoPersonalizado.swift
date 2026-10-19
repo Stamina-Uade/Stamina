@@ -56,16 +56,16 @@ public enum AcentoPersonalizado {
     /// Los colores de la paleta. Elegidos para que se lean sobre negro (≥ 3:1)
     /// y para que no se confundan con el rojo de error.
     public static let opciones: [OpcionDeAcento] = [
-        OpcionDeAcento(id: "rosa", nombre: "Rosa Stamina", rojo: 1.0, verde: 0.137, azul: 0.655),
-        OpcionDeAcento(id: "fucsia", nombre: "Fucsia", rojo: 0.851, verde: 0.275, azul: 0.937),
-        OpcionDeAcento(id: "violeta", nombre: "Violeta", rojo: 0.545, verde: 0.361, azul: 0.965),
-        OpcionDeAcento(id: "azul", nombre: "Azul", rojo: 0.231, verde: 0.510, azul: 0.965),
-        OpcionDeAcento(id: "cian", nombre: "Cian", rojo: 0.133, verde: 0.827, azul: 0.933),
-        OpcionDeAcento(id: "menta", nombre: "Menta", rojo: 0.204, verde: 0.827, azul: 0.600),
-        OpcionDeAcento(id: "lima", nombre: "Verde lima", rojo: 0.518, verde: 0.800, azul: 0.086),
-        OpcionDeAcento(id: "amarillo", nombre: "Amarillo", rojo: 0.980, verde: 0.800, azul: 0.082),
-        OpcionDeAcento(id: "naranja", nombre: "Naranja", rojo: 0.976, verde: 0.451, azul: 0.086),
-        OpcionDeAcento(id: "coral", nombre: "Coral", rojo: 1.0, verde: 0.420, azul: 0.420),
+        OpcionDeAcento(id: "rosa", nombre: String(localized: "Rosa Stamina", bundle: .main, comment: "Nombre de un color de acento"), rojo: 1.0, verde: 0.137, azul: 0.655),
+        OpcionDeAcento(id: "fucsia", nombre: String(localized: "Fucsia", bundle: .main, comment: "Nombre de un color de acento"), rojo: 0.851, verde: 0.275, azul: 0.937),
+        OpcionDeAcento(id: "violeta", nombre: String(localized: "Violeta", bundle: .main, comment: "Nombre de un color de acento"), rojo: 0.545, verde: 0.361, azul: 0.965),
+        OpcionDeAcento(id: "azul", nombre: String(localized: "Azul", bundle: .main, comment: "Nombre de un color de acento"), rojo: 0.231, verde: 0.510, azul: 0.965),
+        OpcionDeAcento(id: "cian", nombre: String(localized: "Cian", bundle: .main, comment: "Nombre de un color de acento"), rojo: 0.133, verde: 0.827, azul: 0.933),
+        OpcionDeAcento(id: "menta", nombre: String(localized: "Menta", bundle: .main, comment: "Nombre de un color de acento"), rojo: 0.204, verde: 0.827, azul: 0.600),
+        OpcionDeAcento(id: "lima", nombre: String(localized: "Verde lima", bundle: .main, comment: "Nombre de un color de acento"), rojo: 0.518, verde: 0.800, azul: 0.086),
+        OpcionDeAcento(id: "amarillo", nombre: String(localized: "Amarillo", bundle: .main, comment: "Nombre de un color de acento"), rojo: 0.980, verde: 0.800, azul: 0.082),
+        OpcionDeAcento(id: "naranja", nombre: String(localized: "Naranja", bundle: .main, comment: "Nombre de un color de acento"), rojo: 0.976, verde: 0.451, azul: 0.086),
+        OpcionDeAcento(id: "coral", nombre: String(localized: "Coral", bundle: .main, comment: "Nombre de un color de acento"), rojo: 1.0, verde: 0.420, azul: 0.420),
     ]
 
     public static var predeterminado: OpcionDeAcento { opciones[0] }
