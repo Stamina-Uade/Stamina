@@ -84,9 +84,9 @@ struct AlmacenDeHitosTests {
         #expect(almacen.nivelDeActividad(para: diaFuturo) == 2)
     }
 
-    @Test("El color de la paleta en el móvil es rosa #FF23A7")
+    @Test("El color de la paleta en el móvil es rosa Stamina")
     func testColorDeAcentoEsRosa() {
-        // En sRGB #FF23A7 corresponde a R: 1.0, G: 0.137, B: 0.655
+        // En sRGB el rosa Stamina corresponde a R: 1.0, G: 0.137, B: 0.655
         let acento = Paleta.acento
         #expect(Paleta.secundario == acento)
         #expect(Paleta.pestanaActiva == acento)
