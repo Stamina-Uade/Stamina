@@ -21,8 +21,8 @@ enum TraductorDeErrores {
         switch resultado {
         case .ok: return ""
         case .rechazado(let codigo, _): return texto(codigo: codigo)
-        case .sinRed: return Textos.errorSinConexion
-        case .respuestaRara: return Textos.errorRespuestaRara
+        case .sinRed: return Textos.errorOffline
+        case .respuestaRara: return Textos.errorUnexpectedResponse
         }
     }
 
@@ -36,10 +36,10 @@ enum TraductorDeErrores {
         case "conflict": return Textos.errorConflict
         case "rate_limited": return Textos.errorRateLimited
         case "internal": return Textos.errorInternal
-        case "service_unavailable": return Textos.errorServidor
+        case "service_unavailable": return Textos.errorServerUnavailable
         // 426: la app quedó por debajo del mínimo. Es lo mismo que diría la puerta
         // de versión, y se dice con las mismas palabras.
-        case "unsupported_client": return Textos.versionRequeridaTexto
+        case "unsupported_client": return Textos.versionRequiredBody
         case "invalid_credentials": return Textos.errorInvalidCredentials
         case "invalid_code": return Textos.errorInvalidCode
         case "code_expired": return Textos.errorCodeExpired
@@ -52,7 +52,7 @@ enum TraductorDeErrores {
         case "profile_incomplete": return Textos.errorProfileIncomplete
         case "legal_not_accepted": return Textos.errorLegalNotAccepted
         case "legal_version_stale": return Textos.errorLegalVersionStale
-        default: return Textos.errorCodigoDesconocido(codigo)
+        default: return Textos.errorUnknownCode(codigo)
         }
     }
 }

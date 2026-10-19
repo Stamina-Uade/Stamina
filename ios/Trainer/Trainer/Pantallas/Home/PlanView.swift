@@ -44,7 +44,6 @@ struct PlanView: View {
         ScrollView {
             VStack(alignment: .leading, spacing: TokensEspaciado.e20) {
                 encabezado
-                guia
 
                 if !planVencido && planesDeObjetivos.count > 1 {
                     selectorDeObjetivo
@@ -86,43 +85,20 @@ struct PlanView: View {
         }
     }
 
-    // MARK: - Encabezado y guía
+    // MARK: - Encabezado
 
-    /// "Tu plan" grande, el subtítulo del bloque arriba; la ayuda y el historial a la derecha.
+    /// "Tu plan" grande, el subtítulo del bloque arriba; el historial a la derecha.
     private var encabezado: some View {
         EncabezadoDePestana(
-            String(localized: "Tu plan", comment: "Título de la pestaña del plan"),
+            Textos.planTitle,
             sobretitulo: (!planVencido ? bloqueVisible?.subtitulo : nil)
         ) {
-            HStack(spacing: TokensEspaciado.e8) {
-                BotonDeAyuda(clave: "guia_plan")
-                BotonCircular("map", etiqueta: Textos.historialTitulo) {
-                    Haptico.toque()
-                    mostrarHistorial = true
-                }
-                .accessibilityHint(String(localized: "Abre tus salidas anteriores", comment: "VoiceOver, botón historial del plan"))
+            BotonCircular("map", etiqueta: Textos.historyTitle) {
+                Haptico.toque()
+                mostrarHistorial = true
             }
+            .accessibilityHint(Textos.historyOpensPastWorkouts)
         }
-    }
-
-    private var guia: some View {
-        TarjetaDeGuia(
-            clave: "guia_plan",
-            titulo: String(localized: "Tu plan, semana a semana", comment: "Guía del plan, título"),
-            puntos: [
-                PuntoDeGuia("flag.checkered",
-                            String(localized: "Arriba, tu carrera y las etapas del plan. Tocá una etapa para saber para qué sirve.",
-                                   comment: "Guía del plan")),
-                PuntoDeGuia("calendar",
-                            String(localized: "Elegí la semana con los botones o deslizando los días. El anillo muestra cuántos km llevás.",
-                                   comment: "Guía del plan")),
-                PuntoDeGuia("hand.tap",
-                            String(localized: "Abajo, los días: tocá uno para ver qué hacer y por qué.",
-                                   comment: "Guía del plan")),
-                PuntoDeGuia("checkmark.circle",
-                            String(localized: "El tilde marca lo que ya hiciste; el día de hoy brilla con tu color.",
-                                   comment: "Guía del plan")),
-            ])
     }
 
     // MARK: - Selector de objetivo
@@ -155,7 +131,7 @@ struct PlanView: View {
                     }
                     .buttonStyle(EstiloPresionado())
                     .accessibilityAddTraits(elegido ? [.isButton, .isSelected] : .isButton)
-                    .accessibilityHint(String(localized: "Muestra el plan de esta meta", comment: "VoiceOver, selector de objetivo"))
+                    .accessibilityHint(Textos.planGoalHint)
                 }
             }
             .padding(TokensEspaciado.e4)
@@ -175,13 +151,13 @@ struct PlanView: View {
 
     private func nombreDelObjetivo(_ objetivo: Objetivo) -> String {
         switch objetivo {
-        case .c5k: return Textos.regObjetivoC5k
-        case .c10k: return Textos.regObjetivoC10k
-        case .mediaMaraton: return Textos.regObjetivoMediaMaraton
-        case .maraton: return Textos.regObjetivoMaraton
-        case .trailMontana: return Textos.regObjetivoTrailMontana
-        case .triatlonOlimpico: return Textos.regObjetivoTriatlonOlimpico
-        case .volverSinLesiones: return Textos.regObjetivoVolverSinLesiones
+        case .c5k: return Textos.signupGoalC5k
+        case .c10k: return Textos.signupGoalC10k
+        case .mediaMaraton: return Textos.signupGoalHalfMarathon
+        case .maraton: return Textos.signupGoalMarathon
+        case .trailMontana: return Textos.signupGoalMountainTrail
+        case .triatlonOlimpico: return Textos.signupGoalOlympicTriathlon
+        case .volverSinLesiones: return Textos.signupGoalInjuryFree
         }
     }
 
@@ -190,7 +166,7 @@ struct PlanView: View {
     /// Foto + cuenta regresiva ("6 semanas") + la etapa en la que estás. La
     /// barra de etapas, ahora tocable, va en su propia tarjeta abajo.
     private func tarjetaDelEvento(_ bloque: BloqueDelPlan) -> some View {
-        TarjetaHeroe(imagen: "BienvenidaMontana") {
+        TarjetaHeroe(imagen: FondosDeTarjeta.imagen(para: .running, contexto: "plan")) {
             VStack(alignment: .leading, spacing: TokensEspaciado.e12) {
                 if !bloque.cuando.isEmpty {
                     PildoraDeEstado(bloque.cuando, simbolo: "calendar")
@@ -200,15 +176,15 @@ struct PlanView: View {
                     if let dias = bloque.diasParaLaCarrera() {
                         MetricaHeroe("\(dias)",
                                      unidad: dias == 1
-                                        ? String(localized: "día", comment: "Unidad de la cuenta regresiva")
-                                        : String(localized: "días", comment: "Unidad de la cuenta regresiva"),
-                                     etiquetaAccesible: String(localized: "Faltan", comment: "VoiceOver"))
-                        Text(String(localized: "para tu carrera", comment: "Debajo de la cuenta regresiva del plan"))
+                                        ? Textos.commonDay
+                                        : Textos.commonDays,
+                                     etiquetaAccesible: Textos.commonToGo)
+                        Text(Textos.planUntilRace)
                             .estilo(.cuerpoSecundario, color: Paleta.textoSecundario)
                     } else if bloque.semanasQueFaltan > 0 {
                         MetricaHeroe("\(bloque.semanasQueFaltan)",
-                                     unidad: String(localized: "semanas", comment: "Unidad de la cuenta regresiva de la carrera"),
-                                     etiquetaAccesible: Textos.planFaltanSemanas(bloque.semanasQueFaltan))
+                                     unidad: Textos.commonWeeks,
+                                     etiquetaAccesible: Textos.planWeeksLeft(bloque.semanasQueFaltan))
                     }
                     Text(bloque.evento)
                         .estilo(bloque.semanasQueFaltan > 0 ? EstiloTipografico.tituloCard : EstiloTipografico.tituloSeccion,
@@ -218,7 +194,7 @@ struct PlanView: View {
 
                 if let actual = bloque.fases.first(where: { $0.enCurso }) {
                     PildoraDeEstado(
-                        String(localized: "Etapa actual: \(actual.titulo)", comment: "Píldora de la tarjeta del plan"),
+                        Textos.planCurrentPhase(actual.titulo),
                         simbolo: "location.fill", tono: .acento)
                 }
             }

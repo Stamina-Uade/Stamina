@@ -34,8 +34,6 @@ struct InicioView: View {
                     pildoras
                 }
 
-                guia
-
                 if estado.plan != nil {
                     AvisoDeLoGuardado(seccion: estado.contenido.plan)
                 }
@@ -68,7 +66,7 @@ struct InicioView: View {
                 if let plan = estado.plan {
                     if !estado.agenda.isEmpty {
                         VStack(alignment: .leading, spacing: TokensEspaciado.e10) {
-                            EncabezadoDeSeccion(Textos.inicioTuDia)
+                            EncabezadoDeSeccion(Textos.homeYourDay)
                             ForEach(estado.agenda) { fila in
                                 FilaDeAgendaView(fila: fila)
                             }
@@ -107,27 +105,6 @@ struct InicioView: View {
         }
     }
 
-    // MARK: - La guía: qué hay en esta pantalla
-
-    /// Se cierra con la X y no vuelve; el "?" de arriba la trae de nuevo.
-    private var guia: some View {
-        TarjetaDeGuia(
-            clave: Self.claveDeLaGuia,
-            titulo: String(localized: "Qué hay en tu inicio", comment: "Título de la guía del inicio"),
-            puntos: [
-                PuntoDeGuia("flag.fill", String(localized: "Arriba, tu próxima carrera y cuánto falta. Tocala para ver el plan.",
-                                                comment: "Guía del inicio: la carrera")),
-                PuntoDeGuia("figure.run", String(localized: "«Hoy» es la sesión que te toca. Tocá la zona o la hidratación y te explicamos qué significan.",
-                                                 comment: "Guía del inicio: hoy")),
-                PuntoDeGuia("square.grid.2x2.fill", String(localized: "Los accesos rápidos te llevan directo a correr, a tu plan, a tu historial o a tu apto.",
-                                                           comment: "Guía del inicio: accesos rápidos")),
-                PuntoDeGuia("chart.bar.fill", String(localized: "La carga semanal son los km de tu semana. Tocá una barra para ver ese día.",
-                                                     comment: "Guía del inicio: carga semanal")),
-            ])
-    }
-
-    private static let claveDeLaGuia = "guia_inicio"
-
     // MARK: - Barra superior: Stamina · racha · avatar
 
     private var barraSuperior: some View {
@@ -140,7 +117,6 @@ struct InicioView: View {
             if let plan = estado.plan {
                 InsigniaDeRacha(racha: plan.racha)
             }
-            BotonDeAyuda(clave: Self.claveDeLaGuia)
             Button {
                 Haptico.toque()
                 estado.ir(a: .perfil)
@@ -161,7 +137,7 @@ struct InicioView: View {
                 .contentShape(Circle())
             }
             .buttonStyle(EstiloPresionado())
-            .accessibilityLabel(Textos.homeTabPerfil)
+            .accessibilityLabel(Textos.homeTabProfile)
         }
     }
 
@@ -178,9 +154,9 @@ struct InicioView: View {
         let hora = Calendar.current.component(.hour, from: Date())
         let base: String
         switch hora {
-        case 5..<13: base = String(localized: "Buen día", comment: "Saludo del inicio, a la mañana")
-        case 13..<20: base = String(localized: "Buenas tardes", comment: "Saludo del inicio, a la tarde")
-        default: base = String(localized: "Buenas noches", comment: "Saludo del inicio, a la noche")
+        case 5..<13: base = Textos.homeGreetingMorning
+        case 13..<20: base = Textos.homeGreetingAfternoon
+        default: base = Textos.homeGreetingEvening
         }
         guard let nombre = primerNombre else { return base }
         return "\(base), \(nombre)"
@@ -201,7 +177,7 @@ struct InicioView: View {
             PildoraDelApto { mostrarApto = true }
             if estado.haySesionEnCurso {
                 Button { estado.ir(a: .entreno) } label: {
-                    PildoraDeEstado(String(localized: "Salida en curso", comment: "Píldora del inicio mientras se corre"),
+                    PildoraDeEstado(Textos.homeWorkoutInProgress,
                                     simbolo: "bolt.fill", tono: .acento)
                 }
                 .buttonStyle(EstiloPresionado())
@@ -230,7 +206,7 @@ struct InicioView: View {
             Haptico.toque()
             estado.ir(a: .plan)
         } label: {
-            TarjetaHeroe(imagen: "BienvenidaRuta", alto: TokensEspaciado.e56 * 4) {
+            TarjetaHeroe(imagen: FondosDeTarjeta.imagen(para: .running, contexto: "inicio"), alto: TokensEspaciado.e56 * 4) {
                 VStack(alignment: .leading, spacing: 0) {
                     if let pildora = pildoraDeLaCarrera(bloque) {
                         PildoraDeEstado(pildora, simbolo: "flag.fill", tono: .acento)
@@ -241,22 +217,21 @@ struct InicioView: View {
                             if let dias = estado.diasParaLaCarrera {
                                 MetricaHeroe("\(dias)",
                                              unidad: dias == 1
-                                                ? String(localized: "día", comment: "Unidad de la cuenta regresiva")
-                                                : String(localized: "días", comment: "Unidad de la cuenta regresiva"),
-                                             etiquetaAccesible: String(localized: "Faltan", comment: "VoiceOver"))
+                                                ? Textos.commonDay
+                                                : Textos.commonDays,
+                                             etiquetaAccesible: Textos.commonToGo)
                             } else {
                                 MetricaHeroe("\(bloque.semanasQueFaltan)",
-                                             unidad: String(localized: "semanas", comment: "Unidad de la cuenta regresiva"),
-                                             etiquetaAccesible: String(localized: "Faltan", comment: "VoiceOver"))
+                                             unidad: Textos.commonWeeks,
+                                             etiquetaAccesible: Textos.commonToGo)
                             }
-                            Text(String(localized: "para tu \(bloque.evento.lowercased())",
-                                        comment: "Debajo de la cuenta regresiva: para tu media maratón"))
+                            Text(Textos.homeUntilYour(bloque.evento.lowercased()))
                                 .estilo(.cuerpoSecundario, color: Paleta.textoSecundario)
                                 .fixedSize(horizontal: false, vertical: true)
                         }
                         Spacer(minLength: 0)
                         HStack(spacing: TokensEspaciado.e4) {
-                            Text(Textos.inicioVerPlan).estilo(.chip, color: Paleta.textoPrimario)
+                            Text(Textos.homeViewPlan).estilo(.chip, color: Paleta.textoPrimario)
                             Image(systemName: "chevron.right")
                                 .font(.system(size: TokensTipografia.chipTamano, weight: .bold))
                                 .foregroundStyle(Paleta.textoPrimario)
@@ -272,7 +247,7 @@ struct InicioView: View {
             .contentShape(Rectangle())
         }
         .buttonStyle(EstiloPresionado())
-        .accessibilityHint(Textos.inicioVerPlan)
+        .accessibilityHint(Textos.homeViewPlan)
     }
 
     /// "Dom 8 nov · 21 km". Sólo lo que el plan sabe: sin fecha no hay fecha.
@@ -293,19 +268,18 @@ struct InicioView: View {
     /// Sin objetivo: la tarjeta héroe invita a elegir el próximo. Lleva a Plan,
     /// que es donde vive el selector de metas.
     private var tarjetaNuevoObjetivo: some View {
-        TarjetaHeroe(imagen: "BienvenidaAmanecer", alto: TokensEspaciado.e56 * 4) {
+        TarjetaHeroe(imagen: FondosDeTarjeta.imagen(para: .running, contexto: "inicio"), alto: TokensEspaciado.e56 * 4) {
             VStack(alignment: .leading, spacing: TokensEspaciado.e12) {
-                PildoraDeEstado(String(localized: "Sin objetivo activo", comment: "Píldora del inicio sin plan"),
+                PildoraDeEstado(Textos.homeNoActiveGoal,
                                 simbolo: "flag", tono: .neutro)
                 Spacer(minLength: TokensEspaciado.e20)
-                Text(String(localized: "Ingresá tu nuevo objetivo", comment: "Título de la tarjeta sin objetivo"))
+                Text(Textos.homeEnterNewGoal)
                     .estilo(.display)
                     .fixedSize(horizontal: false, vertical: true)
-                Text(String(localized: "Elegí tu próxima carrera y armamos el plan semana a semana.",
-                            comment: "Explicación de la tarjeta sin objetivo"))
+                Text(Textos.homeChooseNextRace)
                     .estilo(.cuerpoSecundario, color: Paleta.textoSecundario)
                     .fixedSize(horizontal: false, vertical: true)
-                BotonPrimario(String(localized: "Elegir objetivo", comment: "Botón de la tarjeta sin objetivo")) {
+                BotonPrimario(Textos.homeChooseGoal) {
                     Haptico.toque()
                     estado.ir(a: .plan)
                 }
@@ -322,7 +296,7 @@ struct InicioView: View {
             HStack(alignment: .top, spacing: TokensEspaciado.e12) {
                 iconoDelDia(fuerza: false)
                 VStack(alignment: .leading, spacing: TokensEspaciado.e3) {
-                    Text(String(localized: "Hoy", comment: "Etiqueta de la tarjeta del día en el inicio"))
+                    Text(Textos.commonToday)
                         .estilo(.etiquetaSeccion, color: Paleta.textoTerciario)
                     Text(tituloDeLaSesion(sesion))
                         .estilo(.tituloCardGrande)
@@ -339,7 +313,7 @@ struct InicioView: View {
                     VStack(alignment: .trailing, spacing: TokensEspaciado.e2) {
                         Text(valorDeCuenta(minutosHasta(minuto)))
                             .estilo(.metricaMedia, color: Paleta.acento)
-                        Text(String(localized: "faltan", comment: "Debajo de la cuenta regresiva de la salida"))
+                        Text(Textos.commonToGoLowercase)
                             .estilo(.notaLegal, color: Paleta.textoTerciario)
                     }
                     .accessibilityElement(children: .combine)
@@ -363,7 +337,7 @@ struct InicioView: View {
             }
 
             if sesion.minutoDelDia != nil {
-                BotonPrimario(Textos.inicioPrepararSalida) {
+                BotonPrimario(Textos.homePrepareWorkout) {
                     Haptico.toque()
                     estado.ir(a: .entreno)
                 }
@@ -382,8 +356,7 @@ struct InicioView: View {
     /// "Sugerido 7:30". La zona va aparte, en su píldora tocable.
     private func detalleDeLaSesion(_ sesion: SesionDelDia) -> String? {
         guard let minuto = sesion.minutoDelDia else { return nil }
-        return String(localized: "Sugerido \(Formato.hora(minutoDelDia: minuto))",
-                      comment: "Hora sugerida de la salida")
+        return Textos.homeSuggested(Formato.hora(minutoDelDia: minuto))
     }
 
     /// "Z2 · moderada  ¿Qué es?": la jerga, con la explicación a un toque.
@@ -394,7 +367,7 @@ struct InicioView: View {
         } label: {
             HStack(spacing: TokensEspaciado.e6) {
                 PildoraDeEstado("\(zona.corta) · \(InicioTextos.intensidad(zona))", simbolo: "speedometer", tono: .acento)
-                Text(String(localized: "¿Qué es?", comment: "Abre la explicación de la zona"))
+                Text(Textos.homeWhatIsIt)
                     .estilo(.chip, color: Paleta.textoAcento)
                 Image(systemName: "chevron.right")
                     .font(.system(size: TokensTipografia.chipTamano, weight: .bold))
@@ -406,7 +379,7 @@ struct InicioView: View {
         }
         .buttonStyle(EstiloPresionado())
         .accessibilityElement(children: .combine)
-        .accessibilityHint(String(localized: "Explica qué son las zonas de intensidad", comment: "VoiceOver de la píldora de la zona"))
+        .accessibilityHint(Textos.homeZonesHint)
     }
 
     private func iconoDelDia(fuerza: Bool) -> some View {
@@ -426,9 +399,9 @@ struct InicioView: View {
         HStack(alignment: .top, spacing: TokensEspaciado.e12) {
             iconoDelDia(fuerza: hoy?.esFuerza == true)
             VStack(alignment: .leading, spacing: TokensEspaciado.e4) {
-                Text(String(localized: "Hoy", comment: "Etiqueta de la tarjeta del día en el inicio"))
+                Text(Textos.commonToday)
                     .estilo(.etiquetaSeccion, color: Paleta.textoTerciario)
-                Text(hoy?.titulo ?? Textos.inicioSinPlanHoy)
+                Text(hoy?.titulo ?? Textos.homeNothingPlannedToday)
                     .estilo(.tituloCardGrande)
                     .fixedSize(horizontal: false, vertical: true)
                 if let detalle = hoy?.detalle, !detalle.isEmpty {
@@ -437,7 +410,7 @@ struct InicioView: View {
                         .fixedSize(horizontal: false, vertical: true)
                 }
                 if hoy?.esFuerza == true {
-                    BotonTexto(Textos.inicioVerRutina) {
+                    BotonTexto(Textos.homeViewRoutine) {
                         Haptico.toque()
                         estado.ir(a: .gimnasio)
                     }
@@ -458,15 +431,15 @@ struct InicioView: View {
             explicacion = .avituallamiento(a, duracionMinutos: duracionMinutos)
         } label: {
             FlujoHorizontal(espaciado: TokensEspaciado.e6) {
-                PildoraDeEstado(String(localized: "Hidratación \(a.mililitrosPorHora) ml/h", comment: "Píldora del inicio"),
+                PildoraDeEstado(Textos.homeHydrationRate(a.mililitrosPorHora),
                                 simbolo: "drop.fill", tono: .acento)
                 if a.geles > 0 {
-                    PildoraDeEstado(String(localized: "\(a.geles) gel", comment: "Píldora del inicio"),
+                    PildoraDeEstado(Textos.homeGelCount(a.geles),
                                     simbolo: "bolt.fill")
                 }
                 PildoraDeEstado("\(a.carbohidratosPorHoraG) g/h", simbolo: "leaf.fill")
                 HStack(spacing: TokensEspaciado.e4) {
-                    Text(String(localized: "Qué llevar", comment: "Abre la explicación de la hidratación"))
+                    Text(Textos.homeWhatToBring)
                         .estilo(.chip, color: Paleta.textoAcento)
                     Image(systemName: "chevron.right")
                         .font(.system(size: TokensTipografia.chipTamano, weight: .bold))
@@ -480,7 +453,7 @@ struct InicioView: View {
         }
         .buttonStyle(EstiloPresionado())
         .accessibilityElement(children: .combine)
-        .accessibilityHint(String(localized: "Explica qué llevar en la salida", comment: "VoiceOver de los chips de hidratación"))
+        .accessibilityHint(Textos.homeWhatToBringHint)
     }
 
     /// "1:36" o "42 min": cuánto falta para la hora sugerida.
@@ -504,8 +477,8 @@ struct InicioView: View {
     private var seccionEntrenamientosDeHoy: some View {
         VStack(alignment: .leading, spacing: TokensEspaciado.e10) {
             EncabezadoDeSeccion(
-                String(localized: "Entrenamientos de hoy", comment: "Título de sección del inicio"),
-                accion: String(localized: "Ver historial", comment: "Abre el historial de actividades"),
+                Textos.homeTodayWorkouts,
+                accion: Textos.homeViewHistory,
                 alTocar: {
                     Haptico.toque()
                     estado.ir(a: .historial)
@@ -544,7 +517,7 @@ private struct InicioFilaDeActividad: View {
                 HStack(spacing: TokensEspaciado.e6) {
                     Text(actividad.sport.nombreVisible)
                         .estilo(.cuerpoDestacado)
-                    Text("·").estilo(.labelCampo, color: Paleta.textoTerciario)
+                    Text(verbatim: "·").estilo(.labelCampo, color: Paleta.textoTerciario)
                     Text(hora)
                         .estilo(.labelCampo, color: Paleta.textoSecundario)
                 }
@@ -553,12 +526,12 @@ private struct InicioFilaDeActividad: View {
                     Text(Formato.distancia(Int(actividad.distanceM ?? 0), unidades: unidades, decimales: 2))
                         .estilo(.tituloCard, color: Paleta.acento)
                         .monospacedDigit()
-                    Text("·").estilo(.labelCampo, color: Paleta.textoTerciario)
+                    Text(verbatim: "·").estilo(.labelCampo, color: Paleta.textoTerciario)
                     Text(Formato.cronometro(segundos: Int(actividad.durationS)))
                         .estilo(.labelCampo, color: Paleta.textoSecundario)
                         .monospacedDigit()
                     if let ritmo = ritmoOVelocidad {
-                        Text("·").estilo(.labelCampo, color: Paleta.textoTerciario)
+                        Text(verbatim: "·").estilo(.labelCampo, color: Paleta.textoTerciario)
                         Text(ritmo)
                             .estilo(.labelCampo, color: Paleta.textoSecundario)
                             .monospacedDigit()

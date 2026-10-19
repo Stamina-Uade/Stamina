@@ -33,9 +33,9 @@ struct CatalogoDeEjerciciosView: View {
                     ProgressView().frame(maxWidth: .infinity, maxHeight: .infinity)
                 } else if catalogo.falloDeRed {
                     VStack(spacing: TokensEspaciado.e12) {
-                        Text(Textos.homeDatosSinRed)
+                        Text(Textos.homeDataOffline)
                             .estilo(.cuerpoSecundario, color: Paleta.textoSecundario)
-                        BotonPrimario(Textos.homeDatosReintentar) {
+                        BotonPrimario(Textos.homeDataRetry) {
                             Task { await catalogo.cargar(desde: estado.repositorio.servicioDelCatalogo()) }
                         }
                     }
@@ -57,11 +57,11 @@ struct CatalogoDeEjerciciosView: View {
             }
             .frame(maxWidth: .infinity, maxHeight: .infinity)
             .background(Paleta.fondo)
-            .navigationTitle(Textos.catalogoTitulo)
+            .navigationTitle(Textos.catalogTitle)
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
-                    Button(Textos.comunCancelar) { cerrar() }
+                    Button(Textos.commonCancel) { cerrar() }
                 }
             }
         }
@@ -87,8 +87,8 @@ struct CatalogoDeEjerciciosView: View {
                 HStack(spacing: TokensEspaciado.e9) {
                     Image(systemName: "magnifyingglass")
                         .foregroundStyle(Paleta.textoTerciario)
-                    TextField("", text: $busqueda,
-                              prompt: Text(Textos.catalogoBuscar).foregroundColor(Paleta.textoPlaceholder))
+                    TextField(String(), text: $busqueda,
+                              prompt: Text(Textos.catalogSearch).foregroundColor(Paleta.textoPlaceholder))
                         .estilo(.campoTexto)
                 }
                 .padding(.horizontal, TokensEspaciado.e14)
@@ -110,7 +110,7 @@ struct CatalogoDeEjerciciosView: View {
                         .contentShape(Circle())
                 }
                 .buttonStyle(EstiloPresionado())
-                .accessibilityLabel(Textos.catalogoFiltros)
+                .accessibilityLabel(Textos.catalogFilters)
             }
 
             // El atajo "Sin equipo" lleva tilde además de color: a un centímetro
@@ -120,7 +120,7 @@ struct CatalogoDeEjerciciosView: View {
                     HStack(spacing: TokensEspaciado.e6) {
                         Image(systemName: sinEquipo ? "checkmark.circle.fill" : "circle")
                             .font(.system(size: TokensTipografia.labelCampoTamano))
-                        Text(Textos.catalogoSinEquipo)
+                        Text(Textos.catalogNoEquipment)
                             .estilo(.tituloCard, color: sinEquipo ? Paleta.acento : Paleta.textoSecundario)
                     }
                     .foregroundStyle(sinEquipo ? Paleta.acento : Paleta.textoSecundario)
@@ -181,20 +181,20 @@ struct CatalogoDeEjerciciosView: View {
             Image(systemName: "magnifyingglass")
                 .font(.system(size: TokensTipografia.numeroDatoTamano))
                 .foregroundStyle(Paleta.textoTerciario)
-            Text(Textos.catalogoVacioTitulo)
+            Text(Textos.catalogEmptyTitle)
                 .estilo(.tituloCardGrande)
                 .multilineTextAlignment(.center)
-            Text(Textos.catalogoVacioTexto)
+            Text(Textos.catalogEmptyBody)
                 .estilo(.cuerpoSecundario, color: Paleta.textoSecundario)
                 .multilineTextAlignment(.center)
                 .fixedSize(horizontal: false, vertical: true)
 
             VStack(spacing: TokensEspaciado.e8) {
-                BotonPrimario(Textos.catalogoVacioAmpliar) {
+                BotonPrimario(Textos.catalogEmptyWiden) {
                     musculos = []; equipos = []; sinEquipo = false; busqueda = ""
                 }
-                BotonTexto(Textos.catalogoVacioLibre) { cerrar() }
-                BotonTexto(Textos.catalogoVacioSugerir, color: Paleta.textoSecundario) {}
+                BotonTexto(Textos.catalogEmptyFreeExercise) { cerrar() }
+                BotonTexto(Textos.catalogEmptySuggest, color: Paleta.textoSecundario) {}
             }
             Spacer()
         }
@@ -218,23 +218,23 @@ struct HojaDeFiltros: View {
         NavigationStack {
             ScrollView {
                 VStack(alignment: .leading, spacing: TokensEspaciado.e16) {
-                    grupo(Textos.catalogoMusculo, claves: catalogo.musculosDisponibles,
+                    grupo(Textos.catalogMuscle, claves: catalogo.musculosDisponibles,
                           nombre: catalogo.musculo, seleccion: $musculos)
-                    grupo(Textos.catalogoEquipamiento, claves: catalogo.equipamientosDisponibles,
+                    grupo(Textos.catalogEquipment, claves: catalogo.equipamientosDisponibles,
                           nombre: catalogo.equipamiento, seleccion: $equipos)
                 }
                 .padding(TokensEspaciado.e16)
             }
             .frame(maxWidth: .infinity, maxHeight: .infinity)
             .background(Paleta.fondo)
-            .navigationTitle(Textos.catalogoFiltros)
+            .navigationTitle(Textos.catalogFilters)
             .navigationBarTitleDisplayMode(.inline)
             .safeAreaInset(edge: .bottom) {
                 VStack(spacing: TokensEspaciado.e8) {
                     // El botón dice cuántos quedan: es la información que hace
                     // falta antes de cerrar la hoja, no después.
-                    BotonPrimario(Textos.catalogoVer(cantidadDeResultados)) { cerrar() }
-                    BotonTexto(Textos.catalogoLimpiar, color: Paleta.textoSecundario) {
+                    BotonPrimario(Textos.catalogShowCount(cantidadDeResultados)) { cerrar() }
+                    BotonTexto(Textos.catalogClearFilters, color: Paleta.textoSecundario) {
                         musculos = []; equipos = []; sinEquipo = false
                     }
                 }
@@ -303,19 +303,19 @@ struct FichaDeEjercicioView: View {
                         .estilo(.display)
                         .fixedSize(horizontal: false, vertical: true)
                         .accessibilityAddTraits(.isHeader)
-                    dato(Textos.fichaMusculoPrincipal, principales)
+                    dato(Textos.exercisePrimaryMuscle, principales)
                     if !secundarios.isEmpty {
-                        dato(Textos.fichaMusculoSecundario, secundarios)
+                        dato(Textos.exerciseSecondaryMuscles, secundarios)
                     }
-                    dato(Textos.catalogoEquipamiento, catalogo.equipamiento(ejercicio.equipamiento))
+                    dato(Textos.catalogEquipment, catalogo.equipamiento(ejercicio.equipamiento))
                     // El patrón se muestra traducido, no como slug: mostrar
                     // `empuje-horizontal` crudo fue uno de los ocho defectos que
                     // ESPECIFICACION §6.5 corrigió.
-                    dato(Textos.fichaPatron, catalogo.patron(ejercicio.patron))
+                    dato(Textos.exerciseMovementPattern, catalogo.patron(ejercicio.patron))
 
-                    BotonPrimario(Textos.fichaUsar) { alElegir(ejercicio) }
+                    BotonPrimario(Textos.exerciseUse) { alElegir(ejercicio) }
                     if !ejercicio.sustitutos.isEmpty {
-                        BotonTexto(Textos.fichaSustitutos) { mostrandoSustitutos = true }
+                        BotonTexto(Textos.exerciseSeeSubstitutes) { mostrandoSustitutos = true }
                     }
                 }
                 .padding(TokensEspaciado.e16)
@@ -326,7 +326,7 @@ struct FichaDeEjercicioView: View {
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
-                    Button(Textos.comunVolver) { cerrar() }
+                    Button(Textos.commonBack) { cerrar() }
                 }
             }
         }
@@ -389,17 +389,17 @@ struct SustitutosView: View {
             }
             .frame(maxWidth: .infinity, maxHeight: .infinity)
             .background(Paleta.fondo)
-            .navigationTitle(Textos.sustitutosTitulo(catalogo.nombre(de: original)))
+            .navigationTitle(Textos.exerciseSubstitutesTitle(catalogo.nombre(de: original)))
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
-                    Button(Textos.comunVolver) { cerrar() }
+                    Button(Textos.commonBack) { cerrar() }
                 }
             }
         }
     }
 
     private func motivo(_ tipo: String) -> String {
-        tipo == "mismo-patron" ? Textos.sustitutosMismoPatron : catalogo.patron(tipo)
+        tipo == "mismo-patron" ? Textos.exerciseSubstitutesSamePattern : catalogo.patron(tipo)
     }
 }

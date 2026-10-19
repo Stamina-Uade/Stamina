@@ -17,7 +17,7 @@ struct LoginView: View {
         VStack(spacing: 0) {
             ScrollView {
                 VStack(alignment: .leading, spacing: TokensEspaciado.e20) {
-                    Text(Textos.loginTitulo)
+                    Text(Textos.loginTitle)
                         .estilo(.display)
                         .fixedSize(horizontal: false, vertical: true)
                         .accessibilityAddTraits(.isHeader)
@@ -34,8 +34,8 @@ struct LoginView: View {
                         // "Ingresar" (`FlujoEntrada.correoRechazado`), pegado al campo.
                         ScrollViewReader { desplazamiento in
                             VStack(alignment: .leading, spacing: TokensEspaciado.e8) {
-                                CampoTexto(etiqueta: Textos.comunCorreoLabel,
-                                           marcador: Textos.comunCorreoMarcador,
+                                CampoTexto(etiqueta: Textos.commonEmailLabel,
+                                           marcador: Textos.commonEmailPlaceholder,
                                            texto: $flujo.loginCorreo,
                                            contenido: .correo, teclado: .correo)
                                 if flujo.correoRechazado {
@@ -45,15 +45,15 @@ struct LoginView: View {
                             .muestraElCorreoRechazado(flujo.correoRechazado, desplazando: desplazamiento)
                         }
 
-                        CampoTexto(etiqueta: Textos.loginClaveLabel,
-                                   marcador: Textos.comunClaveMarcador,
+                        CampoTexto(etiqueta: Textos.loginPasswordLabel,
+                                   marcador: Textos.commonPasswordPlaceholder,
                                    texto: $flujo.loginClave,
                                    contenido: .claveActual, seguro: true)
 
                         HStack {
                             Spacer()
                             Button { flujo.irARecuperarClave() } label: {
-                                Text(Textos.loginOlvidaste)
+                                Text(Textos.loginForgotPassword)
                                     .estilo(.cuerpoSecundario, color: Paleta.textoTerciario)
                                     .padding(.vertical, TokensEspaciado.e4)
                                     .contentShape(Rectangle())
@@ -66,10 +66,10 @@ struct LoginView: View {
                         // no al pie de la pantalla: quien termina de escribir la
                         // contraseña lo tiene abajo del pulgar, sin bajar la
                         // vista. Apagado sigue siendo el color de la app.
-                        BotonPrimario(Textos.loginIngresar,
+                        BotonPrimario(Textos.loginSignIn,
                                       habilitado: flujo.loginListo && !flujo.enCurso,
                                       cargando: flujo.enCurso,
-                                      motivoDeshabilitado: Textos.comunCompletaParaSeguir) {
+                                      motivoDeshabilitado: Textos.commonCompleteToContinue) {
                             Task { await flujo.entrar() }
                         }
                     }
@@ -85,7 +85,7 @@ struct LoginView: View {
                             avisoDeProveedor = true
                         }
                         if avisoDeProveedor {
-                            AvisoSuave(Textos.loginSocialFalta)
+                            AvisoSuave(Textos.loginSocialUnavailable)
                         }
                     }
                 }
@@ -96,10 +96,10 @@ struct LoginView: View {
 
             VStack(spacing: TokensEspaciado.e12) {
                 HStack(spacing: TokensEspaciado.e4) {
-                    Text(Textos.loginNoTenesCuenta)
+                    Text(Textos.loginNoAccount)
                         .estilo(.cuerpoSecundario, color: Paleta.textoTerciario)
                     Button { flujo.ir(a: .regCorreo) } label: {
-                        Text(Textos.loginRegistrate)
+                        Text(Textos.loginSignUp)
                             .estilo(.cuerpoSecundario, color: Paleta.acento)
                             .padding(.vertical, TokensEspaciado.e4)
                             .contentShape(Rectangle())
@@ -119,7 +119,7 @@ struct LoginView: View {
     private var separador: some View {
         HStack(spacing: TokensEspaciado.e12) {
             Rectangle().fill(Paleta.divisor).frame(height: TokensEspaciado.e1)
-            Text(Textos.loginO).estilo(.chip, color: Paleta.textoTerciario)
+            Text(Textos.loginOr).estilo(.chip, color: Paleta.textoTerciario)
             Rectangle().fill(Paleta.divisor).frame(height: TokensEspaciado.e1)
         }
         .accessibilityHidden(true)

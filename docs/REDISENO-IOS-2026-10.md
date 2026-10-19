@@ -135,7 +135,7 @@ Qué hace `scripts/desplegar-backend.sh`, en orden:
    (`honnelink` vía Cloudflare si está configurado; si no, `ubuntu@52.200.205.163:49152` con la llave
    `~/Desarrollo/Ubuntu-WorkApp.pem`).
 3. En el servidor corre `backend/deploy/servidor/activar-release.sh`: instala dependencias de producción,
-   aplica migraciones (en esta tanda **no hay migraciones nuevas**), reinicia `trainer-api` y, si el health
+   aplica migraciones (en esta tanda hay **una nueva: `016_pasos_diarios.sql`**, sólo agrega una tabla), reinicia `trainer-api` y, si el health
    no responde, **vuelve solo a la versión anterior**.
 4. Prueba desde afuera `https://stamina.com.ar/v1/health` y `https://honnelink.com/network/info`.
 
@@ -146,7 +146,7 @@ Cómo verificar que quedó lo nuevo:
 - Una salida de más de 20 minutos sube con su recorrido (antes el recorrido daba 413).
 
 Si algo sale mal: el script ya vuelve atrás solo si el health falla. Para volver a mano a la versión
-anterior, desplegar desde el commit previo: `git checkout 16ea9fb && scripts/desplegar-backend.sh`.
+anterior, desplegar desde la rama de antes de hoy: `git checkout feat/ios-stamina-update && scripts/desplegar-backend.sh`.
 
 🛑 Ojo: el EC2 es compartido con HonneLink. El script no toca nada de HonneLink, pero conviene desplegar
 cuando no haya tráfico pico.
@@ -162,3 +162,27 @@ target Trainer, agregar **HealthKit** si Xcode lo pide.
 - Barra: Inicio · Plan · ⚡ · Historial · Perfil. Sólo running en todos lados.
 - Plan: elegir objetivo (por ejemplo 10K), salir y volver a entrar: tiene que seguir elegido.
 - Una salida desde el reloj: termina, pasa al teléfono y aparece en Historial.
+
+## Quinta ronda (19-10, noche) — feedback de la prueba
+
+- **Barra de abajo** sólo en las cuatro pestañas; las pantallas secundarias (Ajustes y sus páginas, Gimnasio,
+  Apto) tienen arriba la flecha y el título fijos, fuera del scroll. **Cerrar sesión** en rojo fuerte (`Paleta.peligro`).
+- **Sin "?" ni guías:** se borraron `TarjetaDeGuia`/`BotonDeAyuda` y las hojas que explicaban peso/altura/edad.
+- **Mascota quieta** (sólo aparece con un fundido una vez). El **tour muestra las pantallas reales** dentro de un
+  teléfono, con un anillo en el elemento y la mascota señalándolo con un bocadillo. Animaciones tipo Duolingo:
+  hacen falta Lottie (o secuencias PNG con alfa): saludar con la mano (1,5 s, loop), señalar (0,8 s + pausa),
+  ciclo de carrera (0,67 s, loop), festejo con medalla (1,8 s), parpadeo/orejas (3 s, loop), pulgar arriba (1 s).
+- **Fondos de las tarjetas:** la foto de bici ("BienvenidaRuta" es el Tour de Francia) ya no sale en running.
+  `FondosDeTarjeta` rota 20 fotos por disciplina sin repetir en 20 días (Inicio y Plan con fotos distintas).
+  Prompts para generar las 60 en `docs/PROMPTS-FONDOS.md`; se agregan como `FondoRunning01…20` en Assets.
+- **Clima nativo:** WeatherKit en el teléfono (aviso de calor en la hora real del entreno). La app ya no llama a
+  `/weather/forecast` (queda deprecado en el backend para versiones viejas). Atribución de Apple Weather en
+  Notificaciones. **Pasos manuales en el portal:** activar WeatherKit en el App ID (Capabilities y App Services) y
+  en Xcode → Signing & Capabilities; tarda ~30 min.
+- **Pasos desde Apple Salud:** al abrir la app se leen los últimos 30 días de HealthKit (iPhone + reloj, sin
+  duplicar) y se suben a la base: tabla `pasos_diarios`, `PUT /v1/me/steps` y `GET /v1/me/steps` (contrato 1.3.0).
+  Con Salud funcionando, el calendario muestra "Apple Salud" y no deja editar; si no hay permiso, queda la edición
+  manual y también se guarda en la base. 195/195 tests unitarios del backend.
+- **Textos:** todas las keys de los dos catálogos son identificadores en inglés (`common.day`,
+  `home.greeting.morning`…) con es/en/fr; el código usa `Textos.*` (iPhone) y `TextosReloj.*` (reloj). Los textos
+  sueltos del reloj (Agua/Geles/Sales, "TIEMPO EN PAUSA"…) ahora también se traducen.

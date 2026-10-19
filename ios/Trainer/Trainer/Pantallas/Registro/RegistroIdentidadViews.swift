@@ -17,20 +17,20 @@ struct RegCorreoView: View {
     @EnvironmentObject private var flujo: FlujoEntrada
 
     var body: some View {
-        PantallaPaso(titulo: Textos.regCorreoTitulo, texto: Textos.regCorreoTexto) {
+        PantallaPaso(titulo: Textos.signupEmailTitle, texto: Textos.signupEmailBody) {
             ScrollViewReader { desplazamiento in
                 VStack(alignment: .leading, spacing: TokensEspaciado.e8) {
-                    CampoTexto(etiqueta: Textos.regNombreLabel,
-                               marcador: Textos.regNombreMarcador,
+                    CampoTexto(etiqueta: Textos.signupNameLabel,
+                               marcador: Textos.signupNamePlaceholder,
                                texto: $flujo.datos.nombre, contenido: .nombre)
                         .disabled(flujo.enCurso)
-                    CampoTexto(etiqueta: Textos.regApellidoLabel,
-                               marcador: Textos.regApellidoMarcador,
+                    CampoTexto(etiqueta: Textos.signupLastNameLabel,
+                               marcador: Textos.signupLastNamePlaceholder,
                                texto: $flujo.datos.apellido, contenido: .apellido)
                         .disabled(flujo.enCurso)
                     if flujo.datos.nombreCompletoListo {
-                    CampoTexto(etiqueta: Textos.comunCorreoLabel,
-                               marcador: Textos.comunCorreoMarcador,
+                    CampoTexto(etiqueta: Textos.commonEmailLabel,
+                               marcador: Textos.commonEmailPlaceholder,
                                texto: $flujo.datos.correo,
                                contenido: .correo, teclado: .correo)
                         .disabled(flujo.enCurso)
@@ -44,16 +44,16 @@ struct RegCorreoView: View {
                 .muestraElCorreoRechazado(flujo.correoRechazado, desplazando: desplazamiento)
             }
         } pie: {
-            Text(Textos.regCorreoLegal)
+            Text(Textos.signupEmailLegal)
                 .estilo(.notaLegal, color: Paleta.textoTerciario)
                 .multilineTextAlignment(.center)
                 .fixedSize(horizontal: false, vertical: true)
 
             // Se prende con algo escrito: si no parece un correo, lo dice el toque.
-            BotonPrimario(Textos.regCorreoEnviar,
+            BotonPrimario(Textos.signupEmailSend,
                           habilitado: flujo.datos.nombreCompletoListo && !flujo.datos.correo.isEmpty && !flujo.enCurso,
                           cargando: flujo.enCurso,
-                          motivoDeshabilitado: Textos.comunCompletaParaSeguir) {
+                          motivoDeshabilitado: Textos.commonCompleteToContinue) {
                 Task { await flujo.pedirCodigoDeRegistro() }
             }
         }
@@ -65,9 +65,9 @@ struct RegCodigoView: View {
     @EnvironmentObject private var flujo: FlujoEntrada
 
     var body: some View {
-        PantallaPaso(titulo: Textos.regCodigoTitulo,
-                     texto: Textos.regCodigoTexto(flujo.datos.correo.isEmpty
-                                                  ? Textos.comunCorreoMarcador
+        PantallaPaso(titulo: Textos.signupCodeTitle,
+                     texto: Textos.signupCodeBody(flujo.datos.correo.isEmpty
+                                                  ? Textos.commonEmailPlaceholder
                                                   : flujo.datos.correo)) {
             VStack(spacing: TokensEspaciado.e14) {
                 CampoCodigo(codigo: $flujo.datos.codigo)
@@ -79,10 +79,10 @@ struct RegCodigoView: View {
                               reenviar: { Task { await flujo.pedirCodigoDeRegistro() } })
             }
         } pie: {
-            BotonPrimario(Textos.regCodigoValidar,
+            BotonPrimario(Textos.signupCodeVerify,
                           habilitado: flujo.datos.codigoCompleto && !flujo.enCurso,
                           cargando: flujo.enCurso,
-                          motivoDeshabilitado: Textos.comunCompletaParaSeguir) {
+                          motivoDeshabilitado: Textos.commonCompleteToContinue) {
                 Task { await flujo.verificarCodigoDeRegistro() }
             }
         }
@@ -104,18 +104,18 @@ struct RegClaveView: View {
     @EnvironmentObject private var flujo: FlujoEntrada
 
     var body: some View {
-        PantallaPaso(titulo: Textos.regClaveTitulo,
-                     texto: Textos.regClaveTexto(FlujoEntrada.largoMinimoDeClave)) {
+        PantallaPaso(titulo: Textos.signupPasswordTitle,
+                     texto: Textos.signupPasswordBody(FlujoEntrada.largoMinimoDeClave)) {
             VStack(alignment: .leading, spacing: TokensEspaciado.e13) {
-                AvisoSuave(Textos.regClaveHueco)
+                AvisoSuave(Textos.signupPasswordGapNote)
 
-                CampoTexto(etiqueta: Textos.claveNuevaLabel,
-                           marcador: Textos.comunClaveMarcador,
+                CampoTexto(etiqueta: Textos.passwordResetNewLabel,
+                           marcador: Textos.commonPasswordPlaceholder,
                            texto: $flujo.claveDeRegistro,
                            contenido: .claveNueva, seguro: true)
 
-                CampoTexto(etiqueta: Textos.claveNuevaRepetirLabel,
-                           marcador: Textos.comunClaveMarcador,
+                CampoTexto(etiqueta: Textos.passwordResetNewRepeatLabel,
+                           marcador: Textos.commonPasswordPlaceholder,
                            texto: $flujo.claveDeRegistroRepetida,
                            contenido: .claveNueva, seguro: true)
 
@@ -124,14 +124,14 @@ struct RegClaveView: View {
 
                 if !flujo.claveDeRegistroRepetida.isEmpty {
                     PistaDeCampo(estado: flujo.claveDeRegistroCoincide
-                                 ? .correcto(Textos.claveNuevaCoinciden)
-                                 : .error(Textos.claveNuevaNoCoinciden))
+                                 ? .correcto(Textos.passwordResetNewMatch)
+                                 : .error(Textos.passwordResetNewNoMatch))
                 }
             }
         } pie: {
-            BotonPrimario(Textos.comunContinuar,
+            BotonPrimario(Textos.commonContinue,
                           habilitado: flujo.claveDeRegistroLista,
-                          motivoDeshabilitado: Textos.comunCompletaParaSeguir) {
+                          motivoDeshabilitado: Textos.commonCompleteToContinue) {
                 flujo.seguirConLaClave()
             }
         }
@@ -147,15 +147,15 @@ struct RegNombreView: View {
     @EnvironmentObject private var flujo: FlujoEntrada
 
     var body: some View {
-        PantallaPaso(titulo: Textos.regNombreTitulo, texto: Textos.regNombreTexto) {
+        PantallaPaso(titulo: Textos.signupNameTitle, texto: Textos.signupNameBody) {
             VStack(alignment: .leading, spacing: TokensEspaciado.e13) {
-                CampoTexto(etiqueta: Textos.regNombreLabel,
-                           marcador: Textos.regNombreMarcador,
+                CampoTexto(etiqueta: Textos.signupNameLabel,
+                           marcador: Textos.signupNamePlaceholder,
                            texto: $flujo.datos.nombre, contenido: .nombre)
                 // Opcional, como en el diseño. Vacío se guarda como `null`, que es
                 // lo único que borra uno que ya estaba (docs/API.md §7).
-                CampoTexto(etiqueta: Textos.regApellidoLabel,
-                           marcador: Textos.regApellidoMarcador,
+                CampoTexto(etiqueta: Textos.signupLastNameLabel,
+                           marcador: Textos.signupLastNamePlaceholder,
                            texto: $flujo.datos.apellido, contenido: .apellido)
             }
             .disabled(flujo.enCurso)

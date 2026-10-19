@@ -16,21 +16,21 @@ struct PreviewPlanView: View {
                 VStack(alignment: .leading, spacing: TokensEspaciado.e16) {
                     Tarjeta {
                         VStack(alignment: .leading, spacing: TokensEspaciado.e11) {
-                            Text(Textos.previewEtiqueta).estilo(.etiquetaSeccion, color: Paleta.acento)
-                            Text(Textos.previewSesion).estilo(.tituloCardGrande)
+                            Text(Textos.previewLabel).estilo(.etiquetaSeccion, color: Paleta.acento)
+                            Text(Textos.previewSession).estilo(.tituloCardGrande)
                             HStack(spacing: TokensEspaciado.e6) {
-                                PildoraDeEstado(Textos.previewChipLiquido, simbolo: "drop.fill")
+                                PildoraDeEstado(Textos.previewChipFluid, simbolo: "drop.fill")
                                 PildoraDeEstado(Textos.previewChipGel, simbolo: "bolt.fill", tono: .acento)
-                                PildoraDeEstado(Textos.previewChipSodio)
+                                PildoraDeEstado(Textos.previewChipSodium)
                             }
                         }
                     }
 
                     Tarjeta {
                         VStack(alignment: .leading, spacing: TokensEspaciado.e8) {
-                            Text(Textos.previewAntesEtiqueta)
+                            Text(Textos.previewBeforeLabel)
                                 .estilo(.etiquetaSeccion, color: Paleta.textoTerciario)
-                            Text(Textos.previewAntesTexto)
+                            Text(Textos.previewBeforeBody)
                                 .estilo(.cuerpo, color: Paleta.textoCuerpo)
                                 .fixedSize(horizontal: false, vertical: true)
                         }
@@ -41,18 +41,18 @@ struct PreviewPlanView: View {
             }
 
             VStack(spacing: TokensEspaciado.e16) {
-                Text(Textos.previewCtaTitulo)
+                Text(Textos.previewCtaTitle)
                     .estilo(.display)
                     .multilineTextAlignment(.center)
                     .fixedSize(horizontal: false, vertical: true)
 
-                BotonPrimario(Textos.previewEmpezar) { flujo.ir(a: .regCorreo) }
+                BotonPrimario(Textos.previewStart) { flujo.ir(a: .regCorreo) }
 
                 HStack(spacing: TokensEspaciado.e4) {
-                    Text(Textos.previewYaTenesCuenta)
+                    Text(Textos.previewHaveAccount)
                         .estilo(.cuerpoSecundario, color: Paleta.textoTerciario)
                     Button { flujo.ir(a: .login) } label: {
-                        Text(Textos.previewIniciarSesion)
+                        Text(Textos.previewSignIn)
                             .estilo(.cuerpoSecundario, color: Paleta.acento)
                             .objetivoTactilAlto()
                     }

@@ -16,7 +16,7 @@ struct SinDatosView: View {
                 HStack(spacing: TokensEspaciado.e8) {
                     ProgressView()
                         .tint(Paleta.acento)
-                    Text(Textos.homeDatosCargando)
+                    Text(Textos.homeDataLoading)
                         .estilo(.cuerpoSecundario, color: Paleta.textoSecundario)
                 }
             } else {
@@ -34,7 +34,7 @@ struct SinDatosView: View {
                 }
                 // Reintentar no completa un perfil: para eso está el aviso de arriba.
                 if problema != .perfilIncompleto {
-                    BotonTexto(Textos.homeDatosReintentar, accion: reintentar)
+                    BotonTexto(Textos.homeDataRetry, accion: reintentar)
                 }
             }
         }
@@ -55,10 +55,10 @@ struct SinDatosView: View {
 
     private var texto: String {
         switch problema {
-        case .sinRed: return Textos.homeDatosSinRed
-        case .perfilIncompleto: return Textos.homeDatosPerfilIncompleto
-        case .servidor: return Textos.homeDatosError
-        case nil: return Textos.homeDatosVacio
+        case .sinRed: return Textos.homeDataOffline
+        case .perfilIncompleto: return Textos.homeDataProfileIncomplete
+        case .servidor: return Textos.homeDataError
+        case nil: return Textos.homeDataEmpty
         }
     }
 }
@@ -82,7 +82,7 @@ struct AvisoDeLoGuardado<Valor>: View {
         let cuando = formato.localizedString(for: Date(timeIntervalSince1970: TimeInterval(guardadoEnMs) / 1000),
                                              relativeTo: Date())
         return seccion.problema == .sinRed
-            ? Textos.homeDatosGuardadoSinRed(cuando)
-            : Textos.homeDatosGuardadoConError(cuando)
+            ? Textos.homeDataSavedOffline(cuando)
+            : Textos.homeDataSavedWithError(cuando)
     }
 }

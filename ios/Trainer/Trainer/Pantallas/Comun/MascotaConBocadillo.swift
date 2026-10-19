@@ -9,9 +9,11 @@ import TrainerCore
 // - `corriendo`: entrenamientos y progreso.
 // - `medalla`: logros y cierres.
 //
-// Se mueve poquito y en loop mientras está a la vista (flota, trota o respira);
-// con "Reducir movimiento" queda quieta. Las imágenes sólo existen en el target
-// del iPhone: estas vistas no se usan en el reloj.
+// Ronda 5: la mascota queda QUIETA en su lugar. Sólo entra una vez, con un
+// fundido y un leve crecimiento, cuando aparece (o cuando su página pasa a ser
+// la que se mira); nada de flotar ni de loops. Con "Reducir movimiento" ni
+// eso: aparece de una. Las imágenes sólo existen en el target del iPhone:
+// estas vistas no se usan en el reloj.
 // =============================================================================
 
 enum PoseDeMascota {
@@ -27,43 +29,11 @@ enum PoseDeMascota {
         }
     }
 
-    /// Desde dónde "salta" al aparecer: la de la medalla, más, porque festeja.
+    /// Desde qué tamaño crece al entrar. Apenas: es una entrada, no un salto.
     fileprivate var escalaInicial: CGFloat {
         switch self {
         case .saludo, .corriendo: return 0.94
-        case .medalla: return 0.82
-        }
-    }
-
-    /// El loop en reposo: flotar lento, trotar rápido, respirar.
-    fileprivate var animacionEnReposo: Animation {
-        switch self {
-        case .saludo: return .easeInOut(duration: 1.8).repeatForever(autoreverses: true)
-        case .corriendo: return .easeInOut(duration: 0.38).repeatForever(autoreverses: true)
-        case .medalla: return .easeInOut(duration: 1.6).repeatForever(autoreverses: true)
-        }
-    }
-
-    fileprivate var desplazamientoEnReposo: CGFloat {
-        switch self {
-        case .saludo: return -TokensEspaciado.e6
-        case .corriendo: return -TokensEspaciado.e8
-        case .medalla: return -TokensEspaciado.e4
-        }
-    }
-
-    /// Corriendo se inclina un poco hacia adelante en cada zancada.
-    fileprivate var giroEnReposo: (desde: Double, hasta: Double) {
-        switch self {
-        case .corriendo: return (desde: -3, hasta: 2)
-        case .saludo, .medalla: return (desde: 0, hasta: 0)
-        }
-    }
-
-    fileprivate var respiroEnReposo: CGFloat {
-        switch self {
-        case .medalla: return 1.035
-        case .saludo, .corriendo: return 1
+        case .medalla: return 0.9
         }
     }
 }
@@ -75,48 +45,35 @@ enum PoseDeMascota {
 struct Mascota: View {
     let pose: PoseDeMascota
     var altoMaximo: CGFloat = TokensEspaciado.e56 * 4
-    /// Si es la que se está mirando: al pasar a `true` hace el "pop" de entrada
-    /// y arranca el loop. Al pasar a `false` se achica de vuelta, para volver a
-    /// saltar la próxima vez.
+    /// Si es la que se está mirando: al pasar a `true` hace la entrada (una
+    /// sola vez). Al pasar a `false` no hace nada: quien la contiene la oculta.
     var activa: Bool = true
+    /// Dada vuelta en espejo. La de `saludo` apoya el codo a la derecha:
+    /// espejada lo apoya a la izquierda.
+    var espejada: Bool = false
 
     @Environment(\.accessibilityReduceMotion) private var movimientoReducido
-    @State private var aparecio = false
-    @State private var enMovimiento = false
+    @State private var entro = false
 
     var body: some View {
         Image(pose.recurso)
             .resizable()
             .scaledToFit()
-            // El pop de entrada va con su propio resorte: la animación de más
-            // afuera (el loop) no lo pisa, gana la más cercana.
-            .scaleEffect(escalaDeAparicion, anchor: .bottom)
-            .animation(movimientoReducido ? nil : .spring(response: 0.45, dampingFraction: 0.55),
-                       value: aparecio)
-            .scaleEffect(enMovimiento ? pose.respiroEnReposo : 1, anchor: .bottom)
-            .rotationEffect(.degrees(enMovimiento ? pose.giroEnReposo.hasta : pose.giroEnReposo.desde),
-                            anchor: .bottom)
-            .offset(y: enMovimiento ? pose.desplazamientoEnReposo : 0)
-            .animation(movimientoReducido ? nil : pose.animacionEnReposo, value: enMovimiento)
+            .scaleEffect(x: espejada ? -1 : 1, y: 1)
+            .scaleEffect(visible ? 1 : pose.escalaInicial, anchor: .bottom)
+            .opacity(visible ? 1 : 0)
             .frame(maxWidth: .infinity, maxHeight: altoMaximo)
             .background(brillo)
             .accessibilityHidden(true)
             .onAppear {
-                if activa { arrancar() }
+                if activa { entrar() }
             }
             .onChange(of: activa) { ahora in
-                if ahora {
-                    arrancar()
-                } else {
-                    aparecio = false
-                }
+                if ahora { entrar() }
             }
-            .onDisappear(perform: detener)
     }
 
-    private var escalaDeAparicion: CGFloat {
-        aparecio || movimientoReducido ? 1 : pose.escalaInicial
-    }
+    private var visible: Bool { entro || movimientoReducido }
 
     /// El halo del acento: un degradé radial que se apaga antes del borde, para
     /// que no se vea el corte del rectángulo.
@@ -131,20 +88,19 @@ struct Mascota: View {
         .accessibilityHidden(true)
     }
 
-    private func arrancar() {
-        guard !movimientoReducido else { return }
-        aparecio = true
-        if !enMovimiento { enMovimiento = true }
-    }
-
-    /// Al irse de pantalla se frena sin animación: si no, el loop seguiría
-    /// "volviendo" para siempre.
-    private func detener() {
-        var quieto = Transaction()
-        quieto.disablesAnimations = true
-        withTransaction(quieto) {
-            aparecio = false
-            enMovimiento = false
+    /// La entrada: vuelve al tamaño chico sin animar y, en la vuelta siguiente,
+    /// crece y aparece. 🪤 Las dos cosas en la misma vuelta se funden en un solo
+    /// cambio y no se anima nada: por eso el `async`.
+    private func entrar() {
+        guard !movimientoReducido else {
+            entro = true
+            return
+        }
+        var sinAnimar = Transaction()
+        sinAnimar.disablesAnimations = true
+        withTransaction(sinAnimar) { entro = false }
+        DispatchQueue.main.async {
+            withAnimation(.easeOut(duration: TokensMovimiento.lenta)) { entro = true }
         }
     }
 }
@@ -161,10 +117,15 @@ enum LadoDeLaCola {
 /// apunta a la mascota. Pensado para UNA línea corta (≈70 caracteres).
 struct Bocadillo<Contenido: View>: View {
     private let cola: LadoDeLaCola
+    private let posicionDeCola: CGFloat
     private let contenido: Contenido
 
-    init(cola: LadoDeLaCola = .abajo, @ViewBuilder contenido: () -> Contenido) {
+    /// - Parameter posicionDeCola: dónde sale el piquito a lo ancho, de 0
+    ///   (izquierda) a 1 (derecha). Por defecto, en el medio.
+    init(cola: LadoDeLaCola = .abajo, posicionDeCola: CGFloat = 0.5,
+         @ViewBuilder contenido: () -> Contenido) {
         self.cola = cola
+        self.posicionDeCola = posicionDeCola
         self.contenido = contenido()
     }
 
@@ -174,8 +135,9 @@ struct Bocadillo<Contenido: View>: View {
             .padding(.horizontal, TokensEspaciado.e16)
             .padding(.vertical, TokensEspaciado.e12)
             .padding(ladoDeLaCola, FormaDeBocadillo.altoDeCola)
-            .background(FormaDeBocadillo(cola: cola).fill(Paleta.superficieAlterna))
-            .overlay(FormaDeBocadillo(cola: cola).stroke(Paleta.bordeSuperficie, lineWidth: TokensEspaciado.e1))
+            .background(FormaDeBocadillo(cola: cola, posicionDeCola: posicionDeCola).fill(Paleta.superficieAlterna))
+            .overlay(FormaDeBocadillo(cola: cola, posicionDeCola: posicionDeCola)
+                .stroke(Paleta.bordeSuperficie, lineWidth: TokensEspaciado.e1))
     }
 }
 
@@ -199,10 +161,12 @@ struct TextoDeBocadillo: View {
 }
 
 /// El contorno del globito: un rectángulo redondeado con el piquito en el
-/// medio del lado de arriba o del de abajo, en un solo trazo (así el borde no
-/// se corta donde se juntan).
+/// lado de arriba o en el de abajo (en el medio, o donde diga
+/// `posicionDeCola`), en un solo trazo: así el borde no se corta donde se juntan.
 struct FormaDeBocadillo: Shape {
     var cola: LadoDeLaCola
+    /// De 0 (izquierda) a 1 (derecha). Nunca se mete en las esquinas redondeadas.
+    var posicionDeCola: CGFloat = 0.5
 
     static let altoDeCola: CGFloat = TokensEspaciado.e10
     static let anchoDeCola: CGFloat = TokensEspaciado.e20
@@ -211,8 +175,10 @@ struct FormaDeBocadillo: Shape {
         let arriba = cola == .arriba ? rect.minY + Self.altoDeCola : rect.minY
         let abajo = cola == .abajo ? rect.maxY - Self.altoDeCola : rect.maxY
         let radio = max(0, min(TokensRadio.card, (abajo - arriba) / 2, rect.width / 2))
-        let medio = rect.midX
         let mitad = max(0, min(Self.anchoDeCola / 2, rect.width / 2 - radio))
+        let margen = radio + mitad
+        let deseado = rect.minX + rect.width * min(max(posicionDeCola, 0), 1)
+        let medio = min(max(deseado, rect.minX + margen), rect.maxX - margen)
 
         var trazo = Path()
         trazo.move(to: CGPoint(x: rect.minX + radio, y: arriba))
@@ -242,9 +208,9 @@ struct FormaDeBocadillo: Shape {
 // MARK: - Mascota + globito
 
 /// La mascota hablando: el globito arriba (piquito hacia abajo) o abajo
-/// (piquito hacia arriba). Al activarse, la mascota sube con un fundido y el
-/// globito "brota" desde el piquito un instante después. Con "Reducir
-/// movimiento" aparece todo de una.
+/// (piquito hacia arriba). Al activarse, la mascota entra con un fundido (ver
+/// `Mascota`) y el globito "brota" desde el piquito un instante después; después
+/// todo queda quieto. Con "Reducir movimiento" aparece todo de una.
 struct MascotaConBocadillo: View {
     let pose: PoseDeMascota
     let texto: String
@@ -276,9 +242,6 @@ struct MascotaConBocadillo: View {
     private var mascota: some View {
         Mascota(pose: pose, altoMaximo: altoMaximo, activa: activa)
             .layoutPriority(1)
-            .offset(y: visible ? 0 : TokensEspaciado.e20)
-            .opacity(visible ? 1 : 0)
-            .animation(movimientoReducido ? nil : .easeOut(duration: TokensMovimiento.lenta), value: entro)
     }
 
     private var globito: some View {
@@ -288,7 +251,7 @@ struct MascotaConBocadillo: View {
             .opacity(visible ? 1 : 0)
             .animation(movimientoReducido
                        ? nil
-                       : Animation.spring(response: 0.4, dampingFraction: 0.7).delay(TokensMovimiento.rapida * 0.6),
+                       : Animation.easeOut(duration: TokensMovimiento.media).delay(TokensMovimiento.rapida * 0.6),
                        value: entro)
     }
 }

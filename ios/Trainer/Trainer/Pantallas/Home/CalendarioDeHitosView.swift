@@ -7,6 +7,8 @@ import TrainerCore
 /// realizados en esa jornada (por ejemplo, 1 km corriendo y 2 km corriendo en un mismo día).
 struct CalendarioDeHitosView: View {
     @ObservedObject private var almacen = AlmacenDeHitos.compartido
+    /// Si los pasos vienen solos de Salud (y no se editan) o se cargan a mano.
+    @ObservedObject private var sincronizadorDePasos = SincronizadorDePasos.compartido
     /// Km o millas, lo que eligió la persona (lo pasa el historial).
     private let unidades: SistemaDeUnidades
     @Environment(\.accessibilityReduceMotion) private var movimientoReducido
@@ -91,6 +93,12 @@ struct CalendarioDeHitosView: View {
         }
         .padding(TokensEspaciado.e16)
         .tarjeta()
+        .task {
+            // Lo que se ve: Salud para todo el año (pide el permiso la primera vez)
+            // y el servidor para lo que Salud no tenga, como en un teléfono nuevo.
+            let inicio = semanasDelAnio.first?.first ?? Date()
+            await sincronizadorDePasos.alVerPasos(desde: inicio, hasta: Date())
+        }
         .sheet(item: $actividadElegidaParaDetalle) { actividad in
             DetalleDeActividadView(
                 actividad: actividad,
@@ -99,17 +107,18 @@ struct CalendarioDeHitosView: View {
                 unidades: unidades
             )
         }
-        .alert("Registrar pasos", isPresented: $mostrandoEditorPasos) {
-            TextField("Cantidad de pasos", text: $textoPasosInput)
+        .alert(Textos.milestonesStepsLog, isPresented: $mostrandoEditorPasos) {
+            TextField(Textos.milestonesStepsCount, text: $textoPasosInput)
                 .keyboardType(.numberPad)
-            Button("Guardar") {
+            Button(Textos.commonSave) {
                 if let cant = Int(textoPasosInput.trimmingCharacters(in: .whitespacesAndNewlines)) {
                     almacen.guardarPasos(cant, para: fechaSeleccionada)
+                    Task { await sincronizadorDePasos.subirPendientes() }
                 }
             }
-            Button("Cancelar", role: .cancel) {}
+            Button(Textos.commonCancel, role: .cancel) {}
         } message: {
-            Text("Ingresá la cantidad de pasos para el día seleccionado:")
+            Text(Textos.milestonesStepsPrompt)
         }
     }
 
@@ -123,11 +132,10 @@ struct CalendarioDeHitosView: View {
                 .accessibilityHidden(true)
 
             VStack(alignment: .leading, spacing: TokensEspaciado.e1) {
-                Text(String(localized: "Tu año", comment: "Título del calendario de hitos"))
+                Text(Textos.milestonesYourYear)
                     .estilo(.tituloSeccion)
                     .accessibilityAddTraits(.isHeader)
-                Text(String(localized: "Cada cuadrito es un día. Tocalo para ver qué hiciste.",
-                            comment: "Calendario de hitos: cómo se usa"))
+                Text(Textos.milestonesCalendarHint)
                     .estilo(.labelCampo, color: Paleta.textoTerciario)
                     .fixedSize(horizontal: false, vertical: true)
             }
@@ -145,12 +153,12 @@ struct CalendarioDeHitosView: View {
         let columnas = [GridItem(.flexible(), spacing: TokensEspaciado.e8),
                         GridItem(.flexible(), spacing: TokensEspaciado.e8)]
         return LazyVGrid(columns: columnas, spacing: TokensEspaciado.e8) {
-            TarjetaMetrica(String(localized: "Sesiones", comment: "Calendario de hitos"), valor: "\(stats.totalSesiones)", simbolo: "figure.run")
-            TarjetaMetrica(String(localized: "Distancia total", comment: "Calendario de hitos"),
+            TarjetaMetrica(Textos.milestonesSessions, valor: "\(stats.totalSesiones)", simbolo: "figure.run")
+            TarjetaMetrica(Textos.milestonesTotalDistance,
                            valor: Formato.distanciaNumero(Int((stats.totalKm * 1000).rounded()), unidades: unidades),
                            unidad: Formato.unidadDeDistancia(unidades), simbolo: "map")
-            TarjetaMetrica(String(localized: "Pasos", comment: "Calendario de hitos"), valor: Formato.pasos(stats.totalPasos), simbolo: "figure.walk")
-            TarjetaMetrica(String(localized: "Días activos", comment: "Calendario de hitos"), valor: "\(stats.diasEntrenados)", simbolo: "flame.fill", destacada: true)
+            TarjetaMetrica(Textos.commonSteps, valor: Formato.pasos(stats.totalPasos), simbolo: "figure.walk")
+            TarjetaMetrica(Textos.milestonesActiveDays, valor: "\(stats.diasEntrenados)", simbolo: "flame.fill", destacada: true)
         }
     }
 
@@ -285,19 +293,19 @@ struct CalendarioDeHitosView: View {
         df.dateStyle = .medium
         let cantidad = almacen.actividades(para: dia).count
         let entrenos = cantidad == 0
-            ? String(localized: "sin entrenamientos", comment: "Calendario de hitos: accesibilidad de un día")
-            : String(localized: "\(cantidad) entrenamientos", comment: "Calendario de hitos: accesibilidad de un día")
+            ? Textos.milestonesNoWorkouts
+            : Textos.milestonesWorkoutsCount(cantidad)
         return "\(df.string(from: dia)): \(entrenos), \(Self.nombreDeNivel(nivel))"
     }
 
     /// El nivel del mapa de calor dicho en una palabra.
     private static func nombreDeNivel(_ nivel: Int) -> String {
         switch nivel {
-        case 1: return String(localized: "actividad suave", comment: "Calendario de hitos: nivel 1")
-        case 2: return String(localized: "actividad moderada", comment: "Calendario de hitos: nivel 2")
-        case 3: return String(localized: "actividad alta", comment: "Calendario de hitos: nivel 3")
-        case 4: return String(localized: "actividad muy alta", comment: "Calendario de hitos: nivel 4")
-        default: return String(localized: "sin actividad", comment: "Calendario de hitos: nivel 0")
+        case 1: return Textos.milestonesActivityLight
+        case 2: return Textos.milestonesActivityModerate
+        case 3: return Textos.milestonesActivityHigh
+        case 4: return Textos.milestonesActivityVeryHigh
+        default: return Textos.milestonesActivityNone
         }
     }
 
@@ -309,7 +317,7 @@ struct CalendarioDeHitosView: View {
     private var leyendaYAyuda: some View {
         VStack(alignment: .leading, spacing: TokensEspaciado.e8) {
             HStack(spacing: TokensEspaciado.e6) {
-                Text("Menos")
+                Text(Textos.commonLess)
                     .estilo(.etiquetaSeccion.enMinusculas, color: Paleta.textoTerciario)
 
                 HStack(spacing: hueco) {
@@ -319,7 +327,7 @@ struct CalendarioDeHitosView: View {
                 }
                 .accessibilityHidden(true)
 
-                Text("Más")
+                Text(Textos.commonMore)
                     .estilo(.etiquetaSeccion.enMinusculas, color: Paleta.textoTerciario)
 
                 Spacer(minLength: TokensEspaciado.e6)
@@ -329,7 +337,7 @@ struct CalendarioDeHitosView: View {
                     HistorialMovimiento.animar(movimientoReducido) { leyendaAbierta.toggle() }
                 } label: {
                     HStack(spacing: TokensEspaciado.e4) {
-                        Text(String(localized: "¿Qué significa?", comment: "Calendario de hitos: abre la explicación de los colores"))
+                        Text(Textos.milestonesWhatItMeans)
                             .estilo(.chip, color: Paleta.textoAcento)
                         Image(systemName: "chevron.down")
                             .font(.system(size: TokensTipografia.chipTamano, weight: .bold))
@@ -342,8 +350,8 @@ struct CalendarioDeHitosView: View {
                 }
                 .buttonStyle(EstiloPresionado())
                 .accessibilityValue(leyendaAbierta
-                                    ? String(localized: "Abierta", comment: "Estado de la leyenda")
-                                    : String(localized: "Cerrada", comment: "Estado de la leyenda"))
+                                    ? Textos.milestonesExpanded
+                                    : Textos.milestonesCollapsed)
             }
 
             if leyendaAbierta {
@@ -359,8 +367,7 @@ struct CalendarioDeHitosView: View {
                         }
                         .accessibilityElement(children: .combine)
                     }
-                    Text(String(localized: "El borde de color marca hoy; el borde grueso, el día que elegiste.",
-                                comment: "Calendario de hitos: qué significan los bordes"))
+                    Text(Textos.milestonesCalendarBorderHint)
                         .estilo(.notaLegal, color: Paleta.textoTerciario)
                         .fixedSize(horizontal: false, vertical: true)
                 }
@@ -389,20 +396,15 @@ struct CalendarioDeHitosView: View {
         let p10 = Formato.pasos(10_000)
         switch nivel {
         case 1:
-            return String(localized: "Suave: una salida corta (menos de \(d3)) o \(p5) pasos o más.",
-                          comment: "Calendario de hitos: leyenda del nivel 1")
+            return Textos.milestonesLevelLight(d3, p5)
         case 2:
-            return String(localized: "Moderado: \(d3) o más en el día, o \(p10) pasos o más.",
-                          comment: "Calendario de hitos: leyenda del nivel 2")
+            return Textos.milestonesLevelModerate(d3, p10)
         case 3:
-            return String(localized: "Alto: dos salidas, o \(d6) o más en el día.",
-                          comment: "Calendario de hitos: leyenda del nivel 3")
+            return Textos.milestonesLevelHigh(d6)
         case 4:
-            return String(localized: "Muy alto: tres salidas o más, o \(d12) o más en el día.",
-                          comment: "Calendario de hitos: leyenda del nivel 4")
+            return Textos.milestonesLevelVeryHigh(d12)
         default:
-            return String(localized: "Sin actividad: ni salidas ni pasos que lleguen a \(p5).",
-                          comment: "Calendario de hitos: leyenda del nivel 0")
+            return Textos.milestonesLevelNone(p5)
         }
     }
 
@@ -417,15 +419,16 @@ struct CalendarioDeHitosView: View {
     private var inspectorDelDiaSeleccionado: some View {
         let entrenamientos = almacen.actividades(para: fechaSeleccionada)
         let pasos = almacen.pasos(para: fechaSeleccionada)
+        let fuente = almacen.fuenteDePasos(para: fechaSeleccionada)
 
         return VStack(alignment: .leading, spacing: TokensEspaciado.e12) {
             encabezadoDelDia(cantidad: entrenamientos.count)
-            tarjetaDePasos(pasos)
+            tarjetaDePasos(pasos, fuente: fuente)
 
             // Lista de Entrenamientos (Requerimiento explícito: "si fueron distintos entrenamientos el mismo día que se muestre una lista")
             if entrenamientos.isEmpty {
                 VStack(spacing: TokensEspaciado.e8) {
-                    Text("No se registraron salidas deportivas este día.")
+                    Text(Textos.milestonesNoWorkoutsDay)
                         .estilo(.cuerpoSecundario, color: Paleta.textoTerciario)
                         .frame(maxWidth: .infinity, alignment: .leading)
 
@@ -438,7 +441,7 @@ struct CalendarioDeHitosView: View {
                 resumenDelDia(entrenamientos)
 
                 VStack(alignment: .leading, spacing: TokensEspaciado.e8) {
-                    Text("Entrenamientos realizados")
+                    Text(Textos.milestonesCompletedWorkouts)
                         .estilo(.etiquetaSeccion, color: Paleta.textoTerciario)
                         .accessibilityAddTraits(.isHeader)
 
@@ -456,10 +459,10 @@ struct CalendarioDeHitosView: View {
         let totales = HistorialTotales(entrenamientos)
         let tiempo = HistorialFormato.tiempoAcumulado(segundos: totales.segundos)
         return HStack(spacing: TokensEspaciado.e8) {
-            TarjetaMetrica(String(localized: "Distancia del día", comment: "Calendario de hitos: resumen del día"),
+            TarjetaMetrica(Textos.milestonesDayDistance,
                            valor: Formato.distanciaNumero(totales.metros, unidades: unidades),
                            unidad: Formato.unidadDeDistancia(unidades), simbolo: "map", destacada: true)
-            TarjetaMetrica(String(localized: "Tiempo", comment: "Calendario de hitos: resumen del día"),
+            TarjetaMetrica(Textos.commonTime,
                            valor: tiempo.valor, unidad: tiempo.unidad, simbolo: "clock")
         }
     }
@@ -476,19 +479,20 @@ struct CalendarioDeHitosView: View {
             Spacer()
 
             if cantidad == 0 {
-                PildoraDeEstado(String(localized: "Día de descanso", comment: "Calendario de hitos: día sin entrenamientos"),
+                PildoraDeEstado(Textos.milestonesRestDay,
                                 simbolo: "moon.zzz.fill")
             } else {
                 PildoraDeEstado(cantidad == 1
-                                ? String(localized: "1 entrenamiento", comment: "Calendario de hitos")
-                                : String(localized: "\(cantidad) entrenamientos", comment: "Calendario de hitos"),
+                                ? Textos.milestonesWorkoutsOne
+                                : Textos.milestonesWorkoutsCount(cantidad),
                                 tono: .acento)
             }
         }
     }
 
-    /// Tarjeta de Pasos del Día (Requerimiento explícito: "que se guarde la cantidad de pasos")
-    private func tarjetaDePasos(_ pasos: Int) -> some View {
+    /// Tarjeta de Pasos del Día (Requerimiento explícito: "que se guarde la cantidad de pasos").
+    /// Con Salud en modo automático no se edita: muestra de dónde salió el número.
+    private func tarjetaDePasos(_ pasos: Int, fuente: FuenteDePasos?) -> some View {
         HStack(spacing: TokensEspaciado.e12) {
             ZStack {
                 Circle().fill(Paleta.acentoChipActivo)
@@ -503,34 +507,54 @@ struct CalendarioDeHitosView: View {
                 HStack(alignment: .firstTextBaseline, spacing: TokensEspaciado.e4) {
                     Text(Formato.pasos(pasos))
                         .estilo(.metricaMedia)
-                    Text("pasos")
+                    Text(Textos.commonStepsLowercase)
                         .estilo(.labelCampo, color: Paleta.acento)
                 }
-                Text("Pasos registrados en el día")
+                Text(Textos.milestonesStepsLogged)
                     .estilo(.labelCampo, color: Paleta.textoTerciario)
             }
             .accessibilityElement(children: .combine)
 
             Spacer()
 
-            Button {
-                textoPasosInput = pasos > 0 ? "\(pasos)" : "5000"
-                mostrandoEditorPasos = true
-            } label: {
-                Text("Editar")
-                    .estilo(.tituloCard, color: Paleta.acento)
-                    .padding(.horizontal, TokensEspaciado.e14)
-                    .frame(minHeight: TokensEspaciado.e36)
-                    .background(Paleta.acentoChipActivo)
-                    .clipShape(Capsule())
-                    .frame(minHeight: TokensTamano.objetivoTactilMinimo)
-                    .contentShape(Rectangle())
+            if sincronizadorDePasos.modoAutomatico {
+                PildoraDeEstado(Self.nombreDeFuente(fuente ?? .healthkit), simbolo: "heart.fill", tono: .acento)
+            } else {
+                botonEditarPasos(pasos)
             }
-            .buttonStyle(EstiloPresionado())
         }
         .padding(TokensEspaciado.e10)
         .background(Paleta.superficieAlterna)
         .clipShape(RoundedRectangle(cornerRadius: TokensRadio.boton, style: .continuous))
+    }
+
+    /// La carga a mano: sólo cuando Salud no da los pasos (sin permiso o sin Salud).
+    private func botonEditarPasos(_ pasos: Int) -> some View {
+        Button {
+            textoPasosInput = pasos > 0 ? "\(pasos)" : "5000"
+            mostrandoEditorPasos = true
+        } label: {
+            Text(Textos.commonEdit)
+                .estilo(.tituloCard, color: Paleta.acento)
+                .padding(.horizontal, TokensEspaciado.e14)
+                .frame(minHeight: TokensEspaciado.e36)
+                .background(Paleta.acentoChipActivo)
+                .clipShape(Capsule())
+                .frame(minHeight: TokensTamano.objetivoTactilMinimo)
+                .contentShape(Rectangle())
+        }
+        .buttonStyle(EstiloPresionado())
+    }
+
+    private static func nombreDeFuente(_ fuente: FuenteDePasos) -> String {
+        switch fuente {
+        case .healthkit:
+            return Textos.milestonesStepsSourceAppleHealth
+        case .healthConnect:
+            return Textos.milestonesStepsSourceHealthConnect
+        case .manual:
+            return Textos.milestonesStepsSourceManual
+        }
     }
 
     private func filaEntrenamiento(_ actividad: Actividad, indice: Int) -> some View {
@@ -564,12 +588,12 @@ struct CalendarioDeHitosView: View {
                             .monospacedDigit()
 
                         if let ritmo = HistorialFormato.ritmoOVelocidad(actividad, unidades: unidades) {
-                            Text("· \(ritmo)")
+                            Text(verbatim: "· \(ritmo)")
                                 .estilo(.labelCampo, color: Paleta.textoTerciario)
                                 .monospacedDigit()
                         }
 
-                        Text("· \(horaDe(actividad))")
+                        Text(verbatim: "· \(horaDe(actividad))")
                             .estilo(.labelCampo, color: Paleta.textoTerciario)
                     }
                 }
@@ -599,9 +623,9 @@ struct CalendarioDeHitosView: View {
     private func tituloFecha(_ fecha: Date) -> String {
         let cal = Calendar.current
         if cal.isDateInToday(fecha) {
-            return String(localized: "Hoy", comment: "Día elegido en el calendario de hitos")
+            return Textos.commonToday
         } else if cal.isDateInYesterday(fecha) {
-            return String(localized: "Ayer", comment: "Día elegido en el calendario de hitos")
+            return Textos.commonYesterday
         } else {
             let df = DateFormatter()
             df.locale = Self.idioma
@@ -631,7 +655,7 @@ struct CalendarioDeHitosView: View {
             HStack(spacing: TokensEspaciado.e6) {
                 Image(systemName: "plus.circle.fill")
                     .font(.system(size: TokensTipografia.tituloCardTamano, weight: .bold))
-                Text("Añadir 1 km running a este día")
+                Text(Textos.milestonesDebugAddKm)
                     .estilo(.tituloCard, color: Paleta.acento)
             }
             .foregroundStyle(Paleta.acento)

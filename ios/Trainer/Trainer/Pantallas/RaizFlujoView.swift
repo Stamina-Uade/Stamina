@@ -60,29 +60,29 @@ struct RaizFlujoView: View {
         // se cierra encima de lo que se esté viendo.
         .task { await flujo.consultarPuertaDeVersion() }
         .task { await flujo.escucharCierres() }
-        .alert(Textos.versionRecomendadaTitulo,
+        .alert(Textos.versionRecommendedTitle,
                isPresented: recomendacionVisible,
                presenting: flujo.actualizacionRecomendada) { aviso in
             if let tienda = aviso.tienda {
-                Button(Textos.versionActualizar) {
+                Button(Textos.versionUpdate) {
                     flujo.recomendacionDescartada = true
                     abrirEnlace(tienda)
                 }
             }
-            Button(Textos.versionAhoraNo, role: .cancel) {
+            Button(Textos.versionNotNow, role: .cancel) {
                 flujo.recomendacionDescartada = true
             }
         } message: { aviso in
-            Text(aviso.texto(generico: Textos.versionRecomendadaTexto))
+            Text(aviso.texto(generico: Textos.versionRecommendedBody))
         }
-        .alert(Textos.sesionExpiradaTitulo, isPresented: $flujo.alertaSesionExpirada) {
-            Button(Textos.comunListo, role: .cancel) {
+        .alert(Textos.sessionExpiredTitle, isPresented: $flujo.alertaSesionExpirada) {
+            Button(Textos.commonDone, role: .cancel) {
                 flujo.irAlLoginDesdeSesionExpirada()
             }
         } message: {
-            Text(Textos.sesionExpiradaMensaje)
+            Text(Textos.sessionExpiredMessage)
         }
-        .alert(flujo.alertaError?.titulo ?? Textos.comunListo,
+        .alert(flujo.alertaError?.titulo ?? Textos.commonDone,
                isPresented: Binding(
                    get: { flujo.alertaError != nil },
                    set: { if !$0 { flujo.alertaError = nil } }
@@ -120,7 +120,7 @@ struct RaizFlujoView: View {
             case .volverYAvance, .soloAvance:
                 BarraAvanceSegmentada(paso: flujo.pantalla.numeroDePaso ?? 1,
                                       total: Pantalla.pasosDelRegistro.count,
-                                      descripcion: Textos.comunAvanceRegistro)
+                                      descripcion: Textos.commonSignupProgress)
             case .soloVolver, .ninguna:
                 Spacer()
             }

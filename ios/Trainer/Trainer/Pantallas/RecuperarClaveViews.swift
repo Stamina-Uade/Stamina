@@ -17,11 +17,11 @@ struct ClaveCorreoView: View {
     @EnvironmentObject private var flujo: FlujoEntrada
 
     var body: some View {
-        PantallaPaso(titulo: Textos.claveCorreoTitulo, texto: Textos.claveCorreoTexto) {
+        PantallaPaso(titulo: Textos.passwordResetEmailTitle, texto: Textos.passwordResetEmailBody) {
             ScrollViewReader { desplazamiento in
                 VStack(alignment: .leading, spacing: TokensEspaciado.e8) {
-                    CampoTexto(etiqueta: Textos.comunCorreoLabel,
-                               marcador: Textos.comunCorreoMarcador,
+                    CampoTexto(etiqueta: Textos.commonEmailLabel,
+                               marcador: Textos.commonEmailPlaceholder,
                                texto: $flujo.recuperacionCorreo,
                                contenido: .correo, teclado: .correo)
                         .disabled(flujo.enCurso)
@@ -35,16 +35,16 @@ struct ClaveCorreoView: View {
                 .muestraElCorreoRechazado(flujo.correoRechazado, desplazando: desplazamiento)
             }
         } pie: {
-            Text(Textos.claveCorreoAntiEnumeracion)
+            Text(Textos.passwordResetEmailAntiEnumeration)
                 .estilo(.notaLegal, color: Paleta.textoTerciario)
                 .multilineTextAlignment(.center)
                 .fixedSize(horizontal: false, vertical: true)
 
             // Se prende con algo escrito: si no parece un correo, lo dice el toque.
-            BotonPrimario(Textos.claveCorreoEnviar,
+            BotonPrimario(Textos.passwordResetEmailSend,
                           habilitado: !flujo.recuperacionCorreo.isEmpty && !flujo.enCurso,
                           cargando: flujo.enCurso,
-                          motivoDeshabilitado: Textos.comunCompletaParaSeguir) {
+                          motivoDeshabilitado: Textos.commonCompleteToContinue) {
                 Task { await flujo.pedirCodigoDeClave() }
             }
             // Acá había un "Volver al inicio de sesión". Se fue: la flecha de la
@@ -61,8 +61,8 @@ struct ClaveCodigoView: View {
     private var listo: Bool { flujo.recuperacionCodigo.count == CampoCodigo.largo }
 
     var body: some View {
-        PantallaPaso(titulo: Textos.claveCodigoTitulo,
-                     texto: Textos.claveCodigoTexto(flujo.correoDelDesafio)) {
+        PantallaPaso(titulo: Textos.passwordResetCodeTitle,
+                     texto: Textos.passwordResetCodeBody(flujo.correoDelDesafio)) {
             VStack(spacing: TokensEspaciado.e14) {
                 CampoCodigo(codigo: $flujo.recuperacionCodigo)
                     .disabled(flujo.enCurso)
@@ -73,10 +73,10 @@ struct ClaveCodigoView: View {
                               reenviar: { Task { await flujo.pedirCodigoDeClave() } })
             }
         } pie: {
-            BotonPrimario(Textos.claveCodigoVerificar,
+            BotonPrimario(Textos.passwordResetCodeVerify,
                           habilitado: listo && !flujo.enCurso,
                           cargando: flujo.enCurso,
-                          motivoDeshabilitado: Textos.comunCompletaParaSeguir) {
+                          motivoDeshabilitado: Textos.commonCompleteToContinue) {
                 Task { await flujo.verificarCodigoDeClave() }
             }
         }
@@ -88,15 +88,15 @@ struct ClaveNuevaView: View {
     @EnvironmentObject private var flujo: FlujoEntrada
 
     var body: some View {
-        PantallaPaso(titulo: Textos.claveNuevaTitulo, texto: Textos.claveNuevaTexto) {
+        PantallaPaso(titulo: Textos.passwordResetNewTitle, texto: Textos.passwordResetNewBody) {
             VStack(alignment: .leading, spacing: TokensEspaciado.e13) {
-                CampoTexto(etiqueta: Textos.claveNuevaLabel,
-                           marcador: Textos.comunClaveMarcador,
+                CampoTexto(etiqueta: Textos.passwordResetNewLabel,
+                           marcador: Textos.commonPasswordPlaceholder,
                            texto: $flujo.claveNueva,
                            contenido: .claveNueva, seguro: true)
 
-                CampoTexto(etiqueta: Textos.claveNuevaRepetirLabel,
-                           marcador: Textos.comunClaveMarcador,
+                CampoTexto(etiqueta: Textos.passwordResetNewRepeatLabel,
+                           marcador: Textos.commonPasswordPlaceholder,
                            texto: $flujo.claveNuevaRepetida,
                            contenido: .claveNueva, seguro: true)
 
@@ -105,16 +105,16 @@ struct ClaveNuevaView: View {
 
                 if !flujo.claveNuevaRepetida.isEmpty {
                     PistaDeCampo(estado: flujo.claveNuevaCoincide
-                                 ? .correcto(Textos.claveNuevaCoinciden)
-                                 : .error(Textos.claveNuevaNoCoinciden))
+                                 ? .correcto(Textos.passwordResetNewMatch)
+                                 : .error(Textos.passwordResetNewNoMatch))
                 }
             }
             .disabled(flujo.enCurso)
         } pie: {
-            BotonPrimario(Textos.claveNuevaGuardar,
+            BotonPrimario(Textos.passwordResetNewSave,
                           habilitado: flujo.claveNuevaLista && !flujo.enCurso,
                           cargando: flujo.enCurso,
-                          motivoDeshabilitado: Textos.comunCompletaParaSeguir) {
+                          motivoDeshabilitado: Textos.commonCompleteToContinue) {
                 Task { await flujo.guardarClaveNueva() }
             }
         }
@@ -131,16 +131,16 @@ struct ClaveListaView: View {
     @EnvironmentObject private var flujo: FlujoEntrada
 
     var body: some View {
-        PantallaCierre(titulo: Textos.claveListaTitulo, texto: Textos.claveListaTexto) {
+        PantallaCierre(titulo: Textos.passwordResetDoneTitle, texto: Textos.passwordResetDoneBody) {
             Tarjeta {
                 VStack(spacing: TokensEspaciado.e9) {
-                    FilaResumen(Textos.claveListaCuenta, flujo.correoDelDesafio)
-                    FilaResumen(Textos.claveListaCambioHecho,
+                    FilaResumen(Textos.passwordResetDoneAccount, flujo.correoDelDesafio)
+                    FilaResumen(Textos.passwordResetDoneChanged,
                                 Date.now.formatted(date: .abbreviated, time: .shortened))
                 }
             }
         } pie: {
-            BotonPrimario(Textos.claveListaEntrar) { flujo.entrarConLaClaveNueva() }
+            BotonPrimario(Textos.passwordResetDoneGoHome) { flujo.entrarConLaClaveNueva() }
         }
     }
 }
@@ -167,7 +167,7 @@ struct PistaDeCorreoRechazado: View {
     static let ancla = "correo-rechazado"
 
     var body: some View {
-        PistaDeCampo(estado: .error(Textos.regCorreoInvalido))
+        PistaDeCampo(estado: .error(Textos.signupEmailInvalid))
             .id(Self.ancla)
     }
 }
@@ -184,7 +184,7 @@ extension View {
                                   desplazando desplazamiento: ScrollViewProxy) -> some View {
         onChange(of: rechazado) { ahora in
             guard ahora else { return }
-            UIAccessibility.post(notification: .announcement, argument: Textos.regCorreoInvalido)
+            UIAccessibility.post(notification: .announcement, argument: Textos.signupEmailInvalid)
             // Recién en la vuelta siguiente el renglón nuevo tiene lugar en pantalla.
             DispatchQueue.main.async {
                 desplazamiento.scrollTo(PistaDeCorreoRechazado.ancla)
@@ -208,7 +208,7 @@ struct MedidorDeClave: View {
                 }
             }
             .accessibilityElement()
-            .accessibilityLabel(Textos.claveNuevaFuerza(cumplidas))
+            .accessibilityLabel(Textos.passwordResetNewStrength(cumplidas))
 
             ForEach(reglas) { regla in
                 HStack(spacing: TokensEspaciado.e8) {
@@ -250,7 +250,7 @@ struct FilaDeReenvio: View {
     var body: some View {
         HStack {
             Button(action: cambiarCorreo) {
-                Text(Textos.comunCambiarCorreo)
+                Text(Textos.commonChangeEmail)
                     .estilo(.cuerpoSecundario, color: Paleta.textoTerciario)
                     .objetivoTactilAlto()
             }
@@ -258,12 +258,12 @@ struct FilaDeReenvio: View {
             Spacer()
 
             if restantes > 0 {
-                Text(Textos.comunReenviarEn(relojMmss))
+                Text(Textos.commonResendIn(relojMmss))
                     .estilo(.cuerpoSecundario, color: Paleta.textoTerciario)
                     .monospacedDigit()
             } else {
                 Button(action: reenviar) {
-                    Text(Textos.comunReenviarCodigo)
+                    Text(Textos.commonResendCode)
                         .estilo(.cuerpoSecundario, color: Paleta.acento)
                         .objetivoTactilAlto()
                 }

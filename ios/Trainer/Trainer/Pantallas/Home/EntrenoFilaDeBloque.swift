@@ -40,8 +40,8 @@ struct FilaDeBloque: View {
     }
 
     private var insigniaVisible: String? {
-        if activo { return bloque.insignia ?? Textos.entrenoEnCurso }
-        if pasado { return Textos.planHecho }
+        if activo { return bloque.insignia ?? Textos.workoutInProgressLowercase }
+        if pasado { return Textos.planDone }
         return bloque.insignia
     }
 }

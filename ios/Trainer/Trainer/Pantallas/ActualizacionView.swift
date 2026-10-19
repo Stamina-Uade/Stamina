@@ -15,13 +15,13 @@ struct ActualizacionRequeridaView: View {
     @Environment(\.openURL) private var abrirEnlace
 
     var body: some View {
-        PantallaCierre(titulo: Textos.versionRequeridaTitulo,
-                       texto: aviso.texto(generico: Textos.versionRequeridaTexto),
+        PantallaCierre(titulo: Textos.versionRequiredTitle,
+                       texto: aviso.texto(generico: Textos.versionRequiredBody),
                        pie: {
                            // Sin enlace a la tienda no hay botón: uno que no hace nada
                            // es peor que el texto, que ya dice dónde actualizar.
                            if let tienda = aviso.tienda {
-                               BotonPrimario(Textos.versionActualizar) { abrirEnlace(tienda) }
+                               BotonPrimario(Textos.versionUpdate) { abrirEnlace(tienda) }
                            }
                        })
             // Opaca hasta el borde: lo de abajo no se tiene que ver ni tocar.

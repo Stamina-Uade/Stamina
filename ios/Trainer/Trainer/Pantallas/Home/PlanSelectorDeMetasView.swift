@@ -18,27 +18,27 @@ struct SelectorInteractivoDeMetasView: View {
     }
 
     private let todasLasMetas: [MetaDidactica] = [
-        MetaDidactica(id: .c5k, titulo: String(localized: "5K Express", comment: "Selector de metas: nombre de la meta"), distancia: "5 km", icono: "figure.run",
-                      descripcion: String(localized: "Velocidad y consistencia. Ideal para iniciarse o mejorar marca personal.", comment: "Selector de metas: descripción de la meta"),
-                      semanasRecomendadas: String(localized: "6 a 8 semanas", comment: "Selector de metas: semanas de preparación recomendadas"), semanasMinimas: 6),
-        MetaDidactica(id: .c10k, titulo: String(localized: "10K Progresivo", comment: "Selector de metas: nombre de la meta"), distancia: "10 km", icono: "figure.run",
-                      descripcion: String(localized: "El equilibrio clásico entre fondo aeróbico y ritmo de carrera.", comment: "Selector de metas: descripción de la meta"),
-                      semanasRecomendadas: String(localized: "8 a 12 semanas", comment: "Selector de metas: semanas de preparación recomendadas"), semanasMinimas: 8),
-        MetaDidactica(id: .mediaMaraton, titulo: String(localized: "Media Maratón", comment: "Selector de metas: nombre de la meta"), distancia: "21.1 km", icono: "figure.run",
-                      descripcion: String(localized: "Prueba intermedia exigente. Requiere fondos largos progresivos y nutrición en ruta.", comment: "Selector de metas: descripción de la meta"),
-                      semanasRecomendadas: String(localized: "12 a 16 semanas", comment: "Selector de metas: semanas de preparación recomendadas"), semanasMinimas: 12),
-        MetaDidactica(id: .maraton, titulo: String(localized: "Maratón", comment: "Selector de metas: nombre de la meta"), distancia: "42.2 km", icono: "figure.run",
-                      descripcion: String(localized: "El desafío supremo de resistencia aeróbica, fuerza mental y fondo.", comment: "Selector de metas: descripción de la meta"),
-                      semanasRecomendadas: String(localized: "16 a 24 semanas", comment: "Selector de metas: semanas de preparación recomendadas"), semanasMinimas: 16),
-        MetaDidactica(id: .trailMontana, titulo: String(localized: "Trail Montaña", comment: "Selector de metas: nombre de la meta"), distancia: String(localized: "Desnivel +", comment: "Selector de metas: distancia o foco de la meta"), icono: "figure.hiking",
-                      descripcion: String(localized: "Terrenos técnicos, cuestas y adaptación a senderos y montaña.", comment: "Selector de metas: descripción de la meta"),
-                      semanasRecomendadas: String(localized: "10 a 14 semanas", comment: "Selector de metas: semanas de preparación recomendadas"), semanasMinimas: 10),
-        MetaDidactica(id: .triatlonOlimpico, titulo: String(localized: "Triatlón Olímpico", comment: "Selector de metas: nombre de la meta"), distancia: "1.5K · 40K · 10K", icono: "figure.mixed.cardio",
-                      descripcion: String(localized: "Natación en aguas abiertas, ciclismo y carrera en transiciones.", comment: "Selector de metas: descripción de la meta"),
-                      semanasRecomendadas: String(localized: "14 a 20 semanas", comment: "Selector de metas: semanas de preparación recomendadas"), semanasMinimas: 14),
-        MetaDidactica(id: .volverSinLesiones, titulo: String(localized: "Volver sin lesiones", comment: "Selector de metas: nombre de la meta"), distancia: String(localized: "Salud y base", comment: "Selector de metas: distancia o foco de la meta"), icono: "heart.text.square",
-                      descripcion: String(localized: "Acondicionamiento físico suave para retomar el hábito con seguridad.", comment: "Selector de metas: descripción de la meta"),
-                      semanasRecomendadas: String(localized: "6 a 10 semanas", comment: "Selector de metas: semanas de preparación recomendadas"), semanasMinimas: 6)
+        MetaDidactica(id: .c5k, titulo: Textos.goalsC5kTitle, distancia: "5 km", icono: "figure.run",
+                      descripcion: Textos.goalsC5kBody,
+                      semanasRecomendadas: Textos.goalsWeeks68, semanasMinimas: 6),
+        MetaDidactica(id: .c10k, titulo: Textos.goalsC10kTitle, distancia: "10 km", icono: "figure.run",
+                      descripcion: Textos.goalsC10kBody,
+                      semanasRecomendadas: Textos.goalsWeeks812, semanasMinimas: 8),
+        MetaDidactica(id: .mediaMaraton, titulo: Textos.goalsHalfMarathonTitle, distancia: "21.1 km", icono: "figure.run",
+                      descripcion: Textos.goalsHalfMarathonBody,
+                      semanasRecomendadas: Textos.goalsWeeks1216, semanasMinimas: 12),
+        MetaDidactica(id: .maraton, titulo: Textos.goalsMarathonTitle, distancia: "42.2 km", icono: "figure.run",
+                      descripcion: Textos.goalsMarathonBody,
+                      semanasRecomendadas: Textos.goalsWeeks1624, semanasMinimas: 16),
+        MetaDidactica(id: .trailMontana, titulo: Textos.goalsMountainTrailTitle, distancia: Textos.goalsElevationPlus, icono: "figure.hiking",
+                      descripcion: Textos.goalsMountainTrailBody,
+                      semanasRecomendadas: Textos.goalsWeeks1014, semanasMinimas: 10),
+        MetaDidactica(id: .triatlonOlimpico, titulo: Textos.goalsOlympicTriathlonTitle, distancia: "1.5K · 40K · 10K", icono: "figure.mixed.cardio",
+                      descripcion: Textos.goalsOlympicTriathlonBody,
+                      semanasRecomendadas: Textos.goalsWeeks1420, semanasMinimas: 14),
+        MetaDidactica(id: .volverSinLesiones, titulo: Textos.goalsInjuryFreeTitle, distancia: Textos.goalsHealthAndBase, icono: "heart.text.square",
+                      descripcion: Textos.goalsInjuryFreeBody,
+                      semanasRecomendadas: Textos.goalsWeeks610, semanasMinimas: 6)
     ]
 
     /// Las que se ofrecen: el MVP (sólo running) esconde el triatlón.
@@ -71,10 +71,10 @@ struct SelectorInteractivoDeMetasView: View {
             selectorDeFecha
             llamadoAAccion
         }
-        .alert("No se pudo guardar el objetivo", isPresented: $errorGuardado) {
-            Button("Aceptar", role: .cancel) {}
+        .alert(Textos.goalsSaveFailedTitle, isPresented: $errorGuardado) {
+            Button(Textos.commonOk, role: .cancel) {}
         } message: {
-            Text("Revisá tu conexión e intentá de nuevo.")
+            Text(Textos.goalsSaveFailedMessage)
         }
     }
 
@@ -82,14 +82,13 @@ struct SelectorInteractivoDeMetasView: View {
 
     private var cabecera: some View {
         VStack(alignment: .leading, spacing: TokensEspaciado.e6) {
-            PildoraDeEstado(String(localized: "Nueva etapa", comment: "Selector de metas"), simbolo: "flag.checkered", tono: .acento)
+            PildoraDeEstado(Textos.goalsNewChapter, simbolo: "flag.checkered", tono: .acento)
 
-            Text(String(localized: "Elegí tu próxima carrera", comment: "Selector de metas, título"))
+            Text(Textos.goalsTitle)
                 .estilo(.tituloPantalla)
                 .accessibilityAddTraits(.isHeader)
 
-            Text(String(localized: "Tu plan anterior terminó o todavía no tenés una meta. Contanos qué querés correr y cuándo, y armamos semanas a tu medida.",
-                        comment: "Selector de metas, explicación"))
+            Text(Textos.goalsIntro)
                 .estilo(.cuerpoSecundario, color: Paleta.textoTerciario)
                 .fixedSize(horizontal: false, vertical: true)
         }
@@ -99,16 +98,16 @@ struct SelectorInteractivoDeMetasView: View {
     /// Los tres pasos, para que se sepa cuánto falta antes de empezar.
     private var pasos: some View {
         HStack(alignment: .top, spacing: TokensEspaciado.e8) {
-            paso(1, String(localized: "Elegí la meta", comment: "Selector de metas, paso 1"))
-            paso(2, String(localized: "Poné la fecha", comment: "Selector de metas, paso 2"))
-            paso(3, String(localized: "Armamos tu plan", comment: "Selector de metas, paso 3"))
+            paso(1, Textos.goalsStepChooseGoal)
+            paso(2, Textos.goalsStepSetDate)
+            paso(3, Textos.goalsStepBuildPlan)
         }
         .accessibilityElement(children: .combine)
     }
 
     private func paso(_ numero: Int, _ texto: String) -> some View {
         HStack(spacing: TokensEspaciado.e6) {
-            Text("\(numero)")
+            Text(verbatim: "\(numero)")
                 .estilo(.chip, color: Paleta.sobreAcento)
                 .frame(width: TokensEspaciado.e20, height: TokensEspaciado.e20)
                 .background(Circle().fill(Paleta.acento))
@@ -200,7 +199,7 @@ struct SelectorInteractivoDeMetasView: View {
         .buttonStyle(EstiloPresionado())
         .accessibilityElement(children: .combine)
         .accessibilityAddTraits(elegida ? [.isButton, .isSelected] : .isButton)
-        .accessibilityHint(String(localized: "Elige esta meta para tu próximo plan", comment: "VoiceOver, selector de metas"))
+        .accessibilityHint(Textos.goalsChooseHint)
     }
 
     // MARK: - Tarjeta didáctica de la meta elegida
@@ -212,7 +211,7 @@ struct SelectorInteractivoDeMetasView: View {
                     .font(.system(size: TokensEspaciado.e14, weight: .semibold))
                     .foregroundStyle(Paleta.acento)
                     .accessibilityHidden(true)
-                Text(String(localized: "¿En qué consiste \(metaActual.titulo)?", comment: "Selector de metas"))
+                Text(Textos.goalsWhatIs(metaActual.titulo))
                     .estilo(.tituloCard)
             }
 
@@ -221,7 +220,7 @@ struct SelectorInteractivoDeMetasView: View {
                 .fixedSize(horizontal: false, vertical: true)
 
             HStack {
-                Text("Preparación sugerida:")
+                Text(Textos.goalsSuggestedPrep)
                     .estilo(.labelCampo, color: Paleta.textoTerciario)
                 Text(metaActual.semanasRecomendadas)
                     .estilo(.chip, color: Paleta.acento)
@@ -243,21 +242,21 @@ struct SelectorInteractivoDeMetasView: View {
         VStack(alignment: .leading, spacing: TokensEspaciado.e10) {
             HStack {
                 VStack(alignment: .leading, spacing: TokensEspaciado.e2) {
-                    Text(String(localized: "¿Ya tenés fecha de carrera?", comment: "Selector de metas, fecha"))
+                    Text(Textos.goalsDateQuestion)
                         .estilo(.opcionTitulo)
-                    Text(String(localized: "Con fecha, el plan cuenta las semanas hasta ese día.", comment: "Selector de metas, fecha"))
+                    Text(Textos.goalsDateBody)
                         .estilo(.labelCampo, color: Paleta.textoTerciario)
                         .fixedSize(horizontal: false, vertical: true)
                 }
                 Spacer()
-                Toggle("", isOn: $conFecha)
+                Toggle(String(), isOn: $conFecha)
                     .labelsHidden()
                     .tint(Paleta.interruptorActivo)
-                    .accessibilityLabel("Fecha del evento")
+                    .accessibilityLabel(Textos.commonEventDate)
             }
 
             if conFecha {
-                DatePicker("Elegir fecha", selection: $fechaEvento, in: Date()..., displayedComponents: .date)
+                DatePicker(Textos.goalsChooseDate, selection: $fechaEvento, in: Date()..., displayedComponents: .date)
                     .datePickerStyle(.compact)
                     .tint(Paleta.acento)
 
@@ -266,7 +265,7 @@ struct SelectorInteractivoDeMetasView: View {
                         .font(.system(size: TokensEspaciado.e12))
                         .foregroundStyle(Paleta.acento)
                         .accessibilityHidden(true)
-                    Text("El plan durará \(semanasCalculadas) semanas de preparación")
+                    Text(Textos.goalsPlanDuration(semanasCalculadas))
                         .estilo(.chip, color: Paleta.acento)
                 }
 
@@ -276,8 +275,7 @@ struct SelectorInteractivoDeMetasView: View {
                             .font(.system(size: TokensEspaciado.e12, weight: .semibold))
                             .foregroundStyle(Paleta.textoSecundario)
                             .accessibilityHidden(true)
-                        Text(String(localized: "Es menos de lo recomendado para esta meta (al menos \(metaActual.semanasMinimas) semanas). Podés elegir una fecha más lejana o una meta más corta.",
-                                    comment: "Selector de metas, aviso de poco tiempo"))
+                        Text(Textos.goalsTooShort(metaActual.semanasMinimas))
                             .estilo(.labelCampo, color: Paleta.textoSecundario)
                             .fixedSize(horizontal: false, vertical: true)
                     }
@@ -288,7 +286,7 @@ struct SelectorInteractivoDeMetasView: View {
                     .accessibilityElement(children: .combine)
                 }
             } else {
-                Text("Se armará un plan continuo sin fecha límite.")
+                Text(Textos.goalsOngoingPlan)
                     .estilo(.labelCampo, color: Paleta.textoTerciario)
             }
         }
@@ -301,12 +299,11 @@ struct SelectorInteractivoDeMetasView: View {
 
     private var llamadoAAccion: some View {
         VStack(spacing: TokensEspaciado.e8) {
-            BotonPrimario(String(localized: "Armar mi plan de \(metaActual.titulo)", comment: "Selector de metas"), cargando: guardando) {
+            BotonPrimario(Textos.goalsBuildMyPlan(metaActual.titulo), cargando: guardando) {
                 Haptico.toque()
                 guardar()
             }
-            Text(String(localized: "Con tu meta y la fecha, el plan arma tus semanas: etapas, días y kilómetros.",
-                        comment: "Selector de metas, qué pasa al tocar"))
+            Text(Textos.goalsFooter)
                 .estilo(.labelCampo, color: Paleta.textoTerciario)
                 .multilineTextAlignment(.center)
                 .frame(maxWidth: .infinity)

@@ -139,7 +139,7 @@ struct BotonBrujula: View {
             .frame(width: 44, height: 44)
         }
         .buttonStyle(EstiloPresionado())
-        .accessibilityLabel("Brújula, orientación \(letraCardinal), \(Int(headingNormalizado)) grados")
+        .accessibilityLabel(Textos.mapCompassAccessibility(letraCardinal, Int(headingNormalizado)))
     }
 }
 

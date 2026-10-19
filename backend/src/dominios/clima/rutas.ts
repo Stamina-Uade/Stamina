@@ -23,7 +23,14 @@ function extraerHoras(json: unknown, ahora: number): Hora[] {
   });
 }
 
+/**
+ * @deprecated La app iOS ya pide el clima a WeatherKit en el dispositivo y no
+ * llama a esta ruta. Queda viva para no romper de golpe las versiones viejas de
+ * la app; se puede borrar cuando ninguna versión en uso la llame. No agregar
+ * clientes nuevos.
+ */
 export async function rutasClima(app: FastifyInstance, ctx: Contexto): Promise<void> {
+  // Obsoleta (ver arriba): sólo para versiones viejas de la app.
   app.post("/weather/forecast", {
     preHandler: crearGuardia(ctx),
     schema: { body: cuerpo("forecastWeather") },

@@ -18,11 +18,11 @@ struct AjustesPaginaAspecto: View {
     let volver: () -> Void
 
     var body: some View {
-        AjustesPagina(String(localized: "Aspecto", comment: "Ajustes: página de modo y color"),
+        AjustesPagina(Textos.settingsAppearanceTitle,
                       ancla: ancla, volver: volver) {
             AjustesSelectorDeModo(modo: $modo)
 
-            AjustesRotulo(String(localized: "Color", comment: "Ajustes: bloque del color de la app"))
+            AjustesRotulo(Textos.settingsAppearanceColor)
                 .padding(.top, TokensEspaciado.e8)
                 .id(AjustesAncla.color)
             AjustesSelectorDeColor()
@@ -34,9 +34,9 @@ extension ModoApariencia {
     /// "Automático", "Claro", "Oscuro": lo que se ve en Ajustes.
     var nombreCorto: String {
         switch self {
-        case .automatico: return String(localized: "Automático", comment: "Ajustes: modo de apariencia")
-        case .claro: return String(localized: "Claro", comment: "Ajustes: modo de apariencia")
-        case .oscuro: return String(localized: "Oscuro", comment: "Ajustes: modo de apariencia")
+        case .automatico: return Textos.settingsAppearanceAutomatic
+        case .claro: return Textos.settingsAppearanceLight
+        case .oscuro: return Textos.settingsAppearanceDark
         }
     }
 }
@@ -126,14 +126,11 @@ struct AjustesSelectorDeModo: View {
     private func descripcion(de modo: ModoApariencia) -> String {
         switch modo {
         case .automatico:
-            return String(localized: "Cambia solo, igual que tu iPhone",
-                          comment: "Ajustes: explicación del modo de apariencia automático")
+            return Textos.settingsAppearanceAutomaticDetail
         case .claro:
-            return String(localized: "Fondo claro, se lee mejor al sol",
-                          comment: "Ajustes: explicación del modo día")
+            return Textos.settingsAppearanceLightDetail
         case .oscuro:
-            return String(localized: "Fondo negro, descansa la vista",
-                          comment: "Ajustes: explicación del modo noche")
+            return Textos.settingsAppearanceDarkDetail
         }
     }
 }

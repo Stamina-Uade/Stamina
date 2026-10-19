@@ -15,13 +15,13 @@ struct RegNacimientoView: View {
     @EnvironmentObject private var flujo: FlujoEntrada
 
     var body: some View {
-        PantallaPaso(titulo: Textos.regNacimientoTitulo(saludo),
-                     texto: Textos.regNacimientoTexto) {
+        PantallaPaso(titulo: Textos.signupBirthTitle(saludo),
+                     texto: Textos.signupBirthBody) {
             RuedaDeNacimiento(fecha: fechaDeLaRueda, nota: notaDeFormato)
                 .disabled(flujo.enCurso)
         } pie: {
             PieDePerfil(habilitado: flujo.datos.nacimiento != nil,
-                        motivoDeshabilitado: Textos.regNacimientoFaltaElegir)
+                        motivoDeshabilitado: Textos.signupBirthMustChoose)
         }
     }
 
@@ -35,7 +35,7 @@ struct RegNacimientoView: View {
 
     private var saludo: String {
         let nombre = flujo.datos.nombre.trimmingCharacters(in: .whitespaces)
-        return Textos.regNacimientoSaludo(nombre.isEmpty ? Textos.regNombreMarcador : nombre)
+        return Textos.signupBirthGreeting(nombre.isEmpty ? Textos.signupNamePlaceholder : nombre)
     }
 
     /// El diseño anuncia en qué orden vienen las columnas según el idioma. Acá el
@@ -48,15 +48,15 @@ struct RegNacimientoView: View {
             .lowercased()
             .compactMap { caracter -> String? in
                 switch caracter {
-                case "d": return Textos.regNacimientoDia
-                case "m": return Textos.regNacimientoMes
-                case "y": return Textos.regNacimientoAnio
+                case "d": return Textos.signupBirthDay
+                case "m": return Textos.signupBirthMonth
+                case "y": return Textos.signupBirthYear
                 default: return nil
                 }
             }
         var vistos: [String] = []
         for parte in orden where !vistos.contains(parte) { vistos.append(parte) }
-        return Textos.regNacimientoFormato(locale.identifier, vistos.joined(separator: " · "))
+        return Textos.signupBirthFormat(locale.identifier, vistos.joined(separator: " · "))
     }
 }
 
@@ -74,17 +74,17 @@ struct RegSexoView: View {
 
     private var opciones: [Opcion] {
         [
-            Opcion(valor: .femenino, titulo: Textos.regSexoFemenino,
-                   detalle: Textos.regSexoFemeninoDetalle),
-            Opcion(valor: .masculino, titulo: Textos.regSexoMasculino,
-                   detalle: Textos.regSexoMasculinoDetalle),
-            Opcion(valor: .sinDeclarar, titulo: Textos.regSexoSinDeclarar,
-                   detalle: Textos.regSexoSinDeclararDetalle),
+            Opcion(valor: .femenino, titulo: Textos.signupSexFemale,
+                   detalle: Textos.signupSexFemaleDetail),
+            Opcion(valor: .masculino, titulo: Textos.signupSexMale,
+                   detalle: Textos.signupSexMaleDetail),
+            Opcion(valor: .sinDeclarar, titulo: Textos.signupSexUndisclosed,
+                   detalle: Textos.signupSexUndisclosedDetail),
         ]
     }
 
     var body: some View {
-        PantallaPaso(titulo: Textos.regSexoTitulo, texto: Textos.regSexoTexto) {
+        PantallaPaso(titulo: Textos.signupSexTitle, texto: Textos.signupSexBody) {
             VStack(spacing: TokensEspaciado.e10) {
                 ForEach(opciones, id: \.valor) { opcion in
                     FilaOpcion(titulo: opcion.titulo, detalle: opcion.detalle,
@@ -108,18 +108,18 @@ struct RegCuerpoView: View {
     @EnvironmentObject private var flujo: FlujoEntrada
 
     var body: some View {
-        PantallaPaso(titulo: Textos.regCuerpoTitulo, texto: Textos.regCuerpoTexto) {
+        PantallaPaso(titulo: Textos.signupBodyTitle, texto: Textos.signupBodyBody) {
             VStack(alignment: .leading, spacing: TokensEspaciado.e13) {
                 VStack(alignment: .leading, spacing: TokensEspaciado.e6) {
-                    CampoTexto(etiqueta: Textos.regCuerpoPesoLabel,
-                               marcador: Textos.regCuerpoPesoMarcador,
+                    CampoTexto(etiqueta: Textos.signupBodyWeightLabel,
+                               marcador: Textos.signupBodyWeightPlaceholder,
                                texto: $flujo.datos.pesoTexto,
                                estilo: .campoNumero, teclado: .decimal)
                     PistaDeCampo(estado: pistaPeso)
                 }
                 VStack(alignment: .leading, spacing: TokensEspaciado.e6) {
-                    CampoTexto(etiqueta: Textos.regCuerpoAlturaLabel,
-                               marcador: Textos.regCuerpoAlturaMarcador,
+                    CampoTexto(etiqueta: Textos.signupBodyHeightLabel,
+                               marcador: Textos.signupBodyHeightPlaceholder,
                                texto: $flujo.datos.alturaTexto,
                                estilo: .campoNumero, teclado: .decimal)
                     PistaDeCampo(estado: pistaAltura)
@@ -134,12 +134,12 @@ struct RegCuerpoView: View {
     private var pistaPeso: EstadoCampo {
         if flujo.datos.pesoTexto.isEmpty { return .neutro }
         return flujo.datos.pesoEnGramos == nil
-            ? .error(Textos.regCuerpoPesoFueraDeRango) : .neutro
+            ? .error(Textos.signupBodyWeightOutOfRange) : .neutro
     }
 
     private var pistaAltura: EstadoCampo {
         if flujo.datos.alturaTexto.isEmpty { return .neutro }
         return flujo.datos.alturaEnMilimetros == nil
-            ? .error(Textos.regCuerpoAlturaFueraDeRango) : .neutro
+            ? .error(Textos.signupBodyHeightOutOfRange) : .neutro
     }
 }

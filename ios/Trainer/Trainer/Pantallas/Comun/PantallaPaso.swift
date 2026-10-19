@@ -199,7 +199,7 @@ struct PieDePerfil: View {
     /// - Parameter ahoraNo: el "Ahora no" de `reg-medicion`, el único paso que el
     ///   diseño deja saltear sin elegir.
     init(habilitado: Bool = true,
-         motivoDeshabilitado: String = Textos.comunCompletaParaSeguir,
+         motivoDeshabilitado: String = Textos.commonCompleteToContinue,
          ahoraNo: (() -> Void)? = nil) {
         self.habilitado = habilitado
         self.motivoDeshabilitado = motivoDeshabilitado
@@ -208,7 +208,7 @@ struct PieDePerfil: View {
 
     var body: some View {
         VStack(spacing: TokensEspaciado.e10) {
-            BotonPrimario(Textos.comunContinuar,
+            BotonPrimario(Textos.commonContinue,
                           habilitado: habilitado && !flujo.enCurso,
                           cargando: flujo.enCurso,
                           motivoDeshabilitado: motivoDeshabilitado) {
@@ -216,12 +216,12 @@ struct PieDePerfil: View {
             }
 
             if let ahoraNo {
-                BotonTexto(Textos.regMedicionAhoraNo, color: Paleta.textoSecundario, accion: ahoraNo)
+                BotonTexto(Textos.signupTrackingNotNow, color: Paleta.textoSecundario, accion: ahoraNo)
                     .disabled(flujo.enCurso)
             }
 
             if flujo.pantalla.ofreceCompletarDespues {
-                BotonTexto(Textos.regCompletarDespues, color: Paleta.textoSecundario) {
+                BotonTexto(Textos.signupCompleteLater, color: Paleta.textoSecundario) {
                     flujo.completarDespues()
                 }
                 // Mientras "Continuar" guarda, salir dejaría su error sin nadie que lo lea.
@@ -248,7 +248,7 @@ struct FlechaVolver: View {
                 .overlay(Circle().strokeBorder(Paleta.bordeSuperficie, lineWidth: TokensEspaciado.e1))
                 .objetivoTactil()
         }
-        .accessibilityLabel(Textos.comunVolver)
+        .accessibilityLabel(Textos.commonBack)
     }
 }
 

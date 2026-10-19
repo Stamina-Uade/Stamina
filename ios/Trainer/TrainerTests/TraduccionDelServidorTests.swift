@@ -44,9 +44,9 @@ struct TraduccionDelServidorTests {
         #expect(home.semanaDeHoy == 1)
         #expect(home.bloque.totalDeSemanas == 11)
         #expect(home.bloque.semanasQueFaltan == 10)
-        #expect(home.bloque.evento == Textos.regObjetivoMediaMaraton)
+        #expect(home.bloque.evento == Textos.signupGoalHalfMarathon)
         #expect(home.bloque.fases.map(\.peso) == [5, 2, 2, 1, 1])
-        #expect(home.bloque.fases.first?.titulo == "\(Textos.planFaseBase) · 1-5")
+        #expect(home.bloque.fases.first?.titulo == "\(Textos.planPhaseBase) · 1-5")
         #expect(home.bloque.fases.map(\.enCurso) == [true, false, false, false, false])
         #expect(home.bloque.semanas.map(\.numero) == [1, 2, 3, 4, 5])
 

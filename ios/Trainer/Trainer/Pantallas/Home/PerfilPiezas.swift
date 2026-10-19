@@ -77,7 +77,7 @@ struct BarraDeProgresoDeMeta: View {
             .frame(height: TokensEspaciado.e6)
             .accessibilityHidden(true)
 
-            Text(String(localized: "Semana \(actual) de \(total) del plan", comment: "Progreso de una meta"))
+            Text(Textos.profilePlanWeekOf(actual, total))
                 .estilo(.notaLegal, color: Paleta.textoTerciario)
         }
         .accessibilityElement(children: .combine)
@@ -128,12 +128,11 @@ struct ChipDeDiaDePerfil: View {
 
     private var textoAccesible: String {
         var partes = [nombreLargo]
-        if esHoy { partes.append(String(localized: "hoy", comment: "Día de hoy en los días de entrenamiento")) }
+        if esHoy { partes.append(Textos.commonTodayLowercase) }
         if let minutoDelDia {
-            partes.append(String(localized: "entrenás a las \(Formato.hora(minutoDelDia: minutoDelDia))",
-                                 comment: "Día de entrenamiento elegido"))
+            partes.append(Textos.profileYouTrainAt(Formato.hora(minutoDelDia: minutoDelDia)))
         } else {
-            partes.append(String(localized: "sin entrenamiento", comment: "Día no elegido para entrenar"))
+            partes.append(Textos.profileNoWorkout)
         }
         return partes.joined(separator: ", ")
     }

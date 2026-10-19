@@ -22,21 +22,21 @@ struct InicioAccesosRapidos: View {
         [
             Acceso(id: "entreno", simbolo: "bolt.fill",
                    titulo: estado.haySesionEnCurso
-                    ? String(localized: "Volver a la salida", comment: "Acceso rápido con una salida en curso")
-                    : String(localized: "Empezar salida", comment: "Acceso rápido al entreno"),
-                   pista: String(localized: "Abre el entreno con GPS", comment: "VoiceOver del acceso rápido"),
+                    ? Textos.homeShortcutsBackToWorkout
+                    : Textos.homeShortcutsStartWorkout,
+                   pista: Textos.homeShortcutsWorkoutHint,
                    accion: { estado.ir(a: .entreno) }),
             Acceso(id: "plan", simbolo: "calendar",
-                   titulo: String(localized: "Ver mi plan", comment: "Acceso rápido al plan"),
-                   pista: String(localized: "Abre tu plan semana a semana", comment: "VoiceOver del acceso rápido"),
+                   titulo: Textos.homeShortcutsViewPlan,
+                   pista: Textos.homeShortcutsPlanHint,
                    accion: { estado.ir(a: .plan) }),
             Acceso(id: "historial", simbolo: "clock.arrow.circlepath",
-                   titulo: String(localized: "Historial", comment: "Acceso rápido al historial"),
-                   pista: String(localized: "Abre todo lo que hiciste", comment: "VoiceOver del acceso rápido"),
+                   titulo: Textos.historyTab,
+                   pista: Textos.homeShortcutsHistoryHint,
                    accion: { estado.ir(a: .historial) }),
             Acceso(id: "apto", simbolo: "checkmark.shield",
-                   titulo: String(localized: "Apto físico", comment: "Acceso rápido al apto físico"),
-                   pista: String(localized: "Abre tu apto físico", comment: "VoiceOver del acceso rápido"),
+                   titulo: Textos.medicalTitle,
+                   pista: Textos.homeShortcutsMedicalHint,
                    accion: abrirApto),
         ]
     }
@@ -48,7 +48,7 @@ struct InicioAccesosRapidos: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: TokensEspaciado.e10) {
-            EncabezadoDeSeccion(String(localized: "Accesos rápidos", comment: "Título de sección del inicio"))
+            EncabezadoDeSeccion(Textos.homeShortcutsTitle)
             LazyVGrid(columns: columnas, spacing: TokensEspaciado.e8) {
                 ForEach(accesos) { acceso in
                     Button {

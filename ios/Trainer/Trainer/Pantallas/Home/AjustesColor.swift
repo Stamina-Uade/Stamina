@@ -107,13 +107,11 @@ struct AjustesSelectorDeColor: View {
                 .strokeBorder(libreElegido ? Paleta.textoPrimario : Color.clear,
                               lineWidth: TokensEspaciado.e2)
                 .allowsHitTesting(false)
-            ColorPicker(String(localized: "Color personalizado",
-                               comment: "Ajustes: selector de un color libre para la app"),
+            ColorPicker(Textos.settingsColorCustomTitle,
                         selection: bindingLibre, supportsOpacity: false)
                 .labelsHidden()
                 .scaleEffect(1.45)
-                .accessibilityHint(String(localized: "Elegí cualquier color y después tocá Usar",
-                                          comment: "Ajustes: cómo se usa el color personalizado"))
+                .accessibilityHint(Textos.settingsColorCustomHint)
         }
         .frame(width: TokensEspaciado.e52, height: TokensEspaciado.e52)
         .frame(maxWidth: .infinity)
@@ -141,7 +139,7 @@ struct AjustesSelectorDeColor: View {
                 librePendiente = nil
                 colorLibre = AcentoPersonalizado.color(paraGuardado: acentoGuardado)
             } label: {
-                Text(String(localized: "Descartar", comment: "Ajustes: no usar el color elegido"))
+                Text(Textos.commonDiscard)
                     .estilo(.tituloCard, color: Paleta.textoSecundario)
                     .padding(.horizontal, TokensEspaciado.e14)
                     .objetivoTactil()
@@ -151,7 +149,7 @@ struct AjustesSelectorDeColor: View {
             Button {
                 aplicar(guardado)
             } label: {
-                Text(String(localized: "Usar", comment: "Ajustes: aplicar el color elegido"))
+                Text(Textos.commonUse)
                     .estilo(.botonPrimario, color: encima)
                     .frame(maxWidth: .infinity)
                     .frame(minHeight: TokensTamano.botonPrimario)
@@ -168,7 +166,7 @@ struct AjustesSelectorDeColor: View {
             guardar("")
         } label: {
             Label {
-                Text(String(localized: "Restablecer", comment: "Ajustes: volver al color de fábrica"))
+                Text(Textos.settingsColorReset)
                     .estilo(.tituloCard, color: Paleta.textoAcento)
             } icon: {
                 Image(systemName: "arrow.uturn.backward")
@@ -264,8 +262,7 @@ struct AjustesVistaPreviaDeColor: View {
             pantalla
                 .accessibilityHidden(true)
             if seLeePoco {
-                PildoraDeEstado(String(localized: "Poco contraste",
-                                       comment: "Ajustes: el color elegido se lee poco sobre fondo oscuro"),
+                PildoraDeEstado(Textos.settingsColorLowContrast,
                                 simbolo: "exclamationmark.triangle.fill", tono: .alerta)
             }
         }
@@ -276,13 +273,13 @@ struct AjustesVistaPreviaDeColor: View {
             HStack(spacing: TokensEspaciado.e8) {
                 pildora
                 Spacer(minLength: 0)
-                Text(String(localized: "Hoy", comment: "Ajustes: ejemplo en la vista previa"))
+                Text(Textos.commonToday)
                     .estilo(.labelCampo, color: Paleta.textoTerciario)
             }
 
             VStack(alignment: .leading, spacing: TokensEspaciado.e6) {
                 HStack(alignment: .firstTextBaseline) {
-                    Text(String(localized: "Tu semana", comment: "Ajustes: ejemplo en la vista previa"))
+                    Text(Textos.settingsColorPreviewYourWeek)
                         .estilo(.tituloCardGrande)
                     Spacer(minLength: 0)
                     Text(verbatim: "3/5")
@@ -292,7 +289,7 @@ struct AjustesVistaPreviaDeColor: View {
             }
 
             HStack(spacing: TokensEspaciado.e12) {
-                Text(String(localized: "Empezar", comment: "Ajustes: ejemplo de botón en la vista previa"))
+                Text(Textos.commonStart)
                     .estilo(.botonPrimario, color: encima)
                     .frame(maxWidth: .infinity)
                     .frame(height: TokensEspaciado.e36)
@@ -315,7 +312,7 @@ struct AjustesVistaPreviaDeColor: View {
             Circle()
                 .fill(color)
                 .frame(width: TokensEspaciado.e6, height: TokensEspaciado.e6)
-            Text(String(localized: "En curso", comment: "Ajustes: ejemplo de píldora en la vista previa"))
+            Text(Textos.settingsColorPreviewInProgress)
                 .estilo(.chip, color: Paleta.textoPrimario)
         }
         .padding(.horizontal, TokensEspaciado.e10)

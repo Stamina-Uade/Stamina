@@ -154,14 +154,14 @@ final class FlujoEntrada: ObservableObject {
         public let mensaje: String
         public let boton: String
 
-        public init(titulo: String, mensaje: String, boton: String = Textos.comunListo) {
+        public init(titulo: String, mensaje: String, boton: String = Textos.commonDone) {
             self.titulo = titulo
             self.mensaje = mensaje
             self.boton = boton
         }
     }
 
-    func mostrarAlertaError(titulo: String, mensaje: String, boton: String = Textos.comunListo) {
+    func mostrarAlertaError(titulo: String, mensaje: String, boton: String = Textos.commonDone) {
         alertaError = InfoAlerta(titulo: titulo, mensaje: mensaje, boton: boton)
     }
 
@@ -373,7 +373,7 @@ final class FlujoEntrada: ObservableObject {
             if pantalla == .login {
                 let texto = TraductorDeErrores.texto(respuesta)
                 errorVisible = texto
-                mostrarAlertaError(titulo: Textos.loginErrorTitulo, mensaje: texto)
+                mostrarAlertaError(titulo: Textos.loginErrorTitle, mensaje: texto)
             }
         }
     }
@@ -409,7 +409,7 @@ final class FlujoEntrada: ObservableObject {
         default:
             let texto = TraductorDeErrores.texto(respuesta)
             errorVisible = texto
-            mostrarAlertaError(titulo: Textos.registroErrorTitulo, mensaje: texto)
+            mostrarAlertaError(titulo: Textos.signupErrorTitle, mensaje: texto)
         }
     }
 
@@ -433,7 +433,7 @@ final class FlujoEntrada: ObservableObject {
         default:
             let texto = TraductorDeErrores.texto(respuesta)
             errorVisible = texto
-            mostrarAlertaError(titulo: Textos.registroErrorTitulo, mensaje: texto)
+            mostrarAlertaError(titulo: Textos.signupErrorTitle, mensaje: texto)
         }
     }
 
@@ -509,7 +509,7 @@ final class FlujoEntrada: ObservableObject {
             await cargarLegales()
             let texto = TraductorDeErrores.texto(respuesta)
             errorVisible = texto
-            mostrarAlertaError(titulo: Textos.registroErrorTitulo, mensaje: texto)
+            mostrarAlertaError(titulo: Textos.signupErrorTitle, mensaje: texto)
         case .rechazado(let codigo, _) where codigo == "weak_password":
             // 🛑 La contraseña se escribió un paso antes y el servidor la rechaza
             // recién ahora: la lista de conocidas no se puede anticipar mientras
@@ -517,7 +517,7 @@ final class FlujoEntrada: ObservableObject {
             pantalla = .regClave
             let texto = TraductorDeErrores.texto(respuesta)
             errorVisible = texto
-            mostrarAlertaError(titulo: Textos.registroErrorTitulo, mensaje: texto)
+            mostrarAlertaError(titulo: Textos.signupErrorTitle, mensaje: texto)
         case .rechazado(let codigo, _) where codigo == "invalid_registration_token":
             if permisoVencido {
                 // Venció sin usarse: hace falta otro código. Si un intento anterior
@@ -525,7 +525,7 @@ final class FlujoEntrada: ObservableObject {
                 // salida.
                 let texto = TraductorDeErrores.texto(respuesta)
                 errorVisible = texto
-                mostrarAlertaError(titulo: Textos.registroErrorTitulo, mensaje: texto)
+                mostrarAlertaError(titulo: Textos.signupErrorTitle, mensaje: texto)
                 ofrecerEmpezarDeNuevo = true
                 ofrecerLogin = altaSinDesenlace
             } else {
@@ -533,16 +533,16 @@ final class FlujoEntrada: ObservableObject {
                 // se creó y la respuesta no llegó. Volver al correo sería una trampa
                 // —`POST /auth/register` contesta 202 igual y el código no llega
                 // nunca—. La salida es entrar.
-                errorVisible = Textos.legalAltaYaCreada
-                mostrarAlertaError(titulo: Textos.registroErrorTitulo, mensaje: Textos.legalAltaYaCreada)
+                errorVisible = Textos.legalSignupAlreadyCreated
+                mostrarAlertaError(titulo: Textos.signupErrorTitle, mensaje: Textos.legalSignupAlreadyCreated)
                 ofrecerLogin = true
                 ofrecerEmpezarDeNuevo = false
             }
         case .rechazado(let codigo, _) where codigo == "conflict":
             // Ya hay una cuenta con ese correo, y pedir otro código no la cambia.
             // No es el `conflict` de un guardado en curso: el texto es otro.
-            errorVisible = Textos.legalCuentaExistente
-            mostrarAlertaError(titulo: Textos.registroErrorTitulo, mensaje: Textos.legalCuentaExistente)
+            errorVisible = Textos.legalAccountExists
+            mostrarAlertaError(titulo: Textos.signupErrorTitle, mensaje: Textos.legalAccountExists)
             laCuentaYaExiste = true
             ofrecerLogin = true
             ofrecerEmpezarDeNuevo = false
@@ -553,12 +553,12 @@ final class FlujoEntrada: ObservableObject {
             altaSinDesenlace = true
             let texto = TraductorDeErrores.texto(respuesta)
             errorVisible = texto
-            mostrarAlertaError(titulo: Textos.registroErrorTitulo, mensaje: texto)
+            mostrarAlertaError(titulo: Textos.signupErrorTitle, mensaje: texto)
             ofrecerLogin = true
         default:
             let texto = TraductorDeErrores.texto(respuesta)
             errorVisible = texto
-            mostrarAlertaError(titulo: Textos.registroErrorTitulo, mensaje: texto)
+            mostrarAlertaError(titulo: Textos.signupErrorTitle, mensaje: texto)
         }
     }
 
@@ -631,7 +631,7 @@ final class FlujoEntrada: ObservableObject {
                     if pantalla == actual {
                         let texto = TraductorDeErrores.texto(guardadoDeObjetivos)
                         errorVisible = texto
-                        mostrarAlertaError(titulo: Textos.registroErrorTitulo, mensaje: texto)
+                        mostrarAlertaError(titulo: Textos.signupErrorTitle, mensaje: texto)
                     }
                     return
                 }
@@ -649,7 +649,7 @@ final class FlujoEntrada: ObservableObject {
             if pantalla == actual {
                 let texto = TraductorDeErrores.texto(respuesta)
                 errorVisible = texto
-                mostrarAlertaError(titulo: Textos.registroErrorTitulo, mensaje: texto)
+                mostrarAlertaError(titulo: Textos.signupErrorTitle, mensaje: texto)
             }
         }
     }
@@ -718,7 +718,7 @@ final class FlujoEntrada: ObservableObject {
         default:
             let texto = TraductorDeErrores.texto(respuesta)
             errorVisible = texto
-            mostrarAlertaError(titulo: Textos.claveErrorTitulo, mensaje: texto)
+            mostrarAlertaError(titulo: Textos.passwordResetErrorTitle, mensaje: texto)
         }
     }
 
@@ -739,7 +739,7 @@ final class FlujoEntrada: ObservableObject {
         default:
             let texto = TraductorDeErrores.texto(respuesta)
             errorVisible = texto
-            mostrarAlertaError(titulo: Textos.claveErrorTitulo, mensaje: texto)
+            mostrarAlertaError(titulo: Textos.passwordResetErrorTitle, mensaje: texto)
         }
     }
 
@@ -769,7 +769,7 @@ final class FlujoEntrada: ObservableObject {
             if pantalla == .claveNueva {
                 let texto = TraductorDeErrores.texto(respuesta)
                 errorVisible = texto
-                mostrarAlertaError(titulo: Textos.claveErrorTitulo, mensaje: texto)
+                mostrarAlertaError(titulo: Textos.passwordResetErrorTitle, mensaje: texto)
             }
         }
     }
@@ -1003,11 +1003,11 @@ final class FlujoEntrada: ObservableObject {
 
     func reglasDeClave(_ clave: String) -> [ReglaDeClave] {
         [
-            ReglaDeClave(id: "largo", texto: Textos.claveNuevaReglaLargo,
+            ReglaDeClave(id: "largo", texto: Textos.passwordResetNewRuleLength,
                          cumple: clave.count >= Self.largoMinimoDeClave),
-            ReglaDeClave(id: "mayuscula", texto: Textos.claveNuevaReglaMayuscula,
+            ReglaDeClave(id: "mayuscula", texto: Textos.passwordResetNewRuleUppercase,
                          cumple: clave.contains { $0.isUppercase }),
-            ReglaDeClave(id: "numero", texto: Textos.claveNuevaReglaNumero,
+            ReglaDeClave(id: "numero", texto: Textos.passwordResetNewRuleNumber,
                          cumple: clave.contains { $0.isNumber }),
         ]
     }
@@ -1053,7 +1053,7 @@ final class FlujoEntrada: ObservableObject {
 
     var correoDelDesafio: String {
         let candidatos = [recuperacionCorreo, loginCorreo]
-        return candidatos.first { !$0.isEmpty } ?? Textos.comunCorreoMarcador
+        return candidatos.first { !$0.isEmpty } ?? Textos.commonEmailPlaceholder
     }
 
     /// El correo tal como viaja: sin los espacios que deja un pegado. Las

@@ -25,35 +25,29 @@ struct AptoFisicoView: View {
 
     var body: some View {
         VStack(spacing: 0) {
+            // Flecha y título fijos arriba, como una barra de navegación.
+            CabeceraSecundaria(titulo: Textos.medicalYourClearance) {
+                cerrar()
+            }
+            .padding(.top, TokensEspaciado.e12)
+
             ScrollView {
                 VStack(alignment: .leading, spacing: TokensEspaciado.e20) {
-                    HStack {
-                        FlechaVolver { cerrar() }
-                        Spacer()
-                    }
-
-                    VStack(alignment: .leading, spacing: TokensEspaciado.e8) {
-                        Text(String(localized: "Tu apto físico", comment: "Título de la pantalla del apto"))
-                            .estilo(.display)
-                            .accessibilityAddTraits(.isHeader)
-                        Text(String(localized: "Con un apto vigente, Stamina puede darte sugerencias en carrera.",
-                                    comment: "Explicación del apto físico"))
-                            .estilo(.cuerpoSecundario, color: Paleta.textoSecundario)
-                            .fixedSize(horizontal: false, vertical: true)
-                    }
+                    Text(Textos.medicalAddBody)
+                        .estilo(.cuerpoSecundario, color: Paleta.textoSecundario)
+                        .fixedSize(horizontal: false, vertical: true)
 
                     tarjetaDelArchivo
 
                     VStack(alignment: .leading, spacing: TokensEspaciado.e10) {
                         HStack {
-                            Text(String(localized: "Vencimiento", comment: "Etiqueta de la fecha del apto"))
+                            Text(Textos.medicalExpiration)
                                 .estilo(.etiquetaSeccion, color: Paleta.textoTerciario)
                             Spacer()
-                            Text(String(localized: "Vence el \(vence.formatted(.dateTime.day().month(.abbreviated).year()))",
-                                        comment: "Fecha de vencimiento elegida"))
+                            Text(Textos.medicalExpiresOn(vence.formatted(.dateTime.day().month(.abbreviated).year())))
                                 .estilo(.labelCampo, color: Paleta.acento)
                         }
-                        DatePicker("", selection: $vence,
+                        DatePicker(String(), selection: $vence,
                                    in: Date()...,
                                    displayedComponents: .date)
                             .datePickerStyle(.wheel)
@@ -61,18 +55,16 @@ struct AptoFisicoView: View {
                             .frame(maxWidth: .infinity)
                             .padding(.vertical, TokensEspaciado.e4)
                             .tarjeta()
-                            .accessibilityLabel(String(localized: "Fecha de vencimiento", comment: "VoiceOver"))
+                            .accessibilityLabel(Textos.medicalExpirationDate)
 
-                        PildoraDeEstado(String(localized: "Vigente · te avisamos 30 días antes",
-                                               comment: "Promesa de aviso antes del vencimiento"),
+                        PildoraDeEstado(Textos.medicalValidReminder,
                                         simbolo: "checkmark", tono: .acento)
                     }
 
                     VStack(alignment: .leading, spacing: TokensEspaciado.e4) {
-                        Casilla(texto: String(localized: "Declaro que mis datos de salud son verdaderos",
-                                              comment: "Declaración jurada del apto"),
+                        Casilla(texto: Textos.medicalSwornStatementDeclare,
                                 marcada: $declaracion)
-                        Text(String(localized: "Declaración jurada", comment: "Aclaración de la casilla"))
+                        Text(Textos.medicalSwornStatement)
                             .estilo(.notaLegal, color: Paleta.textoTerciario)
                             .padding(.leading, TokensEspaciado.e36)
                     }
@@ -84,8 +76,8 @@ struct AptoFisicoView: View {
                     }
 
                     if almacen.apto != nil {
-                        BotonTexto(String(localized: "Borrar apto guardado", comment: "Acción del apto"),
-                                   color: Paleta.error) {
+                        BotonTexto(Textos.medicalDelete,
+                                   color: Paleta.peligro) {
                             almacen.borrar()
                             archivoElegido = nil
                             declaracion = false
@@ -93,19 +85,17 @@ struct AptoFisicoView: View {
                     }
                 }
                 .padding(.horizontal, TokensEspaciado.e22)
-                .padding(.top, TokensEspaciado.e12)
+                .padding(.top, TokensEspaciado.e8)
                 .padding(.bottom, TokensEspaciado.e20)
             }
 
             VStack(spacing: TokensEspaciado.e10) {
-                BotonPrimario(String(localized: "Confirmar", comment: "Confirma el apto"),
+                BotonPrimario(Textos.commonConfirm,
                               habilitado: puedeConfirmar,
-                              motivoDeshabilitado: String(localized: "Elegí el archivo, la fecha y marcá la declaración.",
-                                                          comment: "VoiceOver: por qué no se puede confirmar")) {
+                              motivoDeshabilitado: Textos.medicalFormIncomplete) {
                     confirmar()
                 }
-                Text(String(localized: "Stamina no reemplaza la consulta médica. Tu apto se guarda sólo en este teléfono, protegido, y no se comparte con nadie.",
-                            comment: "Nota legal del apto"))
+                Text(Textos.medicalDisclaimer)
                     .estilo(.notaLegal, color: Paleta.textoTerciario)
                     .multilineTextAlignment(.center)
                     .fixedSize(horizontal: false, vertical: true)
@@ -122,7 +112,7 @@ struct AptoFisicoView: View {
                 archivoElegido = urls.first
                 error = nil
             case .failure:
-                error = String(localized: "No pudimos abrir ese archivo. Probá con otro.", comment: "Error del apto")
+                error = Textos.medicalErrorOpenFailed
             }
         }
         .onAppear {
@@ -186,8 +176,8 @@ struct AptoFisicoView: View {
         }
         .buttonStyle(EstiloPresionado())
         .accessibilityLabel(tieneArchivo
-            ? String(localized: "Archivo del apto: \(nombreDelArchivo). Tocá para cambiarlo.", comment: "VoiceOver")
-            : String(localized: "Subir el apto, foto o PDF", comment: "VoiceOver"))
+            ? Textos.medicalFileAccessibility(nombreDelArchivo)
+            : Textos.medicalUploadAccessibility)
     }
 
     private var tieneArchivo: Bool { archivoElegido != nil || almacen.apto != nil }
@@ -195,12 +185,12 @@ struct AptoFisicoView: View {
     private var nombreDelArchivo: String {
         if let archivoElegido { return archivoElegido.lastPathComponent }
         if let apto = almacen.apto { return apto.nombreOriginal }
-        return String(localized: "Subir foto o PDF", comment: "Tarjeta del archivo vacía")
+        return Textos.medicalUpload
     }
 
     private var detalleDelArchivo: String {
         if archivoElegido != nil {
-            return String(localized: "Listo para guardar", comment: "Archivo elegido y sin guardar")
+            return Textos.medicalReadyToSave
         }
         if let apto = almacen.apto {
             let tamano = ByteCountFormatter.string(fromByteCount: apto.bytes, countStyle: .file)
@@ -208,7 +198,7 @@ struct AptoFisicoView: View {
                 .formatted(date: .abbreviated, time: .omitted)
             return "\(tamano) · \(fecha)"
         }
-        return String(localized: "El certificado que te dio tu médico", comment: "Ayuda de la tarjeta del archivo")
+        return Textos.medicalCertificateDetail
     }
 
     // MARK: - Confirmar
@@ -219,14 +209,14 @@ struct AptoFisicoView: View {
             case .success:
                 cerrar()
             case .failure(.muyGrande):
-                error = String(localized: "El archivo pesa más de 15 MB. Probá con una foto más liviana.", comment: "Error del apto")
+                error = Textos.medicalErrorTooLarge
             case .failure:
-                error = String(localized: "No pudimos guardar el apto. Probá de nuevo.", comment: "Error del apto")
+                error = Textos.medicalErrorSaveFailed
             }
         } else if almacen.actualizarVencimiento(vence, declaracionAceptada: declaracion) {
             cerrar()
         } else {
-            error = String(localized: "No pudimos guardar el apto. Probá de nuevo.", comment: "Error del apto")
+            error = Textos.medicalErrorSaveFailed
         }
     }
 }
@@ -242,18 +232,18 @@ struct PildoraDelApto: View {
         Button(action: alTocar) {
             switch almacen.estado {
             case .sinCargar:
-                PildoraDeEstado(String(localized: "Cargá tu apto físico", comment: "Píldora del inicio sin apto"),
+                PildoraDeEstado(Textos.medicalAddTitle,
                                 simbolo: "plus", tono: .neutro)
             case .vigente(let dias):
-                PildoraDeEstado(String(localized: "Apto vigente · vence en \(dias) días", comment: "Píldora del inicio"),
+                PildoraDeEstado(Textos.medicalStatusValidDaysLeft(dias),
                                 simbolo: "checkmark.shield", tono: .acento)
             case .porVencer(let dias):
                 PildoraDeEstado(dias == 0
-                                ? String(localized: "Tu apto vence hoy", comment: "Píldora del inicio")
-                                : String(localized: "Tu apto vence en \(dias) días", comment: "Píldora del inicio"),
+                                ? Textos.medicalExpiresToday
+                                : Textos.medicalExpiresInDays(dias),
                                 simbolo: "exclamationmark.shield", tono: .alerta)
             case .vencido:
-                PildoraDeEstado(String(localized: "Apto vencido · renovalo", comment: "Píldora del inicio"),
+                PildoraDeEstado(Textos.medicalStatusExpired,
                                 simbolo: "xmark.shield", tono: .alerta)
             }
         }

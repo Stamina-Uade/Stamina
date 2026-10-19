@@ -36,11 +36,12 @@ struct BienvenidaView: View {
     private var fotos: [Foto] {
         [
             Foto(recurso: "BienvenidaAmanecer", pose: .saludo,
-                 titulo: Textos.bienvenidaSlide1Titulo, descripcion: Textos.bienvenidaSlide1Foto),
-            Foto(recurso: "BienvenidaRuta", pose: .corriendo,
-                 titulo: Textos.bienvenidaSlide2Titulo, descripcion: Textos.bienvenidaSlide2Foto),
-            Foto(recurso: "BienvenidaMontana", pose: .medalla,
-                 titulo: Textos.bienvenidaSlide3Titulo, descripcion: Textos.bienvenidaSlide3Foto),
+                 titulo: Textos.welcomeSlide1Title, descripcion: Textos.welcomeSlide1Photo),
+            // "BienvenidaRuta" es una foto de ciclismo: el MVP es running.
+            Foto(recurso: "BienvenidaMontana", pose: .corriendo,
+                 titulo: Textos.welcomeSlide2Title, descripcion: Textos.welcomeSlide2Photo),
+            Foto(recurso: "BienvenidaAmanecer", pose: .medalla,
+                 titulo: Textos.welcomeSlide3Title, descripcion: Textos.welcomeSlide3Photo),
         ]
     }
 
@@ -137,8 +138,9 @@ struct BienvenidaView: View {
         .padding(.top, TokensEspaciado.e8)
     }
 
-    /// Las tres poses, una encima de la otra: la de la foto actual se ve y se
-    /// mueve; las otras se funden. Al entrar, la nueva sube un poquito.
+    /// Las tres poses, una encima de la otra: la de la foto actual se ve,
+    /// quieta; las otras se funden. Al entrar, la nueva sube un poquito y
+    /// aparece (una sola vez: nada de loops, ver `Mascota`).
     private var escenario: some View {
         ZStack {
             ForEach(Array(fotos.enumerated()), id: \.offset) { indice, foto in
@@ -179,8 +181,8 @@ struct BienvenidaView: View {
             indicadores
 
             VStack(spacing: TokensEspaciado.e8) {
-                BotonPrimario(Textos.bienvenidaCrearCuenta) { flujo.ir(a: .regCorreo) }
-                BotonTexto(Textos.bienvenidaYaTengoCuenta) { flujo.ir(a: .login) }
+                BotonPrimario(Textos.welcomeCreateAccount) { flujo.ir(a: .regCorreo) }
+                BotonTexto(Textos.welcomeHaveAccount) { flujo.ir(a: .login) }
             }
         }
         .padding(.horizontal, TokensEspaciado.e22)
@@ -224,7 +226,7 @@ struct BienvenidaView: View {
                                 radius: TokensEspaciado.e4)
                         .objetivoTactil()
                 }
-                .accessibilityLabel(Textos.bienvenidaIrAFoto(indice + 1, fotos.count))
+                .accessibilityLabel(Textos.welcomeGoToPhoto(indice + 1, fotos.count))
                 .accessibilityAddTraits(indice == actual ? [.isButton, .isSelected] : .isButton)
             }
         }

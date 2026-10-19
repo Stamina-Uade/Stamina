@@ -4,14 +4,29 @@ import TrainerCore
 /// "Así funciona Stamina": cinco páginas, una por pestaña de la barra, que se
 /// ven una sola vez al entrar al Home (`tour_visto`, en `RaizHomeView`). Se pasa
 /// deslizando o con "Siguiente", y se puede saltar desde cualquier página.
-/// Lo cuenta la mascota: una línea por globito, nada de párrafos.
+///
+/// Ronda 5: cada página muestra la pantalla DE VERDAD, achicada dentro de un
+/// teléfono (ver `TourVistaPrevia.swift`), con un anillo del acento sobre lo que
+/// importa y la mascota al costado, quieta, señalándolo con una flecha. Lo que
+/// dice va en un globito de una línea.
 struct TourView: View {
+    /// El estado del Home, para dibujar las pantallas reales. 🪤 Hay que pasarlo
+    /// a mano: el `fullScreenCover` de `RaizHomeView` cuelga por FUERA de su
+    /// `.environmentObject(estado)` y no lo hereda. Sin él, cada página muestra
+    /// sólo la barra de pestañas con la pestaña señalada.
+    let estado: EstadoHome?
     /// Se llama al tocar "Empezar" o "Saltar": quien lo presenta lo cierra y
     /// anota que ya se vio.
     let alTerminar: () -> Void
 
+    @EnvironmentObject private var flujo: FlujoEntrada
     @Environment(\.accessibilityReduceMotion) private var movimientoReducido
     @State private var pagina = 0
+
+    init(estado: EstadoHome? = nil, alTerminar: @escaping () -> Void) {
+        self.estado = estado
+        self.alTerminar = alTerminar
+    }
 
     private let paginas = TourPagina.todas
     private var esLaUltima: Bool { pagina >= paginas.count - 1 }
@@ -22,18 +37,20 @@ struct TourView: View {
 
             TabView(selection: $pagina) {
                 ForEach(Array(paginas.enumerated()), id: \.offset) { indice, contenido in
-                    TourPaginaView(contenido: contenido, visible: indice == pagina)
+                    TourPaginaView(contenido: contenido, estado: estado, flujo: flujo,
+                                   visible: indice == pagina)
                         .tag(indice)
                 }
             }
             .tabViewStyle(.page(indexDisplayMode: .never))
 
             puntos
-                .padding(.bottom, TokensEspaciado.e20)
+                .padding(.top, TokensEspaciado.e12)
+                .padding(.bottom, TokensEspaciado.e16)
 
             BotonPrimario(esLaUltima
-                          ? String(localized: "Empezar", comment: "Último botón del tour")
-                          : String(localized: "Siguiente", comment: "Pasa a la siguiente página del tour")) {
+                          ? Textos.commonStart
+                          : Textos.commonNext) {
                 avanzar()
             }
         }
@@ -48,7 +65,7 @@ struct TourView: View {
 
     private var barraSuperior: some View {
         HStack(spacing: TokensEspaciado.e8) {
-            Text(String(localized: "Así funciona \(MarcaApp.nombre)", comment: "Sobretítulo del tour"))
+            Text(Textos.tourHowItWorks(MarcaApp.nombre))
                 .estilo(.etiquetaSeccion, color: Paleta.acento)
                 .accessibilityAddTraits(.isHeader)
             Spacer(minLength: 0)
@@ -57,7 +74,7 @@ struct TourView: View {
                     Haptico.toque()
                     alTerminar()
                 } label: {
-                    Text(String(localized: "Saltar", comment: "Saltea el tour"))
+                    Text(Textos.commonSkip)
                         .estilo(.tituloCard, color: Paleta.textoSecundario)
                         .padding(.horizontal, TokensEspaciado.e8)
                         .frame(minWidth: TokensTamano.objetivoTactilMinimo,
@@ -65,7 +82,7 @@ struct TourView: View {
                         .contentShape(Rectangle())
                 }
                 .buttonStyle(EstiloPresionado())
-                .accessibilityHint(String(localized: "Cierra el tour y va al inicio", comment: "VoiceOver de Saltar"))
+                .accessibilityHint(Textos.tourCloseHint)
             }
         }
         .frame(minHeight: TokensTamano.objetivoTactilMinimo)
@@ -85,7 +102,7 @@ struct TourView: View {
         }
         .animation(movimientoReducido ? nil : .easeOut(duration: TokensMovimiento.rapida), value: pagina)
         .accessibilityElement(children: .ignore)
-        .accessibilityLabel(String(localized: "Página \(pagina + 1) de \(paginas.count)", comment: "VoiceOver de los puntos del tour"))
+        .accessibilityLabel(Textos.tourPageOf(pagina + 1, paginas.count))
     }
 
     // MARK: - Fondo: negro con un resplandor del acento arriba
@@ -96,7 +113,7 @@ struct TourView: View {
             RadialGradient(colors: [Paleta.acentoProfundo, Color.clear],
                            center: .top, startRadius: 0,
                            endRadius: TokensEspaciado.e56 * 6)
-                .opacity(0.6)
+                .opacity(0.5)
         }
         .accessibilityHidden(true)
     }
@@ -117,64 +134,110 @@ struct TourView: View {
 
 // MARK: - El contenido de cada página
 
-/// Una página del tour: la pose de la mascota, lo que dice en el globito (una
-/// línea) y, abajo, una leyenda chiquita con dónde está eso en la app.
+/// Una página del tour: qué pantalla se muestra, qué dice la mascota (una línea
+/// corta, ≤ 60 caracteres) y de qué lado del teléfono se para.
 struct TourPagina {
-    let pose: PoseDeMascota
+    let seccion: SeccionDelTour
     let globito: String
-    let leyenda: String
+    let mascotaALaIzquierda: Bool
 
-    /// Una por pestaña, en el orden de la barra. Saluda para explicar, corre
-    /// para entrenar y ver el progreso, y festeja con la medalla al final.
+    /// Una por pestaña, en el orden de la barra. La mascota cambia de lado en
+    /// cada página, para que no se vea siempre igual.
     static var todas: [TourPagina] {
         [
             TourPagina(
-                pose: .saludo,
-                globito: String(localized: "¡Hola! Acá ves lo que te toca hoy.", comment: "Tour: globito de Inicio"),
-                leyenda: String(localized: "Inicio · tocá una tarjeta para ver más", comment: "Tour: leyenda de Inicio")),
+                seccion: .inicio,
+                globito: Textos.tourPageHomeBubble,
+                mascotaALaIzquierda: true),
             TourPagina(
-                pose: .saludo,
-                globito: String(localized: "Tu plan, semana a semana.", comment: "Tour: globito de Plan"),
-                leyenda: String(localized: "Plan · tocá un día para ver la sesión", comment: "Tour: leyenda de Plan")),
+                seccion: .plan,
+                globito: Textos.tourPagePlanBubble,
+                mascotaALaIzquierda: false),
             TourPagina(
-                pose: .corriendo,
-                globito: String(localized: "Tocá ⚡ y salimos a correr.", comment: "Tour: globito de Entreno"),
-                leyenda: String(localized: "GPS, ritmo y pausa · también desde el reloj", comment: "Tour: leyenda de Entreno")),
+                seccion: .entreno,
+                globito: Textos.tourPageWorkoutBubble,
+                mascotaALaIzquierda: true),
             TourPagina(
-                pose: .corriendo,
-                globito: String(localized: "Cada salida queda guardada.", comment: "Tour: globito de Historial"),
-                leyenda: String(localized: "Historial · mapa, números y tu constancia", comment: "Tour: leyenda de Historial")),
+                seccion: .historial,
+                globito: Textos.tourPageHistoryBubble,
+                mascotaALaIzquierda: false),
             TourPagina(
-                pose: .medalla,
-                globito: String(localized: "¡Listo para tu primera carrera!", comment: "Tour: globito final"),
-                leyenda: String(localized: "Perfil · tus datos, ajustes y el color de la app", comment: "Tour: leyenda de Perfil")),
+                seccion: .perfil,
+                globito: Textos.tourPageProfileBubble,
+                mascotaALaIzquierda: true),
         ]
     }
 }
 
-/// Una página: la mascota grande hablando con su globito, y la leyenda abajo.
-/// Al llegar a la página la mascota entra con un fundido y el globito brota
-/// desde el piquito (todo eso vive en `MascotaConBocadillo`).
+/// Una página: el globito arriba, con el piquito hacia el lado de la mascota, y
+/// abajo el escenario (teléfono + anillo + flecha + mascota). Al llegar a la
+/// página el globito brota una vez; después todo queda quieto.
 private struct TourPaginaView: View {
     let contenido: TourPagina
-    /// Si es la página que se está mirando: la mascota entra y se mueve.
+    let estado: EstadoHome?
+    let flujo: FlujoEntrada
+    /// Si es la página que se está mirando: la mascota, el anillo y la flecha entran.
+    let visible: Bool
+
+    @Environment(\.accessibilityReduceMotion) private var movimientoReducido
+    @State private var entro = false
+
+    var body: some View {
+        VStack(spacing: TokensEspaciado.e12) {
+            globito
+            escenario
+                .frame(maxWidth: .infinity, maxHeight: .infinity)
+        }
+        .padding(.top, TokensEspaciado.e4)
+        .padding(.bottom, TokensEspaciado.e4)
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
+        // El teléfono es decorado: VoiceOver lee qué pestaña es y lo que dice la mascota.
+        .accessibilityElement(children: .ignore)
+        .accessibilityLabel(contenido.seccion.nombre + ". " + contenido.globito)
+        .accessibilityAddTraits(.isHeader)
+        .onAppear { entro = visible }
+        .onChange(of: visible) { entro = $0 }
+    }
+
+    private var aparecido: Bool { entro || movimientoReducido }
+
+    private var globito: some View {
+        Bocadillo(cola: .abajo, posicionDeCola: contenido.mascotaALaIzquierda ? 0.16 : 0.84) {
+            Text(contenido.globito)
+                .estilo(.tituloCard)
+                .multilineTextAlignment(.center)
+                .fixedSize(horizontal: false, vertical: true)
+                .frame(maxWidth: .infinity)
+        }
+        .scaleEffect(aparecido ? 1 : 0.9,
+                     anchor: contenido.mascotaALaIzquierda ? .bottomLeading : .bottomTrailing)
+        .opacity(aparecido ? 1 : 0)
+        .animation(movimientoReducido
+                   ? nil
+                   : Animation.easeOut(duration: TokensMovimiento.media).delay(TokensMovimiento.rapida),
+                   value: entro)
+    }
+
+    /// Con el estado, el escenario lo observa: si el plan llega mientras se
+    /// mira el tour, la vista previa (y dónde va el anillo) se acomoda sola.
+    @ViewBuilder
+    private var escenario: some View {
+        if let estado {
+            TourEscenarioObservado(estado: estado, pagina: contenido, flujo: flujo, visible: visible)
+        } else {
+            TourEscenario(pagina: contenido, estado: nil, flujo: flujo, visible: visible)
+        }
+    }
+}
+
+/// El escenario, redibujado cada vez que cambia el estado del Home.
+private struct TourEscenarioObservado: View {
+    @ObservedObject var estado: EstadoHome
+    let pagina: TourPagina
+    let flujo: FlujoEntrada
     let visible: Bool
 
     var body: some View {
-        VStack(spacing: TokensEspaciado.e16) {
-            Spacer(minLength: 0)
-            MascotaConBocadillo(pose: contenido.pose,
-                                texto: contenido.globito,
-                                altoMaximo: TokensEspaciado.e56 * 5,
-                                activa: visible)
-            Text(contenido.leyenda)
-                .estilo(.cuerpoSecundario, color: Paleta.textoSecundario)
-                .multilineTextAlignment(.center)
-                .fixedSize(horizontal: false, vertical: true)
-            Spacer(minLength: 0)
-        }
-        .padding(.horizontal, TokensEspaciado.e8)
-        .frame(maxWidth: .infinity)
-        .accessibilityElement(children: .combine)
+        TourEscenario(pagina: pagina, estado: estado, flujo: flujo, visible: visible)
     }
 }

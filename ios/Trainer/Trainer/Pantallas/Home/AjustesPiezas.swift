@@ -6,7 +6,8 @@ import TrainerCore
 //
 // Pedido de Ivan: limpio, visual, textos ultra cortos. La raíz es una lista
 // corta de filas (ícono + una o dos palabras + valor + chevron) y cada fila
-// abre su página, con la flecha para volver y el título grande.
+// abre su página. Ronda 5: la flecha y el título van fijos arriba, en una
+// línea, como una barra de navegación; abajo scrollea el contenido.
 // =============================================================================
 
 /// Las páginas que se abren desde la raíz de Ajustes.
@@ -25,14 +26,16 @@ enum AjustesAncla {
 }
 
 /// El tono del cuadradito del ícono. El color nunca va solo: siempre hay texto.
+/// `peligro`: acciones destructivas (cerrar sesión), en el rojo fuerte.
 enum AjustesTono {
-    case acento, neutro, alerta
+    case acento, neutro, peligro
 }
 
 // MARK: - Página
 
-/// Una página de Ajustes: la flecha para volver, el título grande y el
-/// contenido. Se vuelve también deslizando desde el borde izquierdo.
+/// Una página de Ajustes: arriba, fijos, la flecha para volver y el título
+/// (`CabeceraSecundaria`); abajo, el contenido que scrollea. Se vuelve también
+/// deslizando desde el borde izquierdo.
 struct AjustesPagina<Contenido: View>: View {
     private let titulo: String
     /// Si viene, el scroll arranca en ese `id` (ver `AjustesAncla`).
@@ -50,24 +53,15 @@ struct AjustesPagina<Contenido: View>: View {
 
     var body: some View {
         VStack(spacing: 0) {
-            HStack {
-                FlechaVolver(accion: volver)
-                Spacer()
-            }
-            .padding(.horizontal, TokensEspaciado.e16)
-            .padding(.bottom, TokensEspaciado.e4)
+            CabeceraSecundaria(titulo: titulo, volver: volver)
 
             ScrollViewReader { proxy in
                 ScrollView {
                     VStack(alignment: .leading, spacing: TokensEspaciado.e16) {
-                        Text(titulo)
-                            .estilo(.display)
-                            .frame(maxWidth: .infinity, alignment: .leading)
-                            .accessibilityAddTraits(.isHeader)
                         contenido
                     }
                     .padding(.horizontal, TokensEspaciado.e16)
-                    .padding(.top, TokensEspaciado.e4)
+                    .padding(.top, TokensEspaciado.e8)
                     .padding(.bottom, TokensEspaciado.e36)
                 }
                 .onAppear {
@@ -122,7 +116,7 @@ struct AjustesIcono: View {
         switch tono {
         case .acento: return Paleta.acento
         case .neutro: return Paleta.textoSecundario
-        case .alerta: return Paleta.error
+        case .peligro: return Paleta.peligro
         }
     }
 
@@ -130,7 +124,7 @@ struct AjustesIcono: View {
         switch tono {
         case .acento: return Paleta.acentoChipActivo
         case .neutro: return Paleta.superficieHundida
-        case .alerta: return Paleta.errorFondo
+        case .peligro: return Paleta.peligro.opacity(0.15)
         }
     }
 }
@@ -180,7 +174,7 @@ struct AjustesFila: View {
             HStack(spacing: TokensEspaciado.e12) {
                 AjustesIcono(simbolo: simbolo, tono: tono)
                 Text(titulo)
-                    .estilo(.opcionTitulo, color: tono == .alerta ? Paleta.error : Paleta.textoPrimario)
+                    .estilo(.opcionTitulo, color: tono == .peligro ? Paleta.peligro : Paleta.textoPrimario)
                     .lineLimit(1)
                     .minimumScaleFactor(0.85)
                 Spacer(minLength: TokensEspaciado.e8)

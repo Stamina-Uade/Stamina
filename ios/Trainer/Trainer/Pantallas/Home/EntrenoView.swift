@@ -56,29 +56,29 @@ struct EntrenoView: View {
                 deporteElegido = sugerido
             }
         }
-        .alert(Textos.entrenoPermisoTitulo, isPresented: $explicarUbicacion) {
-            Button(Textos.entrenoPermisoContinuar) { estado.empezarOPausar(deporte: deporteElegido) }
-            Button(Textos.entrenoPermisoCancelar, role: .cancel) {}
+        .alert(Textos.workoutPermissionTitle, isPresented: $explicarUbicacion) {
+            Button(Textos.workoutPermissionContinue) { estado.empezarOPausar(deporte: deporteElegido) }
+            Button(Textos.workoutPermissionCancel, role: .cancel) {}
         } message: {
-            Text(Textos.entrenoPermisoDetalle)
+            Text(Textos.workoutPermissionDetail)
         }
-        .alert("Sin movimiento", isPresented: $mostrarAvisoSinMovimiento) {
-            Button("Reanudar", role: .cancel) {
+        .alert(Textos.workoutNoMovementTitle, isPresented: $mostrarAvisoSinMovimiento) {
+            Button(Textos.commonResume, role: .cancel) {
                 // Desde "en curso" no hay nada que reanudar: alternar la pausaría.
                 if estado.estadoDeLaSesion == .pausada {
                     estado.empezarOPausar(deporte: deporteElegido)
                 }
             }
-            Button("Descartar", role: .destructive) {
+            Button(Textos.commonDiscard, role: .destructive) {
                 estado.descartarSesion()
             }
         } message: {
-            Text("El entrenamiento no registró desplazamiento suficiente o duró menos de 10 segundos. ¿Deseas descartarlo o reanudarlo?")
+            Text(Textos.workoutNoMovementMessage)
         }
-        .alert(String(localized: "¿Terminar el entreno?", comment: "Confirmación al terminar una salida en curso"),
+        .alert(Textos.workoutFinishConfirm,
                isPresented: $confirmarTerminar) {
-            Button(Textos.entrenoTerminar, role: .destructive) { estado.terminarSesion() }
-            Button(String(localized: "Seguir", comment: "Seguir con la salida en curso"), role: .cancel) {}
+            Button(Textos.workoutFinish, role: .destructive) { estado.terminarSesion() }
+            Button(Textos.commonKeepGoing, role: .cancel) {}
         }
     }
 
@@ -169,7 +169,7 @@ struct EntrenoView: View {
 
     private var barraSuperior: some View {
         HStack(alignment: .center, spacing: TokensEspaciado.e10) {
-            BotonCircular("xmark", etiqueta: Textos.comunVolver, estilo: .secundario,
+            BotonCircular("xmark", etiqueta: Textos.commonBack, estilo: .secundario,
                           diametro: TokensTamano.objetivoTactilMinimo) {
                 withAnimation(.easeInOut(duration: 0.22)) {
                     estado.volverDeLaPantallaSecundaria()
@@ -235,7 +235,7 @@ struct EntrenoView: View {
 
     private var tituloPildora: String {
         if estado.haySesionEnCurso {
-            return estado.estadoDeLaSesion == .pausada ? "En pausa" : (estado.sesion?.tipo ?? "Entrenamiento en curso")
+            return estado.estadoDeLaSesion == .pausada ? Textos.workoutPaused : (estado.sesion?.tipo ?? Textos.workoutInProgress)
         }
         if let sesion = estado.sesion {
             return sesion.tipo
@@ -247,7 +247,7 @@ struct EntrenoView: View {
         if let sesion = estado.sesion {
             return objetivo(de: sesion)
         }
-        return estado.haySesionEnCurso ? "Grabando GPS" : "Listo para iniciar"
+        return estado.haySesionEnCurso ? Textos.workoutGpsRecording : Textos.workoutReadyToStart
     }
 
     // MARK: - Métricas
@@ -262,12 +262,12 @@ struct EntrenoView: View {
 
             VStack(alignment: .leading, spacing: TokensEspaciado.e2) {
                 HStack(alignment: .firstTextBaseline) {
-                    Text(Textos.entrenoDistancia)
+                    Text(Textos.commonDistance)
                         .estilo(.etiquetaSeccion, color: Paleta.textoSecundario)
                     Spacer(minLength: 0)
                     if estaPausada {
                         // La pausa se ve sin depender del botón: texto + ícono, en su color.
-                        Label("En pausa", systemImage: "pause.fill")
+                        Label(Textos.workoutPaused, systemImage: "pause.fill")
                             .labelStyle(.titleAndIcon)
                             .estilo(.etiquetaSeccion, color: Paleta.controlPausa)
                     }
@@ -276,17 +276,17 @@ struct EntrenoView: View {
                     Formato.distanciaNumero(estado.metrosDeLaSesion, unidades: estado.sistemaDeUnidades, decimales: 2),
                     unidad: unidadDeDistancia,
                     color: estaPausada ? Paleta.textoSecundario : Paleta.textoPrimario,
-                    etiquetaAccesible: Textos.entrenoDistancia
+                    etiquetaAccesible: Textos.commonDistance
                 )
             }
 
             HStack(spacing: TokensEspaciado.e8) {
-                TarjetaMetrica(Textos.entrenoDuracion,
+                TarjetaMetrica(Textos.workoutDuration,
                                valor: Formato.cronometro(segundos: estado.segundosDeLaSesion),
                                simbolo: "stopwatch")
                 tarjetaDeRitmo
                 if let metros = estado.sesion?.distanciaMetros {
-                    TarjetaMetrica(String(localized: "Objetivo", comment: "Distancia objetivo de la sesión del plan"),
+                    TarjetaMetrica(Textos.workoutTarget,
                                    valor: Formato.distanciaNumero(metros, unidades: estado.sistemaDeUnidades),
                                    unidad: unidadDeDistancia,
                                    simbolo: "flag.checkered")
@@ -300,7 +300,7 @@ struct EntrenoView: View {
     @ViewBuilder
     private var tarjetaDeRitmo: some View {
         if deporteElegido == .ciclismo {
-            TarjetaMetrica(String(localized: "Velocidad prom.", comment: "Velocidad promedio de la salida"),
+            TarjetaMetrica(Textos.commonAvgSpeed,
                            valor: Formato.velocidadNumero(metros: estado.metrosDeLaSesion,
                                                           segundos: estado.segundosDeLaSesion,
                                                           unidades: estado.sistemaDeUnidades,
@@ -309,7 +309,7 @@ struct EntrenoView: View {
                            simbolo: "speedometer",
                            destacada: true)
         } else {
-            TarjetaMetrica(String(localized: "Ritmo prom.", comment: "Ritmo promedio de la salida"),
+            TarjetaMetrica(Textos.commonAvgPace,
                            valor: Formato.ritmo(segundosPorKm: estado.ritmoDeLaSesion, unidades: estado.sistemaDeUnidades),
                            unidad: "/\(unidadDeDistancia)",
                            simbolo: "timer",
@@ -322,21 +322,21 @@ struct EntrenoView: View {
     private var filaDeEstado: some View {
         FlujoHorizontal(espaciado: TokensEspaciado.e6) {
             if estado.salidaVieneDelReloj {
-                PildoraDeEstado(String(localized: "Grabando en el reloj", comment: "Píldora: la salida la registra el reloj"),
+                PildoraDeEstado(Textos.workoutRecordingOnWatch,
                                 simbolo: "applewatch", tono: .acento)
             } else if estado.seguimiento.errorDeUbicacion {
-                PildoraDeEstado(String(localized: "Sin GPS", comment: "Píldora: no hay permiso o señal de ubicación"),
+                PildoraDeEstado(Textos.workoutGpsNone,
                                 simbolo: "location.slash.fill", tono: .alerta)
             } else if estado.ubicacionDeLaSesion != nil {
-                PildoraDeEstado(String(localized: "GPS ok", comment: "Píldora: la ubicación funciona"),
+                PildoraDeEstado(Textos.workoutGpsOk,
                                 simbolo: "location.fill", tono: .acento)
             } else {
-                PildoraDeEstado(String(localized: "Buscando GPS", comment: "Píldora: esperando la primera ubicación"),
+                PildoraDeEstado(Textos.workoutGpsSearching,
                                 simbolo: "location", tono: .neutro)
             }
 
             if !estado.salidaVieneDelReloj && relojVinculado {
-                PildoraDeEstado(String(localized: "Reloj vinculado", comment: "Píldora: hay un reloj con la app"),
+                PildoraDeEstado(Textos.workoutWatchConnected,
                                 simbolo: "applewatch", tono: .neutro)
             }
         }
@@ -410,7 +410,7 @@ struct EntrenoView: View {
 
             // Capas del mapa (satélite / estándar)
             BotonDelMapa(activo: mapType == .hybrid,
-                         etiqueta: String(localized: "Vista satelital", comment: "Botón de capas del mapa")) {
+                         etiqueta: Textos.workoutMapSatellite) {
                 withAnimation {
                     mapType = (mapType == .standard) ? .hybrid : .standard
                 }
@@ -421,12 +421,12 @@ struct EntrenoView: View {
 
             // Vista 3D
             BotonDelMapa(activo: is3D,
-                         etiqueta: String(localized: "Vista 3D", comment: "Botón del mapa en perspectiva")) {
+                         etiqueta: Textos.workoutMapView3d) {
                 withAnimation {
                     is3D.toggle()
                 }
             } icono: {
-                Text("3D").estilo(.tituloCard, color: is3D ? Paleta.acento : Paleta.textoPrimario)
+                Text(verbatim: "3D").estilo(.tituloCard, color: is3D ? Paleta.acento : Paleta.textoPrimario)
             }
 
             // Antes de empezar, "centrar" vive acá; en curso, abajo junto a la pausa.
@@ -442,7 +442,7 @@ struct EntrenoView: View {
     }
 
     private var etiquetaCentrar: String {
-        String(localized: "Centrar en mi ubicación", comment: "Botón que recentra el mapa")
+        Textos.workoutMapCenterOnMe
     }
 
     private func centrarEnElUsuario() {
@@ -472,7 +472,7 @@ struct EntrenoView: View {
                     .accessibilityHidden(true)
 
                     VStack(alignment: .leading, spacing: TokensEspaciado.e2) {
-                        Text(Textos.entrenoAvituallamiento)
+                        Text(Textos.workoutFueling)
                             .estilo(.tituloCard)
                         Text(detalleDeAvituallamiento(avituallamiento))
                             .estilo(.labelCampo, color: Paleta.textoSecundario)
@@ -498,7 +498,7 @@ struct EntrenoView: View {
             }
             .buttonStyle(EstiloPresionado())
             .accessibilityElement(children: .combine)
-            .accessibilityHint(String(localized: "Abre el plan de hoy", comment: "Pista de la tarjeta de avituallamiento"))
+            .accessibilityHint(Textos.workoutOpensTodayPlan)
             .padding(TokensEspaciado.e10)
             .transition(.move(edge: .bottom).combined(with: .opacity))
         }
@@ -549,8 +549,8 @@ struct EntrenoView: View {
                 menuDeDeporte
             }
 
-            control(Textos.entrenoEmpezar, color: Paleta.acento) {
-                BotonCircular("play.fill", etiqueta: Textos.entrenoEmpezar,
+            control(Textos.workoutStart, color: Paleta.acento) {
+                BotonCircular("play.fill", etiqueta: Textos.workoutStart,
                               estilo: .primario, diametro: diametroPrincipal) {
                     if estado.seguimiento.errorDeUbicacion {
                         explicarUbicacion = true
@@ -570,7 +570,7 @@ struct EntrenoView: View {
     }
 
     private var etiquetaPlan: String {
-        estado.sesion != nil ? "Plan de hoy" : "Rutas"
+        estado.sesion != nil ? Textos.workoutTodayPlan : Textos.workoutRoutes
     }
 
     /// Con un solo deporte posible (MVP sólo running) no hay nada que elegir:
@@ -580,7 +580,7 @@ struct EntrenoView: View {
         if deportesDisponibles.count <= 1 {
             iconoDelDeporteElegido
                 .accessibilityElement(children: .ignore)
-                .accessibilityLabel(String(localized: "Deporte", comment: "Selector de deporte del entreno"))
+                .accessibilityLabel(Textos.workoutSport)
                 .accessibilityValue(deporteElegido.nombreVisible)
         } else {
             menuDeDeporteConOpciones
@@ -619,7 +619,7 @@ struct EntrenoView: View {
                 .contentShape(Circle())
         }
         .buttonStyle(EstiloPresionado())
-        .accessibilityLabel(String(localized: "Deporte", comment: "Selector de deporte del entreno"))
+        .accessibilityLabel(Textos.workoutSport)
         .accessibilityValue(deporteElegido.nombreVisible)
     }
 
@@ -627,7 +627,7 @@ struct EntrenoView: View {
     // dicen en qué estado está, cada uno con su color de control.
     private func controlesEnCurso(pausado: Bool) -> some View {
         HStack(alignment: .top, spacing: TokensEspaciado.e8) {
-            control(String(localized: "Centrar", comment: "Botón que recentra el mapa (etiqueta corta)"),
+            control(Textos.workoutMapCenter,
                     color: seguirUsuario ? Paleta.acento : Paleta.textoSecundario) {
                 BotonCircular(seguirUsuario ? "location.fill" : "location",
                               etiqueta: etiquetaCentrar, estilo: .secundario, diametro: diametroSecundario) {
@@ -635,17 +635,17 @@ struct EntrenoView: View {
                 }
             }
 
-            control(pausado ? Textos.entrenoReanudar : Textos.entrenoPausar,
+            control(pausado ? Textos.commonResume : Textos.workoutPause,
                     color: pausado ? Paleta.controlReanudar : Paleta.controlPausa) {
                 BotonCircular(pausado ? "play.fill" : "pause.fill",
-                              etiqueta: pausado ? Textos.entrenoReanudar : Textos.entrenoPausar,
+                              etiqueta: pausado ? Textos.commonResume : Textos.workoutPause,
                               estilo: .primario, diametro: diametroPrincipal) {
                     estado.empezarOPausar(deporte: deporteElegido)
                 }
             }
 
-            control(Textos.entrenoTerminar, color: Paleta.error) {
-                BotonCircular("stop.fill", etiqueta: Textos.entrenoTerminar,
+            control(Textos.workoutFinish, color: Paleta.error) {
+                BotonCircular("stop.fill", etiqueta: Textos.workoutFinish,
                               estilo: .secundario, diametro: diametroSecundario) {
                     terminar(desdePausa: pausado)
                 }
@@ -685,7 +685,7 @@ struct EntrenoView: View {
                                    height: TokensTamano.objetivoTactilMinimo)
                             .contentShape(Rectangle())
                     }
-                    .accessibilityLabel(String(localized: "Cerrar el plan", comment: "Cierra el desplegable del plan de hoy"))
+                    .accessibilityLabel(Textos.workoutClosePlan)
                 }
 
                 Text(objetivo(de: sesion))
@@ -700,11 +700,11 @@ struct EntrenoView: View {
                 }
 
                 if let avituallamiento = sesion.avituallamiento {
-                    Text(Textos.entrenoAvituallamiento)
+                    Text(Textos.workoutFueling)
                         .estilo(.etiquetaSeccion, color: Paleta.acento)
                         .padding(.top, TokensEspaciado.e4)
                     FlujoHorizontal(espaciado: TokensEspaciado.e6) {
-                        ChipInformativo(texto: "\(avituallamiento.geles) gel", destacado: true)
+                        ChipInformativo(texto: Textos.homeGelCount(avituallamiento.geles), destacado: true)
                         ChipInformativo(texto: Formato.litros(avituallamiento.mililitrosTotales), destacado: true)
                         ChipInformativo(texto: "\(avituallamiento.sodioMg) mg", destacado: true)
                     }
@@ -730,7 +730,7 @@ struct EntrenoView: View {
         if let metros = sesion.distanciaMetros {
             partes.append(Formato.distancia(metros, unidades: estado.sistemaDeUnidades))
         }
-        if let zona = sesion.zona { partes.append(Textos.zonaVoiceover(zona.numero)) }
+        if let zona = sesion.zona { partes.append(Textos.zoneAccessibility(zona.numero)) }
         return partes.joined(separator: " · ")
     }
 }

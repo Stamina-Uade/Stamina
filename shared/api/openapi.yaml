@@ -16,7 +16,7 @@ openapi: 3.1.0
 
 info:
   title: Trainer API
-  version: 1.2.1
+  version: 1.3.0
   license:
     name: >-
       COMPLETAR. El repositorio es privado y la licencia del proyecto no está
@@ -35,6 +35,8 @@ info:
     endpoints anteriores.
     En la 1.2.1, `ObjetivoEntrada.goal_date_ms` deja de ser obligatorio: ausente
     vale lo mismo que `null` ("sin fecha"). Sólo afloja una validación de entrada.
+    La 1.3.0 agrega los pasos diarios (`GET` y `PUT /me/steps`) y la clave
+    opcional `steps` en la exportación. Aditivo: nada anterior cambia de forma.
 
     **Reglas que valen en TODA la API** (docs/API.md las explica):
 
@@ -81,6 +83,8 @@ tags:
     description: Lo que se entrenó afuera del gimnasio.
   - name: nutricion
     description: Objetivos del día detrás de los guardarraíles de AGENTS.md §9.2, y comidas.
+  - name: pasos
+    description: Los pasos de cada día, de Apple Salud, Health Connect o cargados a mano.
   - name: cuenta
     description: Exportar y borrar la cuenta (AGENTS.md §8).
 
@@ -609,6 +613,101 @@ paths:
         '400': { $ref: '#/components/responses/PedidoInvalido' }
         '401': { $ref: '#/components/responses/NoAutorizado' }
 
+  # ----------------------------------------------------------------- pasos --
+  /me/steps:
+    get:
+      tags: [pasos]
+      operationId: getSteps
+      summary: Mis pasos de un rango de días
+      description: >-
+        Los días del rango que tienen pasos guardados, del más viejo al más nuevo.
+        Un día sin fila no se manda: "no hay dato" no es "cero pasos". El rango
+        incluye las dos puntas y es de 366 días como mucho.
+
+        `from` y `to` son días de calendario "YYYY-MM-DD", sin hora y sin zona: es
+        el día local del teléfono que contó los pasos. Es una excepción a la
+        regla de los milisegundos epoch, y es a propósito: un día de pasos no es un
+        instante, y convertirlo obligaría a saber en qué zona estaba la persona.
+      parameters:
+        - name: from
+          in: query
+          required: true
+          description: Primer día del rango, incluido.
+          schema: { type: string, pattern: '^\d{4}-\d{2}-\d{2}$' }
+        - name: to
+          in: query
+          required: true
+          description: Último día del rango, incluido. No puede ser anterior a `from`.
+          schema: { type: string, pattern: '^\d{4}-\d{2}-\d{2}$' }
+      responses:
+        '200':
+          description: Los días con pasos.
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [data]
+                properties:
+                  data:
+                    type: array
+                    items: { $ref: '#/components/schemas/DiaDePasos' }
+        '400': { $ref: '#/components/responses/PedidoInvalido' }
+        '401': { $ref: '#/components/responses/NoAutorizado' }
+    put:
+      tags: [pasos]
+      operationId: putSteps
+      summary: Guardar los pasos de varios días
+      description: |
+        Hasta 60 días por pedido. Cada día se guarda o se reemplaza entero.
+
+        **Gana el más nuevo.** Por cada día queda el valor con el `updated_at_ms`
+        más alto, sin importar la fuente: la cuenta de hoy crece durante el día y
+        tiene que poder pisar la de la mañana, y un reintento viejo que llega tarde
+        no pisa una corrección posterior. `updated_at_ms` es cuándo el cliente leyó
+        o editó ese valor; si falta, o viene del futuro, vale la hora del servidor.
+
+        Idempotente: reintentar el mismo lote deja lo mismo. Con
+        `Idempotency-Key`, además, devuelve la misma respuesta. La respuesta trae
+        cómo quedó cada día mandado, que puede no ser lo que se mandó si había
+        algo más nuevo.
+      parameters:
+        - $ref: '#/components/parameters/ClaveDeIdempotencia'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [days]
+              additionalProperties: false
+              properties:
+                days:
+                  type: array
+                  minItems: 1
+                  maxItems: 60
+                  items: { $ref: '#/components/schemas/DiaDePasosEntrada' }
+      responses:
+        '200':
+          description: Cómo quedó cada día mandado, del más viejo al más nuevo.
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [data]
+                properties:
+                  data:
+                    type: array
+                    items: { $ref: '#/components/schemas/DiaDePasos' }
+        '400': { $ref: '#/components/responses/PedidoInvalido' }
+        '401': { $ref: '#/components/responses/NoAutorizado' }
+        '409':
+          description: >-
+            La misma `Idempotency-Key` con otro cuerpo, o un reintento del mismo
+            pedido que todavía está en vuelo.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Error' }
+
   # ---------------------------------------------------------------- cuenta --
   /me/delete:
     post:
@@ -649,7 +748,8 @@ paths:
       description: >-
         **AGENTS.md §8.** Todo lo que el servidor guarda de la persona, en un solo
         JSON: perfil, aceptaciones legales, anclas del plan, sesiones de gimnasio con
-        sus series, actividades y comidas. Nunca incluye hashes ni tokens.
+        sus series, actividades, comidas y, desde la 1.3.0, pasos diarios. Nunca
+        incluye hashes ni tokens.
       responses:
         '200':
           description: Los datos.
@@ -775,7 +875,10 @@ paths:
       tags: [plan]
       operationId: forecastWeather
       summary: Pronóstico horario para avisos de calor
+      deprecated: true
       description: >-
+        Obsoleta: la app iOS usa WeatherKit en el dispositivo y ya no la llama.
+        Queda para las versiones viejas de la app; no agregar clientes nuevos.
         El servidor reduce las coordenadas a décimas de grado antes de consultar
         MET Norway y cachea la respuesta. No guarda la ubicación de la persona.
         El pronóstico es informativo y debe citar la fuente.
@@ -2141,6 +2244,45 @@ components:
         created_at_ms: { $ref: '#/components/schemas/EpochMs' }
         updated_at_ms: { $ref: '#/components/schemas/EpochMs' }
 
+    # ---- pasos ----
+    FuenteDePasos:
+      type: string
+      description: De dónde salió el número. Sólo informativo; no decide quién gana.
+      enum: [healthkit, manual, health_connect]
+
+    DiaDePasosEntrada:
+      type: object
+      additionalProperties: false
+      required: [date, steps, source]
+      properties:
+        date:
+          type: string
+          description: >-
+            Día de calendario "YYYY-MM-DD", sin hora ni zona: el día local de quien
+            contó los pasos. El servidor rechaza los días que no existen.
+          pattern: '^\d{4}-\d{2}-\d{2}$'
+          examples: ["2026-10-19"]
+        steps: { type: integer, minimum: 0, maximum: 200000 }
+        source: { $ref: '#/components/schemas/FuenteDePasos' }
+        updated_at_ms:
+          $ref: '#/components/schemas/EpochMs'
+          description: Cuándo el cliente leyó o editó el valor. Ausente vale "ahora".
+
+    DiaDePasos:
+      type: object
+      required: [date, steps, source, updated_at_ms]
+      properties:
+        date:
+          type: string
+          description: >-
+            Día de calendario "YYYY-MM-DD", sin hora ni zona: el día local de quien
+            contó los pasos. El servidor rechaza los días que no existen.
+          pattern: '^\d{4}-\d{2}-\d{2}$'
+          examples: ["2026-10-19"]
+        steps: { type: integer }
+        source: { $ref: '#/components/schemas/FuenteDePasos' }
+        updated_at_ms: { $ref: '#/components/schemas/EpochMs' }
+
     # ---- cuenta ----
     AceptacionRegistrada:
       type: object
@@ -2185,6 +2327,10 @@ components:
         meals:
           type: array
           items: { $ref: '#/components/schemas/ComidaRegistrada' }
+        steps:
+          type: array
+          description: Desde la 1.3.0. Opcional para que un cliente nuevo lea la exportación de un servidor anterior.
+          items: { $ref: '#/components/schemas/DiaDePasos' }
 
     ObjetivoExportado:
       type: object

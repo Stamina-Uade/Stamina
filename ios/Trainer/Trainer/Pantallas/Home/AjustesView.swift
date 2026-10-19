@@ -37,13 +37,10 @@ struct AjustesView: View {
     @State private var guardandoObjetivos = false
     @State private var errorDeObjetivos = false
     @State private var confirmandoCierre = false
-    @State private var guiasRestablecidas = false
 
-    /// Lo que "Ver tour" vuelve a mostrar: la guía de cada pestaña y el
-    /// recorrido de bienvenida (`tour_visto`).
-    private static let clavesDeAyuda = [
-        "guia_inicio", "guia_plan", "guia_historial", "guia_perfil", "guia_ajustes", "tour_visto",
-    ]
+    /// "Ver tour" la pone en `false`: `RaizHomeView` la escucha con
+    /// `@AppStorage` y vuelve a mostrar el recorrido de bienvenida.
+    private static let claveDelTour = "tour_visto"
 
     var body: some View {
         ZStack {
@@ -69,25 +66,25 @@ struct AjustesView: View {
                 return f >= inicioDeHoyMs
             }
         }
-        .alert(Textos.ajustesUnidades, isPresented: $errorDeUnidades) {
-            Button(Textos.comunListo, role: .cancel) {}
+        .alert(Textos.settingsUnits, isPresented: $errorDeUnidades) {
+            Button(Textos.commonDone, role: .cancel) {}
         } message: {
-            Text(flujo.errorVisible ?? Textos.ajustesUnidadesDetalle)
+            Text(flujo.errorVisible ?? Textos.settingsUnitsDetail)
         }
-        .alert("No se guardaron los objetivos", isPresented: $errorDeObjetivos) {
-            Button(Textos.comunListo, role: .cancel) {}
+        .alert(Textos.settingsGoalsSaveFailed, isPresented: $errorDeObjetivos) {
+            Button(Textos.commonDone, role: .cancel) {}
         } message: {
-            Text(flujo.errorVisible ?? "Revisá la conexión e intentá de nuevo.")
+            Text(flujo.errorVisible ?? Textos.settingsGoalsSaveFailedMessage)
         }
-        .confirmationDialog(String(localized: "¿Cerrar la sesión?", comment: "Ajustes: confirmar el cierre de sesión"),
+        .confirmationDialog(Textos.settingsSignOutConfirm,
                             isPresented: $confirmandoCierre, titleVisibility: .visible) {
-            Button(Textos.ajustesCerrarSesion, role: .destructive) {
+            Button(Textos.settingsSignOut, role: .destructive) {
                 // El llavero se borra antes de salir, sin esperar a la red: sin señal
                 // las credenciales se van igual, y `POST /auth/logout` sale por detrás
                 // (`FlujoEntrada.cerrarSesion`).
                 Task { await flujo.cerrarSesion() }
             }
-            Button(Textos.comunCancelar, role: .cancel) {}
+            Button(Textos.commonCancel, role: .cancel) {}
         }
     }
 
@@ -146,10 +143,10 @@ struct AjustesView: View {
     // MARK: - Raíz
 
     private var raiz: some View {
-        AjustesPagina(Textos.ajustesTitulo, volver: { estado.volverDeLaPantallaSecundaria() }) {
+        AjustesPagina(Textos.settingsTitle, volver: { estado.volverDeLaPantallaSecundaria() }) {
             AjustesTarjetaDeFilas {
                 AjustesFila(simbolo: "paintpalette.fill",
-                            titulo: String(localized: "Aspecto", comment: "Ajustes: fila de modo y color"),
+                            titulo: Textos.settingsAppearanceTitle,
                             valor: modoApariencia.nombreCorto,
                             muestra: Paleta.acento,
                             valorAccesible: "\(modoApariencia.nombreCorto), \(nombreDelColor)") {
@@ -157,7 +154,7 @@ struct AjustesView: View {
                 }
                 AjustesDivisorDeFila()
                 AjustesFila(simbolo: "bell.badge.fill",
-                            titulo: String(localized: "Notificaciones", comment: "Ajustes: fila de avisos"),
+                            titulo: Textos.settingsNotificationsTitle,
                             valor: resumenDeAvisos) {
                     ir(a: .notificaciones)
                 }
@@ -165,40 +162,34 @@ struct AjustesView: View {
 
             AjustesTarjetaDeFilas {
                 AjustesFila(simbolo: "ruler",
-                            titulo: Textos.ajustesUnidades,
+                            titulo: Textos.settingsUnits,
                             valor: estado.sistemaDeUnidades == .metrico ? "km" : "mi") {
                     ir(a: .unidades)
                 }
                 AjustesDivisorDeFila()
                 AjustesFila(simbolo: "flag.checkered",
-                            titulo: String(localized: "Objetivos", comment: "Ajustes: fila de objetivos"),
-                            valor: String(localized: "\(objetivosEnEdicion.count) activos",
-                                          comment: "Ajustes: cuántos objetivos hay")) {
+                            titulo: Textos.settingsGoalsTitle,
+                            valor: Textos.settingsGoalsCountActive(objetivosEnEdicion.count)) {
                     ir(a: .objetivos)
                 }
             }
 
             AjustesTarjetaDeFilas {
                 AjustesFila(simbolo: "sparkles",
-                            titulo: String(localized: "Ver tour", comment: "Ajustes: volver a mostrar el tour y las guías"),
-                            valorAccesible: guiasRestablecidas
-                                ? String(localized: "Listo: las guías vuelven a aparecer en cada pestaña.",
-                                         comment: "Ajustes: guías restablecidas")
-                                : nil,
-                            simboloFinal: guiasRestablecidas ? "checkmark.circle.fill" : "chevron.right") {
-                    restablecerGuias()
+                            titulo: Textos.settingsViewTour) {
+                    verTour()
                 }
                 AjustesDivisorDeFila()
                 AjustesFila(simbolo: "rectangle.portrait.and.arrow.right",
-                            titulo: Textos.ajustesCerrarSesion,
-                            tono: .alerta,
+                            titulo: Textos.settingsSignOut,
+                            tono: .peligro,
                             simboloFinal: nil) {
                     Haptico.toque()
                     confirmandoCierre = true
                 }
             }
 
-            Text(Textos.ajustesVersion(versionDeLaApp))
+            Text(Textos.settingsVersion(versionDeLaApp))
                 .estilo(.notaLegal, color: Paleta.textoTerciario)
                 .frame(maxWidth: .infinity)
                 .padding(.top, TokensEspaciado.e8)
@@ -209,9 +200,9 @@ struct AjustesView: View {
     private var resumenDeAvisos: String {
         let activas = [notificacionManana, notificacionPrevio, notificacionCalor].filter { $0 }.count
         switch activas {
-        case 0: return String(localized: "Apagadas", comment: "Ajustes: ningún aviso prendido")
-        case 1: return String(localized: "1 activa", comment: "Ajustes: un aviso prendido")
-        default: return String(localized: "\(activas) activas", comment: "Ajustes: cuántos avisos están prendidos")
+        case 0: return Textos.settingsNotificationsOff
+        case 1: return Textos.settingsNotificationsOneOn
+        default: return Textos.settingsNotificationsCountOn(activas)
         }
     }
 
@@ -220,7 +211,7 @@ struct AjustesView: View {
         let guardado = UserDefaults.standard.string(forKey: AcentoPersonalizado.clave) ?? ""
         if AcentoPersonalizado.esPredeterminado(guardado) { return AcentoPersonalizado.predeterminado.nombre }
         return AcentoPersonalizado.opcion(paraGuardado: guardado)?.nombre
-            ?? String(localized: "Personalizado", comment: "Ajustes: el color libre")
+            ?? Textos.settingsColorCustom
     }
 
     // MARK: - Unidades
@@ -261,16 +252,11 @@ struct AjustesView: View {
         }
     }
 
-    // MARK: - Ayuda
+    // MARK: - Tour
 
-    private func restablecerGuias() {
-        Haptico.exito()
-        withAnimation(reducirMovimiento ? nil : .easeOut(duration: TokensMovimiento.media)) {
-            for clave in Self.clavesDeAyuda {
-                UserDefaults.standard.set(false, forKey: clave)
-            }
-            guiasRestablecidas = true
-        }
+    private func verTour() {
+        Haptico.toque()
+        UserDefaults.standard.set(false, forKey: Self.claveDelTour)
     }
 
     private var versionDeLaApp: String {

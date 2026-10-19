@@ -130,21 +130,21 @@ struct AbrirView: View {
 
     private let deportes: [OpcionDeporteReloj] = [
         OpcionDeporteReloj(id: "run-ext", deporte: .running, esInterior: false,
-                           nombre: "Carrera\nexterior", icono: "figure.run"),
+                           nombre: TextosReloj.startOptionRunOutdoor, icono: "figure.run"),
         OpcionDeporteReloj(id: "bike-ext", deporte: .ciclismo, esInterior: false,
-                           nombre: "Bicicleta\nexterior", icono: "bicycle"),
+                           nombre: TextosReloj.startOptionBikeOutdoor, icono: "bicycle"),
         OpcionDeporteReloj(id: "run-int", deporte: .running, esInterior: true,
-                           nombre: "Carrera\ninterior", icono: "figure.run.treadmill"),
+                           nombre: TextosReloj.startOptionRunIndoor, icono: "figure.run.treadmill"),
         OpcionDeporteReloj(id: "bike-int", deporte: .ciclismo, esInterior: true,
-                           nombre: "Bicicleta\ninterior", icono: "figure.indoor.cycle"),
+                           nombre: TextosReloj.startOptionBikeIndoor, icono: "figure.indoor.cycle"),
         OpcionDeporteReloj(id: "walk-ext", deporte: .trekking, esInterior: false,
-                           nombre: "Caminata\nexterior", icono: "figure.walk"),
+                           nombre: TextosReloj.startOptionWalkOutdoor, icono: "figure.walk"),
         OpcionDeporteReloj(id: "walk-int", deporte: .trekking, esInterior: true,
-                           nombre: "Caminata\ninterior", icono: "figure.walk.treadmill"),
+                           nombre: TextosReloj.startOptionWalkIndoor, icono: "figure.walk.treadmill"),
         OpcionDeporteReloj(id: "swim-ext", deporte: .natacion, esInterior: false,
-                           nombre: "Natación\npiscina", icono: "figure.pool.swim"),
+                           nombre: TextosReloj.startOptionSwimPool, icono: "figure.pool.swim"),
         OpcionDeporteReloj(id: "triatlon", deporte: .natacion, esInterior: false,
-                           nombre: "Triatlón\ncompleto", icono: "figure.mixed.cardio")
+                           nombre: TextosReloj.startOptionTriathlon, icono: "figure.mixed.cardio")
     ]
 
     /// Lo que deja elegir `MVP` (hoy: sólo carrera exterior e interior). Los
@@ -161,7 +161,7 @@ struct AbrirView: View {
             VStack(alignment: .leading, spacing: PaletaReloj.puntosDeDiseno(TokensEspaciado.e8)) {
                 // 1. Objetivo de hoy (oculto completamente si hoy es día de descanso)
                 if !estado.esDiaDeDescanso && (estado.sesionCardioPlanificada != nil || estado.tieneGimnasioHoy) {
-                    Text(TextosReloj.abrirObjetivoHoy.uppercased())
+                    Text(TextosReloj.startTodayGoal.uppercased())
                         .font(.system(size: 11, weight: .bold, design: .rounded))
                         .foregroundStyle(PaletaReloj.textoSecundario)
                         .tracking(0.6)
@@ -175,7 +175,7 @@ struct AbrirView: View {
                 }
 
                 // 2. Elegí un deporte
-                Text(TextosReloj.abrirElegirDeporte.uppercased())
+                Text(TextosReloj.startChooseSport.uppercased())
                     .font(.system(size: 11, weight: .bold, design: .rounded))
                     .foregroundStyle(PaletaReloj.textoSecundario)
                     .tracking(0.6)
@@ -266,7 +266,7 @@ struct AbrirView: View {
 
                     if estado.objetivoHoyCumplido {
                         let metros = estado.distanciaEntrenoHoyMetros > 0 ? estado.distanciaEntrenoHoyMetros : (sesion.distanciaMetros ?? 0)
-                        Text("Completado · \(Formato.distancia(metros, unidades: estado.sistemaDeUnidades, decimales: 2))")
+                        Text(TextosReloj.startGoalCompletedDistance(Formato.distancia(metros, unidades: estado.sistemaDeUnidades, decimales: 2)))
                             .font(.system(size: 13, weight: .bold, design: .rounded))
                             .foregroundStyle(Color.green)
                     } else if let metros = sesion.distanciaMetros, metros > 0 {
@@ -274,7 +274,7 @@ struct AbrirView: View {
                             .font(.system(size: 13, weight: .bold, design: .rounded))
                             .foregroundStyle(PaletaReloj.acento)
                     } else {
-                        Text(TextosReloj.abrirInicio)
+                        Text(TextosReloj.startBegin)
                             .font(.system(size: 13, weight: .bold, design: .rounded))
                             .foregroundStyle(PaletaReloj.acento)
                     }
@@ -306,7 +306,7 @@ struct AbrirView: View {
                 iconoTarjeta(simbolo: "dumbbell.fill", color: PaletaReloj.acento)
 
                 VStack(alignment: .leading, spacing: 2) {
-                    Text("Gimnasio")
+                    Text(TextosReloj.sportGym)
                         .font(.system(size: 15, weight: .bold, design: .rounded))
                         .foregroundStyle(PaletaReloj.textoPrimario)
                         .lineLimit(2)
@@ -314,7 +314,7 @@ struct AbrirView: View {
 
                     let totalSeries = estado.rutina.reduce(0) { $0 + $1.series }
                     if totalSeries > 0 {
-                        Text("\(totalSeries) series")
+                        Text(TextosReloj.startGymSetsCount(totalSeries))
                             .font(.system(size: 13, weight: .bold, design: .rounded))
                             .foregroundStyle(PaletaReloj.acento)
                     }
@@ -357,7 +357,7 @@ struct AbrirView: View {
                         .foregroundStyle(PaletaReloj.textoPrimario)
                         .lineLimit(2)
                         .truncationMode(.tail)
-                    Text(TextosReloj.abrirInicio)
+                    Text(TextosReloj.startBegin)
                         .font(.system(size: 13, weight: .bold, design: .rounded))
                         .foregroundStyle(PaletaReloj.acento)
                 }
@@ -410,7 +410,7 @@ struct AjustesInicialesView: View {
     var body: some View {
         ScrollView(.vertical) {
             VStack(alignment: .leading, spacing: PaletaReloj.puntosDeDiseno(TokensEspaciado.e8)) {
-                Text(TextosReloj.portadaAjustesTitulo)
+                Text(TextosReloj.homeSettingsTitle)
                     .font(.system(size: 22, weight: .bold, design: .rounded))
                     .foregroundStyle(.white)
                     .padding(.bottom, 2)
@@ -420,10 +420,10 @@ struct AjustesInicialesView: View {
                     estado.toggleUnidades()
                 } label: {
                     VStack(alignment: .leading, spacing: 2) {
-                        Text("Unidades")
+                        Text(TextosReloj.settingsUnitsTitle)
                             .font(.system(size: 13, weight: .medium))
                             .foregroundStyle(.white.opacity(0.8))
-                        Text(estado.sistemaDeUnidades == .metrico ? "Sistema métrico" : "Sistema imperial")
+                        Text(estado.sistemaDeUnidades == .metrico ? TextosReloj.settingsUnitsMetric : TextosReloj.settingsUnitsImperial)
                             .font(.system(size: 16, weight: .bold, design: .rounded))
                             .foregroundStyle(.white)
                     }
@@ -436,17 +436,17 @@ struct AjustesInicialesView: View {
                 .buttonStyle(.plain)
 
                 // 2. Sección Pausa automática (Carrera y Bici con detección de parada real)
-                Text("Pausa automática")
+                Text(TextosReloj.settingsAutoPause)
                     .font(.system(size: 13, weight: .medium))
                     .foregroundStyle(.white.opacity(0.8))
                     .padding(.top, 4)
 
                 HStack {
-                    Text("Carrera")
+                    Text(TextosReloj.sportRunning)
                         .font(.system(size: 16, weight: .bold, design: .rounded))
                         .foregroundStyle(.white)
                     Spacer()
-                    Toggle("", isOn: $estado.pausaAutoCarrera)
+                    Toggle(String(), isOn: $estado.pausaAutoCarrera)
                         .labelsHidden()
                         .tint(PaletaReloj.acento)
                 }
@@ -458,17 +458,17 @@ struct AjustesInicialesView: View {
 
 
                 // 3. Sección Alertas
-                Text("Alertas")
+                Text(TextosReloj.settingsAlertsSection)
                     .font(.system(size: 13, weight: .medium))
                     .foregroundStyle(.white.opacity(0.8))
                     .padding(.top, 4)
 
                 HStack {
-                    Text("Alertas de entrenamiento")
+                    Text(TextosReloj.settingsAlertsWorkout)
                         .font(.system(size: 16, weight: .bold, design: .rounded))
                         .foregroundStyle(.white)
                     Spacer()
-                    Toggle("", isOn: $estado.avisosDeAvituallamiento)
+                    Toggle(String(), isOn: $estado.avisosDeAvituallamiento)
                         .labelsHidden()
                         .tint(PaletaReloj.acento)
                 }
@@ -496,17 +496,17 @@ struct AlertaEntrenamientoCompletaView: View {
 
     private var titulo: String {
         switch aviso {
-        case .agua: return "¡Tomá agua!"
-        case .gel: return "¡Tomá un gel!"
-        case .sales: return "¡Tomá sales!"
+        case .agua: return TextosReloj.fuelFullscreenWaterTitle
+        case .gel: return TextosReloj.fuelFullscreenGelTitle
+        case .sales: return TextosReloj.fuelFullscreenSaltsTitle
         }
     }
 
     private var subtitulo: String {
         switch aviso {
-        case .agua: return "Momento de hidratarte"
-        case .gel: return "Energía para continuar"
-        case .sales: return "Electrolitos para tu ritmo"
+        case .agua: return TextosReloj.fuelFullscreenWaterSubtitle
+        case .gel: return TextosReloj.fuelFullscreenGelSubtitle
+        case .sales: return TextosReloj.fuelFullscreenSaltsSubtitle
         }
     }
 
@@ -548,7 +548,7 @@ struct AlertaEntrenamientoCompletaView: View {
                     .multilineTextAlignment(.center)
                     .padding(.horizontal, 16)
 
-                Text("Tocá para continuar")
+                Text(TextosReloj.alertTapToContinue)
                     .font(.system(size: 10, weight: .bold, design: .rounded))
                     .foregroundStyle(PaletaReloj.acento)
                     .padding(.top, 4)
@@ -588,13 +588,13 @@ struct PreguntaAvituallamientoView: View {
                         .font(.system(size: 24, weight: .bold))
                         .foregroundStyle(PaletaReloj.acento)
 
-                    Text("¿Llevás hidratación o geles?")
+                    Text(TextosReloj.fuelPromptQuestion)
                         .font(.system(size: 15, weight: .bold, design: .rounded))
                         .foregroundStyle(.white)
                         .multilineTextAlignment(.center)
                         .padding(.horizontal, 8)
 
-                    Text("Tocá para saltear")
+                    Text(TextosReloj.fuelPromptTapToSkip)
                         .font(.system(size: 11, weight: .medium))
                         .foregroundStyle(PaletaReloj.textoSecundario)
 
@@ -602,7 +602,7 @@ struct PreguntaAvituallamientoView: View {
                         Button {
                             estado.iniciarSinAvituallamiento()
                         } label: {
-                            Text("No")
+                            Text(TextosReloj.commonNo)
                                 .font(.system(size: 14, weight: .bold))
                                 .foregroundStyle(.white)
                                 .frame(maxWidth: .infinity, minHeight: 38)
@@ -616,7 +616,7 @@ struct PreguntaAvituallamientoView: View {
                                 configurando = true
                             }
                         } label: {
-                            Text("Sí")
+                            Text(TextosReloj.commonYes)
                                 .font(.system(size: 14, weight: .bold))
                                 .foregroundStyle(PaletaReloj.fondo)
                                 .frame(maxWidth: .infinity, minHeight: 38)
@@ -631,26 +631,26 @@ struct PreguntaAvituallamientoView: View {
             } else {
                 ScrollView(.vertical) {
                     VStack(spacing: 7) {
-                        Text("¿QUÉ LLEVÁS?")
+                        Text(TextosReloj.fuelPromptTitle)
                             .font(.system(size: 12, weight: .heavy, design: .rounded))
                             .foregroundStyle(PaletaReloj.acento)
 
-                        controlItem(titulo: "Agua", valor: "\(estado.aguaMlQueLleva) ml",
+                        controlItem(titulo: TextosReloj.fuelPromptWater, valor: "\(estado.aguaMlQueLleva) ml",
                                     alMenos: { estado.aguaMlQueLleva = max(0, estado.aguaMlQueLleva - 250) },
                                     alMas: { estado.aguaMlQueLleva = min(3000, estado.aguaMlQueLleva + 250) })
 
-                        controlItem(titulo: "Geles", valor: "\(estado.gelesQueLleva)",
+                        controlItem(titulo: TextosReloj.fuelPromptGels, valor: "\(estado.gelesQueLleva)",
                                     alMenos: { estado.gelesQueLleva = max(0, estado.gelesQueLleva - 1) },
                                     alMas: { estado.gelesQueLleva = min(15, estado.gelesQueLleva + 1) })
 
-                        controlItem(titulo: "Sales", valor: "\(estado.salesQueLleva)",
+                        controlItem(titulo: TextosReloj.fuelPromptSalts, valor: "\(estado.salesQueLleva)",
                                     alMenos: { estado.salesQueLleva = max(0, estado.salesQueLleva - 1) },
                                     alMas: { estado.salesQueLleva = min(15, estado.salesQueLleva + 1) })
 
                         Button {
                             estado.confirmarAvituallamientoEIniciar()
                         } label: {
-                            Text("Iniciar")
+                            Text(TextosReloj.commonStart)
                                 .font(.system(size: 14, weight: .bold))
                                 .foregroundStyle(PaletaReloj.fondo)
                                 .frame(maxWidth: .infinity, minHeight: 38)
@@ -674,7 +674,7 @@ struct PreguntaAvituallamientoView: View {
                 .foregroundStyle(.white)
             Spacer()
             Button(action: alMenos) {
-                Text("-")
+                Text(verbatim: "-")
                     .font(.system(size: 16, weight: .bold))
                     .frame(width: 28, height: 28)
                     .background(PaletaReloj.superficieAlterna)
@@ -688,7 +688,7 @@ struct PreguntaAvituallamientoView: View {
                 .frame(minWidth: 44)
 
             Button(action: alMas) {
-                Text("+")
+                Text(verbatim: "+")
                     .font(.system(size: 16, weight: .bold))
                     .frame(width: 28, height: 28)
                     .background(PaletaReloj.superficieAlterna)
@@ -891,7 +891,7 @@ struct MetricasView: View {
                         Spacer(minLength: 0)
 
                         if estado.pausada {
-                            Text(estado.esAutoPausada ? "Autopausado" : "Pausado")
+                            Text(estado.esAutoPausada ? TextosReloj.workoutStatusAutoPaused : TextosReloj.workoutStatusPaused)
                                 .font(.system(size: 12, weight: .bold, design: .rounded))
                                 .foregroundStyle(PaletaReloj.acento)
                                 .padding(.horizontal, 7)
@@ -921,7 +921,7 @@ struct MetricasView: View {
                                 Text(estado.unidadDeVelocidad.uppercased())
                                     .font(.system(size: 9.5, weight: .heavy))
                                     .foregroundStyle(.white)
-                                Text(estado.ritmoParcial ? "ACTUAL" : "PROMEDIO")
+                                Text(estado.ritmoParcial ? TextosReloj.workoutPaceCurrent : TextosReloj.workoutPaceAverage)
                                     .font(.system(size: 8, weight: .bold))
                                     .foregroundStyle(PaletaReloj.textoSecundario)
                             }
@@ -938,7 +938,7 @@ struct MetricasView: View {
                                 Text("/" + estado.unidadDeDistancia.uppercased())
                                     .font(.system(size: 9.5, weight: .heavy))
                                     .foregroundStyle(.white)
-                                Text(estado.ritmoParcial ? "ACTUAL" : "PROMEDIO")
+                                Text(estado.ritmoParcial ? TextosReloj.workoutPaceCurrent : TextosReloj.workoutPaceAverage)
                                     .font(.system(size: 8, weight: .bold))
                                     .foregroundStyle(PaletaReloj.textoSecundario)
                             }
@@ -971,7 +971,7 @@ struct MetricasView: View {
                     }
 
                     if estado.pantallaBloqueada {
-                        Text(TextosReloj.metricasBloqueada)
+                        Text(TextosReloj.metricsLocked)
                             .font(.system(size: 10, weight: .semibold))
                             .foregroundStyle(PaletaReloj.acento)
                             .lineLimit(1)
@@ -990,7 +990,7 @@ struct MetricasView: View {
                     Image(systemName: "checkmark.circle.fill")
                         .font(.system(size: 34, weight: .bold))
                         .foregroundStyle(Color.green)
-                    Text("¡Objetivo alcanzado!")
+                    Text(TextosReloj.goalReached)
                         .font(.system(size: 15, weight: .bold, design: .rounded))
                         .foregroundStyle(.white)
                         .multilineTextAlignment(.center)
@@ -1003,7 +1003,7 @@ struct MetricasView: View {
                         Button {
                             estado.continuarEntrenamientoTrasObjetivo()
                         } label: {
-                            Text("Continuar")
+                            Text(TextosReloj.commonContinue)
                                 .font(.system(size: 13, weight: .bold))
                                 .foregroundStyle(.white)
                                 .frame(maxWidth: .infinity, minHeight: 38)
@@ -1017,7 +1017,7 @@ struct MetricasView: View {
                             estado.descartarAvisoObjetivoCumplido()
                             estado.solicitarFinalizacion()
                         } label: {
-                            Text("Finalizar")
+                            Text(TextosReloj.commonFinish)
                                 .font(.system(size: 13, weight: .bold))
                                 .foregroundStyle(PaletaReloj.fondo)
                                 .frame(maxWidth: .infinity, minHeight: 38)
@@ -1045,14 +1045,14 @@ struct RutinaView: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: PaletaReloj.puntosDeDiseno(TokensEspaciado.e8)) {
-            Text(TextosReloj.rutinaTitulo)
+            Text(TextosReloj.routineTitle)
                 .estilo(.relojEtiqueta, color: PaletaReloj.textoSecundario)
 
             if estado.rutina.isEmpty {
                 Spacer(minLength: 0)
-                Text(TextosReloj.rutinaSinRutina).estilo(.relojTituloAviso)
+                Text(TextosReloj.routineNone).estilo(.relojTituloAviso)
                     .tituloDelReloj()
-                Text(TextosReloj.rutinaSinRutinaDetalle)
+                Text(TextosReloj.routineNoneDetail)
                     .estilo(.relojCuerpo, color: PaletaReloj.textoSecundario)
                     .cuerpoDelReloj()
                     .lineLimit(3)
@@ -1065,7 +1065,7 @@ struct RutinaView: View {
                             .estilo(.relojCuerpo)
                             .lineLimit(1)
                             .minimumScaleFactor(0.7)
-                        Text("\(ejercicio.series) × \(ejercicio.repeticiones)")
+                        Text(verbatim: "\(ejercicio.series) × \(ejercicio.repeticiones)")
                             .estilo(.relojEtiqueta, color: PaletaReloj.textoSecundario)
                     }
                     .padding(PaletaReloj.puntosDeDiseno(TokensEspaciado.e8))
@@ -1112,19 +1112,19 @@ struct ControlesView: View {
                 .buttonStyle(.plain)
             }
             HStack(spacing: PaletaReloj.puntosDeDiseno(TokensEspaciado.e6)) {
-                control(TextosReloj.controlesFinalizar, simbolo: "flag.fill", tono: .error) {
+                control(TextosReloj.controlsFinish, simbolo: "flag.fill", tono: .error) {
                     estado.solicitarFinalizacion()
                 }
-                control(estado.pausada ? TextosReloj.controlesReanudar : TextosReloj.controlesPausar,
+                control(estado.pausada ? TextosReloj.controlsResume : TextosReloj.controlsPause,
                         simbolo: estado.pausada ? "play.fill" : "pause.fill", tono: .pausa) {
                     estado.pausarOReanudar()
                 }
             }
             HStack(spacing: PaletaReloj.puntosDeDiseno(TokensEspaciado.e6)) {
-                control(TextosReloj.controlesAjustes, simbolo: "gearshape.fill", tono: .normal) {
+                control(TextosReloj.controlsSettings, simbolo: "gearshape.fill", tono: .normal) {
                     estado.ir(a: .ajustes)
                 }
-                control(TextosReloj.controlesVuelta, simbolo: "arrow.triangle.2.circlepath", tono: .vuelta) {
+                control(TextosReloj.controlsLap, simbolo: "arrow.triangle.2.circlepath", tono: .vuelta) {
                     estado.marcarVuelta()
                 }
             }
@@ -1209,25 +1209,25 @@ struct SinMovimientoView: View {
         ZStack(alignment: .topLeading) {
             ScrollView(.vertical) {
                 VStack(spacing: TokensEspaciado.e6) {
-                    Text(TextosReloj.sinMovimientoTitulo)
+                    Text(TextosReloj.stationaryTitle)
                         .font(.title3.weight(.bold))
                         .foregroundStyle(PaletaReloj.textoPrimario)
                         .multilineTextAlignment(.center)
                         .fixedSize(horizontal: false, vertical: true)
                         .padding(.top, 28)
 
-                    Text(TextosReloj.sinMovimientoDetalle)
+                    Text(TextosReloj.stationaryDetail)
                         .font(.headline.weight(.semibold))
                         .foregroundStyle(PaletaReloj.textoPrimario)
                         .multilineTextAlignment(.center)
                         .fixedSize(horizontal: false, vertical: true)
 
-                    botonGrande(TextosReloj.sinMovimientoReanudar,
+                    botonGrande(TextosReloj.stationaryResume,
                                 color: PaletaReloj.superficieAlterna,
                                 texto: PaletaReloj.textoPrimario) {
                         estado.reanudarDesdeFinalizacion()
                     }
-                    botonGrande(TextosReloj.sinMovimientoDescartar,
+                    botonGrande(TextosReloj.stationaryDiscard,
                                 color: PaletaReloj.errorFondo,
                                 texto: PaletaReloj.error) {
                         estado.descartar()
@@ -1254,7 +1254,7 @@ struct SinMovimientoView: View {
             .padding(.top, 4)
             .padding(.leading, 6)
             .zIndex(10)
-            .accessibilityLabel(TextosReloj.sinMovimientoCerrar)
+            .accessibilityLabel(TextosReloj.stationaryClose)
         }
     }
 
@@ -1279,17 +1279,17 @@ struct AvisosView: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: PaletaReloj.puntosDeDiseno(TokensEspaciado.e8)) {
-            Text(TextosReloj.avisosViene)
+            Text(TextosReloj.alertsUpcoming)
                 .estilo(.relojEtiqueta, color: PaletaReloj.acento)
 
-            Text(TextosReloj.avisosSinDatos)
+            Text(TextosReloj.alertsEmpty)
                 .estilo(.relojCuerpo, color: PaletaReloj.textoSecundario)
                 .lineLimit(3)
                 .minimumScaleFactor(0.75)
 
             Spacer(minLength: 0)
 
-            Text(TextosReloj.avisosPaso)
+            Text(TextosReloj.alertsPast)
                 .estilo(.relojEtiqueta, color: PaletaReloj.textoSecundario)
 
             if let aviso = estado.avisosPasados.last {
@@ -1297,7 +1297,7 @@ struct AvisosView: View {
                     Text(aviso.titulo)
                         .estilo(.relojCuerpo, color: PaletaReloj.textoSecundario)
                         .lineLimit(1)
-                    Text("\(aviso.detalle) · \(aviso.cuando)")
+                    Text(verbatim: "\(aviso.detalle) · \(aviso.cuando)")
                         .estilo(.relojEtiqueta, color: PaletaReloj.textoSecundario)
                         .lineLimit(2)
                 }
@@ -1340,7 +1340,7 @@ struct MapaView: View {
         if #available(iOS 17.0, watchOS 10.0, *) {
             MapaModernoView()
         } else {
-            Text(TextosReloj.mapaSinGps)
+            Text(TextosReloj.mapNoGps)
                 .estilo(.relojEtiqueta, color: PaletaReloj.textoSecundario)
         }
     }
@@ -1395,7 +1395,7 @@ struct MapaModernoView: View {
                 Spacer(minLength: 0)
 
                 if estado.pausada {
-                    Text(estado.esAutoPausada ? "Autopausado" : "Pausado")
+                    Text(estado.esAutoPausada ? TextosReloj.workoutStatusAutoPaused : TextosReloj.workoutStatusPaused)
                         .font(.system(size: 12, weight: .bold, design: .rounded))
                         .foregroundStyle(PaletaReloj.acento)
                         .padding(.horizontal, 7)
@@ -1449,7 +1449,7 @@ struct MapaModernoView: View {
                                 Annotation("", coordinate: primero) {
                                     ZStack {
                                         Circle().fill(PaletaReloj.acento).frame(width: 15, height: 15)
-                                        Text("\(indice + 1)")
+                                        Text(verbatim: "\(indice + 1)")
                                             .font(.system(size: 9, weight: .bold))
                                             .foregroundStyle(PaletaReloj.fondo)
                                     }
@@ -1581,7 +1581,7 @@ struct MapaModernoView: View {
                     #endif
                 }
             } else {
-                Text(TextosReloj.mapaSinGps)
+                Text(TextosReloj.mapNoGps)
                     .estilo(.relojEtiqueta, color: PaletaReloj.textoSecundario)
                     .multilineTextAlignment(.center)
                     .padding(.horizontal, TokensEspaciado.e20)
@@ -1603,7 +1603,7 @@ struct MusicaView: View {
             .frame(maxWidth: .infinity, maxHeight: .infinity)
         #else
         Color.black
-            .overlay(Text("Música").foregroundStyle(.white))
+            .overlay(Text(TextosReloj.musicPlaceholder).foregroundStyle(.white))
             .frame(maxWidth: .infinity, maxHeight: .infinity)
         #endif
     }
@@ -1627,7 +1627,7 @@ struct ParcialesView: View {
                     Spacer(minLength: 0)
 
                     if estado.pausada {
-                        Text(estado.esAutoPausada ? "Autopausado" : "Pausado")
+                        Text(estado.esAutoPausada ? TextosReloj.workoutStatusAutoPaused : TextosReloj.workoutStatusPaused)
                             .font(.system(size: 12, weight: .bold, design: .rounded))
                             .foregroundStyle(PaletaReloj.acento)
                             .padding(.horizontal, 7)
@@ -1666,14 +1666,14 @@ struct ParcialesView: View {
 
         return VStack(alignment: .leading, spacing: 5) {
             HStack(alignment: .firstTextBaseline) {
-                Text("SERIES")
+                Text(TextosReloj.intervalsTitle)
                     .font(.system(size: 12, weight: .heavy, design: .rounded))
                     .foregroundStyle(PaletaReloj.acento)
                     .tracking(0.5)
 
                 Spacer()
 
-                Text("\(completadas) de \(total)")
+                Text(TextosReloj.commonCountOf(completadas, total))
                     .font(.system(size: 13, weight: .bold, design: .rounded))
                     .foregroundStyle(.white)
                     .monospacedDigit()
@@ -1727,17 +1727,17 @@ struct ParcialesView: View {
             }
 
             VStack(alignment: .leading, spacing: 1) {
-                Text("Serie \(item.numero)")
+                Text(TextosReloj.intervalsSetNumber(item.numero))
                     .font(.system(size: 13, weight: .bold, design: .rounded))
                     .foregroundStyle(item.completada ? .white : (esActual ? PaletaReloj.acento : PaletaReloj.textoSecundario))
 
                 if esActual {
-                    Text("\(item.metrosCompletados) / \(item.metrosObjetivo) m")
+                    Text(verbatim: "\(item.metrosCompletados) / \(item.metrosObjetivo) m")
                         .font(.system(size: 10, weight: .semibold))
                         .foregroundStyle(PaletaReloj.textoSecundario)
                         .monospacedDigit()
                 } else {
-                    Text("\(item.metrosObjetivo) m")
+                    Text(verbatim: "\(item.metrosObjetivo) m")
                         .font(.system(size: 10, weight: .medium))
                         .foregroundStyle(PaletaReloj.textoSecundario.opacity(0.8))
                 }
@@ -1761,12 +1761,12 @@ struct ParcialesView: View {
                         .font(.system(size: 13, weight: .bold, design: .rounded))
                         .foregroundStyle(PaletaReloj.acento)
                         .monospacedDigit()
-                    Text("ACTUAL")
+                    Text(TextosReloj.workoutPaceCurrent)
                         .font(.system(size: 7.5, weight: .heavy))
                         .foregroundStyle(PaletaReloj.acento)
                 }
             } else {
-                Text("—")
+                Text(verbatim: "—")
                     .font(.system(size: 13, weight: .bold))
                     .foregroundStyle(PaletaReloj.textoSecundario.opacity(0.5))
             }
@@ -1782,14 +1782,14 @@ struct ParcialesView: View {
     private var contenidoKilometros: some View {
         VStack(alignment: .leading, spacing: 5) {
             HStack {
-                Text("KILÓMETROS")
+                Text(TextosReloj.splitsTitle)
                     .font(.system(size: 12, weight: .heavy, design: .rounded))
                     .foregroundStyle(PaletaReloj.acento)
                     .tracking(0.5)
 
                 Spacer()
 
-                Text("\(estado.distanciaMostrada) \(estado.unidadDeDistancia.uppercased())")
+                Text(verbatim: "\(estado.distanciaMostrada) \(estado.unidadDeDistancia.uppercased())")
                     .font(.system(size: 13, weight: .bold, design: .rounded))
                     .foregroundStyle(.white)
                     .monospacedDigit()
@@ -1802,7 +1802,7 @@ struct ParcialesView: View {
                     let parciales = estado.listaParcialesVisuales
                     if parciales.isEmpty {
                         VStack(spacing: 6) {
-                            Text("Sin kilómetros completados aún")
+                            Text(TextosReloj.splitsEmpty)
                                 .font(.system(size: 12, weight: .medium))
                                 .foregroundStyle(PaletaReloj.textoSecundario)
                                 .multilineTextAlignment(.center)
@@ -1825,7 +1825,7 @@ struct ParcialesView: View {
     private func filaKm(_ p: ParcialKilometro) -> some View {
         HStack(spacing: 8) {
             HStack(spacing: 6) {
-                Text("KM \(p.numero)")
+                Text(TextosReloj.splitsKmNumber(p.numero))
                     .font(.system(size: 13, weight: .bold, design: .rounded))
                     .foregroundStyle(p.completado ? .white : PaletaReloj.acento)
 
@@ -1859,7 +1859,7 @@ struct ParcialesView: View {
                         .foregroundStyle(PaletaReloj.textoSecundario)
                 }
             } else {
-                Text("—")
+                Text(verbatim: "—")
                     .font(.system(size: 13, weight: .bold))
                     .foregroundStyle(PaletaReloj.textoSecundario)
             }
@@ -1881,12 +1881,12 @@ struct ParcialesView: View {
                     .font(.system(size: 32, weight: .bold))
                     .foregroundStyle(Color.green)
 
-                Text("¡Objetivo completado!")
+                Text(TextosReloj.goalCompleted)
                     .font(.system(size: 14, weight: .bold, design: .rounded))
                     .foregroundStyle(.white)
                     .multilineTextAlignment(.center)
 
-                Text("Terminaste todas las series de hoy.")
+                Text(TextosReloj.goalAllSetsDone)
                     .font(.system(size: 11, weight: .medium))
                     .foregroundStyle(PaletaReloj.textoSecundario)
                     .multilineTextAlignment(.center)
@@ -1895,7 +1895,7 @@ struct ParcialesView: View {
                     Button {
                         estado.continuarTrasFinDeSeries()
                     } label: {
-                        Text("Continuar entrenamiento")
+                        Text(TextosReloj.goalContinueWorkout)
                             .font(.system(size: 12, weight: .bold))
                             .foregroundStyle(PaletaReloj.sobreAcento)
                             .frame(maxWidth: .infinity, minHeight: 36)
@@ -1907,7 +1907,7 @@ struct ParcialesView: View {
                     Button {
                         estado.finalizarDesdeFinDeSeries()
                     } label: {
-                        Text("Finalizar objetivo de hoy")
+                        Text(TextosReloj.goalFinishToday)
                             .font(.system(size: 12, weight: .bold))
                             .foregroundStyle(.white)
                             .frame(maxWidth: .infinity, minHeight: 36)
@@ -1919,7 +1919,7 @@ struct ParcialesView: View {
                     Button {
                         estado.cancelarAvisoFinDeSeries()
                     } label: {
-                        Text("Cancelar")
+                        Text(TextosReloj.commonCancel)
                             .font(.system(size: 11, weight: .medium))
                             .foregroundStyle(PaletaReloj.textoSecundario)
                             .padding(.top, 2)
@@ -1952,7 +1952,7 @@ struct AjustesDeSesionView: View {
         ZStack(alignment: .topLeading) {
             ScrollView(.vertical) {
                 VStack(alignment: .leading, spacing: PaletaReloj.puntosDeDiseno(TokensEspaciado.e8)) {
-                    Text(TextosReloj.ajustesTitulo)
+                    Text(TextosReloj.settingsTitle)
                         .font(.system(size: 20, weight: .bold, design: .rounded))
                         .foregroundStyle(.white)
                         .padding(.top, TokensEspaciado.e34)
@@ -1963,10 +1963,10 @@ struct AjustesDeSesionView: View {
                         estado.toggleUnidades()
                     } label: {
                         VStack(alignment: .leading, spacing: 2) {
-                            Text("Unidades")
+                            Text(TextosReloj.settingsUnitsTitle)
                                 .font(.system(size: 13, weight: .medium))
                                 .foregroundStyle(.white.opacity(0.8))
-                            Text(estado.sistemaDeUnidades == .metrico ? "Sistema métrico" : "Sistema imperial")
+                            Text(estado.sistemaDeUnidades == .metrico ? TextosReloj.settingsUnitsMetric : TextosReloj.settingsUnitsImperial)
                                 .font(.system(size: 16, weight: .bold, design: .rounded))
                                 .foregroundStyle(.white)
                         }
@@ -1979,18 +1979,18 @@ struct AjustesDeSesionView: View {
                     .buttonStyle(.plain)
 
                     // 2. Sección Pausa automática
-                    Text("Pausa automática")
+                    Text(TextosReloj.settingsAutoPause)
                         .font(.system(size: 13, weight: .medium))
                         .foregroundStyle(.white.opacity(0.8))
                         .padding(.top, 4)
 
                     // Carrera toggle
                     HStack {
-                        Text("Carrera")
+                        Text(TextosReloj.sportRunning)
                             .font(.system(size: 16, weight: .bold, design: .rounded))
                             .foregroundStyle(.white)
                         Spacer()
-                        Toggle("", isOn: $estado.pausaAutoCarrera)
+                        Toggle(String(), isOn: $estado.pausaAutoCarrera)
                             .labelsHidden()
                             .tint(PaletaReloj.acento)
                     }
@@ -2002,18 +2002,18 @@ struct AjustesDeSesionView: View {
 
 
                     // 3. Sección Alertas
-                    Text("Alertas")
+                    Text(TextosReloj.settingsAlertsSection)
                         .font(.system(size: 13, weight: .medium))
                         .foregroundStyle(.white.opacity(0.8))
                         .padding(.top, 4)
 
                     // Alertas de entrenamiento toggle
                     HStack {
-                        Text("Alertas de entrenamiento")
+                        Text(TextosReloj.settingsAlertsWorkout)
                             .font(.system(size: 16, weight: .bold, design: .rounded))
                             .foregroundStyle(.white)
                         Spacer()
-                        Toggle("", isOn: $estado.avisosDeAvituallamiento)
+                        Toggle(String(), isOn: $estado.avisosDeAvituallamiento)
                             .labelsHidden()
                             .tint(PaletaReloj.acento)
                     }
@@ -2113,7 +2113,7 @@ struct ResumenView: View {
                     Image(systemName: "flag.checkered")
                         .font(.system(size: 15, weight: .bold))
                         .foregroundStyle(PaletaReloj.acento)
-                    Text(TextosReloj.finalizarTitulo)
+                    Text(TextosReloj.finishTitle)
                         .font(.system(size: 15, weight: .bold, design: .rounded))
                         .foregroundStyle(PaletaReloj.acento)
                     Spacer()
@@ -2124,42 +2124,42 @@ struct ResumenView: View {
                 .padding(.top, 2)
 
                 // Datos organizados verticalmente, tipografía limpia, sin fondos grises
-                filaVertical(etiqueta: TextosReloj.resumenDistancia,
+                filaVertical(etiqueta: TextosReloj.summaryDistance,
                              valor: Formato.distancia(estado.metros, unidades: estado.sistemaDeUnidades, decimales: 2),
                              destacado: true)
 
-                filaVertical(etiqueta: TextosReloj.resumenDuracion,
+                filaVertical(etiqueta: TextosReloj.summaryDuration,
                              valor: Formato.cronometroCompleto(segundos: estado.segundos))
 
                 // Tiempo total en pausa
-                filaVertical(etiqueta: "TIEMPO EN PAUSA",
+                filaVertical(etiqueta: TextosReloj.summaryPausedTime,
                              valor: Formato.cronometroCompleto(segundos: estado.segundosEnPausa),
                              colorIcono: PaletaReloj.vuelta,
                              icono: "pause.circle.fill")
 
                 if estado.deporte == .ciclismo {
-                    filaVertical(etiqueta: "VELOCIDAD PROMEDIO",
+                    filaVertical(etiqueta: TextosReloj.summaryAverageSpeed,
                                  valor: "\(estado.velocidadTexto) \(estado.unidadDeVelocidad)")
                 } else {
-                    filaVertical(etiqueta: TextosReloj.resumenRitmo,
+                    filaVertical(etiqueta: TextosReloj.summaryPace,
                                  valor: Formato.ritmo(segundosPorKm: estado.ritmoPromedioSegPorKm,
                                                       unidades: estado.sistemaDeUnidades))
                 }
 
                 if let pulso = estado.pulso {
-                    filaVertical(etiqueta: TextosReloj.metricasPulso,
+                    filaVertical(etiqueta: TextosReloj.metricsHeartRate,
                                  valor: "\(pulso) ppm",
                                  colorIcono: .red,
                                  icono: "heart.fill")
                 }
 
-                filaVertical(etiqueta: "DESNIVEL ACUMULADO", valor: Formato.desnivel(metros: 0, unidades: estado.sistemaDeUnidades))
+                filaVertical(etiqueta: TextosReloj.summaryElevationGain, valor: Formato.desnivel(metros: 0, unidades: estado.sistemaDeUnidades))
 
-                filaVertical(etiqueta: "CALORÍAS ACTIVAS", valor: "\(caloriasAproximadas) kcal")
+                filaVertical(etiqueta: TextosReloj.summaryActiveCalories, valor: "\(caloriasAproximadas) kcal")
 
                 #if os(watchOS)
                 if !estado.vueltas.isEmpty {
-                    Text("VUELTAS")
+                    Text(TextosReloj.summaryLapsTitle)
                         .font(.system(size: 10, weight: .bold))
                         .foregroundStyle(PaletaReloj.vuelta)
                         .padding(.top, 4)
@@ -2168,11 +2168,11 @@ struct ResumenView: View {
                         HStack {
                             ZStack {
                                 Circle().fill(PaletaReloj.vuelta).frame(width: 14, height: 14)
-                                Text("\(vuelta.numero)")
+                                Text(verbatim: "\(vuelta.numero)")
                                     .font(.system(size: 8, weight: .bold))
                                     .foregroundStyle(PaletaReloj.fondo)
                             }
-                            Text("Vuelta \(vuelta.numero)")
+                            Text(TextosReloj.summaryLapsItem(vuelta.numero))
                                 .font(.system(size: 12, weight: .semibold))
                                 .foregroundStyle(PaletaReloj.textoPrimario)
                             Spacer()
@@ -2189,7 +2189,7 @@ struct ResumenView: View {
                 #endif
 
                 if tramosConPausa.count > 1 {
-                    Text("TRAMOS Y PAUSAS")
+                    Text(TextosReloj.summarySegmentsTitle)
                         .font(.system(size: 10, weight: .bold))
                         .foregroundStyle(PaletaReloj.textoSecundario)
                         .padding(.top, 4)
@@ -2199,11 +2199,11 @@ struct ResumenView: View {
                             HStack {
                                 ZStack {
                                     Circle().fill(PaletaReloj.acento).frame(width: 14, height: 14)
-                                    Text("\(tramo.numero)")
+                                    Text(verbatim: "\(tramo.numero)")
                                         .font(.system(size: 8, weight: .bold))
                                         .foregroundStyle(PaletaReloj.fondo)
                                 }
-                                Text("Zona \(tramo.numero)")
+                                Text(TextosReloj.summarySegmentsZone(tramo.numero))
                                     .font(.system(size: 12, weight: .semibold))
                                     .foregroundStyle(PaletaReloj.textoPrimario)
                                 Spacer()
@@ -2222,7 +2222,7 @@ struct ResumenView: View {
                                     Image(systemName: "pause.fill")
                                         .font(.system(size: 8, weight: .bold))
                                         .foregroundStyle(PaletaReloj.vuelta)
-                                    Text("Pausa posterior: \(Formato.cronometro(segundos: pausa))")
+                                    Text(TextosReloj.summarySegmentsPauseAfter(Formato.cronometro(segundos: pausa)))
                                         .font(.system(size: 10, weight: .semibold))
                                         .foregroundStyle(PaletaReloj.vuelta)
                                 }
@@ -2241,7 +2241,7 @@ struct ResumenView: View {
                         HStack(spacing: TokensEspaciado.e6) {
                             Image(systemName: "checkmark")
                                 .font(.system(size: 16, weight: .bold))
-                            Text(TextosReloj.finalizarGuardar)
+                            Text(TextosReloj.finishSave)
                                 .font(.system(size: 17, weight: .bold))
                         }
                         .foregroundStyle(PaletaReloj.fondo)
@@ -2257,7 +2257,7 @@ struct ResumenView: View {
                         HStack(spacing: TokensEspaciado.e6) {
                             Image(systemName: "play.fill")
                                 .font(.system(size: 14, weight: .bold))
-                            Text(TextosReloj.finalizarReanudar)
+                            Text(TextosReloj.finishResume)
                                 .font(.system(size: 16, weight: .semibold))
                         }
                         .foregroundStyle(PaletaReloj.textoPrimario)
@@ -2273,7 +2273,7 @@ struct ResumenView: View {
                         HStack(spacing: TokensEspaciado.e6) {
                             Image(systemName: "trash.fill")
                                 .font(.system(size: 14, weight: .bold))
-                            Text("Descartar")
+                            Text(TextosReloj.commonDiscard)
                                 .font(.system(size: 16, weight: .semibold))
                         }
                         .foregroundStyle(PaletaReloj.error)
@@ -2314,7 +2314,7 @@ struct ResumenView: View {
                         .foregroundStyle(PaletaReloj.error)
                         .padding(.top, 4)
 
-                    Text("¿Seguro que quieres descartar estos datos?")
+                    Text(TextosReloj.commonDiscardConfirmation)
                         .font(.system(size: 14, weight: .bold, design: .rounded))
                         .foregroundStyle(PaletaReloj.textoPrimario)
                         .multilineTextAlignment(.center)
@@ -2325,7 +2325,7 @@ struct ResumenView: View {
                         Button {
                             mostrarConfirmacionDescarte = false
                         } label: {
-                            Text("Cancelar")
+                            Text(TextosReloj.commonCancel)
                                 .font(.system(size: 15, weight: .semibold))
                                 .foregroundStyle(PaletaReloj.textoPrimario)
                                 .frame(maxWidth: .infinity, minHeight: 40)
@@ -2338,7 +2338,7 @@ struct ResumenView: View {
                             mostrarConfirmacionDescarte = false
                             estado.descartar()
                         } label: {
-                            Text("Descartar")
+                            Text(TextosReloj.commonDiscard)
                                 .font(.system(size: 15, weight: .bold))
                                 .foregroundStyle(.white)
                                 .frame(maxWidth: .infinity, minHeight: 40)
@@ -2427,7 +2427,7 @@ struct GimnasioRelojView: View {
                             HStack(spacing: 3) {
                                 Image(systemName: "play.circle.fill")
                                     .font(.system(size: 11, weight: .bold))
-                                Text("Técnica")
+                                Text(TextosReloj.gymTechnique)
                                     .font(.system(size: 11, weight: .bold))
                             }
                             .foregroundStyle(PaletaReloj.acento)
@@ -2461,18 +2461,18 @@ struct GimnasioRelojView: View {
                         .minimumScaleFactor(0.7)
 
                     HStack {
-                        Text(TextosReloj.gimnasioSerie(min(hechas + 1, total), total))
+                        Text(TextosReloj.gymSetProgress(min(hechas + 1, total), total))
                             .estilo(.relojEtiqueta, color: PaletaReloj.acento)
                         Spacer()
                         if hechas >= total {
-                            Text("Completado")
+                            Text(TextosReloj.commonCompleted)
                                 .font(.system(size: 11, weight: .bold))
                                 .foregroundStyle(Color.green)
                         }
                     }
 
                     StepperDelReloj(valor: "\(estado.repeticiones)",
-                                    unidad: TextosReloj.gimnasioReps,
+                                    unidad: TextosReloj.gymReps,
                                     bajar: { estado.repeticiones = max(1, estado.repeticiones - 1) },
                                     subir: { estado.repeticiones = min(200, estado.repeticiones + 1) })
 
@@ -2484,7 +2484,7 @@ struct GimnasioRelojView: View {
                     }
 
                     // Botón Serie hecha
-                    BotonDelReloj(titulo: TextosReloj.gimnasioHecha, destacado: true) {
+                    BotonDelReloj(titulo: TextosReloj.gymSetDone, destacado: true) {
                         estado.serieHecha()
                         VibracionReloj.avisar()
                     }
@@ -2497,7 +2497,7 @@ struct GimnasioRelojView: View {
                             HStack(spacing: 2) {
                                 Image(systemName: "plus")
                                     .font(.system(size: 11, weight: .bold))
-                                Text("Serie")
+                                Text(TextosReloj.gymSet)
                                     .font(.system(size: 11, weight: .semibold))
                             }
                             .foregroundStyle(PaletaReloj.textoPrimario)
@@ -2514,7 +2514,7 @@ struct GimnasioRelojView: View {
                                 HStack(spacing: 2) {
                                     Image(systemName: "arrow.uturn.backward")
                                         .font(.system(size: 11, weight: .bold))
-                                    Text("Deshacer")
+                                    Text(TextosReloj.commonUndo)
                                         .font(.system(size: 11, weight: .semibold))
                                 }
                                 .foregroundStyle(PaletaReloj.error)
@@ -2528,7 +2528,7 @@ struct GimnasioRelojView: View {
                         Button {
                             estado.terminarGimnasio()
                         } label: {
-                            Text("Finalizar")
+                            Text(TextosReloj.commonFinish)
                                 .font(.system(size: 11, weight: .bold))
                                 .foregroundStyle(PaletaReloj.acento)
                                 .frame(maxWidth: .infinity, minHeight: 34)
@@ -2539,7 +2539,7 @@ struct GimnasioRelojView: View {
                     }
                     .padding(.top, 4)
                 } else {
-                    Text(TextosReloj.rutinaSinRutina).estilo(.relojCuerpo)
+                    Text(TextosReloj.routineNone).estilo(.relojCuerpo)
                 }
             }
             .padding(.horizontal, PaletaReloj.puntosDeDiseno(TokensEspaciado.e16))
@@ -2693,7 +2693,7 @@ struct DemostracionEjercicioView: View {
                         .frame(width: 80, height: 75)
                 }
 
-                Text("Movimiento continuo · Controlá la respiración")
+                Text(TextosReloj.gymTimerCue)
                     .font(.system(size: 10, weight: .medium))
                     .foregroundStyle(PaletaReloj.textoSecundario)
                     .multilineTextAlignment(.center)
@@ -2701,7 +2701,7 @@ struct DemostracionEjercicioView: View {
                 Button {
                     dismiss()
                 } label: {
-                    Text("Continuar")
+                    Text(TextosReloj.commonContinue)
                         .font(.system(size: 14, weight: .bold))
                         .foregroundStyle(.black)
                         .frame(maxWidth: .infinity, minHeight: 36)
@@ -2736,7 +2736,7 @@ struct ResumenGimnasioRelojView: View {
                         Image(systemName: "dumbbell.fill")
                             .font(.system(size: 15, weight: .bold))
                             .foregroundStyle(PaletaReloj.acento)
-                        Text(TextosReloj.finalizarTitulo)
+                        Text(TextosReloj.finishTitle)
                             .font(.system(size: 15, weight: .bold, design: .rounded))
                             .foregroundStyle(PaletaReloj.acento)
                         Spacer()
@@ -2745,42 +2745,42 @@ struct ResumenGimnasioRelojView: View {
 
                     VStack(alignment: .leading, spacing: 6) {
                         HStack {
-                            Text("Ejercicios")
+                            Text(TextosReloj.gymSummaryExercises)
                                 .font(.system(size: 12, weight: .medium))
                                 .foregroundStyle(PaletaReloj.textoSecundario)
                             Spacer()
-                            Text("\(estado.ejerciciosCompletadosGimnasio) de \(estado.rutina.count)")
+                            Text(TextosReloj.commonCountOf(estado.ejerciciosCompletadosGimnasio, estado.rutina.count))
                                 .font(.system(size: 13, weight: .bold, design: .rounded))
                                 .foregroundStyle(PaletaReloj.textoPrimario)
                         }
 
                         HStack {
-                            Text("Series registradas")
+                            Text(TextosReloj.gymSummarySetsLogged)
                                 .font(.system(size: 12, weight: .medium))
                                 .foregroundStyle(PaletaReloj.textoSecundario)
                             Spacer()
-                            Text("\(estado.totalSeriesGimnasioHechas)")
+                            Text(verbatim: "\(estado.totalSeriesGimnasioHechas)")
                                 .font(.system(size: 13, weight: .bold, design: .rounded))
                                 .foregroundStyle(PaletaReloj.textoPrimario)
                         }
 
                         HStack {
-                            Text("Repeticiones")
+                            Text(TextosReloj.gymSummaryReps)
                                 .font(.system(size: 12, weight: .medium))
                                 .foregroundStyle(PaletaReloj.textoSecundario)
                             Spacer()
-                            Text("\(estado.totalRepeticionesGimnasio)")
+                            Text(verbatim: "\(estado.totalRepeticionesGimnasio)")
                                 .font(.system(size: 13, weight: .bold, design: .rounded))
                                 .foregroundStyle(PaletaReloj.textoPrimario)
                         }
 
                         if estado.totalKilosGimnasio > 0 {
                             HStack {
-                                Text("Volumen total")
+                                Text(TextosReloj.gymSummaryTotalVolume)
                                     .font(.system(size: 12, weight: .medium))
                                     .foregroundStyle(PaletaReloj.textoSecundario)
                                 Spacer()
-                                Text("\(estado.totalKilosGimnasio) kg")
+                                Text(verbatim: "\(estado.totalKilosGimnasio) kg")
                                     .font(.system(size: 13, weight: .bold, design: .rounded))
                                     .foregroundStyle(PaletaReloj.textoPrimario)
                             }
@@ -2799,7 +2799,7 @@ struct ResumenGimnasioRelojView: View {
                             HStack(spacing: TokensEspaciado.e6) {
                                 Image(systemName: "checkmark")
                                     .font(.system(size: 16, weight: .bold))
-                                Text(TextosReloj.finalizarGuardar)
+                                Text(TextosReloj.finishSave)
                                     .font(.system(size: 17, weight: .bold))
                             }
                             .foregroundStyle(PaletaReloj.fondo)
@@ -2815,7 +2815,7 @@ struct ResumenGimnasioRelojView: View {
                             HStack(spacing: TokensEspaciado.e6) {
                                 Image(systemName: "arrow.backward")
                                     .font(.system(size: 14, weight: .bold))
-                                Text("Regresar")
+                                Text(TextosReloj.commonGoBack)
                                     .font(.system(size: 16, weight: .semibold))
                             }
                             .foregroundStyle(PaletaReloj.textoPrimario)
@@ -2831,7 +2831,7 @@ struct ResumenGimnasioRelojView: View {
                             HStack(spacing: TokensEspaciado.e6) {
                                 Image(systemName: "trash.fill")
                                     .font(.system(size: 14, weight: .bold))
-                                Text("Descartar")
+                                Text(TextosReloj.commonDiscard)
                                     .font(.system(size: 16, weight: .semibold))
                             }
                             .foregroundStyle(PaletaReloj.error)
@@ -2872,7 +2872,7 @@ struct ResumenGimnasioRelojView: View {
                         .foregroundStyle(PaletaReloj.error)
                         .padding(.top, 4)
 
-                    Text("¿Seguro que quieres descartar estos datos?")
+                    Text(TextosReloj.commonDiscardConfirmation)
                         .font(.system(size: 14, weight: .bold, design: .rounded))
                         .foregroundStyle(PaletaReloj.textoPrimario)
                         .multilineTextAlignment(.center)
@@ -2883,7 +2883,7 @@ struct ResumenGimnasioRelojView: View {
                         Button {
                             mostrarConfirmacionDescarte = false
                         } label: {
-                            Text("Cancelar")
+                            Text(TextosReloj.commonCancel)
                                 .font(.system(size: 15, weight: .semibold))
                                 .foregroundStyle(PaletaReloj.textoPrimario)
                                 .frame(maxWidth: .infinity, minHeight: 40)
@@ -2896,7 +2896,7 @@ struct ResumenGimnasioRelojView: View {
                             mostrarConfirmacionDescarte = false
                             estado.descartarGimnasio()
                         } label: {
-                            Text("Descartar")
+                            Text(TextosReloj.commonDiscard)
                                 .font(.system(size: 15, weight: .bold))
                                 .foregroundStyle(.white)
                                 .frame(maxWidth: .infinity, minHeight: 40)
@@ -2922,9 +2922,9 @@ struct SinTelefonoView: View {
     private var mensaje: String {
         switch estado.motivoSinConexion {
         case .sesionNoIniciada:
-            return TextosReloj.sinTelefonoSinSesion
+            return TextosReloj.phoneMissingSignedOut
         case .telefonoDesconectado:
-            return TextosReloj.sinTelefonoDesconectado
+            return TextosReloj.phoneMissingDisconnected
         }
     }
 
@@ -2976,7 +2976,7 @@ struct SinTelefonoView: View {
                 Button {
                     estado.reintentarConexion()
                 } label: {
-                    Text(TextosReloj.sinTelefonoReintentar)
+                    Text(TextosReloj.phoneMissingRetry)
                         .font(.system(size: 14, weight: .semibold))
                         .foregroundStyle(.white)
                         .frame(maxWidth: .infinity, minHeight: 38)
@@ -2989,7 +2989,7 @@ struct SinTelefonoView: View {
                 Button {
                     estado.continuarSinTelefono()
                 } label: {
-                    Text("Continuar sin iPhone")
+                    Text(TextosReloj.phoneMissingContinueWithout)
                         .font(.system(size: 12, weight: .medium))
                         .foregroundStyle(PaletaReloj.textoSecundario)
                 }

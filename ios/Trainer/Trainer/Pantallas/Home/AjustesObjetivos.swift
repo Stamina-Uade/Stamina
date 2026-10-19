@@ -10,7 +10,7 @@ struct AjustesPaginaObjetivos: View {
     let volver: () -> Void
 
     var body: some View {
-        AjustesPagina(String(localized: "Objetivos", comment: "Ajustes: página de objetivos"),
+        AjustesPagina(Textos.settingsGoalsTitle,
                       volver: volver) {
             VStack(alignment: .leading, spacing: TokensEspaciado.e12) {
                 if objetivos.isEmpty {
@@ -18,7 +18,7 @@ struct AjustesPaginaObjetivos: View {
                         Image(systemName: "flag.checkered")
                             .foregroundStyle(Paleta.textoTerciario)
                             .accessibilityHidden(true)
-                        Text(String(localized: "Sin objetivos", comment: "Ajustes: no hay objetivos cargados"))
+                        Text(Textos.settingsGoalsNone)
                             .estilo(.cuerpoSecundario, color: Paleta.textoTerciario)
                     }
                     .padding(.leading, TokensEspaciado.e4)
@@ -29,7 +29,7 @@ struct AjustesPaginaObjetivos: View {
                 if objetivos.count < 10 {
                     menuAgregarObjetivo
                 }
-                BotonTonal(String(localized: "Guardar", comment: "Ajustes: guardar los objetivos")) { alGuardar() }
+                BotonTonal(Textos.commonSave) { alGuardar() }
                     .disabled(guardando)
                     .opacity(guardando ? 0.5 : 1)
             }
@@ -39,7 +39,7 @@ struct AjustesPaginaObjetivos: View {
     private func tarjetaDeObjetivo(_ indice: Int) -> some View {
         VStack(alignment: .leading, spacing: TokensEspaciado.e8) {
             HStack {
-                Text(indice == 0 ? "Plan principal" : "Plan \(indice + 1)")
+                Text(indice == 0 ? Textos.settingsGoalsMainPlan : Textos.settingsGoalsPlanNumber(indice + 1))
                     .estilo(.labelCampo, color: indice == 0 ? Paleta.textoAcento : Paleta.textoTerciario)
                 Spacer()
                 Button {
@@ -48,11 +48,11 @@ struct AjustesPaginaObjetivos: View {
                 } label: {
                     Image(systemName: "trash")
                         .font(.system(size: TokensTipografia.valorFilaTamano, weight: .bold))
-                        .foregroundStyle(Paleta.error)
+                        .foregroundStyle(Paleta.peligro)
                         .objetivoTactil()
                 }
                 .buttonStyle(EstiloPresionado())
-                .accessibilityLabel(Text("Quitar"))
+                .accessibilityLabel(Text(Textos.commonRemove))
             }
             Menu {
                 ForEach(MVP.objetivos, id: \.self) { objetivo in
@@ -85,7 +85,7 @@ struct AjustesPaginaObjetivos: View {
                         }), displayedComponents: .date) {
                         Image(systemName: "calendar")
                             .foregroundStyle(Paleta.acento)
-                            .accessibilityLabel(Text("Fecha del evento"))
+                            .accessibilityLabel(Text(Textos.commonEventDate))
                     }
                     .tint(Paleta.acento)
                     Button {
@@ -99,7 +99,7 @@ struct AjustesPaginaObjetivos: View {
                             .objetivoTactil()
                     }
                     .buttonStyle(EstiloPresionado())
-                    .accessibilityLabel(Text("Quitar fecha"))
+                    .accessibilityLabel(Text(Textos.settingsGoalsRemoveDate))
                 }
             } else {
                 Button {
@@ -109,7 +109,7 @@ struct AjustesPaginaObjetivos: View {
                         goalDateMs: DatosRegistro.fechaDelCalendarioEnMs(Date(), zona: .current))
                 } label: {
                     Label {
-                        Text(String(localized: "Fecha", comment: "Ajustes: agregar la fecha del evento"))
+                        Text(Textos.settingsGoalsDate)
                             .estilo(.tituloCard, color: Paleta.textoAcento)
                     } icon: {
                         Image(systemName: "calendar.badge.plus")
@@ -119,7 +119,7 @@ struct AjustesPaginaObjetivos: View {
                     .objetivoTactilAlto()
                 }
                 .buttonStyle(EstiloPresionado())
-                .accessibilityLabel(Text("Agregar fecha del evento"))
+                .accessibilityLabel(Text(Textos.settingsGoalsAddEventDate))
             }
         }
         .padding(TokensEspaciado.e12)
@@ -143,7 +143,7 @@ struct AjustesPaginaObjetivos: View {
             }
         } label: {
             Label {
-                Text("Agregar objetivo").estilo(.tituloCard, color: Paleta.textoAcento)
+                Text(Textos.settingsGoalsAdd).estilo(.tituloCard, color: Paleta.textoAcento)
             } icon: {
                 Image(systemName: "plus.circle")
                     .foregroundStyle(Paleta.acento)

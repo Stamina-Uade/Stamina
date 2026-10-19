@@ -26,11 +26,11 @@ enum InicioTextos {
     /// "moderada", "alta": el nombre de la intensidad de cada zona.
     static func intensidad(_ zona: ZonaDeIntensidad) -> String {
         switch zona {
-        case .z1: return Textos.zonaBaja
-        case .z2: return Textos.zonaModerada
-        case .z3: return Textos.zonaModeradaAlta
-        case .z4: return Textos.zonaAlta
-        case .z5: return Textos.zonaMaxima
+        case .z1: return Textos.zoneLow
+        case .z2: return Textos.zoneModerate
+        case .z3: return Textos.zoneModerateHigh
+        case .z4: return Textos.zoneHigh
+        case .z5: return Textos.zoneMax
         }
     }
 
@@ -38,20 +38,15 @@ enum InicioTextos {
     static func comoSeSiente(_ zona: ZonaDeIntensidad) -> String {
         switch zona {
         case .z1:
-            return String(localized: "Muy suave. Podrías charlar sin parar. Sirve para recuperar.",
-                          comment: "Explicación de la zona 1")
+            return Textos.homeExplainerZone1
         case .z2:
-            return String(localized: "Cómoda. Hablás en frases completas. Es la que arma tu base y la que más vas a usar.",
-                          comment: "Explicación de la zona 2")
+            return Textos.homeExplainerZone2
         case .z3:
-            return String(localized: "Exigente pero sostenible. Te salen frases cortas. Afina tu ritmo de carrera.",
-                          comment: "Explicación de la zona 3")
+            return Textos.homeExplainerZone3
         case .z4:
-            return String(localized: "Dura. Sólo palabras sueltas. Va en tramos, para subir tu umbral.",
-                          comment: "Explicación de la zona 4")
+            return Textos.homeExplainerZone4
         case .z5:
-            return String(localized: "Al máximo. No podés hablar. Tramos muy cortos, para la velocidad.",
-                          comment: "Explicación de la zona 5")
+            return Textos.homeExplainerZone5
         }
     }
 
@@ -75,25 +70,23 @@ struct HojaDeExplicacion: View {
                 switch explicacion {
                 case .zonas(let actual):
                     encabezado(
-                        String(localized: "Zonas de intensidad", comment: "Título de la hoja de zonas"),
-                        bajada: String(localized: "La zona dice qué tan fuerte ir. La forma más simple de medirla: cuánto podés hablar mientras te movés.",
-                                       comment: "Bajada de la hoja de zonas"))
+                        Textos.homeExplainerZonesTitle,
+                        bajada: Textos.homeExplainerZonesBody)
                     ForEach(ZonaDeIntensidad.allCases, id: \.self) { zona in
                         FilaDeZona(zona: zona, esLaDeHoy: zona == actual)
                     }
                 case .avituallamiento(let a, let duracion):
                     encabezado(
-                        String(localized: "Qué llevar hoy", comment: "Título de la hoja de hidratación"),
-                        bajada: String(localized: "Lo que conviene tomar en esta salida, calculado con tu peso y la sesión de hoy.",
-                                       comment: "Bajada de la hoja de hidratación"))
+                        Textos.homeExplainerWhatToBringToday,
+                        bajada: Textos.homeExplainerFuelingBody)
                     if duracion > 0 {
-                        PildoraDeEstado(String(localized: "Salida de \(duracion) min", comment: "Duración en la hoja de hidratación"),
+                        PildoraDeEstado(Textos.homeExplainerWorkoutMinutes(duracion),
                                         simbolo: "clock", tono: .neutro)
                     }
                     ContenidoDelAvituallamiento(a: a)
                 }
 
-                BotonPrimario(String(localized: "Entendido", comment: "Cierra la hoja de explicación")) {
+                BotonPrimario(Textos.commonGotIt) {
                     Haptico.toque()
                     cerrar()
                 }
@@ -141,7 +134,7 @@ private struct FilaDeZona: View {
                     Text(InicioTextos.primeraMayuscula(InicioTextos.intensidad(zona)))
                         .estilo(.cuerpoDestacado)
                     if esLaDeHoy {
-                        PildoraDeEstado(String(localized: "Hoy", comment: "Marca la zona de la sesión de hoy"),
+                        PildoraDeEstado(Textos.commonToday,
                                         simbolo: "figure.run", tono: .acento)
                     }
                     Spacer(minLength: 0)
@@ -189,57 +182,49 @@ private struct ContenidoDelAvituallamiento: View {
         VStack(spacing: TokensEspaciado.e8) {
             FilaDeAvituallamiento(
                 simbolo: "drop.fill",
-                titulo: String(localized: "Agua", comment: "Fila de la hoja de hidratación"),
+                titulo: Textos.homeExplainerWater,
                 valor: "\(a.mililitrosPorHora) ml/h",
                 texto: textoDelAgua)
             FilaDeAvituallamiento(
                 simbolo: "leaf.fill",
-                titulo: String(localized: "Carbohidratos", comment: "Fila de la hoja de hidratación"),
+                titulo: Textos.homeExplainerCarbs,
                 valor: "\(a.carbohidratosPorHoraG) g/h",
-                texto: String(localized: "La energía que tu cuerpo usa más rápido. Es lo que conviene sumar por cada hora, entre geles, bebida deportiva o algo sólido.",
-                              comment: "Explicación de los carbohidratos por hora"))
+                texto: Textos.homeExplainerCarbsBody)
             FilaDeAvituallamiento(
                 simbolo: "bolt.fill",
-                titulo: String(localized: "Geles", comment: "Fila de la hoja de hidratación"),
+                titulo: Textos.homeExplainerGels,
                 valor: "\(a.geles)",
                 texto: a.geles > 0
-                    ? String(localized: "Sobres de carbohidratos rápidos. Tomalos con agua, repartidos durante la salida.",
-                             comment: "Explicación de los geles")
-                    : String(localized: "Hoy no hacen falta: con el agua alcanza.",
-                             comment: "Explicación sin geles"))
+                    ? Textos.homeExplainerGelsBody
+                    : Textos.homeExplainerNotNeededToday)
             if a.sodioMg > 0 {
                 FilaDeAvituallamiento(
                     simbolo: "sparkles",
-                    titulo: String(localized: "Sodio", comment: "Fila de la hoja de hidratación"),
+                    titulo: Textos.homeExplainerSodium,
                     valor: "\(a.sodioMg) mg",
-                    texto: String(localized: "Las sales que perdés al transpirar. Van en una bebida con electrolitos o en pastillas de sal.",
-                                  comment: "Explicación del sodio"))
+                    texto: Textos.homeExplainerSodiumBody)
             }
             if a.carbohidratosAntesG > 0 {
                 FilaDeAvituallamiento(
                     simbolo: "sunrise.fill",
-                    titulo: String(localized: "Antes de salir", comment: "Fila de la hoja de hidratación"),
+                    titulo: Textos.homeExplainerBefore,
                     valor: "\(a.carbohidratosAntesG) g",
-                    texto: String(localized: "Carbohidratos en la comida previa, para salir con energía.",
-                                  comment: "Explicación de los carbohidratos antes"))
+                    texto: Textos.homeExplainerCarbsBefore)
             }
             if a.carbohidratosDespuesG > 0 || a.proteinaDespuesG > 0 {
                 FilaDeAvituallamiento(
                     simbolo: "house.fill",
-                    titulo: String(localized: "Al volver", comment: "Fila de la hoja de hidratación"),
+                    titulo: Textos.homeExplainerAfter,
                     valor: "\(a.carbohidratosDespuesG) g + \(a.proteinaDespuesG) g",
-                    texto: String(localized: "Carbohidratos y proteína para recuperarte.",
-                                  comment: "Explicación de la comida de después"))
+                    texto: Textos.homeExplainerCarbsAfter)
             }
         }
     }
 
     private var textoDelAgua: String {
-        let base = String(localized: "Lo que conviene tomar por cada hora: mejor en sorbos chicos y seguidos que todo de golpe.",
-                          comment: "Explicación del agua por hora")
+        let base = Textos.homeExplainerWaterBody
         guard a.mililitrosTotales > 0 else { return base }
-        let total = String(localized: "En toda la salida: \(Formato.litros(a.mililitrosTotales)).",
-                           comment: "Agua total de la salida")
+        let total = Textos.homeExplainerWholeWorkout(Formato.litros(a.mililitrosTotales))
         return base + " " + total
     }
 }

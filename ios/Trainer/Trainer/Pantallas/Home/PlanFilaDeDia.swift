@@ -92,11 +92,11 @@ struct FilaDeDiaDelPlan: View {
                 .buttonStyle(EstiloPresionado())
                 .accessibilityElement(children: .combine)
                 .accessibilityValue(abierto
-                    ? String(localized: "Abierto", comment: "VoiceOver, día del plan desplegado")
-                    : String(localized: "Cerrado", comment: "VoiceOver, día del plan plegado"))
+                    ? Textos.planDayExpanded
+                    : Textos.planDayCollapsed)
                 .accessibilityHint(abierto
-                    ? String(localized: "Tocá para cerrar el detalle", comment: "VoiceOver, día del plan")
-                    : String(localized: "Tocá para ver qué hacer y por qué", comment: "VoiceOver, día del plan"))
+                    ? Textos.planDayTapToClose
+                    : Textos.planDayTapToSee)
 
             if abierto {
                 PlanDetalleDelDia(dia: dia, datos: datos, abrirHistorial: abrirHistorial)
@@ -122,7 +122,7 @@ struct FilaDeDiaDelPlan: View {
         HStack(spacing: TokensEspaciado.e10) {
             VStack(alignment: .leading, spacing: 0) {
                 Text(nombreDelDia)
-                Text("\(dia.numeroDeDia) \(dia.mesCorto)")
+                Text(verbatim: "\(dia.numeroDeDia) \(dia.mesCorto)")
             }
             .estilo(.etiquetaSeccion.enMinusculas, color: dia.esHoy ? Paleta.acento : Paleta.textoTerciario)
             .monospacedDigit()
@@ -149,9 +149,9 @@ struct FilaDeDiaDelPlan: View {
                     .font(.system(size: TokensTipografia.tituloCardGrandeTamano,
                                   weight: TokensTipografia.tituloCardPeso))
                     .foregroundStyle(Paleta.acento)
-                    .accessibilityLabel(Textos.planHecho)
+                    .accessibilityLabel(Textos.planDone)
             } else if dia.esHoy {
-                Text(Textos.planHoy)
+                Text(Textos.planTodayBadge)
                     .estilo(.etiquetaSeccion, color: Paleta.acento)
             }
 
@@ -312,19 +312,17 @@ private struct PlanDetalleDelDia: View {
     private var queEs: some View {
         if datos.esDescanso {
             parrafo(simbolo: "bed.double",
-                    String(localized: "Hoy toca descansar. El cuerpo se hace más fuerte mientras se recupera: caminar o elongar suave está bien.",
-                           comment: "Plan, explicación de un día de descanso"))
+                    Textos.planDayRest)
         } else if datos.esFuerza {
             parrafo(simbolo: "dumbbell",
-                    String(localized: "Día de fuerza: ejercicios que protegen tus piernas y te hacen correr con menos esfuerzo.",
-                           comment: "Plan, explicación de un día de fuerza"))
+                    Textos.planDayStrength)
         }
     }
 
     @ViewBuilder
     private var estructura: some View {
         if let sesion = datos.sesion, !sesion.bloques.isEmpty {
-            seccion(String(localized: "Cómo es la sesión", comment: "Plan, título del detalle del día"),
+            seccion(Textos.planDaySessionShape,
                     simbolo: "list.bullet") {
                 VStack(alignment: .leading, spacing: TokensEspaciado.e8) {
                     ForEach(sesion.bloques) { bloque in
@@ -345,8 +343,7 @@ private struct PlanDetalleDelDia: View {
                         .accessibilityElement(children: .combine)
                     }
                     if sesion.runWalkRun {
-                        Text(String(localized: "Alternás tramos de trote con tramos de caminata.",
-                                    comment: "Plan, sesión con correr y caminar"))
+                        Text(Textos.planDayRunWalk)
                             .estilo(.labelCampo, color: Paleta.textoTerciario)
                     }
                 }
@@ -357,7 +354,7 @@ private struct PlanDetalleDelDia: View {
     @ViewBuilder
     private var porQueHoy: some View {
         if let motivos = datos.sesion?.motivos, !motivos.isEmpty {
-            seccion(String(localized: "Por qué hoy", comment: "Plan, motivos de la sesión"),
+            seccion(Textos.planDayWhyToday,
                     simbolo: "lightbulb") {
                 VStack(alignment: .leading, spacing: TokensEspaciado.e6) {
                     ForEach(Array(motivos.enumerated()), id: \.offset) { _, motivo in
@@ -380,14 +377,14 @@ private struct PlanDetalleDelDia: View {
     @ViewBuilder
     private var explicacionDeZona: some View {
         if let zona = datos.zona {
-            seccion(String(localized: "Qué es \(zona.corta)", comment: "Plan, explicación de la zona de intensidad"),
+            seccion(Textos.planDayWhatIs(zona.corta),
                     simbolo: "heart.text.square") {
                 Text(zona.planExplicacion)
                     .estilo(.cuerpoSecundario, color: Paleta.textoSecundario)
                     .fixedSize(horizontal: false, vertical: true)
             }
             .accessibilityElement(children: .combine)
-            .accessibilityLabel(Text(verbatim: "\(Textos.zonaVoiceover(zona.numero)). \(zona.planExplicacion)"))
+            .accessibilityLabel(Text(verbatim: "\(Textos.zoneAccessibility(zona.numero)). \(zona.planExplicacion)"))
         }
     }
 
@@ -402,12 +399,11 @@ private struct PlanDetalleDelDia: View {
             }
             if a.sodioMg > 0 {
                 lista.append(DatoRapido(id: "sodio", simbolo: "sparkle",
-                                        texto: String(localized: "\(a.sodioMg) mg de sodio", comment: "Plan, sodio")))
+                                        texto: Textos.planDaySodiumMg(a.sodioMg)))
             }
             if a.carbohidratosPorHoraG > 0 {
                 lista.append(DatoRapido(id: "carbos", simbolo: "fork.knife",
-                                        texto: String(localized: "\(a.carbohidratosPorHoraG) g de carbohidratos por hora",
-                                                      comment: "Plan, carbohidratos por hora")))
+                                        texto: Textos.planDayCarbsPerHour(a.carbohidratosPorHoraG)))
             }
         } else if let p = datos.planificado {
             if let agua = p.aguaMl, agua > 0 {
@@ -419,8 +415,8 @@ private struct PlanDetalleDelDia: View {
             if let sales = p.sales, sales > 0 {
                 lista.append(DatoRapido(id: "sales", simbolo: "sparkle",
                                         texto: sales == 1
-                                            ? String(localized: "1 toma de sales", comment: "Plan, tomas de sales")
-                                            : String(localized: "\(sales) tomas de sales", comment: "Plan, tomas de sales")))
+                                            ? Textos.planDaySaltDoseOne
+                                            : Textos.planDaySaltDosesCount(sales)))
             }
         }
         return lista
@@ -428,19 +424,18 @@ private struct PlanDetalleDelDia: View {
 
     private static func geles(_ cantidad: Int) -> String {
         cantidad == 1
-            ? String(localized: "1 gel", comment: "Plan, cantidad de geles")
-            : String(localized: "\(cantidad) geles", comment: "Plan, cantidad de geles")
+            ? Textos.planDayGelOne
+            : Textos.planDayGelsCount(cantidad)
     }
 
     @ViewBuilder
     private var hidratacion: some View {
         let lista = datosDeHidratacion
         if !lista.isEmpty {
-            seccion(String(localized: "Qué llevar para tomar", comment: "Plan, avituallamiento explicado"),
+            seccion(Textos.planDayWhatToBring,
                     simbolo: "drop.fill") {
                 VStack(alignment: .leading, spacing: TokensEspaciado.e8) {
-                    Text(String(localized: "Lo que el plan llama avituallamiento: agua, geles y sales para no quedarte sin energía en la salida.",
-                                comment: "Plan, qué es el avituallamiento"))
+                    Text(Textos.planDayFuelingBody)
                         .estilo(.labelCampo, color: Paleta.textoTerciario)
                         .fixedSize(horizontal: false, vertical: true)
                     FlujoHorizontal(espaciado: TokensEspaciado.e6) {
@@ -465,16 +460,16 @@ private struct PlanDetalleDelDia: View {
     @ViewBuilder
     private var accion: some View {
         if dia.hecho {
-            BotonTonal(String(localized: "Ver en tu historial", comment: "Plan, día ya hecho")) {
+            BotonTonal(Textos.planDayViewInHistory) {
                 abrirHistorial()
             }
         } else if datos.esFuerza {
-            BotonTonal(String(localized: "Ver rutina", comment: "Plan, día de fuerza")) {
+            BotonTonal(Textos.planDayViewRoutine) {
                 Haptico.toque()
                 estado.ir(a: .gimnasio)
             }
         } else if dia.abrible {
-            BotonPrimario(String(localized: "Empezar esta salida", comment: "Plan, salida de hoy")) {
+            BotonPrimario(Textos.planDayStartWorkout) {
                 Haptico.toque()
                 estado.ir(a: .entreno)
             }
@@ -482,12 +477,10 @@ private struct PlanDetalleDelDia: View {
             // `entreno` muestra la salida de HOY: abrir otro día mostraría una
             // sesión que no es la suya. Se dice cuándo se habilita.
             nota(simbolo: "calendar.badge.clock",
-                 String(localized: "Se habilita ese día: la vas a poder empezar desde acá o desde Inicio.",
-                        comment: "Plan, salida futura"))
+                 Textos.planDayAvailableThatDay)
         } else if !datos.esDescanso, momento == .pasado {
             nota(simbolo: "arrow.uturn.forward",
-                 String(localized: "Este día ya pasó. No pasa nada: el plan sigue con lo que viene.",
-                        comment: "Plan, día pasado sin hacer"))
+                 Textos.planDayPast)
         }
     }
 
@@ -572,11 +565,11 @@ extension ZonaDeIntensidad {
     /// "baja", "moderada"… los mismos textos que usa Inicio.
     fileprivate var planIntensidad: String {
         switch self {
-        case .z1: return Textos.zonaBaja
-        case .z2: return Textos.zonaModerada
-        case .z3: return Textos.zonaModeradaAlta
-        case .z4: return Textos.zonaAlta
-        case .z5: return Textos.zonaMaxima
+        case .z1: return Textos.zoneLow
+        case .z2: return Textos.zoneModerate
+        case .z3: return Textos.zoneModerateHigh
+        case .z4: return Textos.zoneHigh
+        case .z5: return Textos.zoneMax
         }
     }
 
@@ -584,20 +577,15 @@ extension ZonaDeIntensidad {
     fileprivate var planExplicacion: String {
         switch self {
         case .z1:
-            return String(localized: "Muy suave: podés charlar sin esfuerzo. Sirve para recuperarte.",
-                          comment: "Explicación de la zona 1")
+            return Textos.planDayZone1
         case .z2:
-            return String(localized: "Suave y cómodo: podés hablar en frases completas. Construye resistencia sin cansarte de más.",
-                          comment: "Explicación de la zona 2")
+            return Textos.planDayZone2
         case .z3:
-            return String(localized: "Moderado: hablás con frases cortas. Mejora el ritmo que podés sostener mucho rato.",
-                          comment: "Explicación de la zona 3")
+            return Textos.planDayZone3
         case .z4:
-            return String(localized: "Fuerte: te salen pocas palabras. Sube el ritmo que aguantás antes de cansarte.",
-                          comment: "Explicación de la zona 4")
+            return Textos.planDayZone4
         case .z5:
-            return String(localized: "Al máximo: no podés hablar. Son esfuerzos cortos para ganar velocidad.",
-                          comment: "Explicación de la zona 5")
+            return Textos.planDayZone5
         }
     }
 }

@@ -57,16 +57,16 @@ struct RaizHomeView: View {
                 if estado.muestraLaBarra {
                     BarraDePestanas(
                         items: [
-                            ItemDePestana(id: PestanaHome.inicio.rawValue, titulo: Textos.homeTabInicio, simbolo: "house"),
+                            ItemDePestana(id: PestanaHome.inicio.rawValue, titulo: Textos.homeTabHome, simbolo: "house"),
                             ItemDePestana(id: PestanaHome.plan.rawValue, titulo: Textos.homeTabPlan, simbolo: "calendar"),
                             ItemDePestana(id: PestanaHome.historial.rawValue,
-                                         titulo: String(localized: "Historial", comment: "Pestaña del historial de actividades"),
+                                         titulo: Textos.historyTab,
                                          simbolo: "clock.arrow.circlepath"),
-                            ItemDePestana(id: PestanaHome.perfil.rawValue, titulo: Textos.homeTabPerfil, simbolo: "person"),
+                            ItemDePestana(id: PestanaHome.perfil.rawValue, titulo: Textos.homeTabProfile, simbolo: "person"),
                         ],
                         elegida: estado.pestana == .entreno ? estado.pestanaPrevia.rawValue : estado.pestana.rawValue,
                         central: ItemDePestana(id: PestanaHome.entreno.rawValue,
-                                               titulo: Textos.homeTabEntreno, simbolo: "bolt.fill"),
+                                               titulo: Textos.homeTabWorkout, simbolo: "bolt.fill"),
                         alElegir: { id in
                             if let destino = PestanaHome(rawValue: id) { estado.ir(a: destino) }
                         },
@@ -123,7 +123,9 @@ struct RaizHomeView: View {
         .onAppear { if !tourVisto { mostrarTour = true } }
         .onChange(of: tourVisto) { visto in if !visto { mostrarTour = true } }
         .fullScreenCover(isPresented: $mostrarTour, onDismiss: { tourVisto = true }) {
-            TourView {
+            // El cover queda fuera de `.environmentObject(estado)`: se pasa a mano
+            // para que el tour muestre las pantallas reales.
+            TourView(estado: estado) {
                 tourVisto = true
                 mostrarTour = false
             }
@@ -181,16 +183,18 @@ struct AvisoDePerfilIncompleto: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: TokensEspaciado.e8) {
-            AvisoSuave(Textos.homePerfilIncompletoTexto)
-            BotonTexto(Textos.homePerfilIncompletoBoton, accion: retomar)
+            AvisoSuave(Textos.homeProfileIncompleteBody)
+            BotonTexto(Textos.homeProfileIncompleteButton, accion: retomar)
         }
     }
 }
 
 // MARK: - Piezas compartidas por las pestañas
 
-/// El encabezado de una pantalla secundaria (gimnasio, ajustes): flecha para
-/// volver y título. Las pestañas de la barra no lo llevan: ellas usan
+/// El encabezado de una pantalla secundaria (gimnasio, ajustes y sus páginas,
+/// el apto): flecha para volver y título en una línea, como una barra de
+/// navegación. Va FUERA del `ScrollView`, fijo arriba; adentro no se repite el
+/// título. Las pestañas de la barra no lo llevan: ellas usan
 /// `EncabezadoDePestana`, con el título grande del rediseño.
 struct CabeceraSecundaria: View {
     let titulo: String

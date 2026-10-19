@@ -234,9 +234,13 @@ final class EstadoHome: ObservableObject {
                 Task { await self?.actualizar() }
             }
         }
-        ServicioDePasosSalud.compartido.$pasosPorDia
+        // Los pasos que se ven: los de Salud, los del servidor y los cargados a mano,
+        // ya fusionados en el almacén.
+        AlmacenDeHitos.compartido.$pasosPorDia
             .sink { [weak self] nuevos in self?.pasosPorDia = nuevos }
             .store(in: &suscripciones)
+        SincronizadorDePasos.compartido.configurar(
+            servicio: repositorio.servicioDeActividades() as? any ServicioDePasos)
         seguimiento.$ubicacion
             .compactMap { $0 }
             .sink { [weak self] _ in self?.programarAvisoCalor() }
@@ -289,6 +293,8 @@ final class EstadoHome: ObservableObject {
     func actualizar() async {
         guard !actualizando else { return }
         actualizando = true
+        // Los pasos no esperan al plan: Salud contesta sin red.
+        Task { await self.sincronizarPasos() }
         // Primero sube lo pendiente y después se trae: una comida que todavía no llegó
         // no tiene por qué faltar en lo que contesta el servidor.
         await colaDeComidas?.subir()
@@ -395,14 +401,15 @@ final class EstadoHome: ObservableObject {
     private func programarAvisoCalor() {
         let habilitado = UserDefaults.standard.object(forKey: "ajuste_notif_calor") as? Bool ?? true
         if !habilitado { Task { await NotificadorDeEntrenamiento.limpiarAvisosDeCalor() } }
+        // Con la maqueta (sin servidor) no hay avisos reales: por eso el catálogo.
         guard habilitado, let coord = seguimiento.ubicacion,
               let plan = contenido.plan.valor,
-              let servicio = repositorio.servicioDelCatalogo() else { return }
+              repositorio.servicioDelCatalogo() != nil else { return }
         if let ultimaConsultaCalor, Date().timeIntervalSince(ultimaConsultaCalor) < 60 * 60 { return }
         ultimaConsultaCalor = Date()
         Task {
-            guard case .ok(let pronostico) = await servicio.pronostico(
-                lat: coord.latitude, lon: coord.longitude) else { return }
+            // WeatherKit, en el teléfono. Sin datos (sin permiso, sin red) no hay aviso.
+            guard let horas = await ClimaNativo.proximasHoras(en: coord) else { return }
             guard UserDefaults.standard.object(forKey: "ajuste_notif_calor") as? Bool ?? true else { return }
             await NotificadorDeEntrenamiento.limpiarAvisosDeCalor()
             let ahora = Date()
@@ -411,22 +418,28 @@ final class EstadoHome: ObservableObject {
             formato.dateFormat = "yyyy-MM-dd"
             for dia in plan.cronograma where dia.esDescanso != true {
                 guard let fecha = formato.date(from: dia.fechaIso) else { continue }
+                let minutoEntreno = dia.minutoDelDia ?? 1140
                 var componentes = calendario.dateComponents([.year, .month, .day], from: fecha)
+                componentes.hour = minutoEntreno / 60
+                componentes.minute = minutoEntreno % 60
+                guard let inicio = calendario.date(from: componentes) else { continue }
+                // El calor que importa es el de la hora de entrenar, no el de las 8.
+                let fin = inicio.addingTimeInterval(TimeInterval(max(dia.duracionMinutos, 30) * 60))
+                guard let pico = ClimaNativo.pico(entre: inicio, y: fin, en: horas),
+                      pico.calorC >= 30 else { continue }
                 componentes.hour = 8
                 componentes.minute = 0
-                guard let manana = calendario.date(from: componentes), manana > ahora else { continue }
-                let pronosticada = pronostico.hours.min { a, b in
-                    abs(Double(a.atMs) / 1000 - manana.timeIntervalSince1970) <
-                    abs(Double(b.atMs) / 1000 - manana.timeIntervalSince1970)
-                }
-                guard let pronosticada,
-                      abs(Double(pronosticada.atMs) / 1000 - manana.timeIntervalSince1970) <= 90 * 60,
-                      pronosticada.airTemperatureC >= 30 else { continue }
+                guard let manana = calendario.date(from: componentes) else { continue }
+                // A las 8, o una hora antes si se entrena más temprano.
+                let aviso = min(manana, inicio.addingTimeInterval(-60 * 60))
+                guard aviso > ahora else { continue }
+                let temperatura = Int(pico.temperaturaC.rounded())
+                let sensacion = Int(pico.sensacionC.rounded())
                 NotificadorDeEntrenamiento.programarRecordatorio(
                     id: "calor-\(dia.fechaIso)",
-                    titulo: "Calor previsto para entrenar",
-                    cuerpo: "Se esperan \(Int(pronosticada.airTemperatureC.rounded())) °C. Revisá el horario y llevá agua. Fuente: MET Norway.",
-                    fecha: manana)
+                    titulo: Textos.notificationHeatTitle,
+                    cuerpo: Textos.notificationHeatBody(temperatura, sensacion),
+                    fecha: aviso)
             }
         }
     }
@@ -459,8 +472,8 @@ final class EstadoHome: ObservableObject {
                 if let fechaManana = calendario.date(from: compManana), fechaManana > ahora {
                     let minutoEntreno = dia.minutoDelDia ?? 1140
                     let horaTexto = Formato.hora(minutoDelDia: minutoEntreno)
-                    let titulo = Textos.notificacionRecordatorioMananaTitulo
-                    let cuerpo = Textos.notificacionRecordatorioMananaCuerpo(horaTexto, dia.tipo)
+                    let titulo = Textos.notificationReminderMorningTitle
+                    let cuerpo = Textos.notificationReminderMorningBody(horaTexto, dia.tipo)
                     NotificadorDeEntrenamiento.programarRecordatorio(
                         id: "manana-\(dia.fechaIso)",
                         titulo: titulo,
@@ -478,8 +491,8 @@ final class EstadoHome: ObservableObject {
                 compHora.hour = minutoAviso / 60
                 compHora.minute = minutoAviso % 60
                 if let fechaHora = calendario.date(from: compHora), fechaHora > ahora {
-                    let titulo = Textos.notificacionRecordatorioHoraTitulo
-                    let cuerpo = Textos.notificacionRecordatorioHoraCuerpo(dia.tipo)
+                    let titulo = Textos.notificationReminderTimeTitle
+                    let cuerpo = Textos.notificationReminderTimeBody(dia.tipo)
                     NotificadorDeEntrenamiento.programarRecordatorio(
                         id: "hora-\(dia.fechaIso)",
                         titulo: titulo,
@@ -512,15 +525,23 @@ final class EstadoHome: ObservableObject {
 
     func pasos(para dia: DiaDelPlan) -> Int? {
         guard let fecha = dia.fecha else { return nil }
-        let clave = ServicioDePasosSalud.clave(para: fecha)
+        let clave = AlmacenDeHitos.clave(para: fecha)
         return pasosPorDia[clave]
     }
 
+    /// La semana que se mira en el plan: Salud (pide el permiso la primera vez) y,
+    /// para los días que Salud no tiene, el servidor.
     func cargarPasosDeLaSemana() async {
         guard let semana else { return }
         let fechas = semana.dias.compactMap { $0.fecha }
-        guard !fechas.isEmpty else { return }
-        await ServicioDePasosSalud.compartido.solicitarPermisoYConsultar(fechas: fechas)
+        guard let primera = fechas.min(), let ultima = fechas.max() else { return }
+        await SincronizadorDePasos.compartido.alVerPasos(desde: primera, hasta: ultima)
+    }
+
+    /// Al abrir o volver a primer plano: los últimos días de Salud, sin pedir permiso,
+    /// y lo pendiente al servidor.
+    func sincronizarPasos() async {
+        await SincronizadorDePasos.compartido.alAbrirLaApp()
     }
 
     /// El motor dijo `profile_incomplete`: el Home muestra el aviso de completar el
@@ -537,7 +558,10 @@ final class EstadoHome: ObservableObject {
     }
 
     /// La barra de pestañas se esconde en `entreno`: es pantalla completa.
-    var muestraLaBarra: Bool { pestana != .entreno }
+    ///
+    /// Ronda 5: tampoco va en las pantallas secundarias (ajustes, gimnasio): sólo
+    /// en las cuatro pestañas de la barra.
+    var muestraLaBarra: Bool { PestanaHome.enLaBarra.contains(pestana) }
 
     var haySesionEnCurso: Bool { estadoDeLaSesion != .detenida }
 
@@ -574,24 +598,24 @@ final class EstadoHome: ObservableObject {
             if let a = s.avituallamiento {
                 filas.append(FilaDeAgenda(minutoDelDia: minuto - 180,
                                           titulo: Textos.agendaSnack,
-                                          detalle: Textos.agendaSnackDetalle(a.carbohidratosAntesG),
+                                          detalle: Textos.agendaSnackDetail(a.carbohidratosAntesG),
                                           clase: .simple, destino: nil))
                 filas.append(FilaDeAgenda(minutoDelDia: minuto - anticipacionMinutos,
-                                          titulo: Textos.agendaPreparar,
-                                          detalle: Textos.agendaPrepararDetalle(Formato.litros(a.mililitrosTotales),
+                                          titulo: Textos.agendaPrepare,
+                                          detalle: Textos.agendaPrepareDetail(Formato.litros(a.mililitrosTotales),
                                                                                a.geles, anticipacionMinutos),
                                           clase: .simple, destino: nil))
                 filas.append(FilaDeAgenda(minutoDelDia: minuto + s.duracionMinutos + 20,
-                                          titulo: Textos.agendaRecuperacion,
-                                          detalle: Textos.agendaRecuperacionDetalle(a.proteinaDespuesG,
+                                          titulo: Textos.agendaRecovery,
+                                          detalle: Textos.agendaRecoveryDetail(a.proteinaDespuesG,
                                                                                     a.carbohidratosDespuesG),
                                           clase: .simple, destino: nil))
             }
         }
         if contenido.rutina.valor?.planificada == true, !rutina.isEmpty {
             filas.append(FilaDeAgenda(minutoDelDia: 12 * 60,
-                                      titulo: Textos.agendaGimnasio,
-                                      detalle: Textos.agendaGimnasioDetalle(rutina.count),
+                                      titulo: Textos.agendaGym,
+                                      detalle: Textos.agendaGymDetail(rutina.count),
                                       clase: .gimnasio, destino: .gimnasio))
         }
         return filas.sorted { $0.minutoDelDia < $1.minutoDelDia }

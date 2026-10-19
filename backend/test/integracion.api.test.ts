@@ -979,12 +979,86 @@ describe("nutrición: los guardarraíles de §9.2 de punta a punta", { skip: SIN
   });
 });
 
+describe("pasos diarios (contrato 1.3.0)", { skip: SIN_SERVICIOS }, () => {
+  const hoy = () => new Date().toISOString().slice(0, 10);
+  const haceDias = (n: number) => new Date(Date.now() - n * DIA_MS).toISOString().slice(0, 10);
+
+  test("se guardan de a lote y se leen por rango, del más viejo al más nuevo", async () => {
+    const { sesion } = await registrar();
+    const r = await pedir("PUT", "/v1/me/steps", { days: [
+      { date: haceDias(1), steps: 9_500, source: "healthkit" },
+      { date: haceDias(3), steps: 4_200, source: "manual" },
+    ] }, sesion.access_token);
+    assert.equal(r.status, 200, JSON.stringify(r.json));
+    assert.deepEqual(r.json.data.map((d: any) => d.date), [haceDias(3), haceDias(1)]);
+
+    const g = await pedir("GET", `/v1/me/steps?from=${haceDias(10)}&to=${hoy()}`, undefined, sesion.access_token);
+    assert.equal(g.status, 200);
+    assert.deepEqual(g.json.data.map((d: any) => [d.date, d.steps, d.source]),
+                     [[haceDias(3), 4_200, "manual"], [haceDias(1), 9_500, "healthkit"]]);
+    const fuera = await pedir("GET", `/v1/me/steps?from=${haceDias(2)}&to=${haceDias(2)}`, undefined, sesion.access_token);
+    assert.equal(fuera.json.data.length, 0, "un día sin fila no se inventa en cero");
+  });
+
+  test("🛑 gana el más nuevo: un reintento viejo no pisa una corrección", async () => {
+    const { sesion } = await registrar();
+    const ahora = Date.now();
+    const nuevo = { date: haceDias(1), steps: 11_000, source: "healthkit", updated_at_ms: ahora };
+    const viejo = { date: haceDias(1), steps: 3_000, source: "manual", updated_at_ms: ahora - 3_600_000 };
+    assert.equal((await pedir("PUT", "/v1/me/steps", { days: [nuevo] }, sesion.access_token)).status, 200);
+    const tarde = await pedir("PUT", "/v1/me/steps", { days: [viejo] }, sesion.access_token);
+    assert.equal(tarde.status, 200);
+    assert.equal(tarde.json.data[0].steps, 11_000, "la respuesta dice lo que quedó");
+
+    const masNuevo = { ...viejo, steps: 12_345, updated_at_ms: ahora + 1 };
+    const r = await pedir("PUT", "/v1/me/steps", { days: [masNuevo] }, sesion.access_token);
+    assert.equal(r.json.data[0].steps, 12_345);
+    assert.equal(r.json.data[0].source, "manual");
+  });
+
+  test("la misma Idempotency-Key devuelve la misma respuesta", async () => {
+    const { sesion } = await registrar();
+    const clave = { "idempotency-key": idDelCliente() };
+    const cuerpo = { days: [{ date: haceDias(2), steps: 5_000, source: "manual" }] };
+    const a = await pedir("PUT", "/v1/me/steps", cuerpo, sesion.access_token, undefined, clave);
+    const b = await pedir("PUT", "/v1/me/steps", cuerpo, sesion.access_token, undefined, clave);
+    assert.equal(b.status, 200);
+    assert.equal(b.headers["idempotency-replayed"], "true");
+    assert.deepEqual(b.json, a.json);
+  });
+
+  test("🛑 topes: del futuro, repetidos, 61 días o un rango de más de 366 días son 400", async () => {
+    const { sesion } = await registrar();
+    const t = sesion.access_token;
+    const futuro = new Date(Date.now() + 3 * DIA_MS).toISOString().slice(0, 10);
+    assert.equal((await pedir("PUT", "/v1/me/steps", { days: [{ date: futuro, steps: 1, source: "manual" }] }, t)).status, 400);
+    assert.equal((await pedir("PUT", "/v1/me/steps", { days: [
+      { date: haceDias(1), steps: 1, source: "manual" }, { date: haceDias(1), steps: 2, source: "manual" },
+    ] }, t)).status, 400);
+    const muchos = Array.from({ length: 61 }, (_, i) => ({ date: haceDias(i + 1), steps: 1, source: "manual" }));
+    assert.equal((await pedir("PUT", "/v1/me/steps", { days: muchos }, t)).status, 400);
+    assert.equal((await pedir("GET", `/v1/me/steps?from=${haceDias(400)}&to=${hoy()}`, undefined, t)).status, 400);
+    assert.equal((await pedir("GET", `/v1/me/steps?from=${hoy()}&to=${haceDias(1)}`, undefined, t)).status, 400);
+  });
+
+  test("🛑 IDOR: B no ve los pasos de A, y sin token es 401", async () => {
+    const a = await registrar();
+    const b = await registrar();
+    await pedir("PUT", "/v1/me/steps", { days: [{ date: haceDias(1), steps: 7_000, source: "healthkit" }] }, a.sesion.access_token);
+    const deB = await pedir("GET", `/v1/me/steps?from=${haceDias(5)}&to=${hoy()}`, undefined, b.sesion.access_token);
+    assert.equal(deB.json.data.length, 0);
+    assert.equal((await pedir("GET", `/v1/me/steps?from=${haceDias(5)}&to=${hoy()}`)).status, 401);
+  });
+});
+
 describe("cuenta: exportar y borrar (§8)", { skip: SIN_SERVICIOS }, () => {
   test("exportar trae todo lo de la persona y nada secreto", async () => {
     const { email, sesion } = await registrar(nuevoEmail(), perfilCompleto());
     await pedir("POST", "/v1/gym/sessions/gym-2026-09-15/sets", { sets: [serie(1)] }, sesion.access_token);
     await pedir("PUT", `/v1/activities/${idDelCliente()}`, { sport: "running", started_at_ms: Date.now(), duration_s: 60, device: "telefono" }, sesion.access_token);
     await pedir("GET", "/v1/plan", undefined, sesion.access_token);
+    const ayer = new Date(Date.now() - DIA_MS).toISOString().slice(0, 10);
+    await pedir("PUT", "/v1/me/steps", { days: [{ date: ayer, steps: 6_543, source: "healthkit" }] }, sesion.access_token);
 
     const r = await pedir("GET", "/v1/me/export", undefined, sesion.access_token);
     assert.equal(r.status, 200, JSON.stringify(r.json));
@@ -994,6 +1068,7 @@ describe("cuenta: exportar y borrar (§8)", { skip: SIN_SERVICIOS }, () => {
     assert.equal(d.plans.length, 1);
     assert.equal(d.gym_sessions[0].sets.length, 1);
     assert.equal(d.activities.length, 1);
+    assert.deepEqual(d.steps.map((p: any) => [p.date, p.steps, p.source]), [[ayer, 6_543, "healthkit"]]);
     const texto = JSON.stringify(d);
     assert.ok(!texto.includes("argon2") && !texto.includes("refresh"), "🛑 ni hashes ni tokens");
   });
@@ -1004,6 +1079,9 @@ describe("cuenta: exportar y borrar (§8)", { skip: SIN_SERVICIOS }, () => {
     await pedir("POST", "/v1/gym/sessions/gym-2026-10-06/sets", { sets: [serie(1)] }, sesion.access_token);
     await pedir("PUT", `/v1/activities/${idDelCliente()}`, {
       sport: "running", started_at_ms: Date.now(), duration_s: 60, device: "telefono",
+    }, sesion.access_token);
+    await pedir("PUT", "/v1/me/steps", {
+      days: [{ date: new Date(Date.now() - DIA_MS).toISOString().slice(0, 10), steps: 1_000, source: "manual" }],
     }, sesion.access_token);
     const mala = await pedir("POST", "/v1/me/delete", { password: "No-es-la-clave-1" }, sesion.access_token);
     assert.equal(mala.status, 401);
@@ -1019,6 +1097,7 @@ describe("cuenta: exportar y borrar (§8)", { skip: SIN_SERVICIOS }, () => {
               (select count(*) from series_gimnasio where usuario_id = $1) +
               (select count(*) from series_gimnasio_historial where usuario_id = $1) +
               (select count(*) from actividades where usuario_id = $1) +
+              (select count(*) from pasos_diarios where usuario_id = $1) +
               (select count(*) from aceptaciones_legales where usuario_id = $1) as total`,
       [sesion.user_id]
     );

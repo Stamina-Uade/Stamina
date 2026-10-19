@@ -19,6 +19,7 @@ import { rutasActividades } from "./dominios/actividades/rutas.js";
 import { rutasNutricion } from "./dominios/nutricion/rutas.js";
 import { rutasCuenta } from "./dominios/cuenta/rutas.js";
 import { rutasClima } from "./dominios/clima/rutas.js";
+import { rutasPasos } from "./dominios/pasos/rutas.js";
 
 /** Tope de cuerpo. §12: todo lo que viene del body tiene tope server-side. */
 const MAX_BODY_BYTES = 64 * 1024;
@@ -127,6 +128,8 @@ export async function crearServidor(ctx: Contexto): Promise<FastifyInstance> {
       await rutasGimnasio(v1, ctx);
       await rutasActividades(v1, ctx);
       await rutasNutricion(v1, ctx);
+      // Pasos diarios (contrato 1.3.0).
+      await rutasPasos(v1, ctx);
       await rutasCuenta(v1, ctx);
     },
     { prefix: "/v1" }

@@ -215,10 +215,9 @@ final class AlmacenDeAptoFisico: ObservableObject {
         cuando.hour = 10
 
         let contenido = UNMutableNotificationContent()
-        contenido.title = String(localized: "Tu apto físico vence en 30 días", comment: "Aviso de vencimiento del apto")
+        contenido.title = Textos.medicalExpiresIn30Days
         // Sin datos de salud en la pantalla bloqueada: sólo el recordatorio.
-        contenido.body = String(localized: "Renovalo para seguir recibiendo sugerencias en carrera.",
-                                comment: "Aviso de vencimiento del apto")
+        contenido.body = Textos.medicalRenewBody
         let pedido = UNNotificationRequest(identifier: Self.idDelAviso, content: contenido,
                                            trigger: UNCalendarNotificationTrigger(dateMatching: cuando, repeats: false))
         centro.requestAuthorization(options: [.alert, .sound]) { concedido, _ in

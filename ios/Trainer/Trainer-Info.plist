@@ -11,7 +11,7 @@
 	<key>CFBundleName</key>
 	<string>Stamina</string>
 	<key>NSHealthShareUsageDescription</key>
-	<string>Mostramos tus pasos diarios en el calendario de entrenamiento.</string>
+	<string>Leemos tus pasos diarios de Salud para mostrarlos en tu calendario y guardarlos en tu historial de Stamina.</string>
 	<key>NSHealthUpdateUsageDescription</key>
 	<string>Guardamos tus datos de entrenamiento en Salud.</string>
 </dict>

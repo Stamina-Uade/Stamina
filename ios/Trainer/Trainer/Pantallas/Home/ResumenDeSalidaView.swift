@@ -64,7 +64,7 @@ struct ResumenDeSalidaView: View {
 
                 ResumenTarjetaDeRacha()
 
-                BotonPrimario(Textos.resumenGuardarCerrar) {
+                BotonPrimario(Textos.summarySaveAndClose) {
                     alTerminar()
                 }
                 .padding(.top, TokensEspaciado.e8)
@@ -81,14 +81,14 @@ struct ResumenDeSalidaView: View {
     private var cabecera: some View {
         HStack(alignment: .top, spacing: TokensEspaciado.e12) {
             VStack(alignment: .leading, spacing: TokensEspaciado.e6) {
-                Text(String(localized: "¡Llegaste!", comment: "Resumen de salida: título al terminar"))
+                Text(Textos.summaryArrived)
                     .estilo(.display)
                     .fixedSize(horizontal: false, vertical: true)
                     .accessibilityAddTraits(.isHeader)
                 HStack(spacing: TokensEspaciado.e6) {
                     IconoDeporte(deporte: salida.deporte, color: Paleta.acento, tamano: TokensTipografia.labelCampoTamano)
                         .accessibilityHidden(true)
-                    Text("\(salida.deporte.nombreVisible) · \(ResumenFormato.fechaHora(salida.inicioMs))")
+                    Text(verbatim: "\(salida.deporte.nombreVisible) · \(ResumenFormato.fechaHora(salida.inicioMs))")
                         .estilo(.labelCampo, color: Paleta.textoSecundario)
                 }
             }
@@ -135,9 +135,9 @@ private struct ResumenTarjetaDeRacha: View {
             .accessibilityHidden(true)
 
             VStack(alignment: .leading, spacing: TokensEspaciado.e2) {
-                Text(Textos.resumenRachaMantenida)
+                Text(Textos.summaryStreakKept)
                     .estilo(.tituloCardGrande)
-                Text(Textos.rachaDetalleActiva)
+                Text(Textos.streakDetailActive)
                     .estilo(.cuerpoSecundario, color: Paleta.textoSecundario)
             }
             Spacer(minLength: 0)

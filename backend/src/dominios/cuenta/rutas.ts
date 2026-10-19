@@ -18,11 +18,13 @@ import { filaASerie } from "../gimnasio/repositorio.js";
 import { serieAApi } from "../gimnasio/rutas.js";
 import { actividadAApi } from "../actividades/rutas.js";
 import { comidaAApi } from "../nutricion/rutas.js";
+import { crearRepoPasos, pasosAApi } from "../pasos/repositorio.js";
 
 export async function rutasCuenta(app: FastifyInstance, ctx: Contexto): Promise<void> {
   const guardia = crearGuardia(ctx);
   const repo = crearRepoCuenta(ctx.db);
   const perfiles = crearRepoPerfil(ctx.db);
+  const pasos = crearRepoPasos(ctx.db);
 
   app.post(
     "/me/delete",
@@ -60,7 +62,7 @@ export async function rutasCuenta(app: FastifyInstance, ctx: Contexto): Promise<
     },
     async (req) => {
       const usuarioId = usuarioDe(req);
-      const [perfil, legales, planes, objetivos, sesiones, series, actividades, comidas] = await Promise.all([
+      const [perfil, legales, planes, objetivos, sesiones, series, actividades, comidas, diasDePasos] = await Promise.all([
         perfiles.leer(usuarioId),
         repo.aceptacionesLegales(usuarioId),
         repo.planes(usuarioId),
@@ -69,6 +71,7 @@ export async function rutasCuenta(app: FastifyInstance, ctx: Contexto): Promise<
         repo.seriesDeGimnasio(usuarioId),
         repo.actividades(usuarioId),
         repo.comidas(usuarioId),
+        pasos.todos(usuarioId),
       ]);
       if (perfil === null) throw new ErrorApi("not_found", "Profile not found");
 
@@ -106,6 +109,7 @@ export async function rutasCuenta(app: FastifyInstance, ctx: Contexto): Promise<
           })),
           activities: actividades.map(actividadAApi),
           meals: comidas.map(comidaAApi),
+          steps: diasDePasos.map(pasosAApi),
         },
       };
     }

@@ -4,10 +4,10 @@ import TrainerCore
 /// `perfil` — foto, datos del cuerpo, deporte y nivel, objetivo y días. El
 /// engranaje de arriba a la derecha lleva a `ajustes`.
 ///
-/// Ronda 3: cada bloque dice qué es y qué pasa si lo tocás. La guía de arriba
-/// se cierra y el "?" la vuelve a mostrar; los datos del cuerpo explican para
-/// qué se usan (`PerfilDatosDelCuerpo.swift`); las metas llevan al plan; y abajo
-/// quedan los accesos con ícono, título y subtítulo (`PerfilPiezas.swift`).
+/// Ronda 5: sin guías ni explicaciones. Los datos del cuerpo son tres tarjetas
+/// (`PerfilDatosDelCuerpo.swift`) y, si falta alguno, un botón chico para
+/// completarlo; las metas llevan al plan; y abajo quedan los accesos con ícono,
+/// título y subtítulo (`PerfilPiezas.swift`).
 struct PerfilView: View {
     @EnvironmentObject private var estado: EstadoHome
     @EnvironmentObject private var flujo: FlujoEntrada
@@ -15,14 +15,9 @@ struct PerfilView: View {
     @State private var cargandoMetas = true
     @State private var mostrarApto = false
     @State private var mostrarRacha = false
-    @State private var datoElegido: DatoDelCuerpo?
-    /// "Completar ahora" en la hoja de un dato: primero se cierra la hoja y, al
-    /// terminar de cerrarse, se va a los pasos del alta.
-    @State private var completarAlCerrar = false
     @ObservedObject private var apto = AlmacenDeAptoFisico.compartido
     @AppStorage(AcentoPersonalizado.clave) private var acentoGuardado = ""
 
-    private static let claveDeGuia = "guia_perfil"
     /// La lee `RaizHomeView` con `@AppStorage`: en `false`, muestra el recorrido.
     private static let claveDelTour = "tour_visto"
 
@@ -34,7 +29,6 @@ struct PerfilView: View {
         ScrollView {
             VStack(alignment: .leading, spacing: TokensEspaciado.e16) {
                 encabezado
-                guia
                 tarjetaDeIdentidad
                 datosDelCuerpo
                 if let plan = estado.plan {
@@ -63,44 +57,18 @@ struct PerfilView: View {
                 DetalleDeRachaView(racha: racha)
             }
         }
-        .sheet(item: $datoElegido, onDismiss: completarSiSePidio) { dato in
-            DetalleDeDatoDelCuerpo(dato: dato, valor: valor(de: dato), falta: falta(dato)) {
-                completarAlCerrar = true
-                datoElegido = nil
-            }
-        }
     }
 
-    // MARK: - Encabezado y guía
+    // MARK: - Encabezado
 
-    /// "Perfil" grande, como las otras pestañas, el "?" de la guía y el engranaje.
+    /// "Perfil" grande, como las otras pestañas, y el engranaje.
     private var encabezado: some View {
-        EncabezadoDePestana(Textos.homeTabPerfil) {
-            HStack(spacing: TokensEspaciado.e8) {
-                BotonDeAyuda(clave: Self.claveDeGuia)
-                BotonCircular("gearshape", etiqueta: Textos.perfilVerAjustes) {
-                    Haptico.toque()
-                    estado.ir(a: .ajustes)
-                }
+        EncabezadoDePestana(Textos.homeTabProfile) {
+            BotonCircular("gearshape", etiqueta: Textos.profileViewSettings) {
+                Haptico.toque()
+                estado.ir(a: .ajustes)
             }
         }
-    }
-
-    private var guia: some View {
-        TarjetaDeGuia(
-            clave: Self.claveDeGuia,
-            titulo: String(localized: "Tu perfil, en un vistazo", comment: "Título de la guía del perfil"),
-            puntos: [
-                PuntoDeGuia("hand.tap", String(localized: "Tocá peso, altura o edad para ver para qué los usa la app.",
-                                                comment: "Guía del perfil")),
-                PuntoDeGuia("flag.checkered", String(localized: "Tus metas muestran cuánto falta; tocá una para ver tu plan.",
-                                                      comment: "Guía del perfil")),
-                PuntoDeGuia("calendar", String(localized: "Los días resaltados son los que elegiste para entrenar.",
-                                                comment: "Guía del perfil")),
-                PuntoDeGuia("gearshape", String(localized: "En Ajustes cambiás el color, las notificaciones y las unidades.",
-                                                 comment: "Guía del perfil")),
-            ]
-        )
     }
 
     // MARK: - Identidad
@@ -125,7 +93,7 @@ struct PerfilView: View {
                         .estilo(.unidadHeroe, color: Paleta.acento)
                 }
                 .frame(width: TokensEspaciado.e56, height: TokensEspaciado.e56)
-                .accessibilityLabel(Textos.perfilSinFoto)
+                .accessibilityLabel(Textos.profileNoPhoto)
 
                 VStack(alignment: .leading, spacing: TokensEspaciado.e6) {
                     Text(estado.nombreCompleto)
@@ -178,9 +146,9 @@ struct PerfilView: View {
                     .frame(width: TokensEspaciado.e22, height: TokensEspaciado.e22)
                     .accessibilityHidden(true)
                 VStack(alignment: .leading, spacing: TokensEspaciado.e2) {
-                    Text(String(localized: "Tu color · \(nombreDelColor)", comment: "Color de acento en el perfil"))
+                    Text(Textos.profileYourColor(nombreDelColor))
                         .estilo(.tituloCard)
-                    Text(String(localized: "Cambiá el color de la app en Ajustes", comment: "Ayuda del color en el perfil"))
+                    Text(Textos.profileColorHint)
                         .estilo(.notaLegal, color: Paleta.textoTerciario)
                 }
                 Spacer(minLength: 0)
@@ -200,44 +168,56 @@ struct PerfilView: View {
     private var nombreDelColor: String {
         if acentoGuardado.isEmpty { return AcentoPersonalizado.predeterminado.nombre }
         return AcentoPersonalizado.opcion(paraGuardado: acentoGuardado)?.nombre
-            ?? String(localized: "Personalizado", comment: "Color de acento elegido a mano")
+            ?? Textos.settingsColorCustom
     }
 
     // MARK: - Datos del cuerpo
 
-    /// Peso, altura y edad: tres tarjetas de métrica en fila. Cada una se toca
-    /// y explica para qué la usa la app.
+    /// Peso, altura y edad: tres tarjetas de métrica en fila. Si falta alguno,
+    /// abajo va un botón chico que lleva a los pasos del alta.
     private var datosDelCuerpo: some View {
         VStack(alignment: .leading, spacing: TokensEspaciado.e10) {
-            EncabezadoDeSeccion(String(localized: "Tu cuerpo", comment: "Sección del perfil"),
-                                detalle: String(localized: "tocá un dato para saber por qué", comment: "Ayuda de la sección"))
+            EncabezadoDeSeccion(Textos.profileYourBody)
             HStack(spacing: TokensEspaciado.e8) {
                 ForEach(DatoDelCuerpo.allCases) { dato in
                     tarjetaDeDato(dato)
                 }
             }
+            if DatoDelCuerpo.allCases.contains(where: { falta($0) }) {
+                botonCompletarDatos
+            }
         }
     }
 
     private func tarjetaDeDato(_ dato: DatoDelCuerpo) -> some View {
+        TarjetaMetrica(dato.titulo, valor: valor(de: dato), simbolo: dato.simbolo, destacada: falta(dato))
+            .accessibilityElement(children: .ignore)
+            .accessibilityLabel(Text(verbatim: "\(dato.titulo), \(valor(de: dato))"))
+    }
+
+    /// "Completar ahora": chico, en línea, sólo si falta un dato.
+    private var botonCompletarDatos: some View {
         Button {
             Haptico.toque()
-            datoElegido = dato
+            retomarPerfil()
         } label: {
-            TarjetaMetrica(dato.titulo, valor: valor(de: dato), simbolo: dato.simbolo, destacada: falta(dato))
-                .overlay(alignment: .topTrailing) {
-                    Image(systemName: "info.circle")
-                        .font(.system(size: TokensTipografia.notaLegalTamano, weight: .semibold))
-                        .foregroundStyle(Paleta.textoTerciario)
-                        .padding(TokensEspaciado.e8)
-                        .accessibilityHidden(true)
-                }
+            HStack(spacing: TokensEspaciado.e6) {
+                Image(systemName: "plus")
+                    .font(.system(size: TokensTipografia.chipTamano, weight: .bold))
+                    .accessibilityHidden(true)
+                Text(Textos.profileCompleteNow)
+                    .estilo(.chip, color: Paleta.textoAcento)
+            }
+            .foregroundStyle(Paleta.textoAcento)
+            .padding(.horizontal, TokensEspaciado.e12)
+            .padding(.vertical, TokensEspaciado.e8)
+            .background(Paleta.acentoChipActivo)
+            .clipShape(Capsule())
+            .overlay(Capsule().strokeBorder(Paleta.acentoSuaveBorde, lineWidth: TokensEspaciado.e1))
+            .frame(minHeight: TokensTamano.objetivoTactilMinimo)
+            .contentShape(Rectangle())
         }
         .buttonStyle(EstiloPresionado())
-        .accessibilityElement(children: .ignore)
-        .accessibilityLabel(Text(verbatim: "\(dato.titulo), \(valor(de: dato))"))
-        .accessibilityHint(String(localized: "Explica para qué lo usa la app", comment: "Pista de un dato del cuerpo"))
-        .accessibilityAddTraits(.isButton)
     }
 
     private func valor(de dato: DatoDelCuerpo) -> String {
@@ -247,7 +227,7 @@ struct PerfilView: View {
         case .altura:
             return altura
         case .edad:
-            return edad.map(Textos.perfilAnios) ?? "—"
+            return edad.map(Textos.profileAgeYears) ?? "—"
         }
     }
 
@@ -257,12 +237,6 @@ struct PerfilView: View {
         case .altura: return estado.perfil?.heightMm == nil
         case .edad: return estado.perfil?.birthdateMs == nil
         }
-    }
-
-    private func completarSiSePidio() {
-        guard completarAlCerrar else { return }
-        completarAlCerrar = false
-        retomarPerfil()
     }
 
     /// Los mismos pasos del alta, al primer hueco (como el aviso del inicio en
@@ -283,35 +257,33 @@ struct PerfilView: View {
             plan.bloque.semanas.first { $0.numero == numero }
         }
         return VStack(alignment: .leading, spacing: TokensEspaciado.e10) {
-            EncabezadoDeSeccion(String(localized: "Tu actividad", comment: "Sección del perfil"))
+            EncabezadoDeSeccion(Textos.profileYourActivity)
             HStack(spacing: TokensEspaciado.e8) {
                 Button {
                     Haptico.toque()
                     mostrarRacha = true
                 } label: {
-                    TarjetaMetrica(Textos.rachaTitulo, valor: "\(plan.racha.dias)", unidad: Textos.rachaDias,
+                    TarjetaMetrica(Textos.streakTitle, valor: "\(plan.racha.dias)", unidad: Textos.streakDays,
                                    simbolo: plan.racha.dias > 0 ? "flame.fill" : "flame",
                                    destacada: plan.racha.dias > 0 && plan.racha.activaHoy)
                 }
                 .buttonStyle(EstiloPresionado())
-                .accessibilityHint(String(localized: "Muestra cómo funciona la racha", comment: "Pista de la racha"))
+                .accessibilityHint(Textos.profileStreakHint)
 
                 if let numero = plan.semanaDeHoy, plan.bloque.totalDeSemanas > 0 {
                     botonAlPlan {
-                        TarjetaMetrica(String(localized: "Semana", comment: "Semana del plan en el perfil"),
+                        TarjetaMetrica(Textos.commonWeek,
                                        valor: "\(numero)",
-                                       unidad: String(localized: "de \(plan.bloque.totalDeSemanas)",
-                                                      comment: "Total de semanas del plan"),
+                                       unidad: Textos.profileOfNumber(plan.bloque.totalDeSemanas),
                                        simbolo: "calendar")
                     }
                 }
 
                 if let semana = semanaDeHoy, semana.metrosPrevistos > 0 {
                     botonAlPlan {
-                        TarjetaMetrica(String(localized: "Esta semana", comment: "Distancia de la semana en el perfil"),
+                        TarjetaMetrica(Textos.profileThisWeek,
                                        valor: Formato.distanciaNumero(semana.metrosHechos, unidades: estado.sistemaDeUnidades),
-                                       unidad: String(localized: "de \(Formato.distancia(semana.metrosPrevistos, unidades: estado.sistemaDeUnidades))",
-                                                      comment: "Distancia prevista de la semana"),
+                                       unidad: Textos.profileOfText(Formato.distancia(semana.metrosPrevistos, unidades: estado.sistemaDeUnidades)),
                                        simbolo: "figure.run")
                     }
                 }
@@ -327,14 +299,14 @@ struct PerfilView: View {
             contenido()
         }
         .buttonStyle(EstiloPresionado())
-        .accessibilityHint(String(localized: "Abre tu plan", comment: "Pista de una tarjeta que lleva al plan"))
+        .accessibilityHint(Textos.profileOpensPlan)
     }
 
     // MARK: - Metas y Objetivos
 
     private var seccionMetas: some View {
         VStack(alignment: .leading, spacing: TokensEspaciado.e10) {
-            EncabezadoDeSeccion(String(localized: "Metas y objetivos", comment: "Perfil: sección de metas"), accion: String(localized: "+ Gestionar", comment: "Perfil: acción de la sección de metas")) {
+            EncabezadoDeSeccion(Textos.profileGoalsTitle, accion: Textos.profileGoalsManage) {
                 Haptico.toque()
                 estado.ir(a: .ajustes)
             }
@@ -358,7 +330,7 @@ struct PerfilView: View {
     private var cargandoLasMetas: some View {
         HStack(spacing: TokensEspaciado.e10) {
             ProgressView().tint(Paleta.acento)
-            Text(String(localized: "Buscando tus metas…", comment: "Cargando las metas en el perfil"))
+            Text(Textos.profileGoalsLoading)
                 .estilo(.cuerpoSecundario, color: Paleta.textoSecundario)
         }
         .padding(TokensEspaciado.e16)
@@ -373,10 +345,10 @@ struct PerfilView: View {
                 .foregroundStyle(Paleta.textoTerciario)
                 .accessibilityHidden(true)
 
-            Text("Sin metas activas")
+            Text(Textos.profileGoalsNoneActive)
                 .estilo(.opcionTitulo)
 
-            Text("Tus metas anteriores ya finalizaron. Definí una nueva meta para comenzar tu próximo plan.")
+            Text(Textos.profileGoalsFinished)
                 .estilo(.cuerpoSecundario, color: Paleta.textoTerciario)
                 .multilineTextAlignment(.center)
                 .fixedSize(horizontal: false, vertical: true)
@@ -386,7 +358,7 @@ struct PerfilView: View {
                 Haptico.toque()
                 estado.ir(a: .plan)
             } label: {
-                Text("Elegir nueva meta")
+                Text(Textos.profileGoalsChooseNew)
                     .estilo(.tituloCard, color: Paleta.sobreAcento)
                     .padding(.horizontal, TokensEspaciado.e20)
                     .frame(minHeight: TokensTamano.objetivoTactilMinimo)
@@ -426,7 +398,7 @@ struct PerfilView: View {
                     VStack(alignment: .leading, spacing: TokensEspaciado.e3) {
                         Text(TraduccionDelServidor.nombre(de: meta.goal))
                             .estilo(.opcionTitulo)
-                        Text(meta.goalDateMs.map(formatoFecha) ?? "Plan sin fecha fija")
+                        Text(meta.goalDateMs.map(formatoFecha) ?? Textos.profileGoalsNoFixedDate)
                             .estilo(.notaLegal, color: Paleta.textoTerciario)
                     }
 
@@ -455,16 +427,16 @@ struct PerfilView: View {
         }
         .buttonStyle(EstiloPresionado())
         .accessibilityElement(children: .combine)
-        .accessibilityHint(String(localized: "Abre tu plan", comment: "Pista de una tarjeta que lleva al plan"))
+        .accessibilityHint(Textos.profileOpensPlan)
     }
 
     /// "Faltan 12 días" de cerca, "Faltan 9 sem" de lejos.
     private func cuentaRegresiva(_ dias: Int) -> String {
         switch dias {
-        case 0: return String(localized: "¡Es hoy!", comment: "Cuenta regresiva de una meta")
-        case 1: return String(localized: "Falta 1 día", comment: "Cuenta regresiva de una meta")
-        case 2..<14: return String(localized: "Faltan \(dias) días", comment: "Cuenta regresiva de una meta")
-        default: return String(localized: "Faltan \(dias / 7) sem", comment: "Cuenta regresiva de una meta, en semanas")
+        case 0: return Textos.profileGoalsToday
+        case 1: return Textos.profileGoalsOneDayLeft
+        case 2..<14: return Textos.profileGoalsDaysLeft(dias)
+        default: return Textos.profileGoalsWeeksLeft(dias / 7)
         }
     }
 
@@ -486,9 +458,9 @@ struct PerfilView: View {
     private var seccionDias: some View {
         let elegidos = estado.perfil?.trainingDays?.count ?? 0
         return VStack(alignment: .leading, spacing: TokensEspaciado.e10) {
-            EncabezadoDeSeccion(String(localized: "Días de entrenamiento", comment: "Perfil: sección de días de entrenamiento"),
+            EncabezadoDeSeccion(Textos.profileTrainingDays,
                                 detalle: elegidos > 0
-                                    ? String(localized: "\(elegidos) por semana", comment: "Cantidad de días de entrenamiento")
+                                    ? Textos.profilePerWeek(elegidos)
                                     : nil)
 
             VStack(alignment: .leading, spacing: TokensEspaciado.e12) {
@@ -499,16 +471,14 @@ struct PerfilView: View {
                 }
 
                 if elegidos > 0 {
-                    Text(String(localized: "Los días llenos son los que elegiste: tu plan reparte los entrenamientos en ellos, a esa hora.",
-                                comment: "Explicación de los días de entrenamiento"))
+                    Text(Textos.profileTrainingDaysDetail)
                         .estilo(.notaLegal, color: Paleta.textoTerciario)
                         .fixedSize(horizontal: false, vertical: true)
                 } else {
-                    Text(String(localized: "Todavía no elegiste días. Completá tu perfil para que el plan sepa cuándo entrenás.",
-                                comment: "Sin días de entrenamiento"))
+                    Text(Textos.profileTrainingDaysNone)
                         .estilo(.notaLegal, color: Paleta.textoTerciario)
                         .fixedSize(horizontal: false, vertical: true)
-                    BotonTonal(String(localized: "Completar perfil", comment: "Botón para completar el perfil")) {
+                    BotonTonal(Textos.profileCompleteProfile) {
                         Haptico.toque()
                         retomarPerfil()
                     }
@@ -540,25 +510,24 @@ struct PerfilView: View {
     /// sigue en Ajustes.
     private var seccionAccesos: some View {
         VStack(alignment: .leading, spacing: TokensEspaciado.e10) {
-            EncabezadoDeSeccion(String(localized: "Más", comment: "Sección de accesos del perfil"))
+            EncabezadoDeSeccion(Textos.commonMore)
             VStack(spacing: 0) {
                 FilaDeAccesoDePerfil(simbolo: "cross.case.fill",
-                                     titulo: String(localized: "Apto físico", comment: "Fila del perfil"),
+                                     titulo: Textos.medicalTitle,
                                      subtitulo: textoDelApto,
                                      colorDelSubtitulo: colorDelApto) {
                     mostrarApto = true
                 }
                 separador
                 FilaDeAccesoDePerfil(simbolo: "paintpalette",
-                                     titulo: String(localized: "Ajustes y color", comment: "Fila del perfil"),
-                                     subtitulo: String(localized: "Color, apariencia, notificaciones, unidades y cerrar sesión",
-                                                       comment: "Qué hay en Ajustes")) {
+                                     titulo: Textos.profileSettingsAndColor,
+                                     subtitulo: Textos.profileSettingsDetail) {
                     estado.ir(a: .ajustes)
                 }
                 separador
                 FilaDeAccesoDePerfil(simbolo: "questionmark.circle",
-                                     titulo: String(localized: "Cómo funciona Stamina", comment: "Fila del perfil"),
-                                     subtitulo: String(localized: "Volvé a ver el recorrido por la app", comment: "Fila del perfil")) {
+                                     titulo: Textos.profileHowItWorks,
+                                     subtitulo: Textos.profileTourAgain) {
                     // `RaizHomeView` escucha esta clave con `@AppStorage`: el recorrido aparece al toque.
                     UserDefaults.standard.set(false, forKey: Self.claveDelTour)
                 }
@@ -578,12 +547,12 @@ struct PerfilView: View {
     private var textoDelApto: String {
         switch apto.estado {
         case .sinCargar:
-            return String(localized: "Sin cargar · subí foto o PDF", comment: "Estado del apto en el perfil")
+            return Textos.profileMedicalNotAdded
         case .vigente(let dias), .porVencer(let dias):
             let fecha = apto.apto?.vence.formatted(date: .abbreviated, time: .omitted) ?? ""
-            return String(localized: "Vence el \(fecha) · faltan \(dias) días", comment: "Estado del apto en el perfil")
+            return Textos.profileMedicalExpiresOnDaysLeft(fecha, dias)
         case .vencido:
-            return String(localized: "Vencido · renovalo", comment: "Estado del apto en el perfil")
+            return Textos.profileMedicalExpired
         }
     }
 
@@ -632,13 +601,13 @@ struct PerfilView: View {
 
     private func nombreCortoDia(_ weekday: Int) -> String {
         switch weekday {
-        case 1: return "Lun"
-        case 2: return "Mar"
-        case 3: return "Mié"
-        case 4: return "Jue"
-        case 5: return "Vie"
-        case 6: return "Sáb"
-        case 7: return "Dom"
+        case 1: return Textos.weekdayShortMon
+        case 2: return Textos.weekdayShortTue
+        case 3: return Textos.weekdayShortWed
+        case 4: return Textos.weekdayShortThu
+        case 5: return Textos.weekdayShortFri
+        case 6: return Textos.weekdayShortSat
+        case 7: return Textos.weekdayShortSun
         default: return ""
         }
     }
@@ -678,9 +647,9 @@ struct PerfilView: View {
             .flatMap { DeporteDeSesion(rawValue: $0.rawValue) }
             .map { MVP.acotado($0).nombreVisible }
         let nivel: String? = switch perfil.level {
-        case .principiante: Textos.regNivelPrincipiante
-        case .intermedio: Textos.regNivelIntermedio
-        case .avanzado: Textos.regNivelAvanzado
+        case .principiante: Textos.signupLevelBeginner
+        case .intermedio: Textos.signupLevelIntermediate
+        case .avanzado: Textos.signupLevelAdvanced
         case nil: nil
         }
         return [deporte, nivel].compactMap { $0 }.joined(separator: " · ")

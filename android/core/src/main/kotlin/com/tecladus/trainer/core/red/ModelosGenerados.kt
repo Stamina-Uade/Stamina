@@ -3,7 +3,7 @@
 // NO EDITAR A MANO: se reescribe con `npm run generar:modelos` y el CI falla si
 // lo commiteado no coincide.
 //
-// contrato: Trainer API v1.2.1
+// contrato: Trainer API v1.3.0
 //
 // AGENTS.md §5: el JSON va en snake_case, los tiempos son enteros de milisegundos
 // desde epoch y todo viaja en un sobre {"data": …} o {"error": {…}}. Los nombres
@@ -997,6 +997,43 @@ data class ComidaRegistrada(
     val updatedAtMs: Long,
 )
 
+/** De dónde salió el número. Sólo informativo; no decide quién gana. */
+@Serializable
+enum class FuenteDePasos {
+    @SerialName("healthkit")
+    HEALTHKIT,
+
+    @SerialName("manual")
+    MANUAL,
+
+    @SerialName("health_connect")
+    HEALTH_CONNECT,
+
+}
+
+/** DiaDePasosEntrada */
+@Serializable
+data class DiaDePasosEntrada(
+    /** Día de calendario "YYYY-MM-DD", sin hora ni zona: el día local de quien contó los pasos. El servidor rechaza los días que no existen. */
+    val date: String,
+    val steps: Int,
+    val source: FuenteDePasos,
+    /** Cuándo el cliente leyó o editó el valor. Ausente vale "ahora". */
+    @SerialName("updated_at_ms")
+    val updatedAtMs: Long? = null,
+)
+
+/** DiaDePasos */
+@Serializable
+data class DiaDePasos(
+    /** Día de calendario "YYYY-MM-DD", sin hora ni zona: el día local de quien contó los pasos. El servidor rechaza los días que no existen. */
+    val date: String,
+    val steps: Int,
+    val source: FuenteDePasos,
+    @SerialName("updated_at_ms")
+    val updatedAtMs: Long,
+)
+
 /** AceptacionRegistrada */
 @Serializable
 data class AceptacionRegistrada(
@@ -1037,6 +1074,8 @@ data class ExportacionDeDatos(
     val gymSessions: List<SesionDeGimnasio>,
     val activities: List<Actividad>,
     val meals: List<ComidaRegistrada>,
+    /** Desde la 1.3.0. Opcional para que un cliente nuevo lea la exportación de un servidor anterior. */
+    val steps: List<DiaDePasos>? = null,
 )
 
 /** ObjetivoExportado */

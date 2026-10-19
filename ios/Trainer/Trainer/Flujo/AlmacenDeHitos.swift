@@ -18,6 +18,8 @@ public final class AlmacenDeHitos: ObservableObject {
     static let claveHuerfanosAdoptables = "stamina_hitos_huerfanos_adoptables"
 
     @Published public private(set) var pasosPorDia: [String: Int] = [:]
+    /// De dónde salió cada número de `pasosPorDia`, cuándo y si falta subirlo.
+    @Published private(set) var registrosDePasos: [String: RegistroDePasos] = [:]
     @Published public private(set) var actividadesPorDia: [String: [Actividad]] = [:]
     @Published public private(set) var todasLasActividades: [Actividad] = []
 
@@ -29,8 +31,13 @@ public final class AlmacenDeHitos: ObservableObject {
     /// El archivo de la cuenta existe pero todavía no se pudo leer.
     private var lecturaPendiente = false
 
+    /// "yyyy-MM-dd" gregoriano, sea cual sea el calendario del teléfono: es también
+    /// la fecha que viaja a `PUT /me/steps`, y con un calendario budista "yyyy"
+    /// daría 2569.
     private static let formatoFechaClave: DateFormatter = {
         let df = DateFormatter()
+        df.calendar = Calendar(identifier: .gregorian)
+        df.locale = Locale(identifier: "en_US_POSIX")
         df.dateFormat = "yyyy-MM-dd"
         df.timeZone = .current
         return df
@@ -63,34 +70,11 @@ public final class AlmacenDeHitos: ObservableObject {
         if let dueno { adoptarHuerfanos(para: dueno) }
         cargarDeDisco()
         guard conectarConLaApp else { return }
-        conectarConServicioDePasos()
         escucharCambiosDeCuenta()
         #if DEBUG
         // 🛑 Sólo en DEBUG: un binario de release jamás inventa actividades.
         verificarDatosIniciales()
         #endif
-    }
-
-    // MARK: - Conexión con Salud y Sincronización
-
-    private func conectarConServicioDePasos() {
-        // Escuchar cambios de Apple Health y fusionarlos
-        ServicioDePasosSalud.compartido.$pasosPorDia
-            .receive(on: DispatchQueue.main)
-            .sink { [weak self] pasosHealth in
-                guard let self else { return }
-                var huboCambios = false
-                for (clave, cant) in pasosHealth where cant > 0 {
-                    if self.pasosPorDia[clave] != cant {
-                        self.pasosPorDia[clave] = cant
-                        huboCambios = true
-                    }
-                }
-                if huboCambios {
-                    self.guardarEnDisco()
-                }
-            }
-            .store(in: &suscripciones)
     }
 
     // MARK: - Cuenta
@@ -124,8 +108,7 @@ public final class AlmacenDeHitos: ObservableObject {
         // Lo que se registró sin nadie identificado (sólo en memoria) es de quien
         // entra ahora: se le suma. Lo de una cuenta que sale ya está en su archivo,
         // porque cada cambio se guarda al toque.
-        let sinDueno: HitosEnDisco? = (dueno == nil && archivoActual == nil)
-            ? HitosEnDisco(pasosPorDia: pasosPorDia, actividadesPorDia: actividadesPorDia) : nil
+        let sinDueno: HitosEnDisco? = (dueno == nil && archivoActual == nil) ? enMemoria : nil
         dueno = nuevo
         if let nuevo {
             adoptarHuerfanos(para: nuevo)
@@ -135,12 +118,14 @@ public final class AlmacenDeHitos: ObservableObject {
             preferencias.set(false, forKey: Self.claveHuerfanosAdoptables)
         }
         pasosPorDia = [:]
+        registrosDePasos = [:]
         actividadesPorDia = [:]
         cargarDeDisco()
         if nuevo != nil, let sinDueno {
-            var unidos = HitosEnDisco(pasosPorDia: pasosPorDia, actividadesPorDia: actividadesPorDia)
+            var unidos = enMemoria
             Self.unir(&unidos, con: sinDueno)
             pasosPorDia = unidos.pasosPorDia
+            registrosDePasos = unidos.registrosDePasos ?? [:]
             actividadesPorDia = unidos.actividadesPorDia
             guardarEnDisco()
         }
@@ -152,6 +137,13 @@ public final class AlmacenDeHitos: ObservableObject {
     private struct HitosEnDisco: Codable {
         var pasosPorDia: [String: Int]
         var actividadesPorDia: [String: [Actividad]]
+        /// Opcional: los archivos de antes de los pasos en el servidor no lo tienen.
+        var registrosDePasos: [String: RegistroDePasos]? = nil
+    }
+
+    private var enMemoria: HitosEnDisco {
+        HitosEnDisco(pasosPorDia: pasosPorDia, actividadesPorDia: actividadesPorDia,
+                     registrosDePasos: registrosDePasos)
     }
 
     private func archivo(de usuario: String) -> URL? {
@@ -219,14 +211,26 @@ public final class AlmacenDeHitos: ObservableObject {
             return
         }
         pasosPorDia = guardado.pasosPorDia
+        registrosDePasos = Self.conRegistroParaTodo(guardado.pasosPorDia, guardado.registrosDePasos ?? [:])
         actividadesPorDia = guardado.actividadesPorDia
         recalcularListaPlana()
     }
 
+    /// Los pasos de antes de esta versión no dicen de dónde salieron: valen como
+    /// carga manual de "hace mucho" (`actualizadoMs` 1), así suben una vez para que
+    /// el historial quede en la cuenta, pero no le ganan a nada de lo que ya haya.
+    private static func conRegistroParaTodo(_ pasos: [String: Int],
+                                            _ registros: [String: RegistroDePasos]) -> [String: RegistroDePasos] {
+        var completos = registros
+        for clave in pasos.keys where completos[clave] == nil {
+            completos[clave] = RegistroDePasos(fuente: .manual, actualizadoMs: 1, pendiente: true)
+        }
+        return completos
+    }
+
     private func guardarEnDisco() {
         if let archivoActual, !lecturaPendiente {
-            _ = escribir(HitosEnDisco(pasosPorDia: pasosPorDia, actividadesPorDia: actividadesPorDia),
-                         en: archivoActual)
+            _ = escribir(enMemoria, en: archivoActual)
         }
         recalcularListaPlana()
     }
@@ -253,9 +257,15 @@ public final class AlmacenDeHitos: ObservableObject {
         }
     }
 
-    /// Unión sin pérdida: los pasos se quedan con el mayor y las actividades se
-    /// juntan por id (gana la que ya estaba en el destino).
+    /// Unión sin pérdida: los pasos se quedan con el mayor (y con el registro de ese
+    /// número) y las actividades se juntan por id (gana la que ya estaba en el destino).
     private static func unir(_ destino: inout HitosEnDisco, con otro: HitosEnDisco) {
+        var registros = conRegistroParaTodo(destino.pasosPorDia, destino.registrosDePasos ?? [:])
+        let deOtro = conRegistroParaTodo(otro.pasosPorDia, otro.registrosDePasos ?? [:])
+        for (dia, pasos) in otro.pasosPorDia where pasos > (destino.pasosPorDia[dia] ?? -1) {
+            registros[dia] = deOtro[dia]
+        }
+        destino.registrosDePasos = registros
         destino.pasosPorDia.merge(otro.pasosPorDia) { max($0, $1) }
         for (dia, lista) in otro.actividadesPorDia {
             var actual = destino.actividadesPorDia[dia] ?? []
@@ -280,10 +290,14 @@ public final class AlmacenDeHitos: ObservableObject {
 
     // MARK: - Gestión de Pasos
 
-    /// Guarda la cantidad de pasos para una fecha determinada (ej: 5000 pasos ayer).
+    /// El tope del contrato (`DiaDePasosEntrada.steps`): uno más grande sería un 400.
+    static let maximoDePasos = 200_000
+
+    /// Carga a mano (ej: 5000 pasos ayer). Queda pendiente de subir, como `manual`.
     public func guardarPasos(_ pasos: Int, para fecha: Date) {
         let clave = Self.clave(para: fecha)
-        pasosPorDia[clave] = max(0, pasos)
+        pasosPorDia[clave] = min(max(0, pasos), Self.maximoDePasos)
+        registrosDePasos[clave] = RegistroDePasos(fuente: .manual, actualizadoMs: Self.ahoraMs(), pendiente: true)
         guardarEnDisco()
     }
 
@@ -291,6 +305,88 @@ public final class AlmacenDeHitos: ObservableObject {
     public func pasos(para fecha: Date) -> Int {
         let clave = Self.clave(para: fecha)
         return pasosPorDia[clave] ?? 0
+    }
+
+    /// De dónde salió el número de ese día. `nil` si no hay número.
+    func fuenteDePasos(para fecha: Date) -> FuenteDePasos? {
+        registrosDePasos[Self.clave(para: fecha)]?.fuente
+    }
+
+    /// Lo que leyó Salud. Sólo cambia (y queda pendiente de subir) lo que es distinto
+    /// de lo que ya había: abrir la app diez veces no sube diez veces lo mismo.
+    ///
+    /// Salud gana sobre una carga manual del mismo día: con permiso, el número de
+    /// Salud es el de verdad, y la carga a mano sólo existe para cuando no lo hay.
+    func registrarDeSalud(_ porDia: [Date: Int], ahoraMs: Int64) {
+        var huboCambios = false
+        for (fecha, cantidad) in porDia {
+            let clave = Self.clave(para: fecha)
+            let pasos = min(max(0, cantidad), Self.maximoDePasos)
+            if pasosPorDia[clave] == pasos, registrosDePasos[clave]?.fuente == .healthkit { continue }
+            pasosPorDia[clave] = pasos
+            registrosDePasos[clave] = RegistroDePasos(fuente: .healthkit, actualizadoMs: ahoraMs, pendiente: true)
+            huboCambios = true
+        }
+        if huboCambios { guardarEnDisco() }
+    }
+
+    /// Lo que falta subir, del día más viejo al más nuevo. Un día del futuro no sale
+    /// (el servidor lo rechazaría): se queda acá hasta que deje de serlo.
+    func pasosPendientes(hoy: Date = Date()) -> [DiaDePasosEntrada] {
+        let manana = Self.clave(para: Calendar.current.date(byAdding: .day, value: 1, to: hoy) ?? hoy)
+        var salida: [DiaDePasosEntrada] = []
+        for (clave, registro) in registrosDePasos where registro.pendiente && clave <= manana {
+            guard Self.fecha(desde: clave) != nil, let pasos = pasosPorDia[clave] else { continue }
+            salida.append(DiaDePasosEntrada(date: clave, steps: Int64(pasos), source: registro.fuente,
+                                            updatedAtMs: registro.actualizadoMs))
+        }
+        return salida.sorted { $0.date < $1.date }
+    }
+
+    /// El servidor recibió el lote: lo mandado deja de estar pendiente, salvo que se
+    /// haya vuelto a cambiar mientras viajaba. Y lo que contestó se fusiona: si había
+    /// algo más nuevo en otro teléfono, queda eso.
+    func confirmarSubida(_ enviados: [DiaDePasosEntrada], respuesta: [DiaDePasos]) {
+        descartarPendientes(enviados, guardar: false)
+        fusionarDelServidor(respuesta, guardar: false)
+        guardarEnDisco()
+    }
+
+    /// El servidor rechazó el lote (400): no se reintenta para siempre.
+    func descartarPendientes(_ enviados: [DiaDePasosEntrada], guardar: Bool = true) {
+        for dia in enviados {
+            guard var registro = registrosDePasos[dia.date], registro.actualizadoMs == dia.updatedAtMs else { continue }
+            registro.pendiente = false
+            registrosDePasos[dia.date] = registro
+        }
+        if guardar { guardarEnDisco() }
+    }
+
+    /// Lo que está en el servidor. Gana el más nuevo, igual que allá: así un
+    /// teléfono nuevo recupera el historial y uno viejo no pisa lo de otro.
+    func fusionarDelServidor(_ dias: [DiaDePasos], guardar: Bool = true) {
+        var huboCambios = false
+        for dia in dias where Self.fecha(desde: dia.date) != nil {
+            let pasos = Int(min(max(0, dia.steps), Int64(Self.maximoDePasos)))
+            let local = registrosDePasos[dia.date]
+            if local == nil || dia.updatedAtMs > (local?.actualizadoMs ?? 0) {
+                pasosPorDia[dia.date] = pasos
+                registrosDePasos[dia.date] = RegistroDePasos(fuente: dia.source, actualizadoMs: dia.updatedAtMs,
+                                                             pendiente: false)
+                huboCambios = true
+            } else if var igual = local, igual.pendiente, igual.actualizadoMs == dia.updatedAtMs,
+                      pasosPorDia[dia.date] == pasos {
+                // Ya estaba allá: subió y se perdió la respuesta.
+                igual.pendiente = false
+                registrosDePasos[dia.date] = igual
+                huboCambios = true
+            }
+        }
+        if huboCambios, guardar { guardarEnDisco() }
+    }
+
+    private static func ahoraMs() -> Int64 {
+        Int64((Date().timeIntervalSince1970 * 1_000).rounded())
     }
 
     // MARK: - Gestión de Actividades
@@ -374,6 +470,7 @@ public final class AlmacenDeHitos: ObservableObject {
         if let ayer = cal.date(byAdding: .day, value: -1, to: hoy) {
             let claveAyer = Self.clave(para: ayer)
             pasosPorDia[claveAyer] = 5000
+            marcarComoEjemplo(claveAyer)
 
             let baseAyerMs = Int64(cal.startOfDay(for: ayer).timeIntervalSince1970 * 1000)
 
@@ -452,6 +549,7 @@ public final class AlmacenDeHitos: ObservableObject {
             if let fecha = cal.date(byAdding: .day, value: -item.diasAtras, to: hoy) {
                 let clave = Self.clave(para: fecha)
                 pasosPorDia[clave] = item.pasos
+                marcarComoEjemplo(clave)
                 // MVP sólo running: el ejemplo no siembra salidas de bici.
                 guard MVP.permite(item.deporte) else { continue }
 
@@ -477,6 +575,11 @@ public final class AlmacenDeHitos: ObservableObject {
         guardarEnDisco()
     }
 
+    /// Los pasos de ejemplo no son de nadie: nunca suben al servidor.
+    private func marcarComoEjemplo(_ clave: String) {
+        registrosDePasos[clave] = RegistroDePasos(fuente: .manual, actualizadoMs: 1, pendiente: false)
+    }
+
     private func generarRutaGPS(
         latBase: Double,
         lonBase: Double,
@@ -496,4 +599,12 @@ public final class AlmacenDeHitos: ObservableObject {
         return puntos
     }
     #endif
+}
+
+/// De dónde salió el número de pasos de un día y si falta subirlo (`PUT /me/steps`).
+struct RegistroDePasos: Codable, Equatable {
+    var fuente: FuenteDePasos
+    /// Cuándo se leyó de Salud o se cargó a mano. Decide quién gana, acá y en el servidor.
+    var actualizadoMs: Int64
+    var pendiente: Bool
 }

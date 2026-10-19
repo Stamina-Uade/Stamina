@@ -19,16 +19,16 @@ struct RegDeporteView: View {
     /// Todas las opciones; el MVP (sólo running) filtra cuáles se muestran.
     private var opciones: [(Deporte, String, String)] {
         let todas: [(Deporte, String, String)] = [
-            (.running, Textos.regDeporteRunning, Textos.regDeporteRunningDetalle),
-            (.ciclismo, Textos.regDeporteCiclismo, Textos.regDeporteCiclismoDetalle),
-            (.trekking, Textos.regDeporteTrekking, Textos.regDeporteTrekkingDetalle),
-            (.triatlon, Textos.regDeporteTriatlon, Textos.regDeporteTriatlonDetalle),
+            (.running, Textos.signupSportRunning, Textos.signupSportRunningDetail),
+            (.ciclismo, Textos.signupSportCycling, Textos.signupSportCyclingDetail),
+            (.trekking, Textos.signupSportTrekking, Textos.signupSportTrekkingDetail),
+            (.triatlon, Textos.signupSportTriathlon, Textos.signupSportTriathlonDetail),
         ]
         return todas.filter { MVP.deportesDePerfil.contains($0.0) }
     }
 
     var body: some View {
-        PantallaPaso(titulo: Textos.regDeporteTitulo, texto: texto) {
+        PantallaPaso(titulo: Textos.signupSportTitle, texto: texto) {
             VStack(spacing: TokensEspaciado.e10) {
                 ForEach(opciones, id: \.0) { valor, titulo, detalle in
                     FilaOpcion(titulo: titulo, detalle: detalle,
@@ -48,9 +48,8 @@ struct RegDeporteView: View {
     /// running) va una línea que dice por qué no hay más.
     private var texto: String {
         opciones.count == 1
-            ? String(localized: "Por ahora, Stamina es sólo para correr.",
-                     comment: "Paso deporte del alta cuando el MVP ofrece una sola opción")
-            : Textos.regDeporteTexto
+            ? Textos.signupSportRunningOnly
+            : Textos.signupSportBody
     }
 
     /// Con una sola opción (MVP sólo running) queda elegida de entrada; y si
@@ -70,14 +69,14 @@ struct RegNivelView: View {
 
     private var opciones: [(Nivel, String, String)] {
         [
-            (.principiante, Textos.regNivelPrincipiante, Textos.regNivelPrincipianteDetalle),
-            (.intermedio, Textos.regNivelIntermedio, Textos.regNivelIntermedioDetalle),
-            (.avanzado, Textos.regNivelAvanzado, Textos.regNivelAvanzadoDetalle),
+            (.principiante, Textos.signupLevelBeginner, Textos.signupLevelBeginnerDetail),
+            (.intermedio, Textos.signupLevelIntermediate, Textos.signupLevelIntermediateDetail),
+            (.avanzado, Textos.signupLevelAdvanced, Textos.signupLevelAdvancedDetail),
         ]
     }
 
     var body: some View {
-        PantallaPaso(titulo: Textos.regNivelTitulo, texto: Textos.regNivelTexto) {
+        PantallaPaso(titulo: Textos.signupLevelTitle, texto: Textos.signupLevelBody) {
             VStack(spacing: TokensEspaciado.e10) {
                 ForEach(opciones, id: \.0) { valor, titulo, detalle in
                     FilaOpcion(titulo: titulo, detalle: detalle,
@@ -104,27 +103,27 @@ struct RegObjetivoView: View {
 
     private var objetivos: [(Objetivo, String, String)] {
         let todos: [(Objetivo, String, String)] = [
-            (.c5k, Textos.regObjetivoC5k, Textos.regObjetivoC5kDetalle),
-            (.c10k, Textos.regObjetivoC10k, Textos.regObjetivoC10kDetalle),
-            (.mediaMaraton, Textos.regObjetivoMediaMaraton, Textos.regObjetivoMediaMaratonDetalle),
-            (.maraton, Textos.regObjetivoMaraton, Textos.regObjetivoMaratonDetalle),
-            (.trailMontana, Textos.regObjetivoTrailMontana, Textos.regObjetivoTrailMontanaDetalle),
-            (.triatlonOlimpico, Textos.regObjetivoTriatlonOlimpico,
-             Textos.regObjetivoTriatlonOlimpicoDetalle),
-            (.volverSinLesiones, Textos.regObjetivoVolverSinLesiones,
-             Textos.regObjetivoVolverSinLesionesDetalle),
+            (.c5k, Textos.signupGoalC5k, Textos.signupGoalC5kDetail),
+            (.c10k, Textos.signupGoalC10k, Textos.signupGoalC10kDetail),
+            (.mediaMaraton, Textos.signupGoalHalfMarathon, Textos.signupGoalHalfMarathonDetail),
+            (.maraton, Textos.signupGoalMarathon, Textos.signupGoalMarathonDetail),
+            (.trailMontana, Textos.signupGoalMountainTrail, Textos.signupGoalMountainTrailDetail),
+            (.triatlonOlimpico, Textos.signupGoalOlympicTriathlon,
+             Textos.signupGoalOlympicTriathlonDetail),
+            (.volverSinLesiones, Textos.signupGoalInjuryFree,
+             Textos.signupGoalInjuryFreeDetail),
         ]
         // MVP sólo running: el triatlón queda escondido (ver `MVP`).
         return todos.filter { MVP.permite($0.0) }
     }
 
     var body: some View {
-        PantallaPaso(titulo: Textos.regObjetivoTitulo, texto: Textos.regObjetivoTexto) {
+        PantallaPaso(titulo: Textos.signupGoalTitle, texto: Textos.signupGoalBody) {
             VStack(alignment: .leading, spacing: TokensEspaciado.e13) {
                 VStack(alignment: .leading, spacing: TokensEspaciado.e8) {
-                    Text(Textos.regObjetivoElegi)
+                    Text(Textos.signupGoalChoose)
                         .estilo(.etiquetaSeccion, color: Paleta.textoTerciario)
-                    Text("Podés elegir varios. El primero será tu plan principal.")
+                    Text(Textos.signupGoalMultipleHint)
                         .estilo(.notaLegal, color: Paleta.textoTerciario)
                     ForEach(objetivos, id: \.0) { valor, titulo, distancia in
                         FilaObjetivo(titulo: titulo, distancia: distancia,
@@ -147,8 +146,8 @@ struct RegObjetivoView: View {
                 }
 
                 CalendarioMes(seleccionada: $flujo.datos.fechaObjetivo,
-                              etiquetaMesAnterior: Textos.regObjetivoMesAnterior,
-                              etiquetaMesSiguiente: Textos.regObjetivoMesSiguiente)
+                              etiquetaMesAnterior: Textos.signupGoalPreviousMonth,
+                              etiquetaMesSiguiente: Textos.signupGoalNextMonth)
 
                 lineaDeFechaVista
             }
@@ -190,11 +189,11 @@ struct RegObjetivoView: View {
     }
 
     private var lineaDeFecha: String {
-        guard let fecha = flujo.datos.fechaObjetivo else { return Textos.regObjetivoSinFecha }
+        guard let fecha = flujo.datos.fechaObjetivo else { return Textos.signupGoalNoDate }
         let dias = Calendar.autoupdatingCurrent
             .dateComponents([.day], from: Date(), to: fecha).day ?? 0
         let semanas = max(0, Int((Double(dias) / 7).rounded()))
-        return Textos.regObjetivoConFecha(
+        return Textos.signupGoalWithDate(
             fecha.formatted(.dateTime.day().month(.wide).year()), semanas)
     }
 }

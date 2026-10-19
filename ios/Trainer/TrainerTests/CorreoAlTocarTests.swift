@@ -127,7 +127,7 @@ struct CorreoAlTocarTests {
         flujo.loginCorreo = "persona@ejemplo.com"
         flujo.loginClave = "Trainer2026x"
         await flujo.entrar()
-        #expect(flujo.errorVisible == Textos.errorSinConexion)
+        #expect(flujo.errorVisible == Textos.errorOffline)
 
         flujo.loginCorreo = "persona"
         await flujo.entrar()

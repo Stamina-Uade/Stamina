@@ -31,9 +31,8 @@ struct InicioTarjetaDeCarga: View {
     var body: some View {
         VStack(alignment: .leading, spacing: TokensEspaciado.e10) {
             VStack(alignment: .leading, spacing: TokensEspaciado.e4) {
-                EncabezadoDeSeccion(Textos.inicioCargaSemanal)
-                Text(String(localized: "Los km de esta semana: lo hecho contra lo previsto. Cada barra es un día; tocala para verlo.",
-                            comment: "Explicación de la carga semanal en el inicio"))
+                EncabezadoDeSeccion(Textos.homeWeeklyLoad)
+                Text(Textos.homeWeeklyLoadGuide)
                     .estilo(.notaLegal, color: Paleta.textoSecundario)
                     .fixedSize(horizontal: false, vertical: true)
             }
@@ -68,13 +67,13 @@ struct InicioTarjetaDeCarga: View {
                 if let semana {
                     Text(Formato.distancia(semana.metrosHechos, unidades: estado.sistemaDeUnidades, decimales: 0))
                         .estilo(.metricaMedia)
-                    Text(Textos.inicioDePrevistos(
+                    Text(Textos.homeOfPlanned(
                         Formato.distancia(semana.metrosPrevistos, unidades: estado.sistemaDeUnidades, decimales: 0)))
                         .estilo(.labelCampo, color: Paleta.textoTerciario)
                 }
                 Spacer(minLength: 0)
                 HStack(spacing: TokensEspaciado.e4) {
-                    Text(Textos.inicioVerPlan).estilo(.chip, color: Paleta.textoAcento)
+                    Text(Textos.homeViewPlan).estilo(.chip, color: Paleta.textoAcento)
                     Image(systemName: "chevron.right")
                         .font(.system(size: TokensTipografia.notaLegalTamano, weight: .semibold))
                         .foregroundStyle(Paleta.textoAcento)
@@ -86,7 +85,7 @@ struct InicioTarjetaDeCarga: View {
         }
         .buttonStyle(EstiloPresionado())
         .accessibilityElement(children: .combine)
-        .accessibilityHint(Textos.inicioVerPlan)
+        .accessibilityHint(Textos.homeViewPlan)
     }
 
     // MARK: - El día elegido
@@ -106,12 +105,12 @@ struct InicioTarjetaDeCarga: View {
             }
             Spacer(minLength: 0)
             if dia?.hecho == true {
-                PildoraDeEstado(String(localized: "Hecho", comment: "Día de la carga semanal ya entrenado"),
+                PildoraDeEstado(Textos.commonDoneCheck,
                                 simbolo: "checkmark", tono: .acento)
             }
             Text(metros > 0
                  ? Formato.distancia(metros, unidades: estado.sistemaDeUnidades)
-                 : String(localized: "Sin km", comment: "Día de la carga semanal sin distancia"))
+                 : Textos.homeWeeklyLoadNoKm)
                 .estilo(.tituloCard, color: metros > 0 ? Paleta.acento : Paleta.textoTerciario)
                 .monospacedDigit()
         }
@@ -152,10 +151,10 @@ struct InicioTarjetaDeCarga: View {
 
     /// "Hoy · miércoles 21", "Jueves 22" o, sin días alineados, "Día 4".
     private func nombreDelDia(_ indice: Int) -> String {
-        let hoy = String(localized: "Hoy", comment: "El día de hoy en la carga semanal")
+        let hoy = Textos.commonToday
         guard let dia = dias?[indice] else {
             if indice == plan.indiceDeHoy { return hoy }
-            return String(localized: "Día \(indice + 1)", comment: "Día de la carga semanal sin fecha")
+            return Textos.homeWeeklyLoadDayNumber(indice + 1)
         }
         let nombre = "\(simbolo(iso: dia.diaDeLaSemana, corto: false)) \(dia.numeroDeDia)"
         if indice == plan.indiceDeHoy { return "\(hoy) · \(nombre)" }
@@ -166,7 +165,7 @@ struct InicioTarjetaDeCarga: View {
         let metros = plan.cargaSemanal[indice]
         let distancia = metros > 0
             ? Formato.distancia(metros, unidades: estado.sistemaDeUnidades)
-            : String(localized: "Sin km", comment: "Día de la carga semanal sin distancia")
+            : Textos.homeWeeklyLoadNoKm
         return "\(nombreDelDia(indice)), \(distancia)"
     }
 }

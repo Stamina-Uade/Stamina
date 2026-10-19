@@ -46,7 +46,7 @@ struct FilaDeAgendaView: View {
                 FlujoDeChips(chips: chips(de: avituallamiento))
 
                 if let zona = sesion.zona {
-                    Text(Textos.inicioNotaHidratacion(
+                    Text(Textos.homeHydrationNote(
                         avituallamiento.mililitrosPorHora,
                         avituallamiento.carbohidratosPorHoraG,
                         zona.corta,
@@ -101,7 +101,7 @@ struct FilaDeAgendaView: View {
     private func chips(de avituallamiento: AvituallamientoDeSesion) -> [(String, Bool)] {
         var chips: [(String, Bool)] = []
         if avituallamiento.geles > 0 {
-            chips.append(("\(avituallamiento.geles) gel", true))
+            chips.append((Textos.homeGelCount(avituallamiento.geles), true))
         }
         chips.append(("\(avituallamiento.mililitrosPorHora) ml/h", false))
         chips.append(("\(avituallamiento.carbohidratosPorHoraG) g/h", false))
@@ -219,7 +219,7 @@ struct InsigniaDeRacha: View {
                     .foregroundStyle(racha.dias > 0
                         ? (racha.activaHoy ? Paleta.acento : Paleta.textoSecundario)
                         : Paleta.textoTerciario)
-                Text("\(racha.dias)")
+                Text(verbatim: "\(racha.dias)")
                     .estilo(.cuerpoDestacado, color: racha.dias > 0 ? Paleta.textoPrimario : Paleta.textoSecundario)
                     .monospacedDigit()
             }
@@ -236,7 +236,7 @@ struct InsigniaDeRacha: View {
             .contentShape(Rectangle())
         }
         .buttonStyle(.plain)
-        .accessibilityLabel("\(Textos.rachaTitulo): \(racha.dias) \(Textos.rachaDias)")
+        .accessibilityLabel(Textos.streakAccessibility(Textos.streakTitle, racha.dias, Textos.streakDays))
         .sheet(isPresented: $mostrandoDetalle) {
             DetalleDeRachaView(racha: racha)
         }
@@ -270,8 +270,8 @@ struct DetalleDeRachaView: View {
             .accessibilityHidden(true)
 
             VStack(spacing: TokensEspaciado.e4) {
-                MetricaHeroe("\(racha.dias)", unidad: Textos.rachaDias, etiquetaAccesible: Textos.rachaTitulo)
-                Text(Textos.rachaTitulo)
+                MetricaHeroe("\(racha.dias)", unidad: Textos.streakDays, etiquetaAccesible: Textos.streakTitle)
+                Text(Textos.streakTitle)
                     .estilo(.etiquetaSeccion, color: Paleta.acento)
             }
 
@@ -281,7 +281,7 @@ struct DetalleDeRachaView: View {
                     .multilineTextAlignment(.center)
                     .padding(.horizontal, TokensEspaciado.e16)
 
-                Text(Textos.rachaExplicacion)
+                Text(Textos.streakExplanation)
                     .estilo(.cuerpoSecundario, color: Paleta.textoSecundario)
                     .multilineTextAlignment(.center)
                     .padding(.horizontal, TokensEspaciado.e20)
@@ -289,7 +289,7 @@ struct DetalleDeRachaView: View {
 
             Spacer()
 
-            BotonPrimario(Textos.comunListo) {
+            BotonPrimario(Textos.commonDone) {
                 cerrar()
             }
             .padding(.horizontal, TokensEspaciado.e16)
@@ -302,14 +302,14 @@ struct DetalleDeRachaView: View {
     private var mensajeDeEstado: String {
         if racha.dias > 0 {
             if racha.entrenadoHoy {
-                return Textos.rachaDetalleActiva
+                return Textos.streakDetailActive
             } else if !racha.tocaHoy {
-                return Textos.rachaDetalleDescanso
+                return Textos.streakDetailRest
             } else {
-                return Textos.rachaDetallePendiente
+                return Textos.streakDetailPending
             }
         } else {
-            return Textos.rachaDetallePerdida
+            return Textos.streakDetailLost
         }
     }
 }

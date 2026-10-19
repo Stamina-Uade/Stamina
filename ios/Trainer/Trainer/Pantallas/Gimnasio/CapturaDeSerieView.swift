@@ -66,7 +66,7 @@ struct CapturaDeSerieView: View {
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
                     // Volver no descarta: lo registrado queda guardado (§6.3).
-                    Button(Textos.comunVolver) { cerrar() }
+                    Button(Textos.commonBack) { cerrar() }
                 }
             }
         }
@@ -81,13 +81,13 @@ struct CapturaDeSerieView: View {
                 tiraDeSeries
 
                 if !todasHechas {
-                    stepper(Textos.serieRepeticiones + (esPorTiempo ? " (\(Textos.serieSegundos.lowercased()))" : ""),
+                    stepper(Textos.gymSetReps + (esPorTiempo ? " (\(Textos.gymSetSeconds.lowercased()))" : ""),
                             valor: "\(repeticiones)",
                             bajar: { repeticiones = max(1, repeticiones - 1) },
                             subir: { repeticiones = min(200, repeticiones + 1) })
 
                     if ejercicio.prescripcion.unidadDePeso != nil {
-                        stepper(Textos.seriePeso,
+                        stepper(Textos.gymSetWeight,
                                 valor: Formato.peso(pesoGramos, unidades: estado.sistemaDeUnidades),
                                 bajar: { pesoGramos = max(0, pesoGramos - 2500) },
                                 subir: { pesoGramos = min(500_000, pesoGramos + 2500) })
@@ -97,7 +97,7 @@ struct CapturaDeSerieView: View {
                 botonPrimario
 
                 if !todasHechas {
-                    BotonTexto(Textos.serieSaltear, color: Paleta.textoSecundario) { saltear() }
+                    BotonTexto(Textos.gymSetSkip, color: Paleta.textoSecundario) { saltear() }
                 }
             }
             .padding(TokensEspaciado.e16)
@@ -119,7 +119,7 @@ struct CapturaDeSerieView: View {
                         Text(esExtra ? "+\(indice + 1)" : "\(indice + 1)")
                             .estilo(.labelCampo, color: colorDe(hecha: hecha, actual: esActual, salteada: salteada))
                         if salteada {
-                            Text(Textos.serieSalteada)
+                            Text(Textos.gymSetSkipped)
                                 .estilo(.etiquetaSeccion.enMinusculas, color: Paleta.textoTerciario)
                         }
                     }
@@ -135,7 +135,7 @@ struct CapturaDeSerieView: View {
                     .contentShape(Rectangle())
                 }
                 .buttonStyle(EstiloPresionado())
-                .accessibilityLabel(Textos.gymSerieNumero(indice + 1))
+                .accessibilityLabel(Textos.gymSetNumber(indice + 1))
                 .accessibilityAddTraits(hecha ? [.isButton, .isSelected] : .isButton)
             }
 
@@ -154,7 +154,7 @@ struct CapturaDeSerieView: View {
                     .contentShape(Rectangle())
             }
             .buttonStyle(EstiloPresionado())
-            .accessibilityLabel(Textos.serieExtra)
+            .accessibilityLabel(Textos.gymSetExtra)
         }
     }
 
@@ -186,11 +186,11 @@ struct CapturaDeSerieView: View {
     private var botonPrimario: some View {
         Group {
             if todasHechas {
-                BotonPrimario(Textos.serieSiguiente) { cerrar() }
+                BotonPrimario(Textos.gymSetNextExercise) { cerrar() }
             } else if serieActual < estado.seriesHechas(enEjercicio: indiceDeEjercicio) {
-                BotonPrimario(Textos.serieCorregir(serieActual + 1)) { confirmar() }
+                BotonPrimario(Textos.gymSetEdit(serieActual + 1)) { confirmar() }
             } else {
-                BotonPrimario(Textos.serieConfirmar(serieActual + 1, resumenDeLaSerie)) { confirmar() }
+                BotonPrimario(Textos.gymSetConfirm(serieActual + 1, resumenDeLaSerie)) { confirmar() }
             }
         }
     }
@@ -300,24 +300,24 @@ struct DescansoView: View {
                         .foregroundStyle(Paleta.acento)
                         .accessibilityHidden(true)
                 }
-                Text(Textos.descansoFin)
+                Text(Textos.gymRestDone)
                     .estilo(.display)
                     .multilineTextAlignment(.center)
-                Text(Textos.descansoFinDetalle(ejercicio))
+                Text(Textos.gymRestDoneDetail(ejercicio))
                     .estilo(.cuerpoSecundario, color: Paleta.textoSecundario)
                     .multilineTextAlignment(.center)
             } else {
-                PildoraDeEstado(Textos.descansoTitulo, simbolo: "timer", tono: .acento)
+                PildoraDeEstado(Textos.gymRestTitle, simbolo: "timer", tono: .acento)
                 AnilloDeDescanso(fraccion: fraccionRestante, termino: false) {
                     Text(Formato.cronometro(segundos: segundos))
                         .estilo(.metricaHeroe)
                         .lineLimit(1)
                         .minimumScaleFactor(0.5)
                         .padding(.horizontal, TokensEspaciado.e16)
-                        .accessibilityLabel(Text(Textos.descansoTitulo) + Text(", ")
+                        .accessibilityLabel(Text(Textos.gymRestTitle) + Text(verbatim: ", ")
                                             + Text(Formato.cronometro(segundos: segundos)))
                 }
-                Text(Textos.descansoFaltan(seriesQueFaltan))
+                Text(Textos.gymRestSetsLeft(seriesQueFaltan))
                     .estilo(.cuerpoSecundario, color: Paleta.textoSecundario)
             }
 
@@ -325,9 +325,9 @@ struct DescansoView: View {
 
             VStack(spacing: TokensEspaciado.e10) {
                 if !termino {
-                    BotonTonal(Textos.descansoMas) { sumar(30) }
+                    BotonTonal(Textos.gymRestAddTime) { sumar(30) }
                 }
-                BotonPrimario(termino ? Textos.comunListo : Textos.descansoSaltar) { terminar() }
+                BotonPrimario(termino ? Textos.commonDone : Textos.gymRestSkip) { terminar() }
             }
             .padding(.horizontal, TokensEspaciado.e16)
             .padding(.bottom, TokensEspaciado.e26)

@@ -16,22 +16,22 @@ struct RegSaludView: View {
     @EnvironmentObject private var flujo: FlujoEntrada
 
     var body: some View {
-        PantallaPaso(titulo: Textos.regSaludTitulo, texto: Textos.regSaludTexto) {
+        PantallaPaso(titulo: Textos.signupHealthTitle, texto: Textos.signupHealthBody) {
             VStack(spacing: TokensEspaciado.e14) {
-                AvisoAtencion(titulo: Textos.regSaludParaYConsulta) {
+                AvisoAtencion(titulo: Textos.signupHealthStopAndConsult) {
                     VStack(alignment: .leading, spacing: TokensEspaciado.e8) {
-                        ItemAtencion(Textos.regSaludSintoma1)
-                        ItemAtencion(Textos.regSaludSintoma2)
-                        ItemAtencion(Textos.regSaludSintoma3)
+                        ItemAtencion(Textos.signupHealthSymptom1)
+                        ItemAtencion(Textos.signupHealthSymptom2)
+                        ItemAtencion(Textos.signupHealthSymptom3)
                     }
                 }
 
-                Casilla(texto: Textos.regSaludAcepto, marcada: $flujo.datos.descargoAceptado)
+                Casilla(texto: Textos.signupHealthAccept, marcada: $flujo.datos.descargoAceptado)
                     .disabled(flujo.enCurso)
             }
         } pie: {
             PieDePerfil(habilitado: flujo.datos.descargoAceptado,
-                        motivoDeshabilitado: Textos.regSaludFaltaAceptar)
+                        motivoDeshabilitado: Textos.signupHealthMustAccept)
         }
     }
 }
@@ -48,15 +48,15 @@ struct RegMedicionView: View {
 
     private var opciones: [(DatosRegistro.Medicion, String, String)] {
         [
-            (.gps, Textos.regMedicionGps, Textos.regMedicionGpsDetalle),
-            (.garmin, Textos.regMedicionGarmin, Textos.regMedicionGarminDetalle),
-            (.apple, Textos.regMedicionApple, Textos.regMedicionAppleDetalle),
-            (.manual, Textos.regMedicionManual, Textos.regMedicionManualDetalle),
+            (.gps, Textos.signupTrackingGps, Textos.signupTrackingGpsDetail),
+            (.garmin, Textos.signupTrackingGarmin, Textos.signupTrackingGarminDetail),
+            (.apple, Textos.signupTrackingApple, Textos.signupTrackingAppleDetail),
+            (.manual, Textos.signupTrackingManual, Textos.signupTrackingManualDetail),
         ]
     }
 
     var body: some View {
-        PantallaPaso(titulo: Textos.regMedicionTitulo, texto: Textos.regMedicionTexto) {
+        PantallaPaso(titulo: Textos.signupTrackingTitle, texto: Textos.signupTrackingBody) {
             VStack(spacing: TokensEspaciado.e10) {
                 ForEach(opciones, id: \.0) { valor, titulo, detalle in
                     FilaOpcion(titulo: titulo, detalle: detalle,
@@ -64,7 +64,7 @@ struct RegMedicionView: View {
                         flujo.datos.medicion = valor
                     }
                 }
-                AvisoSuave(Textos.regMedicionNoSeGuarda)
+                AvisoSuave(Textos.signupTrackingNotSaved)
             }
         } pie: {
             PieDePerfil(ahoraNo: {
@@ -92,7 +92,7 @@ struct RegDiasView: View {
     }
 
     var body: some View {
-        PantallaPaso(titulo: Textos.regDiasTitulo, texto: Textos.regDiasTexto) {
+        PantallaPaso(titulo: Textos.signupDaysTitle, texto: Textos.signupDaysBody) {
             VStack(alignment: .leading, spacing: TokensEspaciado.e13) {
                 HStack(spacing: TokensEspaciado.e5) {
                     ForEach(diasEnOrden, id: \.self) { iso in
@@ -111,13 +111,13 @@ struct RegDiasView: View {
                 }
 
                 AvisoSuave(flujo.datos.hayAlgunDia
-                           ? Textos.regDiasAviso(flujo.datos.dias.count)
-                           : Textos.regDiasSinDias)
+                           ? Textos.signupDaysAlert(flujo.datos.dias.count)
+                           : Textos.signupDaysNoDays)
             }
             .disabled(flujo.enCurso)
         } pie: {
             PieDePerfil(habilitado: flujo.datos.hayAlgunDia,
-                        motivoDeshabilitado: Textos.regDiasSinDias)
+                        motivoDeshabilitado: Textos.signupDaysNoDays)
         }
     }
 
@@ -126,7 +126,7 @@ struct RegDiasView: View {
             Text(Self.nombre(iso)).estilo(.tituloCard)
             Spacer()
             DatePicker(
-                Textos.regDiasHoraDe(Self.nombre(iso)),
+                Textos.signupDaysTimeOf(Self.nombre(iso)),
                 selection: enlaceDeHora(iso),
                 displayedComponents: .hourAndMinute
             )
@@ -210,10 +210,10 @@ struct RegListoView: View {
             ScrollView {
                 VStack(spacing: TokensEspaciado.e16) {
                     MascotaConBocadillo(pose: .medalla,
-                                        texto: Textos.regListoTitulo(nombre),
+                                        texto: Textos.signupDoneTitle(nombre),
                                         altoMaximo: TokensEspaciado.e56 * 4)
 
-                    Text(String(localized: "Tu perfil quedó completo.", comment: "reg-listo: la línea bajo la mascota"))
+                    Text(Textos.signupDoneProfileComplete)
                         .estilo(.cuerpoDestacado, color: Paleta.textoSecundario)
                         .multilineTextAlignment(.center)
                         .fixedSize(horizontal: false, vertical: true)
@@ -236,12 +236,12 @@ struct RegListoView: View {
     private var resumen: some View {
         Tarjeta {
             VStack(spacing: TokensEspaciado.e9) {
-                FilaResumen(Textos.regListoNacimiento,
+                FilaResumen(Textos.signupDoneBirth,
                             flujo.datos.nacimiento.map { $0.formatted(.dateTime.day().month().year()) } ?? "—")
-                FilaResumen(Textos.regListoDeporte, deporte)
-                FilaResumen(Textos.regListoNivel, nivel)
-                FilaResumen(Textos.regListoDias, dias)
-                FilaResumen(Textos.regListoObjetivo, objetivo)
+                FilaResumen(Textos.signupDoneSport, deporte)
+                FilaResumen(Textos.signupDoneLevel, nivel)
+                FilaResumen(Textos.signupDoneDays, dias)
+                FilaResumen(Textos.signupDoneGoal, objetivo)
             }
         }
     }
@@ -250,7 +250,7 @@ struct RegListoView: View {
     /// para que el resumen que scrollea se pierda debajo.
     private var pie: some View {
         VStack(spacing: TokensEspaciado.e10) {
-            BotonPrimario(Textos.regListoIrAInicio) { flujo.terminarRegistro() }
+            BotonPrimario(Textos.signupDoneGoHome) { flujo.terminarRegistro() }
         }
         .padding(.horizontal, TokensEspaciado.e22)
         .padding(.bottom, TokensEspaciado.e34)
@@ -279,24 +279,24 @@ struct RegListoView: View {
 
     private var nombre: String {
         let n = flujo.datos.nombre.trimmingCharacters(in: .whitespaces)
-        return n.isEmpty ? Textos.regNombreMarcador : n
+        return n.isEmpty ? Textos.signupNamePlaceholder : n
     }
 
     private var deporte: String {
         switch flujo.datos.deporte {
-        case .running: return Textos.regDeporteRunning
-        case .ciclismo: return Textos.regDeporteCiclismo
-        case .trekking: return Textos.regDeporteTrekking
-        case .triatlon: return Textos.regDeporteTriatlon
+        case .running: return Textos.signupSportRunning
+        case .ciclismo: return Textos.signupSportCycling
+        case .trekking: return Textos.signupSportTrekking
+        case .triatlon: return Textos.signupSportTriathlon
         case .none: return "—"
         }
     }
 
     private var nivel: String {
         switch flujo.datos.nivel {
-        case .principiante: return Textos.regNivelPrincipiante
-        case .intermedio: return Textos.regNivelIntermedio
-        case .avanzado: return Textos.regNivelAvanzado
+        case .principiante: return Textos.signupLevelBeginner
+        case .intermedio: return Textos.signupLevelIntermediate
+        case .avanzado: return Textos.signupLevelAdvanced
         case .none: return "—"
         }
     }
@@ -309,14 +309,14 @@ struct RegListoView: View {
 
     private var objetivo: String {
         switch flujo.datos.objetivo {
-        case .c5k: return Textos.regObjetivoC5k
-        case .c10k: return Textos.regObjetivoC10k
-        case .mediaMaraton: return Textos.regObjetivoMediaMaraton
-        case .maraton: return Textos.regObjetivoMaraton
-        case .trailMontana: return Textos.regObjetivoTrailMontana
-        case .triatlonOlimpico: return Textos.regObjetivoTriatlonOlimpico
-        case .volverSinLesiones: return Textos.regObjetivoVolverSinLesiones
-        case .none: return Textos.regListoPlanDeBase
+        case .c5k: return Textos.signupGoalC5k
+        case .c10k: return Textos.signupGoalC10k
+        case .mediaMaraton: return Textos.signupGoalHalfMarathon
+        case .maraton: return Textos.signupGoalMarathon
+        case .trailMontana: return Textos.signupGoalMountainTrail
+        case .triatlonOlimpico: return Textos.signupGoalOlympicTriathlon
+        case .volverSinLesiones: return Textos.signupGoalInjuryFree
+        case .none: return Textos.signupDoneBasePlan
         }
     }
 }

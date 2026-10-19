@@ -20,7 +20,7 @@ struct GimnasioView: View {
 
     var body: some View {
         VStack(spacing: 0) {
-            CabeceraSecundaria(titulo: Textos.homeTabGimnasio) {
+            CabeceraSecundaria(titulo: Textos.homeTabGym) {
                 estado.volverDeLaPantallaSecundaria()
             }
 
@@ -33,7 +33,7 @@ struct GimnasioView: View {
                     } else {
                         AvisoDeLoGuardado(seccion: estado.contenido.rutina)
 
-                        Text(Textos.gymSubtitulo)
+                        Text(Textos.gymSubtitle)
                             .estilo(.labelCampo, color: Paleta.textoTerciario)
 
                         tarjetaDeProgreso
@@ -45,9 +45,9 @@ struct GimnasioView: View {
                         }
                     }
 
-                    BotonAgregar(Textos.gymAgregar) { mostrandoCatalogo = true }
+                    BotonAgregar(Textos.gymAddExercise) { mostrandoCatalogo = true }
 
-                    BotonPrimario(Textos.gymTerminar) {
+                    BotonPrimario(Textos.gymFinish) {
                         estado.volverDeLaPantallaSecundaria()
                     }
                     .padding(.top, TokensEspaciado.e4)
@@ -80,12 +80,12 @@ struct GimnasioView: View {
                     PildoraDeEstado(fraccion.formatted(.percent.precision(.fractionLength(0))),
                                     simbolo: "dumbbell.fill", tono: .acento)
                 }
-                Text(Textos.gymSeriesCompletadas)
+                Text(Textos.gymSetsCompleted)
                     .estilo(.cuerpoSecundario, color: Paleta.textoSecundario)
 
-                BarraDeProgreso(fraccion: fraccion, descripcion: Textos.gymProgreso(hechas, total))
+                BarraDeProgreso(fraccion: fraccion, descripcion: Textos.gymProgress(hechas, total))
 
-                Text(Textos.gymNota)
+                Text(Textos.gymNote)
                     .estilo(.notaLegal, color: Paleta.textoTerciario)
                     .fixedSize(horizontal: false, vertical: true)
             }
@@ -110,7 +110,7 @@ struct TarjetaDeEjercicio: View {
                     // La columna PREVIA: con esto la persona elige la carga, que el motor
                     // no prescribe.
                     if !seriesPrevias.isEmpty {
-                        Text(Textos.gymPrevia(seriesPrevias))
+                        Text(Textos.gymPrevious(seriesPrevias))
                             .estilo(.notaLegal, color: Paleta.textoSecundario)
                             .fixedSize(horizontal: false, vertical: true)
                     }
@@ -164,7 +164,7 @@ struct TarjetaDeEjercicio: View {
         if let gramos = primera.pesoGramos {
             partes.append(Formato.peso(gramos, unidades: estado.sistemaDeUnidades))
         }
-        partes.append(Textos.gymDescanso(ejercicio.prescripcion.descansoSegundos))
+        partes.append(Textos.gymRestSeconds(ejercicio.prescripcion.descansoSegundos))
         return partes.joined(separator: " · ")
     }
 }
@@ -205,7 +205,7 @@ struct ChipDeSerie: View {
             .contentShape(Rectangle())
         }
         .buttonStyle(EstiloPresionado())
-        .accessibilityLabel(Textos.gymSerieNumero(numero))
+        .accessibilityLabel(Textos.gymSetNumber(numero))
         .accessibilityValue(etiqueta)
         .accessibilityAddTraits(hecha ? [.isButton, .isSelected] : .isButton)
     }

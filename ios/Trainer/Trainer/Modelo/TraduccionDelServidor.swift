@@ -49,7 +49,7 @@ enum TraduccionDelServidor {
         let bloque = BloqueDelPlan(
             subtitulo: subtitulo(plan, semanaDeHoy: semanaDeHoy, enTriatlon: esTriatlon),
             evento: nombre(de: plan.goal, enTriatlon: esTriatlon),
-            cuando: plan.eventDateMs.map { fechaLarga($0, zona: zona) } ?? Textos.planSinFecha,
+            cuando: plan.eventDateMs.map { fechaLarga($0, zona: zona) } ?? Textos.planNoRaceDate,
             semanasQueFaltan: semanaDeHoy.map { max(0, total - $0) } ?? (yaTermino ? 0 : total),
             totalDeSemanas: total,
             fases: plan.phases
@@ -135,7 +135,7 @@ enum TraduccionDelServidor {
             duracionMinutos: Int(dia.durationMin),
             // El servidor manda la estructura como un párrafo, no en bloques: va
             // entero, y no se parte adivinando dónde termina el calentamiento.
-            bloques: [BloqueDeSesion(titulo: Textos.entrenoEstructura, detalle: dia.detail)],
+            bloques: [BloqueDeSesion(titulo: Textos.workoutStructure, detalle: dia.detail)],
             avituallamiento: dia.fueling.map(avituallamiento),
             motivos: dia.reasons.map(\.text))
     }
@@ -199,7 +199,7 @@ enum TraduccionDelServidor {
     private static func subtitulo(_ plan: Plan, semanaDeHoy: Int?, enTriatlon: Bool = false) -> String {
         let nombreObj = nombre(de: plan.goal, enTriatlon: enTriatlon)
         guard let semanaDeHoy else { return nombreObj }
-        return Textos.planSubtitulo(nombreObj, semanaDeHoy, Int(plan.totalWeeks))
+        return Textos.planSubtitle(nombreObj, semanaDeHoy, Int(plan.totalWeeks))
     }
 
     // MARK: - Rutina
@@ -304,13 +304,13 @@ enum TraduccionDelServidor {
 
     static func nombre(de objetivo: Objetivo, enTriatlon: Bool = false) -> String {
         switch objetivo {
-        case .c5k: return Textos.regObjetivoC5k
-        case .c10k: return Textos.regObjetivoC10k
-        case .mediaMaraton: return enTriatlon ? "Triatlón media distancia" : Textos.regObjetivoMediaMaraton
-        case .maraton: return enTriatlon ? "Triatlón larga distancia" : Textos.regObjetivoMaraton
-        case .trailMontana: return Textos.regObjetivoTrailMontana
-        case .triatlonOlimpico: return Textos.regObjetivoTriatlonOlimpico
-        case .volverSinLesiones: return Textos.regObjetivoVolverSinLesiones
+        case .c5k: return Textos.signupGoalC5k
+        case .c10k: return Textos.signupGoalC10k
+        case .mediaMaraton: return enTriatlon ? "Triatlón media distancia" : Textos.signupGoalHalfMarathon
+        case .maraton: return enTriatlon ? "Triatlón larga distancia" : Textos.signupGoalMarathon
+        case .trailMontana: return Textos.signupGoalMountainTrail
+        case .triatlonOlimpico: return Textos.signupGoalOlympicTriathlon
+        case .volverSinLesiones: return Textos.signupGoalInjuryFree
         }
     }
 
@@ -328,11 +328,11 @@ enum TraduccionDelServidor {
 
     static func nombre(de fase: Fase) -> String {
         switch fase {
-        case .base: return Textos.planFaseBase
-        case .construccion: return Textos.planFaseConstruccion
-        case .pico: return Textos.planFasePico
-        case .afinamiento: return Textos.planFaseAfinamiento
-        case .carrera: return Textos.planFaseCarrera
+        case .base: return Textos.planPhaseBase
+        case .construccion: return Textos.planPhaseBuild
+        case .pico: return Textos.planPhasePeak
+        case .afinamiento: return Textos.planPhaseTaper
+        case .carrera: return Textos.planPhaseRace
         }
     }
 }

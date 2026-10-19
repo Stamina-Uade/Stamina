@@ -61,8 +61,8 @@ enum HistorialFormato {
 
     static func cantidadDeSalidas(_ cantidad: Int) -> String {
         cantidad == 1
-            ? String(localized: "1 salida", comment: "Historial: cantidad de salidas")
-            : String(localized: "\(cantidad) salidas", comment: "Historial: cantidad de salidas")
+            ? Textos.historyWorkoutsOne
+            : Textos.historyWorkoutsCount(cantidad)
     }
 }
 
@@ -99,18 +99,18 @@ enum HistorialPeriodo: String, CaseIterable, Identifiable {
 
     var titulo: String {
         switch self {
-        case .semana: return String(localized: "Semana", comment: "Historial: período del resumen")
-        case .mes: return String(localized: "Mes", comment: "Historial: período del resumen")
-        case .todo: return String(localized: "Todo", comment: "Historial: período del resumen")
+        case .semana: return Textos.commonWeek
+        case .mes: return Textos.commonMonth
+        case .todo: return Textos.commonAll
         }
     }
 
     /// Qué cuenta, dicho en palabras, para debajo de las tarjetas.
     var explicacion: String {
         switch self {
-        case .semana: return String(localized: "Desde el lunes hasta hoy", comment: "Historial: qué abarca el resumen semanal")
-        case .mes: return String(localized: "Desde el 1 de este mes", comment: "Historial: qué abarca el resumen mensual")
-        case .todo: return String(localized: "Todas tus salidas", comment: "Historial: qué abarca el resumen total")
+        case .semana: return Textos.historyPeriodWeekDetail
+        case .mes: return Textos.historyPeriodMonthDetail
+        case .todo: return Textos.historyAllWorkouts
         }
     }
 
@@ -202,25 +202,24 @@ struct HistorialFranjaDeResumen: View {
         let totales = HistorialTotales(delPeriodo)
         let tiempo = HistorialFormato.tiempoAcumulado(segundos: totales.segundos)
         return VStack(alignment: .leading, spacing: TokensEspaciado.e10) {
-            EncabezadoDeSeccion(String(localized: "Tus números", comment: "Historial: título del resumen"),
+            EncabezadoDeSeccion(Textos.historyYourNumbers,
                                 detalle: deporte?.nombreVisible)
 
             HistorialSelectorDePeriodo(periodo: $periodo)
 
             HStack(spacing: TokensEspaciado.e8) {
-                TarjetaMetrica(String(localized: "Distancia", comment: "Historial: resumen"),
+                TarjetaMetrica(Textos.commonDistance,
                                valor: Formato.distanciaNumero(totales.metros, unidades: unidades),
                                unidad: Formato.unidadDeDistancia(unidades),
                                simbolo: "map", destacada: true)
-                TarjetaMetrica(String(localized: "Salidas", comment: "Historial: resumen, cantidad de actividades"),
+                TarjetaMetrica(Textos.historyWorkouts,
                                valor: "\(totales.sesiones)", simbolo: "figure.run")
-                TarjetaMetrica(String(localized: "Tiempo", comment: "Historial: resumen, tiempo acumulado"),
+                TarjetaMetrica(Textos.commonTime,
                                valor: tiempo.valor, unidad: tiempo.unidad, simbolo: "clock")
             }
 
             Text(esParcial
-                 ? String(localized: "\(periodo.explicacion). Suma lo cargado hasta ahora: tocá «Cargar más» abajo para sumar las anteriores.",
-                          comment: "Historial: aviso de que el total es parcial")
+                 ? Textos.historyTotalsPartialNote(periodo.explicacion)
                  : periodo.explicacion)
                 .estilo(.labelCampo, color: Paleta.textoTerciario)
                 .fixedSize(horizontal: false, vertical: true)
@@ -239,7 +238,7 @@ struct HistorialChipsDeDeporte: View {
     var body: some View {
         ScrollView(.horizontal, showsIndicators: false) {
             HStack(spacing: TokensEspaciado.e8) {
-                chip(String(localized: "Todos", comment: "Historial: filtro sin deporte"), deporte: nil)
+                chip(Textos.commonAllPlural, deporte: nil)
                 ForEach(deportes, id: \.self) { deporte in
                     chip(deporte.nombreVisible, deporte: deporte)
                 }
@@ -323,7 +322,7 @@ struct HistorialEncabezadoDeMes: View {
         HStack(alignment: .firstTextBaseline, spacing: TokensEspaciado.e6) {
             Text(HistorialFormato.mesYAnio(grupo.inicio))
                 .estilo(.tituloSeccion)
-            Text("· \(Formato.distancia(grupo.metros, unidades: unidades))")
+            Text(verbatim: "· \(Formato.distancia(grupo.metros, unidades: unidades))")
                 .estilo(.labelCampo, color: Paleta.textoAcento)
             Spacer(minLength: TokensEspaciado.e8)
             Text(HistorialFormato.cantidadDeSalidas(grupo.actividades.count))
@@ -362,12 +361,12 @@ struct HistorialEstadoVacio: View {
                     .font(.system(size: TokensEspaciado.e20, weight: .semibold))
                     .foregroundStyle(Paleta.error)
                     .accessibilityHidden(true)
-                Text(Textos.historialError)
+                Text(Textos.historyError)
                     .estilo(.cuerpoSecundario, color: Paleta.textoSecundario)
                     .frame(maxWidth: .infinity, alignment: .leading)
                     .fixedSize(horizontal: false, vertical: true)
             }
-            BotonTonal(String(localized: "Reintentar", comment: "Historial: volver a pedir la lista")) {
+            BotonTonal(Textos.commonRetry) {
                 Haptico.toque()
                 reintentar()
             }
@@ -389,19 +388,18 @@ struct HistorialEstadoVacio: View {
             .shadow(color: Paleta.acentoBrillo, radius: TokensEspaciado.e12)
             .accessibilityHidden(true)
 
-            Text(String(localized: "Todavía no hay salidas", comment: "Historial vacío: título"))
+            Text(Textos.historyEmptyTitle)
                 .estilo(.tituloCardGrande)
                 .multilineTextAlignment(.center)
                 .accessibilityAddTraits(.isHeader)
 
-            Text(String(localized: "Tocá ⚡ para empezar la primera. Cuando la termines, aparece acá con su mapa, sus parciales y sus pausas.",
-                        comment: "Historial vacío: qué hacer"))
+            Text(Textos.historyEmptyBody)
                 .estilo(.cuerpoSecundario, color: Paleta.textoSecundario)
                 .multilineTextAlignment(.center)
                 .fixedSize(horizontal: false, vertical: true)
 
             if let empezar {
-                BotonPrimario(String(localized: "Empezar mi primera salida", comment: "Historial vacío: botón al entreno")) {
+                BotonPrimario(Textos.historyEmptyStartFirst) {
                     Haptico.toque()
                     empezar()
                 }

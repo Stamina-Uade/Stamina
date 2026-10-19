@@ -129,11 +129,11 @@ struct ResumenDatosDeMetricas {
 
     var tarjetas: [Tarjeta] {
         var lista: [Tarjeta] = [
-            Tarjeta(etiqueta: String(localized: "Duración total", comment: "Resumen: métrica"),
+            Tarjeta(etiqueta: Textos.summaryTotalDuration,
                     valor: Formato.cronometroCompleto(segundos: segundos), simbolo: "clock")
         ]
         if analisis.tiempoEnMovimientoSegundos < segundos {
-            lista.append(Tarjeta(etiqueta: String(localized: "En movimiento", comment: "Resumen: tiempo en movimiento"),
+            lista.append(Tarjeta(etiqueta: Textos.summaryMovingTime,
                                  valor: Formato.cronometroCompleto(segundos: analisis.tiempoEnMovimientoSegundos),
                                  simbolo: "timer"))
         }
@@ -141,37 +141,37 @@ struct ResumenDatosDeMetricas {
             let promedio = (metros >= 50 && segundos > 0)
                 ? Formato.velocidadNumero(metros: metros, segundos: segundos, unidades: unidades)
                 : "0,0"
-            lista.append(Tarjeta(etiqueta: String(localized: "Velocidad prom.", comment: "Resumen: velocidad promedio"),
+            lista.append(Tarjeta(etiqueta: Textos.commonAvgSpeed,
                                  valor: promedio, unidad: Formato.unidadDeVelocidad(unidades),
                                  simbolo: "speedometer"))
             if let maxima = analisis.velocidadMaximaKmh {
-                lista.append(Tarjeta(etiqueta: String(localized: "Velocidad máx.", comment: "Resumen: velocidad máxima"),
+                lista.append(Tarjeta(etiqueta: Textos.summaryMaxSpeed,
                                      valor: ResumenFormato.velocidadNumero(kmh: maxima, unidades: unidades),
                                      unidad: Formato.unidadDeVelocidad(unidades), simbolo: "bolt.fill"))
             }
         } else {
-            lista.append(Tarjeta(etiqueta: String(localized: "Ritmo prom.", comment: "Resumen: ritmo promedio"),
+            lista.append(Tarjeta(etiqueta: Textos.commonAvgPace,
                                  valor: Formato.ritmo(segundosPorKm: ResumenFormato.ritmoMedio(metros: metros, segundos: segundos),
                                                       unidades: unidades),
                                  unidad: ResumenFormato.unidadDeRitmo(unidades), simbolo: "speedometer"))
             if let mejor = analisis.ritmoMaximoSegPorKm {
-                lista.append(Tarjeta(etiqueta: String(localized: "Mejor ritmo", comment: "Resumen: mejor ritmo"),
+                lista.append(Tarjeta(etiqueta: Textos.summaryBestPace,
                                      valor: Formato.ritmo(segundosPorKm: mejor, unidades: unidades),
                                      unidad: ResumenFormato.unidadDeRitmo(unidades), simbolo: "bolt.fill"))
             }
         }
         if let pulsoMedio {
-            lista.append(Tarjeta(etiqueta: Textos.resumenPulsoMedio, valor: "\(pulsoMedio)",
+            lista.append(Tarjeta(etiqueta: Textos.summaryAvgHeartRate, valor: "\(pulsoMedio)",
                                  unidad: "ppm", simbolo: "heart.fill"))
         }
         if let pulsoMaximo {
-            lista.append(Tarjeta(etiqueta: Textos.resumenPulsoMax, valor: "\(pulsoMaximo)",
+            lista.append(Tarjeta(etiqueta: Textos.summaryMaxHeartRate, valor: "\(pulsoMaximo)",
                                  unidad: "ppm", simbolo: "heart.fill"))
         }
-        lista.append(Tarjeta(etiqueta: String(localized: "Desnivel", comment: "Resumen: desnivel acumulado"),
+        lista.append(Tarjeta(etiqueta: Textos.commonElevationGain,
                              valor: Formato.desnivel(metros: desnivelMetros, unidades: unidades),
                              simbolo: "mountain.2.fill"))
-        lista.append(Tarjeta(etiqueta: String(localized: "Calorías", comment: "Resumen: calorías activas"),
+        lista.append(Tarjeta(etiqueta: Textos.summaryCalories,
                              valor: Formato.kcal(calorias), unidad: "kcal", simbolo: "flame.fill"))
         return lista
     }
@@ -191,7 +191,7 @@ struct ResumenMetricasPrincipales: View {
             MetricaHeroe(
                 Formato.distanciaNumero(datos.metros, unidades: datos.unidades, decimales: 2),
                 unidad: Formato.unidadDeDistancia(datos.unidades),
-                etiquetaAccesible: Textos.entrenoDistancia
+                etiquetaAccesible: Textos.commonDistance
             )
             LazyVGrid(columns: columnas, alignment: .leading, spacing: TokensEspaciado.e8) {
                 ForEach(datos.tarjetas) { tarjeta in
@@ -223,7 +223,7 @@ struct ResumenMapaDelRecorrido: View {
     var body: some View {
         VStack(alignment: .leading, spacing: TokensEspaciado.e8) {
             HStack(spacing: TokensEspaciado.e8) {
-                Text(String(localized: "Recorrido", comment: "Resumen: título del mapa"))
+                Text(Textos.commonRoute)
                     .estilo(.tituloSeccion)
                     .accessibilityAddTraits(.isHeader)
                 Spacer(minLength: 0)
@@ -235,7 +235,7 @@ struct ResumenMapaDelRecorrido: View {
                             .font(.system(size: TokensTipografia.chipTamano, weight: .bold))
                             .foregroundStyle(Paleta.sobreAcento)
                             .accessibilityHidden(true)
-                        Text("Reproducir recorrido")
+                        Text(Textos.summaryReplayRoute)
                             .estilo(.chip, color: Paleta.sobreAcento)
                     }
                     .padding(.horizontal, TokensEspaciado.e12)
@@ -303,8 +303,8 @@ struct ResumenParciales: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: TokensEspaciado.e8) {
-            EncabezadoDeSeccion(String(localized: "Parciales", comment: "Resumen: splits por kilómetro"),
-                                detalle: String(localized: "cada km", comment: "Resumen: los parciales son por kilómetro"))
+            EncabezadoDeSeccion(Textos.summarySplits,
+                                detalle: Textos.summaryPerKm)
             VStack(spacing: TokensEspaciado.e10) {
                 ForEach(splits) { split in
                     fila(split, esMejor: split.numero == numeroDelMejor)
@@ -331,7 +331,7 @@ struct ResumenParciales: View {
 
     private func fila(_ split: SplitKilometro, esMejor: Bool) -> some View {
         HStack(spacing: TokensEspaciado.e10) {
-            Text("Km \(split.numero)")
+            Text(Textos.summarySplitKmNumber(split.numero))
                 .estilo(.resumenCifraChica, color: esMejor ? Paleta.textoPrimario : Paleta.textoSecundario)
                 .frame(minWidth: TokensEspaciado.e40, alignment: .leading)
 
@@ -359,13 +359,13 @@ struct ResumenParciales: View {
                         .estilo(.resumenCifraFila, color: esMejor ? Paleta.acento : Paleta.textoPrimario)
                         .lineLimit(1)
                 }
-                Text("\(Formato.distancia(split.metros, unidades: unidades, decimales: 2)) · \(Formato.cronometro(segundos: split.segundos))")
+                Text(verbatim: "\(Formato.distancia(split.metros, unidades: unidades, decimales: 2)) · \(Formato.cronometro(segundos: split.segundos))")
                     .estilo(.resumenCifraChica, color: Paleta.textoTerciario)
                     .lineLimit(1)
             }
         }
         .accessibilityElement(children: .combine)
-        .accessibilityValue(esMejor ? Text(String(localized: "Parcial más rápido", comment: "Resumen: accesibilidad del mejor split")) : Text(""))
+        .accessibilityValue(esMejor ? Text(Textos.summaryFastestSplit) : Text(verbatim: ""))
     }
 }
 
@@ -423,7 +423,7 @@ struct ResumenTramos: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: TokensEspaciado.e8) {
-            EncabezadoDeSeccion(String(localized: "Tramos, pausas y reanudaciones", comment: "Resumen: sección de tramos"))
+            EncabezadoDeSeccion(Textos.summarySegmentsPauses)
             VStack(spacing: 0) {
                 ForEach(Array(filas.enumerated()), id: \.element.id) { indice, fila in
                     if indice > 0 {
@@ -445,14 +445,14 @@ struct ResumenTramos: View {
         HStack(spacing: TokensEspaciado.e10) {
             ZStack {
                 Circle().fill(Paleta.acentoChipActivo)
-                Text("\(fila.numero)")
+                Text(verbatim: "\(fila.numero)")
                     .estilo(.chip, color: Paleta.acento)
             }
             .frame(width: TokensEspaciado.e34, height: TokensEspaciado.e34)
             .accessibilityHidden(true)
 
             VStack(alignment: .leading, spacing: TokensEspaciado.e1) {
-                Text("Tramo \(fila.numero)")
+                Text(Textos.summarySplitSegmentNumber(fila.numero))
                     .estilo(.tituloCard)
                 Text(Formato.distancia(fila.metros, unidades: unidades, decimales: 2))
                     .estilo(.resumenCifraChica, color: Paleta.textoSecundario)
@@ -462,7 +462,7 @@ struct ResumenTramos: View {
                 Text(Formato.cronometro(segundos: fila.segundos))
                     .estilo(.resumenCifraFila)
                 if let ritmo = fila.ritmoSegPorKm {
-                    Text("\(Formato.ritmo(segundosPorKm: ritmo, unidades: unidades)) \(ResumenFormato.unidadDeRitmo(unidades))")
+                    Text(verbatim: "\(Formato.ritmo(segundosPorKm: ritmo, unidades: unidades)) \(ResumenFormato.unidadDeRitmo(unidades))")
                         .estilo(.resumenCifraChica, color: Paleta.textoTerciario)
                 }
             }
@@ -478,9 +478,9 @@ struct ResumenTramos: View {
                 .foregroundStyle(colorPausa)
                 .accessibilityHidden(true)
             VStack(alignment: .leading, spacing: TokensEspaciado.e1) {
-                Text("Pausa \(pausa.numero): \(Formato.cronometro(segundos: pausa.duracionSegundos))")
+                Text(Textos.summaryPauseNumber(pausa.numero, Formato.cronometro(segundos: pausa.duracionSegundos)))
                     .estilo(.tituloCard, color: colorPausa)
-                Text("Pausa: \(ResumenFormato.hora(pausa.inicioMs)) · Reanudación: \(ResumenFormato.hora(pausa.finMs))")
+                Text(Textos.summaryPauseResume(ResumenFormato.hora(pausa.inicioMs), ResumenFormato.hora(pausa.finMs)))
                     .estilo(.notaLegal, color: Paleta.textoTerciario)
             }
             Spacer(minLength: 0)

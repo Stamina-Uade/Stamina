@@ -205,6 +205,9 @@ public enum Paleta {
     // ---- estado ----
 
     public static let error = TokensColor.estadoError
+    /// Ronda 5: el rojo de una acción DESTRUCTIVA (cerrar sesión, borrar). Más
+    /// intenso que `error` (que es un salmón para avisos): es el rojo del sistema.
+    public static let peligro = Color(red: 1.0, green: 0.231, blue: 0.188)
     public static let errorFondo = TokensColor.estadoErrorFondo
     public static let errorBorde = TokensColor.estadoErrorBorde
 

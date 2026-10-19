@@ -71,11 +71,6 @@ private struct CuerpoDeObjetivos: Encodable {
     let goals: [ObjetivoDeUsuario]
 }
 
-private struct CoordenadaParaPronostico: Encodable {
-    let lat: Double
-    let lon: Double
-}
-
 /// Lo que la app le pide al servidor. Es un protocolo para que los tests del flujo
 /// de entrada usen un doble y no un servidor.
 public protocol ServicioDeCuenta: Sendable {
@@ -132,7 +127,6 @@ extension ServicioDeCuenta {
 public protocol ServicioDelPlan: Sendable {
     func plan() async -> Resultado<Plan>
     func planes() async -> Resultado<[PlanDeObjetivo]>
-    func pronostico(lat: Double, lon: Double) async -> Resultado<PronosticoDeCalor>
     func rutina(delDia fechaMs: Int64) async -> Resultado<RutinaDelDia>
     func nutricion(delDia fechaMs: Int64) async -> Resultado<DiaNutricional>
 
@@ -151,7 +145,6 @@ public protocol ServicioDelPlan: Sendable {
 public extension ServicioDelPlan {
     func diccionarioDeEjercicios() async -> Resultado<DiccionarioDeEjercicios> { .sinRed }
     func planes() async -> Resultado<[PlanDeObjetivo]> { .sinRed }
-    func pronostico(lat: Double, lon: Double) async -> Resultado<PronosticoDeCalor> { .sinRed }
 }
 
 /// La actividad se guarda por id antes que su recorrido. El recorrido viaja
@@ -306,10 +299,6 @@ public final class ApiTrainer: ServicioDeCuenta, ServicioDelPlan, ServicioDeActi
 
     public func planes() async -> Resultado<[PlanDeObjetivo]> {
         await renovador.pedir(.get, "/plans")
-    }
-
-    public func pronostico(lat: Double, lon: Double) async -> Resultado<PronosticoDeCalor> {
-        await renovador.pedir(.post, "/weather/forecast", cuerpo: CoordenadaParaPronostico(lat: lat, lon: lon))
     }
 
     public func objetivos() async -> Resultado<[ObjetivoDeUsuario]> {
@@ -554,4 +543,38 @@ private struct ClaveDelContrato: CodingKey {
     init(_ nombre: String) { stringValue = nombre }
     init?(stringValue: String) { self.stringValue = stringValue }
     init?(intValue: Int) { return nil }
+}
+
+// MARK: - Pasos diarios (contrato 1.3.0)
+
+/// Los pasos de cada día en el servidor. Aparte de los otros servicios para que la
+/// app lo pida con un `as?` y la maqueta, que no lo tiene, siga igual.
+public protocol ServicioDePasos: Sendable {
+    /// `GET /me/steps`: los días con pasos entre `desde` y `hasta` ("yyyy-MM-dd",
+    /// las dos puntas incluidas, 366 días como mucho).
+    func pasos(desde: String, hasta: String) async -> Resultado<[DiaDePasos]>
+    /// `PUT /me/steps`: hasta 60 días. Devuelve cómo quedó cada uno (gana el más nuevo).
+    ///
+    /// - Parameter claveDeIdempotencia: una por intento —este lote—, la misma si ESE
+    ///   intento se reintenta.
+    func guardarPasos(_ dias: [DiaDePasosEntrada], claveDeIdempotencia: String) async -> Resultado<[DiaDePasos]>
+}
+
+extension ApiTrainer: ServicioDePasos {
+    public func pasos(desde: String, hasta: String) async -> Resultado<[DiaDePasos]> {
+        await renovador.pedir(.get, "/me/steps", consulta: [
+            URLQueryItem(name: "from", value: desde),
+            URLQueryItem(name: "to", value: hasta),
+        ])
+    }
+
+    public func guardarPasos(_ dias: [DiaDePasosEntrada], claveDeIdempotencia: String) async -> Resultado<[DiaDePasos]> {
+        await renovador.pedir(.put, "/me/steps", cuerpo: PedidoDePasos(days: dias),
+                              claveDeIdempotencia: claveDeIdempotencia)
+    }
+}
+
+/// `PUT /me/steps`: el lote, adentro de `days`.
+struct PedidoDePasos: Encodable, Sendable {
+    let days: [DiaDePasosEntrada]
 }

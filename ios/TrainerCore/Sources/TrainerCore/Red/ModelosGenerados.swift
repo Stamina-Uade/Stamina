@@ -3,7 +3,7 @@
 // NO EDITAR A MANO: se reescribe en cada `npm run generar:modelos`, y el CI
 // falla si el archivo commiteado no coincide con lo que el generador produce.
 //
-// Contrato 1.2.1
+// Contrato 1.3.0
 //
 // AGENTS.md §4.2: los modelos de red se generan desde el contrato, no se
 // escriben a mano. AGENTS.md §5: a partir de la primera versión en tienda,
@@ -1764,6 +1764,68 @@ public struct ComidaRegistrada: Codable, Equatable, Sendable {
     }
 }
 
+/// De dónde salió el número. Sólo informativo; no decide quién gana.
+public enum FuenteDePasos: String, Codable, CaseIterable, Sendable {
+    case healthkit = "healthkit"
+    case manual = "manual"
+    case healthConnect = "health_connect"
+}
+
+public struct DiaDePasosEntrada: Codable, Equatable, Sendable {
+    /// Día de calendario "YYYY-MM-DD", sin hora ni zona: el día local de quien contó los pasos. El servidor rechaza los días que no existen.
+    public let date: String
+    public let steps: Int64
+    public let source: FuenteDePasos
+    /// Cuándo el cliente leyó o editó el valor. Ausente vale "ahora".
+    public let updatedAtMs: Int64?
+
+    enum CodingKeys: String, CodingKey {
+        case date
+        case steps
+        case source
+        case updatedAtMs = "updated_at_ms"
+    }
+
+    public init(
+        date: String,
+        steps: Int64,
+        source: FuenteDePasos,
+        updatedAtMs: Int64? = nil
+    ) {
+        self.date = date
+        self.steps = steps
+        self.source = source
+        self.updatedAtMs = updatedAtMs
+    }
+}
+
+public struct DiaDePasos: Codable, Equatable, Sendable {
+    /// Día de calendario "YYYY-MM-DD", sin hora ni zona: el día local de quien contó los pasos. El servidor rechaza los días que no existen.
+    public let date: String
+    public let steps: Int64
+    public let source: FuenteDePasos
+    public let updatedAtMs: Int64
+
+    enum CodingKeys: String, CodingKey {
+        case date
+        case steps
+        case source
+        case updatedAtMs = "updated_at_ms"
+    }
+
+    public init(
+        date: String,
+        steps: Int64,
+        source: FuenteDePasos,
+        updatedAtMs: Int64
+    ) {
+        self.date = date
+        self.steps = steps
+        self.source = source
+        self.updatedAtMs = updatedAtMs
+    }
+}
+
 public struct AceptacionRegistrada: Codable, Equatable, Sendable {
     public let version: String
     public let acceptedAtMs: Int64
@@ -1830,6 +1892,8 @@ public struct ExportacionDeDatos: Codable, Equatable, Sendable {
     public let gymSessions: [SesionDeGimnasio]
     public let activities: [Actividad]
     public let meals: [ComidaRegistrada]
+    /// Desde la 1.3.0. Opcional para que un cliente nuevo lea la exportación de un servidor anterior.
+    public let steps: [DiaDePasos]?
 
     enum CodingKeys: String, CodingKey {
         case exportedAtMs = "exported_at_ms"
@@ -1840,6 +1904,7 @@ public struct ExportacionDeDatos: Codable, Equatable, Sendable {
         case gymSessions = "gym_sessions"
         case activities
         case meals
+        case steps
     }
 
     public init(
@@ -1850,7 +1915,8 @@ public struct ExportacionDeDatos: Codable, Equatable, Sendable {
         plans: [AnclaDePlan],
         gymSessions: [SesionDeGimnasio],
         activities: [Actividad],
-        meals: [ComidaRegistrada]
+        meals: [ComidaRegistrada],
+        steps: [DiaDePasos]? = nil
     ) {
         self.exportedAtMs = exportedAtMs
         self.profile = profile
@@ -1860,6 +1926,7 @@ public struct ExportacionDeDatos: Codable, Equatable, Sendable {
         self.gymSessions = gymSessions
         self.activities = activities
         self.meals = meals
+        self.steps = steps
     }
 }
 

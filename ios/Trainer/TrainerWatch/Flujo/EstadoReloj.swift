@@ -657,8 +657,8 @@ final class EstadoReloj: ObservableObject {
         if fuenteLocal {
             guard let sig = seguimiento.siguienteDisciplinaTriatlon() else { return nil }
             switch sig {
-            case .ciclismo: return (.ciclismo, "bicycle", "Pasar a Bicicleta")
-            case .running: return (.running, "figure.run", "Pasar a Carrera")
+            case .ciclismo: return (.ciclismo, "bicycle", TextosReloj.controlsTriathlonToCycling)
+            case .running: return (.running, "figure.run", TextosReloj.controlsTriathlonToRunning)
             default: return nil
             }
         }

@@ -12,7 +12,7 @@ struct AjustesPaginaUnidades: View {
     let volver: () -> Void
 
     var body: some View {
-        AjustesPagina(Textos.ajustesUnidades, volver: volver) {
+        AjustesPagina(Textos.settingsUnits, volver: volver) {
             HStack(spacing: TokensEspaciado.e4) {
                 ForEach(SistemaDeUnidades.allCases) { sistema in
                     segmento(sistema)
@@ -61,13 +61,13 @@ struct AjustesPaginaUnidades: View {
         .accessibilityElement(children: .ignore)
         .accessibilityLabel(nombre(de: sistema))
         // AGENTS.md §10: métrico e imperial son preferencia de PRESENTACIÓN.
-        .accessibilityHint(Textos.ajustesUnidadesDetalle)
+        .accessibilityHint(Textos.settingsUnitsDetail)
         .accessibilityAddTraits(esElegido ? [.isButton, .isSelected] : .isButton)
     }
 
     private func nombre(de sistema: SistemaDeUnidades) -> String {
         sistema == .metrico
-            ? String(localized: "Kilómetros", comment: "Ajustes: sistema métrico")
-            : String(localized: "Millas", comment: "Ajustes: sistema imperial")
+            ? Textos.settingsUnitsKilometers
+            : Textos.settingsUnitsMiles
     }
 }

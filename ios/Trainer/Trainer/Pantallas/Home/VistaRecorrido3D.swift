@@ -92,11 +92,11 @@ struct VistaRecorrido3D: View {
                 // Barra de acciones superiores
                 HStack {
                     if let alCerrar {
-                        BotonCircular("chevron.down", etiqueta: String(localized: "Cerrar", comment: "Vista 3D: botón para cerrar"), accion: alCerrar)
+                        BotonCircular("chevron.down", etiqueta: Textos.commonClose, accion: alCerrar)
                     }
                     Spacer()
                     // Menú de opciones (todavía sin acciones)
-                    BotonCircular("ellipsis", etiqueta: String(localized: "Más opciones", comment: "Vista 3D: menú de opciones")) {
+                    BotonCircular("ellipsis", etiqueta: Textos.route3dMoreOptions) {
                         // Acciones adicionales
                     }
                 }
@@ -104,7 +104,7 @@ struct VistaRecorrido3D: View {
                 .padding(.top, TokensEspaciado.e6)
 
                 // La marca, en el rosa del acento
-                Text("STAMINA")
+                Text(verbatim: "STAMINA")
                     .estilo(.marca, color: Paleta.acento)
 
                 // Subtítulo de actividad (ej: "Carrera de noche")
@@ -115,21 +115,21 @@ struct VistaRecorrido3D: View {
                 HStack(spacing: 0) {
                     // Columna 1: Ritmo (o Velocidad)
                     columnaMetrica(
-                        etiqueta: deporte == .ciclismo ? String(localized: "Velocidad", comment: "Vista 3D: etiqueta de métrica") : String(localized: "Ritmo", comment: "Vista 3D: etiqueta de métrica"),
+                        etiqueta: deporte == .ciclismo ? Textos.commonSpeed : Textos.commonPace,
                         valor: valorRitmo,
                         unidad: unidadRitmo
                     )
 
                     // Columna 2: Desnivel
                     columnaMetrica(
-                        etiqueta: String(localized: "Desnivel", comment: "Vista 3D: etiqueta de métrica"),
+                        etiqueta: Textos.commonElevationGain,
                         valor: valorDesnivel,
                         unidad: unidadDesnivel
                     )
 
                     // Columna 3: Distancia
                     columnaMetrica(
-                        etiqueta: String(localized: "Distancia", comment: "Vista 3D: etiqueta de métrica"),
+                        etiqueta: Textos.commonDistance,
                         valor: valorDistancia,
                         unidad: unidadDistancia
                     )

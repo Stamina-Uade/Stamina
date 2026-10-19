@@ -20,9 +20,9 @@ struct ProblemaView: View {
 
     private var datos: [Dato] {
         [
-            Dato(valor: porcentaje(0.794), texto: Textos.problemaDato1, enAcento: true),
-            Dato(valor: "\(numero(30))–\(porcentaje(0.67))", texto: Textos.problemaDato2, enAcento: false),
-            Dato(valor: porcentaje(0.377), texto: Textos.problemaDato3, enAcento: false),
+            Dato(valor: porcentaje(0.794), texto: Textos.problemFact1, enAcento: true),
+            Dato(valor: "\(numero(30))–\(porcentaje(0.67))", texto: Textos.problemFact2, enAcento: false),
+            Dato(valor: porcentaje(0.377), texto: Textos.problemFact3, enAcento: false),
         ]
     }
 
@@ -30,7 +30,7 @@ struct ProblemaView: View {
         VStack(spacing: 0) {
             ScrollView {
                 VStack(alignment: .leading, spacing: TokensEspaciado.e26) {
-                    Text(Textos.problemaTitulo)
+                    Text(Textos.problemTitle)
                         .estilo(.display)
                         .fixedSize(horizontal: false, vertical: true)
                         .accessibilityAddTraits(.isHeader)
@@ -62,7 +62,7 @@ struct ProblemaView: View {
                 .padding(.vertical, TokensEspaciado.e26)
             }
 
-            BotonPrimario(Textos.problemaSeguir) { flujo.ir(a: .previewPlan) }
+            BotonPrimario(Textos.commonContinueNext) { flujo.ir(a: .previewPlan) }
                 .padding(.horizontal, TokensEspaciado.e22)
                 .padding(.bottom, TokensEspaciado.e34)
         }

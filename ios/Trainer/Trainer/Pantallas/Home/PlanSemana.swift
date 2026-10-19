@@ -57,7 +57,7 @@ struct PlanSelectorDeSemana: View {
     private func chip(_ semana: SemanaDelPlan, llenando: Bool) -> some View {
         let esLaElegida = semana.numero == elegida
         return Button { alElegir(semana.numero) } label: {
-            Text(Textos.planSemanaChip(semana.numero))
+            Text(Textos.planWeekChip(semana.numero))
                 .estilo(.tituloCard, color: esLaElegida ? Paleta.sobreAcento : Paleta.textoTerciario)
                 .lineLimit(1)
                 .minimumScaleFactor(0.8)
@@ -77,7 +77,7 @@ struct PlanSelectorDeSemana: View {
                 .contentShape(Capsule())
         }
         .buttonStyle(EstiloPresionado())
-        .accessibilityLabel(semana.enCurso ? Textos.planSemanaEnCurso(semana.numero) : Textos.planSemana(semana.numero))
+        .accessibilityLabel(semana.enCurso ? Textos.planWeekInProgress(semana.numero) : Textos.planWeek(semana.numero))
         .accessibilityAddTraits(esLaElegida ? [.isButton, .isSelected] : .isButton)
     }
 }
@@ -113,29 +113,29 @@ struct PlanProgresoDeLaSemana: View {
     }
 
     private var titulo: String {
-        semana.enCurso ? Textos.planSemanaEnCurso(semana.numero) : Textos.planSemana(semana.numero)
+        semana.enCurso ? Textos.planWeekInProgress(semana.numero) : Textos.planWeek(semana.numero)
     }
 
     private var kilometros: String {
-        Textos.planKmDe(
+        Textos.planKmOf(
             Formato.distancia(semana.metrosHechos, unidades: unidades, decimales: 0),
             Formato.distancia(semana.metrosPrevistos, unidades: unidades, decimales: 0))
     }
 
     private var mensaje: String {
         if semana.metrosPrevistos <= 0 {
-            return String(localized: "Esta semana no tiene kilómetros previstos.", comment: "Plan, semana sin km")
+            return Textos.planWeekNoKmPlanned
         }
         if semana.metrosHechos >= semana.metrosPrevistos {
-            return String(localized: "¡Semana cumplida! Todo lo previsto está hecho.", comment: "Plan, semana completa")
+            return Textos.planWeekComplete
         }
         if semana.metrosHechos <= 0 {
             return semana.enCurso
-                ? String(localized: "Todavía no sumaste kilómetros esta semana.", comment: "Plan, semana sin empezar")
-                : String(localized: "Sin kilómetros registrados en esta semana.", comment: "Plan, semana sin registros")
+                ? Textos.planWeekNoKmYet
+                : Textos.planWeekNoKmLogged
         }
         let faltan = Formato.distancia(semana.metrosPrevistos - semana.metrosHechos, unidades: unidades, decimales: 0)
-        return String(localized: "Te faltan \(faltan) para completar la semana.", comment: "Plan, km que faltan")
+        return Textos.planWeekLeftToComplete(faltan)
     }
 
     var body: some View {
@@ -159,16 +159,15 @@ struct PlanProgresoDeLaSemana: View {
 
             HStack(spacing: TokensEspaciado.e8) {
                 flecha("chevron.left",
-                       etiqueta: String(localized: "Semana anterior", comment: "VoiceOver, plan"),
+                       etiqueta: Textos.planWeekPrevious,
                        habilitada: hayAnterior) { alMoverse(-1) }
-                Text(String(localized: "Deslizá los días de costado para cambiar de semana",
-                            comment: "Plan, pista del gesto"))
+                Text(Textos.planWeekSwipeHint)
                     .estilo(.labelCampo, color: Paleta.textoTerciario)
                     .multilineTextAlignment(.center)
                     .frame(maxWidth: .infinity)
                     .accessibilityHidden(true)
                 flecha("chevron.right",
-                       etiqueta: String(localized: "Semana siguiente", comment: "VoiceOver, plan"),
+                       etiqueta: Textos.planWeekNext,
                        habilitada: haySiguiente) { alMoverse(1) }
             }
         }

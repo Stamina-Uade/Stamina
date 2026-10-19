@@ -113,7 +113,7 @@ struct ReproductorDeRecorridoView: View {
                 // 2. Capa superior: Botón cerrar + Selector de velocidad
                 VStack(spacing: TokensEspaciado.e12) {
                     HStack(alignment: .center) {
-                        BotonCircular("xmark", etiqueta: String(localized: "Cerrar reproducción", comment: "Reproductor de recorrido: botón para cerrar")) {
+                        BotonCircular("xmark", etiqueta: Textos.replayClose) {
                             pausar()
                             if let alCerrar {
                                 alCerrar()
@@ -178,13 +178,13 @@ struct ReproductorDeRecorridoView: View {
     private var hudTelemetria: some View {
         panelFlotante(
             HStack(spacing: 0) {
-                columnaHUD(titulo: String(localized: "TIEMPO", comment: "Reproductor de recorrido: etiqueta del panel de datos"), valor: Formato.cronometroCompleto(segundos: Int(tiempoActual)))
+                columnaHUD(titulo: Textos.replayHeaderTime, valor: Formato.cronometroCompleto(segundos: Int(tiempoActual)))
                 divisorHUD
-                columnaHUD(titulo: String(localized: "RITMO", comment: "Reproductor de recorrido: etiqueta del panel de datos"), valor: valorRitmoTexto)
+                columnaHUD(titulo: Textos.replayHeaderPace, valor: valorRitmoTexto)
                 divisorHUD
-                columnaHUD(titulo: String(localized: "VELOCIDAD", comment: "Reproductor de recorrido: etiqueta del panel de datos"), valor: valorVelocidadTexto)
+                columnaHUD(titulo: Textos.replayHeaderSpeed, valor: valorVelocidadTexto)
                 divisorHUD
-                columnaHUD(titulo: String(localized: "KILÓMETRO", comment: "Reproductor de recorrido: etiqueta del panel de datos"), valor: kilometroActualTexto)
+                columnaHUD(titulo: Textos.replayHeaderKilometer, valor: kilometroActualTexto)
             }
             .padding(.vertical, TokensEspaciado.e12)
         )
@@ -220,7 +220,7 @@ struct ReproductorDeRecorridoView: View {
                     .font(.system(size: TokensTipografia.valorDatoTamano, weight: .bold))
                     .foregroundStyle(Paleta.acento)
                     .accessibilityHidden(true)
-                Text("TIEMPO TOTAL")
+                Text(Textos.replayHeaderTotalTime)
                     .estilo(.etiquetaSeccion, color: Paleta.textoSecundario)
             }
             Text(Formato.cronometroCompleto(segundos: duracionTotalSegundos))
@@ -268,7 +268,7 @@ struct ReproductorDeRecorridoView: View {
 
                 // Botones
                 HStack(spacing: TokensEspaciado.e22) {
-                    BotonCircular("backward.end.fill", etiqueta: String(localized: "Reiniciar reproducción", comment: "Reproductor de recorrido: volver al principio")) {
+                    BotonCircular("backward.end.fill", etiqueta: Textos.replayRestart) {
                         tiempoActual = 0.0
                         reproducir()
                     }
@@ -315,7 +315,7 @@ struct ReproductorDeRecorridoView: View {
                 .contentShape(Capsule())
         }
         .buttonStyle(EstiloPresionado())
-        .accessibilityLabel(Text("Velocidad \(titulo)"))
+        .accessibilityLabel(Text(Textos.replaySpeedAccessibility(titulo)))
         .accessibilityAddTraits(activo ? .isSelected : [])
     }
 

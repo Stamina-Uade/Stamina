@@ -621,21 +621,21 @@ final class SeguimientoDeSalida: NSObject, ObservableObject, CLLocationManagerDe
     private func notificar(_ salida: SalidaCapturada) {
         guard salida.metros > 0 && salida.segundos >= 10 else { return }
         let deporte: String = switch salida.deporte {
-        case .running: Textos.notificacionEntrenamientoRunning
-        case .ciclismo: Textos.notificacionEntrenamientoCiclismo
-        case .trekking: Textos.notificacionEntrenamientoTrekking
-        case .natacion: Textos.notificacionEntrenamientoNatacion
-        case .fuerza: Textos.notificacionEntrenamientoFuerza
-        case .otro: Textos.notificacionEntrenamientoOtro
-        case .triatlon: Textos.regDeporteTriatlon
+        case .running: Textos.notificationWorkoutRunning
+        case .ciclismo: Textos.notificationWorkoutCycling
+        case .trekking: Textos.notificationWorkoutHiking
+        case .natacion: Textos.notificationWorkoutSwimming
+        case .fuerza: Textos.notificationWorkoutStrength
+        case .otro: Textos.notificationWorkoutOther
+        case .triatlon: Textos.signupSportTriathlon
         }
-        let distancia = Textos.notificacionEntrenamientoDistancia(
+        let distancia = Textos.notificationWorkoutDistance(
             Formato.kilometros(salida.metros, decimales: 2))
         let duracion = Formato.cronometroCompleto(segundos: salida.segundos)
         NotificadorDeEntrenamiento.enviar(
             id: salida.id,
-            titulo: Textos.notificacionEntrenamientoTitulo,
-            cuerpo: Textos.notificacionEntrenamientoCuerpo(deporte, duracion, distancia))
+            titulo: Textos.notificationWorkoutTitle,
+            cuerpo: Textos.notificationWorkoutBody(deporte, duracion, distancia))
     }
 
     private func guardar() {

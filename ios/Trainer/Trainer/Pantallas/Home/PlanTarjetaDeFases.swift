@@ -24,9 +24,8 @@ struct PlanTarjetaDeFases: View {
     var body: some View {
         VStack(alignment: .leading, spacing: TokensEspaciado.e12) {
             VStack(alignment: .leading, spacing: TokensEspaciado.e4) {
-                EncabezadoDeSeccion(String(localized: "Las etapas de tu plan", comment: "Plan, título de las fases"))
-                Text(String(localized: "Cada etapa tiene un objetivo distinto. Tocá una para ver para qué sirve.",
-                            comment: "Plan, ayuda de las fases"))
+                EncabezadoDeSeccion(Textos.planPhasesTitle)
+                Text(Textos.planPhasesIntro)
                     .estilo(.labelCampo, color: Paleta.textoTerciario)
                     .fixedSize(horizontal: false, vertical: true)
             }
@@ -123,7 +122,7 @@ struct PlanTarjetaDeFases: View {
         .buttonStyle(EstiloPresionado())
         .accessibilityLabel(Text(verbatim: "\(fase.titulo), \(estado(de: fase).texto)"))
         .accessibilityAddTraits(esLaMostrada ? [.isButton, .isSelected] : .isButton)
-        .accessibilityHint(String(localized: "Explica para qué sirve esta etapa", comment: "VoiceOver, fases del plan"))
+        .accessibilityHint(Textos.planPhaseHint)
     }
 
     private func simboloDeEstado(_ fase: FaseDelPlan) -> String? {
@@ -134,12 +133,12 @@ struct PlanTarjetaDeFases: View {
 
     private func estado(de fase: FaseDelPlan) -> (texto: String, simbolo: String, tono: TonoDePildora) {
         if fase.enCurso {
-            return (String(localized: "Estás acá", comment: "Plan, fase en curso"), "location.fill", .acento)
+            return (Textos.planPhaseYouAreHere, "location.fill", .acento)
         }
         if fase.hecha {
-            return (String(localized: "Completada", comment: "Plan, fase hecha"), "checkmark", .neutro)
+            return (Textos.planPhaseCompleted, "checkmark", .neutro)
         }
-        return (String(localized: "Más adelante", comment: "Plan, fase futura"), "clock", .neutro)
+        return (Textos.planPhaseUpcoming, "clock", .neutro)
     }
 
     // MARK: - Explicación
@@ -203,15 +202,15 @@ private enum TipoDeFase {
         func empiezaCon(_ nombre: String) -> Bool {
             !nombre.isEmpty && minusculas.hasPrefix(nombre.lowercased())
         }
-        if empiezaCon(Textos.planFaseBase) || minusculas.contains("base") {
+        if empiezaCon(Textos.planPhaseBase) || minusculas.contains("base") {
             self = .base
-        } else if empiezaCon(Textos.planFaseConstruccion) || minusculas.contains("constru") || minusculas.contains("carga") {
+        } else if empiezaCon(Textos.planPhaseBuild) || minusculas.contains("constru") || minusculas.contains("carga") {
             self = .construccion
-        } else if empiezaCon(Textos.planFasePico) || minusculas.contains("pico") {
+        } else if empiezaCon(Textos.planPhasePeak) || minusculas.contains("pico") {
             self = .pico
-        } else if empiezaCon(Textos.planFaseAfinamiento) || minusculas.contains("afina") {
+        } else if empiezaCon(Textos.planPhaseTaper) || minusculas.contains("afina") {
             self = .afinamiento
-        } else if empiezaCon(Textos.planFaseCarrera) || minusculas.contains("carrera") {
+        } else if empiezaCon(Textos.planPhaseRace) || minusculas.contains("carrera") {
             self = .carrera
         } else {
             self = .otra
@@ -232,41 +231,32 @@ private enum TipoDeFase {
     var paraQueSirve: String {
         switch self {
         case .base:
-            return String(localized: "Es el cimiento: mucho trote suave para que el corazón, las piernas y los tendones se acostumbren a correr seguido sin lesionarse.",
-                          comment: "Plan, para qué sirve la fase base")
+            return Textos.planPhaseBaseBody
         case .construccion:
-            return String(localized: "Se suma carga de a poco: más kilómetros y algunas sesiones a ritmo para ganar resistencia y velocidad.",
-                          comment: "Plan, para qué sirve la fase de construcción")
+            return Textos.planPhaseBuildBody
         case .pico:
-            return String(localized: "Las semanas más exigentes: el fondo más largo y los entrenamientos más parecidos a la carrera.",
-                          comment: "Plan, para qué sirve la fase pico")
+            return Textos.planPhasePeakBody
         case .afinamiento:
-            return String(localized: "Baja el volumen para que llegues descansado sin perder la chispa: menos kilómetros y algo de ritmo.",
-                          comment: "Plan, para qué sirve la fase de afinamiento")
+            return Textos.planPhaseTaperBody
         case .carrera:
-            return String(localized: "La semana de la carrera: poco y suave, para llegar con las piernas frescas.",
-                          comment: "Plan, para qué sirve la fase de carrera")
+            return Textos.planPhaseRaceBody
         case .otra:
-            return String(localized: "Una etapa con un objetivo propio. Los días de cada semana ya la tienen en cuenta: seguilos y listo.",
-                          comment: "Plan, fase sin explicación específica")
+            return Textos.planPhaseGenericBody
         }
     }
 
     var consejo: String? {
         switch self {
         case .base:
-            return String(localized: "Si sentís que vas lento, está bien: es a propósito.", comment: "Plan, consejo fase base")
+            return Textos.planPhaseBaseTip
         case .construccion:
-            return String(localized: "Algunas semanas cuestan más; las más livianas están para que el cuerpo lo absorba.",
-                          comment: "Plan, consejo fase de construcción")
+            return Textos.planPhaseBuildTip
         case .pico:
-            return String(localized: "Dormí y comé bien: acá el cansancio es esperable.", comment: "Plan, consejo fase pico")
+            return Textos.planPhasePeakTip
         case .afinamiento:
-            return String(localized: "Si te sobra energía, es la idea. No agregues kilómetros de más.",
-                          comment: "Plan, consejo fase de afinamiento")
+            return Textos.planPhaseTaperTip
         case .carrera:
-            return String(localized: "No estrenes nada el día de la carrera: ni zapatillas ni geles.",
-                          comment: "Plan, consejo fase de carrera")
+            return Textos.planPhaseRaceTip
         case .otra:
             return nil
         }

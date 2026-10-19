@@ -459,7 +459,7 @@ struct FlujoContraElServidorTests {
 
         await flujo.entrar()
 
-        #expect(flujo.errorVisible == Textos.errorSinConexion)
+        #expect(flujo.errorVisible == Textos.errorOffline)
         #expect(!flujo.enCurso)
     }
 
@@ -572,7 +572,7 @@ struct FlujoContraElServidorTests {
         #expect(flujo.pantalla == .regAviso)
         #expect(flujo.ofrecerLogin)
         #expect(!flujo.ofrecerEmpezarDeNuevo)
-        #expect(flujo.errorVisible == Textos.legalAltaYaCreada)
+        #expect(flujo.errorVisible == Textos.legalSignupAlreadyCreated)
     }
 
     @Test("Si un intento se cortó y el permiso venció después, se ofrecen las dos salidas")
@@ -603,7 +603,7 @@ struct FlujoContraElServidorTests {
         await flujo.crearCuenta()
 
         #expect(flujo.pantalla == .regAviso)
-        #expect(flujo.errorVisible == Textos.legalCuentaExistente)
+        #expect(flujo.errorVisible == Textos.legalAccountExists)
         #expect(flujo.errorVisible != Textos.errorConflict, "no es el conflict de un guardado en curso")
         #expect(flujo.ofrecerLogin && flujo.laCuentaYaExiste)
         #expect(!flujo.ofrecerEmpezarDeNuevo)
@@ -624,7 +624,7 @@ struct FlujoContraElServidorTests {
         await flujo.crearCuenta()
 
         #expect(flujo.pantalla == .regAviso)
-        #expect(flujo.errorVisible == Textos.errorRespuestaRara)
+        #expect(flujo.errorVisible == Textos.errorUnexpectedResponse)
         #expect(flujo.ofrecerLogin, "la cuenta pudo crearse del otro lado")
 
         await flujo.crearCuenta()
@@ -673,7 +673,7 @@ struct FlujoContraElServidorTests {
 
         await flujo.guardarYSeguir()
         #expect(flujo.pantalla == .regSexo)
-        #expect(flujo.errorVisible == Textos.errorSinConexion)
+        #expect(flujo.errorVisible == Textos.errorOffline)
 
         await flujo.guardarYSeguir()
         #expect(flujo.pantalla == .regCuerpo)
@@ -804,7 +804,7 @@ struct FlujoContraElServidorTests {
         compuerta.abrir()
         await guardado.value
         #expect(flujo.pantalla == .regCuerpo)
-        #expect(flujo.errorVisible == Textos.errorSinConexion)
+        #expect(flujo.errorVisible == Textos.errorOffline)
     }
 
     // MARK: - Perfil a medio hacer
@@ -1106,14 +1106,14 @@ struct FlujoContraElServidorTests {
 
         await flujo.pedirCodigoDeClave()
         #expect(flujo.pantalla == .claveCorreo)
-        #expect(flujo.errorVisible == Textos.errorSinConexion)
+        #expect(flujo.errorVisible == Textos.errorOffline)
         await flujo.pedirCodigoDeClave()
         #expect(flujo.pantalla == .claveCodigo)
 
         flujo.recuperacionCodigo = "A7K2Q9"
         await flujo.verificarCodigoDeClave()
         #expect(flujo.pantalla == .claveCodigo)
-        #expect(flujo.errorVisible == Textos.errorSinConexion)
+        #expect(flujo.errorVisible == Textos.errorOffline)
         await flujo.verificarCodigoDeClave()
         #expect(flujo.pantalla == .claveNueva)
 
@@ -1121,7 +1121,7 @@ struct FlujoContraElServidorTests {
         flujo.claveNuevaRepetida = "Trainer2027x"
         await flujo.guardarClaveNueva()
         #expect(flujo.pantalla == .claveNueva)
-        #expect(flujo.errorVisible == Textos.errorSinConexion)
+        #expect(flujo.errorVisible == Textos.errorOffline)
         await flujo.guardarClaveNueva()
         #expect(flujo.pantalla == .claveLista)
     }
@@ -1164,7 +1164,7 @@ struct FlujoContraElServidorTests {
     @Test("Un code que la app no conoce se muestra con su nombre, no se traga")
     func codigoDesconocido() {
         #expect(TraductorDeErrores.texto(codigo: "algo_nuevo").contains("algo_nuevo"))
-        #expect(TraductorDeErrores.texto(Resultado<Int>.respuestaRara(http: 502)) == Textos.errorRespuestaRara)
+        #expect(TraductorDeErrores.texto(Resultado<Int>.respuestaRara(http: 502)) == Textos.errorUnexpectedResponse)
         #expect(TraductorDeErrores.texto(Resultado<Int>.rechazado(codigo: "session_revoked", http: 401))
                 == Textos.errorSessionRevoked)
     }
@@ -1226,7 +1226,7 @@ struct PlataformaTests {
         for idioma in ["es", "en"] {
             let ruta = try #require(Bundle.main.path(forResource: idioma, ofType: "lproj"))
             let paquete = try #require(Bundle(path: ruta))
-            for clave in ["reg.sexo.texto", "reg.sexo.sin_declarar.detalle"] {
+            for clave in ["signup.sex.body", "signup.sex.undisclosed.detail"] {
                 let texto = paquete.localizedString(forKey: clave, value: "∅", table: nil)
                 #expect(texto != "∅", "falta \(clave) en \(idioma)")
                 #expect(!texto.localizedCaseInsensitiveContains("promedio")

@@ -4,7 +4,7 @@ import TrainerCore
 /// Historial leído de GET /activities. El mapa de detalle se pide sólo al abrir
 /// la actividad: el listado del servidor nunca arrastra puntos GPS.
 ///
-/// Ronda 3: guía de la pantalla, resumen Semana | Mes | Todo, filtro por
+/// Ronda 3: resumen Semana | Mes | Todo, filtro por
 /// deporte, lista agrupada por mes y un estado vacío que lleva al entreno.
 /// El resumen y el filtro se calculan sobre lo ya cargado (sin pedir más red).
 struct HistorialDeActividadesView: View {
@@ -25,8 +25,6 @@ struct HistorialDeActividadesView: View {
     @State private var elegida: ActividadElegida?
     @State private var periodo: HistorialPeriodo = .semana
     @State private var deporteElegido: DeporteDeSesion?
-
-    private static let claveGuia = "guia_historial"
 
     struct ActividadElegida: Identifiable {
         let actividad: Actividad
@@ -62,10 +60,10 @@ struct HistorialDeActividadesView: View {
             } else {
                 NavigationStack {
                     lista(conEncabezado: false)
-                        .navigationTitle(Textos.historialTitulo)
+                        .navigationTitle(Textos.historyTitle)
                         .toolbar {
                             ToolbarItem(placement: .confirmationAction) {
-                                Button(Textos.historialCerrar) { cerrar() }
+                                Button(Textos.historyClose) { cerrar() }
                             }
                         }
                 }
@@ -89,8 +87,6 @@ struct HistorialDeActividadesView: View {
                 if conEncabezado {
                     encabezado
                 }
-
-                guia
 
                 if actividades.isEmpty, !cargando {
                     HistorialEstadoVacio(
@@ -120,31 +116,12 @@ struct HistorialDeActividadesView: View {
         .refreshable { await cargar(desdeElPrincipio: true) }
     }
 
-    // MARK: - Encabezado y guía
+    // MARK: - Encabezado
 
     private var encabezado: some View {
         EncabezadoDePestana(
-            String(localized: "Historial", comment: "Título de la pestaña del historial"),
-            sobretitulo: String(localized: "Todo lo que entrenaste", comment: "Sobretítulo del historial")
-        ) {
-            BotonDeAyuda(clave: Self.claveGuia)
-        }
-    }
-
-    private var guia: some View {
-        TarjetaDeGuia(
-            clave: Self.claveGuia,
-            titulo: String(localized: "Qué hay en tu historial", comment: "Guía del historial: título"),
-            puntos: [
-                PuntoDeGuia("chart.bar.fill", String(localized: "Arriba, tus números: distancia, salidas y tiempo. Elegí Semana, Mes o Todo.",
-                                                     comment: "Guía del historial")),
-                PuntoDeGuia("calendar", String(localized: "En el calendario cada cuadrito es un día: cuanto más fuerte el color, más te moviste. Tocá uno para ver qué hiciste.",
-                                               comment: "Guía del historial")),
-                PuntoDeGuia("line.3.horizontal.decrease.circle", String(localized: "Filtrá por deporte y tocá una salida para ver su mapa, sus parciales y sus pausas.",
-                                                                        comment: "Guía del historial")),
-                PuntoDeGuia("arrow.down", String(localized: "Deslizá hacia abajo para actualizar la lista.",
-                                                 comment: "Guía del historial"))
-            ]
+            Textos.historyTab,
+            sobretitulo: Textos.historySubtitle
         )
     }
 
@@ -153,8 +130,8 @@ struct HistorialDeActividadesView: View {
     @ViewBuilder
     private var salidas: some View {
         if !actividades.isEmpty {
-            EncabezadoDeSeccion(String(localized: "Tus salidas", comment: "Historial: título de la lista"),
-                                detalle: String(localized: "tocá una para ver el detalle", comment: "Historial: cómo abrir una salida"))
+            EncabezadoDeSeccion(Textos.historyYourWorkouts,
+                                detalle: Textos.historyTapOneForDetail)
             if deportesPresentes.count > 1 {
                 HistorialChipsDeDeporte(deportes: deportesPresentes, elegido: $deporteElegido)
             }
@@ -172,7 +149,7 @@ struct HistorialDeActividadesView: View {
             }
             // Vacío y sin cargar ya tiene sus propios botones (reintentar, empezar).
             if hayMas, !actividades.isEmpty || cargando {
-                BotonTonal(cargando ? Textos.historialCargando : Textos.historialMas) {
+                BotonTonal(cargando ? Textos.historyLoading : Textos.historyLoadMore) {
                     Task { await cargar() }
                 }
                 .disabled(cargando)
@@ -186,12 +163,11 @@ struct HistorialDeActividadesView: View {
             HistorialTarjetaDeActividad(actividad: actividad, unidades: unidades)
         }
         .buttonStyle(EstiloPresionado())
-        .accessibilityHint(String(localized: "Abre el mapa, los parciales y las pausas de esta salida",
-                                  comment: "Historial: qué pasa al tocar una salida"))
+        .accessibilityHint(Textos.historyRowHint)
         .contentShape(.contextMenuPreview, RoundedRectangle(cornerRadius: TokensRadio.card, style: .continuous))
         .contextMenu {
             Button { abrir(actividad) } label: {
-                Label(String(localized: "Ver detalle", comment: "Historial: menú de una salida"), systemImage: "map")
+                Label(Textos.historyViewDetail, systemImage: "map")
             }
         }
     }
@@ -368,7 +344,7 @@ struct DetalleDeActividadView: View {
             .navigationTitle(actividad.sport.nombreVisible)
             .toolbar {
                 ToolbarItem(placement: .confirmationAction) {
-                    Button(Textos.historialCerrar) { cerrar() }
+                    Button(Textos.historyClose) { cerrar() }
                 }
             }
         }
@@ -399,7 +375,7 @@ struct DetalleDeActividadView: View {
                     .estilo(.labelCampo, color: Paleta.textoSecundario)
             }
             Spacer(minLength: TokensEspaciado.e8)
-            PildoraDeEstado(actividad.device == .reloj ? String(localized: "Reloj", comment: "Dispositivo de origen") : "iPhone",
+            PildoraDeEstado(actividad.device == .reloj ? Textos.historySourceWatch : "iPhone",
                             simbolo: actividad.device == .reloj ? "applewatch" : "iphone")
         }
         .padding(.top, TokensEspaciado.e8)
@@ -423,7 +399,7 @@ struct DetalleDeActividadView: View {
         } else if cargando {
             HStack(spacing: TokensEspaciado.e8) {
                 ProgressView().tint(Paleta.acento)
-                Text(Textos.historialCargando)
+                Text(Textos.historyLoading)
                     .estilo(.cuerpoSecundario, color: Paleta.textoSecundario)
             }
             .frame(maxWidth: .infinity)
@@ -435,7 +411,7 @@ struct DetalleDeActividadView: View {
                     .font(.system(size: TokensTipografia.valorFilaTamano))
                     .foregroundStyle(Paleta.textoTerciario)
                     .accessibilityHidden(true)
-                Text(Textos.historialSinRecorrido)
+                Text(Textos.historyNoRoute)
                     .estilo(.cuerpoSecundario, color: Paleta.textoTerciario)
             }
             .frame(maxWidth: .infinity)

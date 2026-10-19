@@ -40,21 +40,21 @@ struct RegAvisoView: View {
         return PantallaPaso(titulo: aviso.title, texto: aviso.summary) {
             VStack(alignment: .leading, spacing: TokensEspaciado.e13) {
                 if legales.reviewed == false {
-                    AvisoSuave(Textos.legalSinRevisar)
+                    AvisoSuave(Textos.legalNotReviewed)
                 }
                 SeccionesLegales(secciones: aviso.sections, enTarjetas: true)
-                BotonTexto(Textos.legalVerTerminos) { flujo.ir(a: .regTerminos) }
+                BotonTexto(Textos.legalViewTerms) { flujo.ir(a: .regTerminos) }
             }
         } pie: {
             if flujo.ofrecerEmpezarDeNuevo {
                 // El permiso venció sin usarse: hace falta otro código.
-                BotonTexto(Textos.legalEmpezarDeNuevo) { flujo.empezarElAltaDeNuevo() }
+                BotonTexto(Textos.legalStartOver) { flujo.empezarElAltaDeNuevo() }
             }
             if flujo.ofrecerLogin {
                 // 🛑 Volver al correo sería una trampa: si la cuenta se creó y la
                 // respuesta no llegó, `POST /auth/register` contesta 202 igual y el
                 // código no llega nunca. La salida es entrar.
-                BotonTexto(flujo.laCuentaYaExiste ? Textos.legalEntrarConEseCorreo : Textos.legalIrAlLogin) {
+                BotonTexto(flujo.laCuentaYaExiste ? Textos.legalSignInWithEmail : Textos.legalGoToLogin) {
                     flujo.irAlLoginDesdeElAlta()
                 }
             }
@@ -62,10 +62,10 @@ struct RegAvisoView: View {
             Casilla(texto: aviso.acceptance, marcada: $flujo.aceptoElAviso)
                 .disabled(flujo.enCurso)
 
-            BotonPrimario(Textos.legalCrearCuenta,
+            BotonPrimario(Textos.legalCreateAccount,
                           habilitado: flujo.aceptoElAviso && !flujo.enCurso,
                           cargando: flujo.enCurso,
-                          motivoDeshabilitado: Textos.legalFaltaAceptar) {
+                          motivoDeshabilitado: Textos.legalMustAccept) {
                 Task { await flujo.crearCuenta() }
             }
         }
@@ -74,8 +74,8 @@ struct RegAvisoView: View {
     /// Sin el texto no se puede aceptar nada, y se dice: no una pantalla vacía con
     /// un botón que igual funciona.
     private var sinTexto: some View {
-        PantallaPaso(titulo: Textos.legalTitulo,
-                     texto: flujo.falloLegales ? Textos.legalSinTexto : Textos.legalCargando) {
+        PantallaPaso(titulo: Textos.legalTitle,
+                     texto: flujo.falloLegales ? Textos.legalNoText : Textos.legalLoading) {
             if flujo.cargandoLegales {
                 ProgressView()
                     .tint(Paleta.acento)
@@ -83,7 +83,7 @@ struct RegAvisoView: View {
             }
         } pie: {
             if flujo.falloLegales {
-                BotonPrimario(Textos.legalReintentar, habilitado: !flujo.cargandoLegales) {
+                BotonPrimario(Textos.legalRetry, habilitado: !flujo.cargandoLegales) {
                     Task { await flujo.cargarLegales() }
                 }
             }
@@ -109,7 +109,7 @@ struct RegTerminosView: View {
                 EmptyView()
             })
         } else {
-            PantallaPaso(titulo: Textos.legalTitulo, texto: Textos.legalSinTexto, pie: {
+            PantallaPaso(titulo: Textos.legalTitle, texto: Textos.legalNoText, pie: {
                 EmptyView()
             })
         }
