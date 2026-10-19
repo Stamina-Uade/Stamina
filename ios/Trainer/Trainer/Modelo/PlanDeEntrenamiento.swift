@@ -221,9 +221,17 @@ public struct BloqueDelPlan: Sendable {
     public let totalDeSemanas: Int
     public let fases: [FaseDelPlan]
     public let semanas: [SemanaDelPlan]
+    /// El día de la carrera, si el plan tiene fecha (`event_date_ms`). Es lo que
+    /// el inicio usa para "23 días para tu media maratón".
+    public let fechaDelEventoMs: Int64?
+    /// La distancia del objetivo, si es una carrera con distancia fija.
+    public let distanciaDelEventoMetros: Int?
 
     public init(subtitulo: String, evento: String, cuando: String, semanasQueFaltan: Int,
-                totalDeSemanas: Int, fases: [FaseDelPlan], semanas: [SemanaDelPlan]) {
+                totalDeSemanas: Int, fases: [FaseDelPlan], semanas: [SemanaDelPlan],
+                fechaDelEventoMs: Int64? = nil, distanciaDelEventoMetros: Int? = nil) {
+        self.fechaDelEventoMs = fechaDelEventoMs
+        self.distanciaDelEventoMetros = distanciaDelEventoMetros
         self.subtitulo = subtitulo
         self.evento = evento
         self.cuando = cuando
@@ -231,6 +239,17 @@ public struct BloqueDelPlan: Sendable {
         self.totalDeSemanas = totalDeSemanas
         self.fases = fases
         self.semanas = semanas
+    }
+}
+
+extension BloqueDelPlan {
+    /// Días enteros que faltan para la carrera. `nil` sin fecha o con la fecha pasada.
+    public func diasParaLaCarrera(ahora: Date = Date(), calendario: Calendar = .current) -> Int? {
+        guard let ms = fechaDelEventoMs else { return nil }
+        let hoy = calendario.startOfDay(for: ahora)
+        let carrera = calendario.startOfDay(for: Date(timeIntervalSince1970: TimeInterval(ms) / 1000))
+        guard let dias = calendario.dateComponents([.day], from: hoy, to: carrera).day, dias >= 0 else { return nil }
+        return dias
     }
 }
 
@@ -439,9 +458,12 @@ public struct FilaDeAgenda: Identifiable, Sendable {
 /// Las siete pestañas de `HomeB.dc.html`. Sólo cinco están en la barra: gimnasio
 /// se abre desde la agenda y ajustes desde el perfil.
 public enum PestanaHome: String, CaseIterable, Sendable {
-    case inicio, plan, entreno, nutricion, perfil, ajustes, gimnasio
+    // Rediseño 2026-10: Nutrición sale de la app y su lugar en la barra lo toma
+    // Historial. Los datos de nutrición del servidor se siguen leyendo (EstadoHome)
+    // pero ninguna pantalla los muestra.
+    case inicio, plan, entreno, historial, perfil, ajustes, gimnasio
 
-    public static let enLaBarra: [PestanaHome] = [.inicio, .plan, .nutricion, .perfil]
+    public static let enLaBarra: [PestanaHome] = [.inicio, .plan, .historial, .perfil]
 }
 
 // MARK: - Lo que el Home muestra, con su estado

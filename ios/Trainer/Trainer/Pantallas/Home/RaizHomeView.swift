@@ -52,7 +52,9 @@ struct RaizHomeView: View {
                         items: [
                             ItemDePestana(id: PestanaHome.inicio.rawValue, titulo: Textos.homeTabInicio, simbolo: "house"),
                             ItemDePestana(id: PestanaHome.plan.rawValue, titulo: Textos.homeTabPlan, simbolo: "calendar"),
-                            ItemDePestana(id: PestanaHome.nutricion.rawValue, titulo: Textos.homeTabNutricion, simbolo: "fork.knife"),
+                            ItemDePestana(id: PestanaHome.historial.rawValue,
+                                         titulo: String(localized: "Historial", comment: "Pestaña del historial de actividades"),
+                                         simbolo: "clock.arrow.circlepath"),
                             ItemDePestana(id: PestanaHome.perfil.rawValue, titulo: Textos.homeTabPerfil, simbolo: "person"),
                         ],
                         elegida: estado.pestana == .entreno ? estado.pestanaPrevia.rawValue : estado.pestana.rawValue,
@@ -87,11 +89,6 @@ struct RaizHomeView: View {
         .background(Paleta.fondo)
         .environmentObject(estado)
         .animation(.spring(response: 0.35, dampingFraction: 0.85), value: estado.pestana)
-        .sheet(item: $estado.modal) { modal in
-            switch modal {
-            case .registrarComida: RegistrarComidaView().environmentObject(estado)
-            }
-        }
         .onAppear {
             DispatchQueue.main.asyncAfter(deadline: .now() + 0.6) {
                 GestorDeMapa.shared.precalentar()
@@ -145,7 +142,7 @@ struct RaizHomeView: View {
         switch actual {
         case .inicio:    InicioView()
         case .plan:      PlanView()
-        case .nutricion: NutricionView()
+        case .historial: HistorialDeActividadesView(servicio: estado.repositorio.servicioDeActividades(), esPestana: true)
         case .perfil:    PerfilView()
         case .ajustes:   AjustesView()
         case .gimnasio:  GimnasioView()

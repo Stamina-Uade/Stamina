@@ -379,7 +379,7 @@ final class FlujoDeEntradaUITests: XCTestCase {
             ("inicio", "Tu día"),
             ("plan", "Media maratón de Buenos Aires"),
             ("entreno", "Fondo largo"),
-            ("nutricion", "Comidas de hoy"),
+            ("historial", "Historial"),
             ("perfil", "Iván Benítez"),
             ("ajustes", "Unidades"),
             ("gimnasio", "Press plano con barra"),

@@ -24,14 +24,6 @@ final class EstadoHome: ObservableObject {
     /// A dónde vuelve `gimnasio` y `ajustes`, que no están en la barra.
     @Published private(set) var pestanaPrevia: PestanaHome = .inicio
 
-    /// El modal abierto, si hay alguno. Uno por vez, como en el diseño.
-    @Published var modal: ModalDelHome?
-
-    enum ModalDelHome: Identifiable {
-        case registrarComida
-        var id: Int { 0 }
-    }
-
     // MARK: - Plan
 
     @Published var semanaElegida: Int = 1
@@ -549,6 +541,27 @@ final class EstadoHome: ObservableObject {
 
     var haySesionEnCurso: Bool { estadoDeLaSesion != .detenida }
 
+    // MARK: - El objetivo de la próxima carrera
+
+    /// El plan ya no tiene días de hoy en adelante (o no hay plan): toca elegir un
+    /// objetivo nuevo. Lo usan Plan (muestra el selector de metas) e Inicio (muestra
+    /// "Ingresá tu nuevo objetivo"). Antes vivía sólo en PlanView.
+    var planVencido: Bool {
+        let df = DateFormatter()
+        df.calendar = Calendar(identifier: .gregorian)
+        df.locale = Locale(identifier: "en_US_POSIX")
+        df.dateFormat = "yyyy-MM-dd"
+        let hoyIso = df.string(from: Date())
+        guard let cronograma = contenido.plan.valor?.cronograma, !cronograma.isEmpty else {
+            return true
+        }
+        return !cronograma.contains { $0.fechaIso >= hoyIso }
+    }
+
+    /// Días enteros que faltan para la carrera del plan principal. `nil` si el plan
+    /// no tiene fecha o la fecha ya pasó.
+    var diasParaLaCarrera: Int? { bloque?.diasParaLaCarrera() }
+
     /// La agenda del día. El **orden, los horarios y los números** salen de la
     /// sesión que manda el servidor; los títulos son de la interfaz y por eso sí
     /// están localizados. Sin horario no hay nada que ordenar, y lo que el servidor
@@ -562,7 +575,7 @@ final class EstadoHome: ObservableObject {
                 filas.append(FilaDeAgenda(minutoDelDia: minuto - 180,
                                           titulo: Textos.agendaSnack,
                                           detalle: Textos.agendaSnackDetalle(a.carbohidratosAntesG),
-                                          clase: .simple, destino: .nutricion))
+                                          clase: .simple, destino: nil))
                 filas.append(FilaDeAgenda(minutoDelDia: minuto - anticipacionMinutos,
                                           titulo: Textos.agendaPreparar,
                                           detalle: Textos.agendaPrepararDetalle(Formato.litros(a.mililitrosTotales),
@@ -572,7 +585,7 @@ final class EstadoHome: ObservableObject {
                                           titulo: Textos.agendaRecuperacion,
                                           detalle: Textos.agendaRecuperacionDetalle(a.proteinaDespuesG,
                                                                                     a.carbohidratosDespuesG),
-                                          clase: .simple, destino: .nutricion))
+                                          clase: .simple, destino: nil))
             }
         }
         if contenido.rutina.valor?.planificada == true, !rutina.isEmpty {
@@ -639,7 +652,6 @@ final class EstadoHome: ObservableObject {
     func agregar(_ comida: Comida) {
         comidas.append(comida)
         comidas.sort { $0.minutoDelDia < $1.minutoDelDia }
-        modal = nil
         guard let cola = colaDeComidas else { return }
         cola.guardar(id: comida.id, Self.entrada(de: comida))
         Task { await cola.subir() }

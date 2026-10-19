@@ -5,6 +5,10 @@ import TrainerCore
 /// la actividad: el listado del servidor nunca arrastra puntos GPS.
 struct HistorialDeActividadesView: View {
     let servicio: (any ServicioDeActividades)?
+    /// `true` cuando es una pestaña de la barra (rediseño 2026-10): lleva el
+    /// encabezado grande y no tiene botón de cerrar. `false` cuando se abre como
+    /// hoja desde otra pantalla.
+    var esPestana: Bool = false
     @Environment(\.dismiss) private var cerrar
     @State private var actividades: [Actividad] = []
     @State private var cursor: String?
@@ -19,40 +23,22 @@ struct HistorialDeActividadesView: View {
     }
 
     var body: some View {
-        NavigationStack {
-            ScrollView {
-                VStack(spacing: TokensEspaciado.e14) {
-                    CalendarioDeHitosView()
-
-                    LazyVStack(spacing: TokensEspaciado.e10) {
-                        if actividades.isEmpty, !cargando {
-                            HistorialAvisoVacio(fallo: fallo)
-                        }
-                        ForEach(actividades, id: \.id) { actividad in
-                            Button { elegida = ActividadElegida(actividad: actividad) } label: {
-                                HistorialTarjetaDeActividad(actividad: actividad)
+        Group {
+            if esPestana {
+                lista(conEncabezado: true)
+            } else {
+                NavigationStack {
+                    lista(conEncabezado: false)
+                        .navigationTitle(Textos.historialTitulo)
+                        .toolbar {
+                            ToolbarItem(placement: .confirmationAction) {
+                                Button(Textos.historialCerrar) { cerrar() }
                             }
-                            .buttonStyle(EstiloPresionado())
                         }
-                        if hayMas {
-                            BotonTonal(cargando ? Textos.historialCargando : Textos.historialMas) {
-                                Task { await cargar() }
-                            }
-                            .disabled(cargando)
-                            .padding(.vertical, TokensEspaciado.e8)
-                        }
-                    }
-                }
-                .padding(TokensEspaciado.e16)
-            }
-            .background(Paleta.fondo)
-            .navigationTitle(Textos.historialTitulo)
-            .toolbar {
-                ToolbarItem(placement: .confirmationAction) {
-                    Button(Textos.historialCerrar) { cerrar() }
                 }
             }
         }
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
         .task { if actividades.isEmpty { await cargar() } }
         .sheet(item: $elegida) { seleccion in
             DetalleDeActividadView(
@@ -61,6 +47,43 @@ struct HistorialDeActividadesView: View {
                 servicio: servicio
             )
         }
+    }
+
+    private func lista(conEncabezado: Bool) -> some View {
+        ScrollView {
+            VStack(alignment: .leading, spacing: TokensEspaciado.e14) {
+                if conEncabezado {
+                    EncabezadoDePestana(
+                        String(localized: "Historial", comment: "Título de la pestaña del historial"),
+                        sobretitulo: String(localized: "Todo lo que entrenaste", comment: "Sobretítulo del historial"))
+                }
+
+                CalendarioDeHitosView()
+
+                LazyVStack(spacing: TokensEspaciado.e10) {
+                    if actividades.isEmpty, !cargando {
+                        HistorialAvisoVacio(fallo: fallo)
+                    }
+                    ForEach(actividades, id: \.id) { actividad in
+                        Button { elegida = ActividadElegida(actividad: actividad) } label: {
+                            HistorialTarjetaDeActividad(actividad: actividad)
+                        }
+                        .buttonStyle(EstiloPresionado())
+                    }
+                    if hayMas {
+                        BotonTonal(cargando ? Textos.historialCargando : Textos.historialMas) {
+                            Task { await cargar() }
+                        }
+                        .disabled(cargando)
+                        .padding(.vertical, TokensEspaciado.e8)
+                    }
+                }
+            }
+            .padding(.horizontal, TokensEspaciado.e16)
+            .padding(.top, conEncabezado ? TokensEspaciado.e8 : TokensEspaciado.e16)
+            .padding(.bottom, TokensEspaciado.e36)
+        }
+        .background(Paleta.fondo)
     }
 
     private func cargar() async {

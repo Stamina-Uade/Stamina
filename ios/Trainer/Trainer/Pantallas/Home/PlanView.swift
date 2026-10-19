@@ -25,16 +25,7 @@ struct PlanView: View {
         return bloque.semanas.first { $0.numero == estado.semanaElegida } ?? bloque.semanas.first
     }
 
-    private var planVencido: Bool {
-        let df = DateFormatter()
-        df.dateFormat = "yyyy-MM-dd"
-        let hoyIso = df.string(from: Date())
-        guard let cronograma = estado.contenido.plan.valor?.cronograma, !cronograma.isEmpty else {
-            return true
-        }
-        let diasFuturosOHoy = cronograma.filter { $0.fechaIso >= hoyIso }
-        return diasFuturosOHoy.isEmpty
-    }
+    private var planVencido: Bool { estado.planVencido }
 
     var body: some View {
         ScrollView {
@@ -160,7 +151,15 @@ struct PlanView: View {
                 }
 
                 VStack(alignment: .leading, spacing: TokensEspaciado.e4) {
-                    if bloque.semanasQueFaltan > 0 {
+                    if let dias = bloque.diasParaLaCarrera() {
+                        MetricaHeroe("\(dias)",
+                                     unidad: dias == 1
+                                        ? String(localized: "día", comment: "Unidad de la cuenta regresiva")
+                                        : String(localized: "días", comment: "Unidad de la cuenta regresiva"),
+                                     etiquetaAccesible: String(localized: "Faltan", comment: "VoiceOver"))
+                        Text(String(localized: "para tu carrera", comment: "Debajo de la cuenta regresiva del plan"))
+                            .estilo(.cuerpoSecundario, color: Paleta.textoSecundario)
+                    } else if bloque.semanasQueFaltan > 0 {
                         MetricaHeroe("\(bloque.semanasQueFaltan)",
                                      unidad: String(localized: "semanas", comment: "Unidad de la cuenta regresiva de la carrera"),
                                      etiquetaAccesible: Textos.planFaltanSemanas(bloque.semanasQueFaltan))

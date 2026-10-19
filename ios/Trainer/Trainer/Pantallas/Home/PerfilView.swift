@@ -8,6 +8,8 @@ struct PerfilView: View {
     @EnvironmentObject private var flujo: FlujoEntrada
     @State private var metasActivas: [ObjetivoDeUsuario] = []
     @State private var cargandoMetas = true
+    @State private var mostrarApto = false
+    @ObservedObject private var apto = AlmacenDeAptoFisico.compartido
 
     private var inicioDeHoyMs: Int64 {
         Int64(Calendar.current.startOfDay(for: Date()).timeIntervalSince1970 * 1000)
@@ -19,7 +21,7 @@ struct PerfilView: View {
                 encabezado
                 tarjetaDeIdentidad
                 datosDelCuerpo
-                seccionHitos
+                seccionApto
                 seccionMetas
                 seccionDias
                 seccionAjustes
@@ -37,6 +39,7 @@ struct PerfilView: View {
             }
             cargandoMetas = false
         }
+        .sheet(isPresented: $mostrarApto) { AptoFisicoView() }
     }
 
     // MARK: - Encabezado
@@ -115,10 +118,53 @@ struct PerfilView: View {
         }
     }
 
-    // MARK: - Hitos de Actividad (GitHub Heatmap)
+    // MARK: - Apto físico
+    //
+    // El calendario de actividad que estaba acá se mudó a la pestaña Historial.
 
-    private var seccionHitos: some View {
-        CalendarioDeHitosView()
+    private var seccionApto: some View {
+        Button { mostrarApto = true } label: {
+            HStack(spacing: TokensEspaciado.e12) {
+                ZStack {
+                    Circle().fill(Paleta.acentoChipActivo)
+                    Image(systemName: "cross.case.fill")
+                        .font(.system(size: TokensTipografia.tituloCardTamano, weight: .bold))
+                        .foregroundStyle(Paleta.acento)
+                }
+                .frame(width: TokensEspaciado.e40, height: TokensEspaciado.e40)
+                .accessibilityHidden(true)
+
+                VStack(alignment: .leading, spacing: TokensEspaciado.e3) {
+                    Text(String(localized: "Apto físico", comment: "Fila del perfil"))
+                        .estilo(.opcionTitulo)
+                    Text(textoDelApto)
+                        .estilo(.notaLegal, color: Paleta.textoSecundario)
+                }
+                Spacer(minLength: 0)
+                Image(systemName: "chevron.right")
+                    .font(.system(size: TokensTipografia.notaLegalTamano, weight: .semibold))
+                    .foregroundStyle(Paleta.textoTerciario)
+                    .accessibilityHidden(true)
+            }
+            .padding(TokensEspaciado.e14)
+            .frame(maxWidth: .infinity, alignment: .leading)
+            .tarjeta()
+            .contentShape(Rectangle())
+        }
+        .buttonStyle(EstiloPresionado())
+        .accessibilityElement(children: .combine)
+    }
+
+    private var textoDelApto: String {
+        switch apto.estado {
+        case .sinCargar:
+            return String(localized: "Sin cargar · subí foto o PDF", comment: "Estado del apto en el perfil")
+        case .vigente(let dias), .porVencer(let dias):
+            let fecha = apto.apto?.vence.formatted(date: .abbreviated, time: .omitted) ?? ""
+            return String(localized: "Vence el \(fecha) · faltan \(dias) días", comment: "Estado del apto en el perfil")
+        case .vencido:
+            return String(localized: "Vencido · renovalo", comment: "Estado del apto en el perfil")
+        }
     }
 
     // MARK: - Metas y Objetivos

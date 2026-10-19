@@ -61,7 +61,9 @@ enum TraduccionDelServidor {
                     dias: dias.filter { $0.weekNumber == semana.number }
                         .map { dia($0, hoyMs: hoyMs, zona: zona, enTriatlon: esTriatlon) },
                     enCurso: Int(semana.number) == semanaDeHoy)
-            })
+            },
+            fechaDelEventoMs: plan.eventDateMs,
+            distanciaDelEventoMetros: esTriatlon ? nil : distanciaEnMetros(de: plan.goal))
 
         let diasDeEstaSemana = semanaDeHoy.map { numero in dias.filter { Int($0.weekNumber) == numero } } ?? []
         let racha = plan.streak.map { s in
@@ -307,6 +309,18 @@ enum TraduccionDelServidor {
         case .trailMontana: return Textos.regObjetivoTrailMontana
         case .triatlonOlimpico: return Textos.regObjetivoTriatlonOlimpico
         case .volverSinLesiones: return Textos.regObjetivoVolverSinLesiones
+        }
+    }
+
+    /// La distancia de la carrera, para la píldora "Dom 8 nov · 21 km" del inicio.
+    /// Sin distancia fija (trail, volver sin lesiones) no se inventa una.
+    static func distanciaEnMetros(de objetivo: Objetivo) -> Int? {
+        switch objetivo {
+        case .c5k: return 5_000
+        case .c10k: return 10_000
+        case .mediaMaraton: return 21_097
+        case .maraton: return 42_195
+        case .trailMontana, .triatlonOlimpico, .volverSinLesiones: return nil
         }
     }
 

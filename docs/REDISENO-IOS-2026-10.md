@@ -59,3 +59,22 @@ pulso en vivo en el teléfono) **no se inventó**.
 - Los textos nuevos usan `String(localized:)`: falta pasarlos a `Localizable.xcstrings` y correr `npm run generar:textos`.
 - Cambios de comportamiento a confirmar: en Entreno se puede terminar sin pausar (pide confirmación); el botón
   Historial de Plan pasó al encabezado.
+
+## Segunda ronda (19-10, tarde) — pedido de Ivan
+
+- **Barra de abajo:** Inicio · Plan · (rayo: Entreno) · Historial · Perfil. **Nutrición salió de la app**
+  (`NutricionView` y `RegistrarComidaView` borradas). Los datos de nutrición del servidor se siguen leyendo en
+  `EstadoHome`, pero ninguna pantalla los muestra; se pueden sacar del todo cuando se decida.
+- **Historial es una pestaña** (`HistorialDeActividadesView(esPestana: true)`) y tiene el calendario de actividad,
+  que salió de Inicio y de Perfil.
+- **Inicio como el mockup:** Stamina · racha · avatar, fecha, "Buen día, <nombre>", píldora del apto, tarjeta con
+  foto de la próxima carrera ("23 días para tu media maratón", píldora "Dom 8 nov · 21 km"), tarjeta HOY con hora
+  sugerida, zona, clima del servidor (si lo manda) y "Preparar salida", píldoras de hidratación.
+  **Siempre hay un objetivo a la vista:** sin plan o con el plan terminado aparece "Ingresá tu nuevo objetivo",
+  que lleva al selector de metas de Plan.
+- **Apto físico** (pantalla 1 del mockup): archivo (PDF o foto), vencimiento, declaración jurada, aviso 30 días
+  antes. Se abre desde la píldora del inicio y desde Perfil. 🛑 Se guarda **sólo en el teléfono**, por cuenta y
+  con protección de archivo: el servidor no tiene dónde guardarlo. Subirlo es una decisión de producto/legal.
+- Plan cuenta **días** a la carrera cuando el servidor manda `event_date_ms`.
+- **El reloj no se tocó en esta ronda.** De la primera quedaron dos arreglos invisibles de sincronización
+  (la salida a medias no cambia de dueño al cerrar sesión, y el reloj se entera del cierre de sesión).
