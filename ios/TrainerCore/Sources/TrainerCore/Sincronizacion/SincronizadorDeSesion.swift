@@ -98,16 +98,21 @@ public struct SesionCompartida: Codable, Equatable, Sendable {
     public let duracionMinutos: Int
     public let minutoDelDia: Int?
     public let geles: Int?
+    public let aguaMl: Int?
+    public let sales: Int?
     public let esDescanso: Bool?
     public let esFuerza: Bool?
 
     public init(tipo: String, distanciaMetros: Int?, duracionMinutos: Int,
-                minutoDelDia: Int?, geles: Int?, esDescanso: Bool? = false, esFuerza: Bool? = false) {
+                minutoDelDia: Int?, geles: Int?, aguaMl: Int? = nil, sales: Int? = nil,
+                esDescanso: Bool? = false, esFuerza: Bool? = false) {
         self.tipo = tipo
         self.distanciaMetros = distanciaMetros
         self.duracionMinutos = duracionMinutos
         self.minutoDelDia = minutoDelDia
         self.geles = geles
+        self.aguaMl = aguaMl
+        self.sales = sales
         self.esDescanso = esDescanso
         self.esFuerza = esFuerza
     }
@@ -121,11 +126,14 @@ public struct DiaPlanificadoCompartido: Codable, Equatable, Sendable {
     public let duracionMinutos: Int
     public let minutoDelDia: Int?
     public let geles: Int?
+    public let aguaMl: Int?
+    public let sales: Int?
     public let esDescanso: Bool?
     public let esFuerza: Bool?
 
     public init(fechaIso: String, diaDeLaSemana: Int, tipo: String, distanciaMetros: Int?,
-                duracionMinutos: Int, minutoDelDia: Int?, geles: Int?, esDescanso: Bool? = false, esFuerza: Bool? = false) {
+                duracionMinutos: Int, minutoDelDia: Int?, geles: Int?, aguaMl: Int? = nil, sales: Int? = nil,
+                esDescanso: Bool? = false, esFuerza: Bool? = false) {
         self.fechaIso = fechaIso
         self.diaDeLaSemana = diaDeLaSemana
         self.tipo = tipo
@@ -133,6 +141,8 @@ public struct DiaPlanificadoCompartido: Codable, Equatable, Sendable {
         self.duracionMinutos = duracionMinutos
         self.minutoDelDia = minutoDelDia
         self.geles = geles
+        self.aguaMl = aguaMl
+        self.sales = sales
         self.esDescanso = esDescanso
         self.esFuerza = esFuerza
     }
@@ -140,6 +150,7 @@ public struct DiaPlanificadoCompartido: Codable, Equatable, Sendable {
 
 public enum ComandoDeSalida: String, Sendable {
     case pausar, reanudar, terminar, descartar
+    case musicaAlternar, musicaSiguiente, musicaAnterior, musicaRebobinar
 }
 
 /// Una salida terminada en el reloj viaja completa al teléfono como archivo

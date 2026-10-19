@@ -54,55 +54,31 @@ struct RaizReloj: View {
             .background(PaletaReloj.fondo)
             .environmentObject(estado)
             .overlay {
-                if estado.preguntaAvituallamientoActiva {
-                    PreguntaAvituallamientoView()
-                        .environmentObject(estado)
-                        .zIndex(25)
-                }
                 if let aviso = estado.avisoDeAvituallamiento {
-                    Button {
+                    AlertaEntrenamientoCompletaView(aviso: aviso) {
                         estado.cerrarAvisoDeAvituallamiento()
-                    } label: {
-                        VStack(spacing: 12) {
-                            Image(systemName: aviso == .agua ? "drop" : aviso == .gel ? "bolt" : "circle.hexagongrid")
-                                .font(.system(size: 34, weight: .bold))
-                            Text(textoDelAviso(aviso))
-                                .font(.system(size: 22, weight: .bold, design: .rounded))
-                                .multilineTextAlignment(.center)
-                            Text(TextosReloj.avituallamientoAvisoCerrar)
-                                .font(.system(size: 12))
-                        }
-                        .foregroundStyle(PaletaReloj.acento)
-                        .frame(maxWidth: .infinity, maxHeight: .infinity)
-                        .background(PaletaReloj.fondo.ignoresSafeArea())
-                        .contentShape(Rectangle())
                     }
-                    .buttonStyle(.plain)
                     .zIndex(30)
                 }
             }
-    }
-
-    private func textoDelAviso(_ aviso: TipoDeAvisoDeAvituallamiento) -> String {
-        switch aviso {
-        case .agua: TextosReloj.avituallamientoAvisoAgua
-        case .gel: TextosReloj.avituallamientoAvisoGel
-        case .sales: TextosReloj.avituallamientoAvisoSales
-        }
     }
 
     @ViewBuilder
     private var contenido: some View {
         if !estado.estaAutenticado && !estado.corriendo {
             SinTelefonoView()
+        } else if estado.cuentaRegresivaActiva {
+            VistaCuentaRegresiva {
+                estado.completarCuentaRegresiva()
+            }
+            .ignoresSafeArea()
         } else {
             switch estado.pantalla {
             case .abrir:        PortadaRelojView()
-            case .metricas:     MetricasView()
+            case .metricas, .controles, .musica, .mapa, .parciales:
+                                CarruselEntrenamientoRelojView()
             case .rutina:       RutinaView()
-            case .controles:    ControlesView()
             case .avisos:       AvisosView()
-            case .mapa:         MapaView()
             case .ajustes:      AjustesDeSesionView()
             case .confirmarFinalizacion: ConfirmarFinalizacionView()
             case .sinMovimiento: SinMovimientoView()
@@ -110,8 +86,6 @@ struct RaizReloj: View {
             case .gimnasio:     GimnasioRelojView()
             case .resumenGimnasio: ResumenGimnasioRelojView()
             case .sinTelefono:  SinTelefonoView()
-            case .musica:       MusicaView()
-            case .parciales:    ParcialesView()
             }
         }
     }
@@ -170,6 +144,12 @@ struct AbrirView: View {
                            nombre: "Triatlón\ncompleto", icono: "figure.mixed.cardio")
     ]
 
+    /// Para el MVP únicamente están disponibles carrera exterior y carrera interior.
+    /// Los demás deportes permanecen definidos arriba para reincorporarlos a futuro.
+    private var deportesVisibles: [OpcionDeporteReloj] {
+        deportes.filter { $0.id == "run-ext" || $0.id == "run-int" }
+    }
+
     var body: some View {
         ScrollView(.vertical) {
             VStack(alignment: .leading, spacing: PaletaReloj.puntosDeDiseno(TokensEspaciado.e8)) {
@@ -195,7 +175,7 @@ struct AbrirView: View {
                     .tracking(0.6)
                     .padding(.top, TokensEspaciado.e4)
 
-                ForEach(deportes) { opcion in
+                ForEach(deportesVisibles) { opcion in
                     tarjeta(opcion)
                 }
             }
@@ -454,7 +434,7 @@ struct AjustesInicialesView: View {
                     Spacer()
                     Toggle("", isOn: $estado.pausaAutoCarrera)
                         .labelsHidden()
-                        .tint(.green)
+                        .tint(PaletaReloj.acento)
                 }
                 .padding(.horizontal, 14)
                 .padding(.vertical, 10)
@@ -462,29 +442,21 @@ struct AjustesInicialesView: View {
                 .background(PaletaReloj.superficie)
                 .clipShape(RoundedRectangle(cornerRadius: 16, style: .continuous))
 
-                HStack {
-                    Text("Bicicleta")
-                        .font(.system(size: 16, weight: .bold, design: .rounded))
-                        .foregroundStyle(.white)
-                    Spacer()
-                    Toggle("", isOn: $estado.pausaAutoBici)
-                        .labelsHidden()
-                        .tint(.green)
-                }
-                .padding(.horizontal, 14)
-                .padding(.vertical, 10)
-                .frame(maxWidth: .infinity, minHeight: 48)
-                .background(PaletaReloj.superficie)
-                .clipShape(RoundedRectangle(cornerRadius: 16, style: .continuous))
+
+                // 3. Sección Alertas
+                Text("Alertas")
+                    .font(.system(size: 13, weight: .medium))
+                    .foregroundStyle(.white.opacity(0.8))
+                    .padding(.top, 4)
 
                 HStack {
-                    Text(TextosReloj.avituallamientoTitulo)
+                    Text("Alertas de entrenamiento")
                         .font(.system(size: 16, weight: .bold, design: .rounded))
                         .foregroundStyle(.white)
                     Spacer()
                     Toggle("", isOn: $estado.avisosDeAvituallamiento)
                         .labelsHidden()
-                        .tint(.green)
+                        .tint(PaletaReloj.acento)
                 }
                 .padding(.horizontal, 14)
                 .padding(.vertical, 10)
@@ -498,6 +470,84 @@ struct AjustesInicialesView: View {
             .padding(.bottom, TokensEspaciado.e16)
         }
         .scrollIndicators(.hidden)
+    }
+}
+
+/// Alerta a pantalla completa durante el entrenamiento que vibra el reloj para hidratarse o nutrirse.
+/// Tapa toda la pantalla de forma análoga al contador del principio. Tocar cualquier parte
+/// de la pantalla la descarta al instante y vuelve al lugar exacto en el que estaba el usuario.
+struct AlertaEntrenamientoCompletaView: View {
+    let aviso: TipoDeAvisoDeAvituallamiento
+    let alCerrar: () -> Void
+
+    private var titulo: String {
+        switch aviso {
+        case .agua: return "¡Tomá agua!"
+        case .gel: return "¡Tomá un gel!"
+        case .sales: return "¡Tomá sales!"
+        }
+    }
+
+    private var subtitulo: String {
+        switch aviso {
+        case .agua: return "Momento de hidratarte"
+        case .gel: return "Energía para continuar"
+        case .sales: return "Electrolitos para tu ritmo"
+        }
+    }
+
+    private var icono: String {
+        switch aviso {
+        case .agua: return "drop.fill"
+        case .gel: return "bolt.fill"
+        case .sales: return "pills.fill"
+        }
+    }
+
+    var body: some View {
+        ZStack {
+            // Fondo negro puro que cubre 100% de la pantalla (como el contador del inicio)
+            PaletaReloj.fondo.ignoresSafeArea()
+
+            // Círculo exterior decorativo
+            Circle()
+                .stroke(PaletaReloj.acento.opacity(0.18), lineWidth: 10)
+                .frame(width: 140, height: 140)
+
+            Circle()
+                .stroke(PaletaReloj.acento, style: StrokeStyle(lineWidth: 4, lineCap: .round))
+                .frame(width: 140, height: 140)
+
+            VStack(spacing: 5) {
+                Image(systemName: icono)
+                    .font(.system(size: 36, weight: .bold))
+                    .foregroundStyle(PaletaReloj.acento)
+
+                Text(titulo)
+                    .font(.system(size: 19, weight: .bold, design: .rounded))
+                    .foregroundStyle(.white)
+                    .multilineTextAlignment(.center)
+
+                Text(subtitulo)
+                    .font(.system(size: 11, weight: .medium))
+                    .foregroundStyle(PaletaReloj.textoSecundario)
+                    .multilineTextAlignment(.center)
+                    .padding(.horizontal, 16)
+
+                Text("Tocá para continuar")
+                    .font(.system(size: 10, weight: .bold, design: .rounded))
+                    .foregroundStyle(PaletaReloj.acento)
+                    .padding(.top, 4)
+            }
+        }
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
+        .contentShape(Rectangle())
+        .onTapGesture {
+            #if os(watchOS)
+            WKInterfaceDevice.current().play(.click)
+            #endif
+            alCerrar()
+        }
     }
 }
 
@@ -639,6 +689,165 @@ struct PreguntaAvituallamientoView: View {
     }
 }
 
+// MARK: - `carrusel` / `paginador` de entrenamiento
+
+/// Paginador horizontal de entrenamiento con TabView y estilo .page:
+/// Muestra los 3 círculos indicadores de paginación en la parte inferior idénticos a PortadaRelojView:
+/// - Tag 0 (Izquierda): Controles (los botones: pausar, bloquear, ajustes, vuelta)
+/// - Tag 1 (Centro): Métricas (con acceso vertical a Mapa y Parciales)
+/// - Tag 2 (Derecha): Música (NowPlayingView nativo)
+struct CarruselEntrenamientoRelojView: View {
+    @EnvironmentObject private var estado: EstadoReloj
+    @State private var paginaHorizontal: Int = 1
+
+    var body: some View {
+        TabView(selection: $paginaHorizontal) {
+            ControlesView()
+                .tag(0)
+
+            MetricasContenedorVerticalView()
+                .tag(1)
+
+            MusicaView()
+                .tag(2)
+        }
+        .tabViewStyle(.page)
+        .onAppear {
+            actualizarPaginaSegunEstado()
+        }
+        .onChange(of: estado.pantalla) { _ in
+            actualizarPaginaSegunEstado()
+        }
+        .onChange(of: paginaHorizontal) { nuevaPagina in
+            if nuevaPagina == 0 {
+                if estado.pantalla != .controles {
+                    estado.ir(a: .controles)
+                }
+            } else if nuevaPagina == 2 {
+                if estado.pantalla != .musica {
+                    estado.ir(a: .musica)
+                }
+            } else if nuevaPagina == 1 {
+                if estado.pantalla != .metricas && estado.pantalla != .mapa && estado.pantalla != .parciales {
+                    estado.ir(a: .metricas)
+                }
+            }
+        }
+    }
+
+    private func actualizarPaginaSegunEstado() {
+        switch estado.pantalla {
+        case .controles:
+            if paginaHorizontal != 0 { paginaHorizontal = 0 }
+        case .musica:
+            if paginaHorizontal != 2 { paginaHorizontal = 2 }
+        case .metricas, .mapa, .parciales:
+            if paginaHorizontal != 1 { paginaHorizontal = 1 }
+        default:
+            break
+        }
+    }
+}
+
+/// Contenedor vertical para la página central del entrenamiento (Estilo Strava):
+/// Mientras el usuario desliza verticalmente, la pantalla se desenfoca progresivamente.
+/// Al soltar el dedo tras superar el umbral, cambia de pantalla al instante y el desenfoque
+/// se disipa con una transición rápida (0.18s), sin desplazamiento físico de láminas superpuestas.
+struct MetricasContenedorVerticalView: View {
+    @EnvironmentObject private var estado: EstadoReloj
+    @State private var radioBlur: CGFloat = 0
+
+    var body: some View {
+        ZStack {
+            PaletaReloj.fondo.ignoresSafeArea()
+
+            Group {
+                switch estado.pantalla {
+                case .mapa:
+                    MapaView()
+                case .parciales:
+                    ParcialesView()
+                default:
+                    MetricasView()
+                }
+            }
+            .frame(maxWidth: .infinity, maxHeight: .infinity)
+            .blur(radius: radioBlur)
+        }
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
+        .contentShape(Rectangle())
+        .simultaneousGesture(
+            DragGesture(minimumDistance: 12)
+                .onChanged { valor in
+                    let dx = valor.translation.width
+                    let dy = valor.translation.height
+                    // Solo activar si el gesto es netamente vertical
+                    guard abs(dy) > abs(dx) * 1.15 else { return }
+
+                    // En la lista de parciales, deslizar hacia arriba es para scrollear los parciales;
+                    // solo desenfocar si desliza hacia abajo (para regresar a métricas)
+                    if estado.pantalla == .parciales && dy < 0 {
+                        return
+                    }
+
+                    // El desenfoque aumenta con la distancia del dedo hasta un máximo de 16
+                    let progreso = min(1.0, abs(dy) / 40.0)
+                    radioBlur = progreso * 16.0
+                }
+                .onEnded { valor in
+                    let dx = valor.translation.width
+                    let dy = valor.translation.height
+                    if abs(dy) > 32 && abs(dy) > abs(dx) * 1.15 {
+                        cambiarPantallaVertical(dy: dy)
+                    } else {
+                        withAnimation(.easeOut(duration: 0.15)) {
+                            radioBlur = 0
+                        }
+                    }
+                }
+        )
+        .onChange(of: estado.pantalla) { nuevaPantalla in
+            // Si la pantalla cambió por toque de botón u otra vía externa:
+            if radioBlur == 0 && (nuevaPantalla == .metricas || nuevaPantalla == .mapa || nuevaPantalla == .parciales) {
+                radioBlur = 14
+                withAnimation(.easeOut(duration: 0.18)) {
+                    radioBlur = 0
+                }
+            }
+        }
+    }
+
+    private func cambiarPantallaVertical(dy: CGFloat) {
+        let destino: EstadoReloj.Pantalla?
+        switch estado.pantalla {
+        case .metricas:
+            destino = dy < 0 ? .parciales : .mapa
+        case .mapa:
+            destino = .metricas
+        case .parciales:
+            destino = dy > 0 ? .metricas : nil
+        default:
+            destino = nil
+        }
+
+        guard let target = destino else {
+            withAnimation(.easeOut(duration: 0.15)) {
+                radioBlur = 0
+            }
+            return
+        }
+
+        radioBlur = 16.0
+        estado.ir(a: target)
+        #if os(watchOS)
+        WKInterfaceDevice.current().play(.click)
+        #endif
+        withAnimation(.easeOut(duration: 0.18)) {
+            radioBlur = 0
+        }
+    }
+}
+
 // MARK: - `metricas`
 
 /// La pantalla que se mira corriendo. Números enormes, nada más.
@@ -759,23 +968,6 @@ struct MetricasView: View {
                 .padding(.top, 4)
                 .padding(.bottom, 2)
             }
-            .navegacionEntrenoReloj(
-                alDeslizarArriba: { if !estado.cuentaRegresivaActiva { estado.ir(a: .mapa) } },
-                alDeslizarAbajo: { if !estado.cuentaRegresivaActiva { estado.ir(a: .parciales) } },
-                alDeslizarIzquierda: { if !estado.cuentaRegresivaActiva { estado.ir(a: .controles) } },
-                alDeslizarDerecha: { if !estado.cuentaRegresivaActiva { estado.ir(a: .musica) } }
-            )
-
-            // Capa de cuenta regresiva sobre el entrenamiento mismo:
-            // Al terminar la cuenta, se oculta instantáneamente sin ningún pantallazo
-            // y sin posibilidad de deslizar hacia Ajustes porque ya salimos de Portada.
-            if estado.cuentaRegresivaActiva {
-                VistaCuentaRegresiva {
-                    estado.completarCuentaRegresiva()
-                }
-                .transition(.opacity)
-                .zIndex(20)
-            }
 
             // Aviso in-workout cuando se alcanza el objetivo
             if estado.mostrarAvisoObjetivoCumplido {
@@ -827,7 +1019,6 @@ struct MetricasView: View {
                 .clipShape(RoundedRectangle(cornerRadius: 16, style: .continuous))
                 .overlay(RoundedRectangle(cornerRadius: 16, style: .continuous)
                     .stroke(Color.green.opacity(0.5), lineWidth: 1.5))
-                .padding(.horizontal, 6)
             }
         }
     }
@@ -926,11 +1117,8 @@ struct ControlesView: View {
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
         .padding(.horizontal, PaletaReloj.puntosDeDiseno(TokensEspaciado.e6))
-        .padding(.vertical, PaletaReloj.puntosDeDiseno(TokensEspaciado.e4))
-        .navegacionEntrenoReloj(
-            alDeslizarIzquierda: { estado.ir(a: .metricas) },
-            alDeslizarDerecha: { estado.ir(a: .metricas) }
-        )
+        .padding(.top, PaletaReloj.puntosDeDiseno(TokensEspaciado.e4))
+        .padding(.bottom, PaletaReloj.puntosDeDiseno(TokensEspaciado.e10))
     }
 
     private enum TonoControl: Equatable { case normal, acento, error, vuelta, pausa }
@@ -1012,6 +1200,7 @@ struct SinMovimientoView: View {
                         .foregroundStyle(PaletaReloj.textoPrimario)
                         .multilineTextAlignment(.center)
                         .fixedSize(horizontal: false, vertical: true)
+                        .padding(.top, 28)
 
                     Text(TextosReloj.sinMovimientoDetalle)
                         .font(.headline.weight(.semibold))
@@ -1035,15 +1224,22 @@ struct SinMovimientoView: View {
             }
             .scrollIndicators(.hidden)
 
-            Button { estado.reanudarDesdeFinalizacion() } label: {
+            Button {
+                estado.reanudarDesdeFinalizacion()
+            } label: {
                 Image(systemName: "xmark")
                     .font(.system(size: 13, weight: .bold))
                     .foregroundStyle(PaletaReloj.textoPrimario)
-                    .frame(width: 28, height: 28)
+                    .frame(width: 32, height: 32)
                     .background(PaletaReloj.superficieAlterna)
                     .clipShape(Circle())
+                    .frame(minWidth: 44, minHeight: 44)
+                    .contentShape(Rectangle())
             }
             .buttonStyle(.plain)
+            .padding(.top, 4)
+            .padding(.leading, 6)
+            .zIndex(10)
             .accessibilityLabel(TextosReloj.sinMovimientoCerrar)
         }
     }
@@ -1174,7 +1370,7 @@ struct MapaModernoView: View {
 
     var body: some View {
         ZStack(alignment: .top) {
-            PaletaReloj.fondo
+            PaletaReloj.fondo.ignoresSafeArea()
 
             // Encabezado superior con icono del deporte y badge de pausa condicional
             HStack(alignment: .center) {
@@ -1193,6 +1389,10 @@ struct MapaModernoView: View {
                         .background(PaletaReloj.acentoSuave)
                         .clipShape(Capsule())
                 }
+            }
+            .contentShape(Rectangle())
+            .onTapGesture {
+                estado.ir(a: .metricas)
             }
             .padding(.horizontal, 10)
             .padding(.top, 4)
@@ -1345,6 +1545,7 @@ struct MapaModernoView: View {
                     }
                     #endif
                 }
+                .ignoresSafeArea()
                 .mapStyle(.standard(elevation: .flat))
                 .allowsHitTesting(false)
                 .onAppear {
@@ -1374,11 +1575,6 @@ struct MapaModernoView: View {
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
         .contentShape(Rectangle())
-        .navegacionEntrenoReloj(
-            alDeslizarAbajo: { estado.ir(a: .metricas) },
-            alDeslizarIzquierda: { estado.ir(a: .controles) },
-            alDeslizarDerecha: { estado.ir(a: .musica) }
-        )
     }
 }
 
@@ -1391,17 +1587,10 @@ struct MusicaView: View {
         #if os(watchOS)
         NowPlayingView()
             .frame(maxWidth: .infinity, maxHeight: .infinity)
-            .navegacionEntrenoReloj(
-                alDeslizarIzquierda: { estado.ir(a: .metricas) },
-                alDeslizarDerecha: { estado.ir(a: .metricas) }
-            )
         #else
         Color.black
             .overlay(Text("Música").foregroundStyle(.white))
-            .navegacionEntrenoReloj(
-                alDeslizarIzquierda: { estado.ir(a: .metricas) },
-                alDeslizarDerecha: { estado.ir(a: .metricas) }
-            )
+            .frame(maxWidth: .infinity, maxHeight: .infinity)
         #endif
     }
 }
@@ -1433,6 +1622,10 @@ struct ParcialesView: View {
                             .clipShape(Capsule())
                     }
                 }
+                .contentShape(Rectangle())
+                .onTapGesture {
+                    estado.ir(a: .metricas)
+                }
                 .padding(.horizontal, 10)
                 .padding(.top, 2)
 
@@ -1449,11 +1642,6 @@ struct ParcialesView: View {
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
         .contentShape(Rectangle())
-        .navegacionEntrenoReloj(
-            alDeslizarArriba: { estado.ir(a: .metricas) },
-            alDeslizarIzquierda: { estado.ir(a: .controles) },
-            alDeslizarDerecha: { estado.ir(a: .musica) }
-        )
     }
 
     // MARK: - Modo Objetivo de Series (Lista de Tareas)
@@ -1790,7 +1978,7 @@ struct AjustesDeSesionView: View {
                         Spacer()
                         Toggle("", isOn: $estado.pausaAutoCarrera)
                             .labelsHidden()
-                            .tint(.green)
+                            .tint(PaletaReloj.acento)
                     }
                     .padding(.horizontal, 14)
                     .padding(.vertical, 10)
@@ -1798,15 +1986,22 @@ struct AjustesDeSesionView: View {
                     .background(PaletaReloj.superficie)
                     .clipShape(RoundedRectangle(cornerRadius: 16, style: .continuous))
 
-                    // Bicicleta toggle
+
+                    // 3. Sección Alertas
+                    Text("Alertas")
+                        .font(.system(size: 13, weight: .medium))
+                        .foregroundStyle(.white.opacity(0.8))
+                        .padding(.top, 4)
+
+                    // Alertas de entrenamiento toggle
                     HStack {
-                        Text("Bicicleta")
+                        Text("Alertas de entrenamiento")
                             .font(.system(size: 16, weight: .bold, design: .rounded))
                             .foregroundStyle(.white)
                         Spacer()
-                        Toggle("", isOn: $estado.pausaAutoBici)
+                        Toggle("", isOn: $estado.avisosDeAvituallamiento)
                             .labelsHidden()
-                            .tint(.green)
+                            .tint(PaletaReloj.acento)
                     }
                     .padding(.horizontal, 14)
                     .padding(.vertical, 10)

@@ -56,7 +56,7 @@ public enum PaletaReloj {
 
     /// El acento, del catálogo de assets del reloj para que la perilla de color
     /// funcione también en la muñeca (decisión 0007 §12.1).
-    public static let acento: Color = acentoDelCatalogo ?? TokensAcento.respaldo
+    public static let acento: Color = acentoDelCatalogo ?? Color(red: 1.0, green: 35.0 / 255.0, blue: 167.0 / 255.0)
 
     private static var acentoDelCatalogo: Color? {
         #if canImport(UIKit)

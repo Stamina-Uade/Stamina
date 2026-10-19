@@ -1196,7 +1196,7 @@ struct MapaDeSalida: UIViewRepresentable {
         func mapView(_ mapView: MKMapView, rendererFor overlay: MKOverlay) -> MKOverlayRenderer {
             if let pausaPoly = overlay as? PolilineaPausa {
                 let renderer = MKPolylineRenderer(polyline: pausaPoly)
-                renderer.strokeColor = UIColor.systemOrange.withAlphaComponent(0.85)
+                renderer.strokeColor = UIColor(Paleta.acento).withAlphaComponent(0.85)
                 renderer.lineWidth = 4
                 renderer.lineDashPattern = [NSNumber(value: 4), NSNumber(value: 6)]
                 renderer.lineCap = .round
@@ -1236,7 +1236,7 @@ struct MapaDeSalida: UIViewRepresentable {
                 marker.markerTintColor = UIColor.systemRed
                 marker.glyphImage = UIImage(systemName: "flag.fill")
             } else if titulo.contains("pausa") {
-                marker.markerTintColor = UIColor.systemOrange
+                marker.markerTintColor = UIColor(Paleta.acento)
                 marker.glyphImage = UIImage(systemName: "pause.fill")
             } else if titulo.contains("reanud") {
                 marker.markerTintColor = UIColor.systemGreen

@@ -135,6 +135,9 @@ final class EstadoReloj: ObservableObject {
             avisoDeAvituallamiento = aviso
             #if os(watchOS)
             WKInterfaceDevice.current().play(.notification)
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.35) {
+                WKInterfaceDevice.current().play(.directionUp)
+            }
             #endif
         }
     }
@@ -200,9 +203,18 @@ final class EstadoReloj: ObservableObject {
 
     // MARK: - Música en el Reloj
 
-    @Published var musicaReproduciendo: Bool = false
+    @Published var musicaReproduciendo: Bool = true
     @Published var cancionActual: CancionReproduciendo? = nil
     @Published var volumenMusica: Double = 0.7
+    @Published var tiempoReproduccionActual: Double = 0.0
+
+    private var indiceCancionActual: Int = 0
+    private let listaMusicaEntrenamiento: [CancionReproduciendo] = [
+        CancionReproduciendo(titulo: "Running Cadence 180", artista: "Trainer Beats", album: "Cardio Energy"),
+        CancionReproduciendo(titulo: "Marathon Rhythm", artista: "Stamina Audio", album: "Cardio Energy"),
+        CancionReproduciendo(titulo: "High Altitude", artista: "Peak Performance", album: "Elevation"),
+        CancionReproduciendo(titulo: "Endurance Flow", artista: "Tempo Track", album: "Rhythm Run")
+    ]
 
     public struct CancionReproduciendo: Equatable {
         public var titulo: String
@@ -216,14 +228,45 @@ final class EstadoReloj: ObservableObject {
         }
     }
 
+    func actualizarInfoMusica() {
+        if cancionActual == nil {
+            cancionActual = listaMusicaEntrenamiento[indiceCancionActual % listaMusicaEntrenamiento.count]
+        }
+    }
+
     func alternarReproduccionMusica() {
         musicaReproduciendo.toggle()
+        _ = sincronizador.solicitarComando(.musicaAlternar)
+        #if os(watchOS)
+        WKInterfaceDevice.current().play(.click)
+        #endif
     }
 
     func siguienteCancion() {
+        indiceCancionActual = (indiceCancionActual + 1) % listaMusicaEntrenamiento.count
+        cancionActual = listaMusicaEntrenamiento[indiceCancionActual]
+        tiempoReproduccionActual = 0.0
+        _ = sincronizador.solicitarComando(.musicaSiguiente)
+        #if os(watchOS)
+        WKInterfaceDevice.current().play(.click)
+        #endif
     }
 
     func anteriorCancion() {
+        // Si la canción lleva más de 2 segundos, retrocede a 0 (inicio de la pista).
+        // Si ya está en 0 (o <= 2 segundos), retrocede a la canción anterior.
+        if tiempoReproduccionActual > 2.0 {
+            tiempoReproduccionActual = 0.0
+            _ = sincronizador.solicitarComando(.musicaRebobinar)
+        } else {
+            indiceCancionActual = (indiceCancionActual - 1 + listaMusicaEntrenamiento.count) % listaMusicaEntrenamiento.count
+            cancionActual = listaMusicaEntrenamiento[indiceCancionActual]
+            tiempoReproduccionActual = 0.0
+            _ = sincronizador.solicitarComando(.musicaAnterior)
+        }
+        #if os(watchOS)
+        WKInterfaceDevice.current().play(.click)
+        #endif
     }
 
     // MARK: - Parciales por Km y Objetivo de Series
@@ -472,6 +515,9 @@ final class EstadoReloj: ObservableObject {
                             self.deporte = dep
                         }
                         if salida.corriendo && !salida.pausada {
+                            if self.musicaReproduciendo {
+                                self.tiempoReproduccionActual += 1.0
+                            }
                             self.evaluarAvisoDeAvituallamiento(
                                 segundos: salida.segundos, deporte: salida.deporte ?? self.deporte)
                         }
@@ -502,6 +548,9 @@ final class EstadoReloj: ObservableObject {
         seguimiento.$segundos
             .sink { [weak self] segundos in
                 guard let self, self.corriendo, self.fuenteLocal else { return }
+                if self.musicaReproduciendo {
+                    self.tiempoReproduccionActual += 1.0
+                }
                 self.evaluarAvisoDeAvituallamiento(
                     segundos: segundos,
                     deporte: self.esTriatlon ? self.disciplinaTriatlonActual : self.deporte)
@@ -741,6 +790,8 @@ final class EstadoReloj: ObservableObject {
                 duracionMinutos: diaHoy.duracionMinutos,
                 minutoDelDia: diaHoy.minutoDelDia,
                 geles: diaHoy.geles,
+                aguaMl: diaHoy.aguaMl,
+                sales: diaHoy.sales,
                 esDescanso: diaHoy.esDescanso,
                 esFuerza: diaHoy.esFuerza
             )
@@ -924,24 +975,30 @@ final class EstadoReloj: ObservableObject {
         self.iconoPendiente = icono
         self.iconoDeporteEnCurso = icono
 
-        // Si avisos están prendidos y es deporte exterior, preguntar ágilmente qué lleva
-        if avisosDeAvituallamiento && !esInterior && deporte != .fuerza {
-            self.preguntaAvituallamientoActiva = true
-        } else {
-            iniciarSinAvituallamiento()
-        }
+        iniciarSinAvituallamiento()
     }
 
     func iniciarSinAvituallamiento() {
-        gelesQueLleva = 0
-        salesQueLleva = 0
-        aguaMlQueLleva = 0
+        if let sesion = sesionPlanificada {
+            gelesQueLleva = sesion.geles ?? 0
+            salesQueLleva = sesion.sales ?? 0
+            aguaMlQueLleva = sesion.aguaMl ?? 0
+        } else {
+            gelesQueLleva = 0
+            salesQueLleva = 0
+            aguaMlQueLleva = 0
+        }
         preguntaAvituallamientoActiva = false
         cuentaRegresivaActiva = true
         pantalla = .metricas
     }
 
     func confirmarAvituallamientoEIniciar() {
+        if let sesion = sesionPlanificada {
+            gelesQueLleva = sesion.geles ?? 0
+            salesQueLleva = sesion.sales ?? 0
+            aguaMlQueLleva = sesion.aguaMl ?? 0
+        }
         preguntaAvituallamientoActiva = false
         cuentaRegresivaActiva = true
         pantalla = .metricas
@@ -982,6 +1039,16 @@ final class EstadoReloj: ObservableObject {
         }
         if let icono {
             self.iconoDeporteEnCurso = icono
+        }
+        // Insumos configurados desde el celular
+        if let sesion = sesionPlanificada {
+            self.gelesQueLleva = sesion.geles ?? 0
+            self.salesQueLleva = sesion.sales ?? 0
+            self.aguaMlQueLleva = sesion.aguaMl ?? 0
+        } else {
+            self.gelesQueLleva = 0
+            self.salesQueLleva = 0
+            self.aguaMlQueLleva = 0
         }
         guard estaAutenticado else {
             ir(a: .sinTelefono)

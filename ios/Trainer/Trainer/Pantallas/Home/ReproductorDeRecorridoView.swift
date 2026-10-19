@@ -4,11 +4,11 @@ import TrainerCore
 
 /// Reproductor animado de recorrido a pantalla completa en 3D y tercera persona:
 /// - Vista satelital con relieve realista en 3D siguiendo al atleta en tercera persona.
-/// - La ruta NO se muestra adelantada en gris: se va trazando en naranja vivo a medida que avanza.
+/// - La ruta NO se muestra adelantada en gris: se va trazando en rosa vivo a medida que avanza.
 /// - Telemetría sobre el mapa flotante: solo tiempo transcurrido, ritmo, velocidad y kilómetro actual.
 /// - Al terminar la reproducción: tarjeta visible con el tiempo total.
 /// - Selector de velocidad (1x, 2x, 4x) y scrubber interactivo.
-/// - Punto verde de inicio y punto naranja de fin.
+/// - Punto verde de inicio y punto rosa de fin.
 struct ReproductorDeRecorridoView: View {
     let puntos: [PuntoDeRecorrido]
     let deporte: DeporteDeSesion
@@ -389,8 +389,8 @@ private struct MapaReproductor: UIViewRepresentable {
         func mapView(_ mapView: MKMapView, rendererFor overlay: MKOverlay) -> MKOverlayRenderer {
             if let polyline = overlay as? MKPolyline {
                 let renderer = MKPolylineRenderer(polyline: polyline)
-                // Ruta en color naranja vivo trazándose dinámicamente
-                renderer.strokeColor = UIColor(red: 1.0, green: 0.38, blue: 0.05, alpha: 1.0)
+                // Ruta en color rosa vivo (#FF23A7) trazándose dinámicamente
+                renderer.strokeColor = UIColor(Paleta.acento)
                 renderer.lineWidth = 5.5
                 renderer.lineCap = .round
                 renderer.lineJoin = .round
@@ -421,7 +421,7 @@ private struct MapaReproductor: UIViewRepresentable {
                 view.addSubview(dot)
                 return view
             } else if titulo.contains("fin") {
-                let id = "MarcadorFinNaranja"
+                let id = "MarcadorFinRosa"
                 let view = mapView.dequeueReusableAnnotationView(withIdentifier: id) ?? MKAnnotationView(annotation: annotation, reuseIdentifier: id)
                 view.annotation = annotation
                 view.canShowCallout = false
@@ -429,7 +429,7 @@ private struct MapaReproductor: UIViewRepresentable {
                 view.subviews.forEach { $0.removeFromSuperview() }
 
                 let outer = UIView(frame: CGRect(x: 2, y: 2, width: 20, height: 20))
-                outer.backgroundColor = UIColor(red: 1.0, green: 0.38, blue: 0.05, alpha: 1.0)
+                outer.backgroundColor = UIColor(Paleta.acento)
                 outer.layer.cornerRadius = 10
                 outer.layer.borderColor = UIColor.white.cgColor
                 outer.layer.borderWidth = 3.0
@@ -455,7 +455,7 @@ private struct MapaReproductor: UIViewRepresentable {
                 let dot = UIView(frame: CGRect(x: 2, y: 2, width: 18, height: 18))
                 dot.backgroundColor = UIColor.white
                 dot.layer.cornerRadius = 9
-                dot.layer.borderColor = UIColor(red: 1.0, green: 0.38, blue: 0.05, alpha: 1.0).cgColor
+                dot.layer.borderColor = UIColor(Paleta.acento).cgColor
                 dot.layer.borderWidth = 3.5
                 dot.layer.shadowColor = UIColor.black.cgColor
                 dot.layer.shadowOpacity = 0.6
@@ -471,13 +471,13 @@ private struct MapaReproductor: UIViewRepresentable {
             marker.annotation = annotation
 
             if titulo.contains("pausa") {
-                marker.markerTintColor = UIColor.systemOrange
+                marker.markerTintColor = UIColor(Paleta.acento)
                 marker.glyphImage = UIImage(systemName: "pause.fill")
             } else if titulo.contains("km") {
                 marker.markerTintColor = UIColor.systemBlue
                 marker.glyphText = annotation.subtitle ?? "KM"
             } else {
-                marker.markerTintColor = UIColor(red: 1.0, green: 0.38, blue: 0.05, alpha: 1.0)
+                marker.markerTintColor = UIColor(Paleta.acento)
             }
             return marker
         }

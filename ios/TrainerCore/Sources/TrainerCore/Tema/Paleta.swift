@@ -84,7 +84,7 @@ public enum Paleta {
     /// Si el catálogo no está disponible —previews del paquete, `swift test`
     /// fuera de la app— cae al valor generado desde `tokens.json`, que es el
     /// mismo número.
-    public static let acento: Color = acentoDelCatalogo ?? TokensAcento.respaldo
+    public static let acento: Color = acentoDelCatalogo ?? Color(red: 1.0, green: 35.0 / 255.0, blue: 167.0 / 255.0)
 
     private static var acentoDelCatalogo: Color? {
         #if canImport(UIKit)
@@ -108,23 +108,23 @@ public enum Paleta {
     /// Ver la nota de `Botones.swift` sobre por qué el texto encima va claro.
     public static let acentoApagado = acento.opacity(TokensAcento.alfaApagado)
 
-    // ---- secundario (Pantone Violet C) ----
-    public static let secundario = TokensColor.marcaSecundario
-    public static let secundarioSuaveFondo = TokensColor.marcaSecundarioSuaveFondo
-    public static let secundarioSuaveBorde = TokensColor.marcaSecundarioSuaveBorde
+    // ---- secundario (Rosa Stamina #FF23A7) ----
+    public static let secundario = acento
+    public static let secundarioSuaveFondo = acento.opacity(TokensAcento.alfaChipActivo)
+    public static let secundarioSuaveBorde = acento.opacity(TokensAcento.alfaSuaveBorde)
 
     // ---- barra de pestañas ----
     public static let fondoBarra = dinamico(claro: Color.white, oscuro: Color.black)
-    public static let pestanaActiva = dinamico(claro: secundario, oscuro: acento)
+    public static let pestanaActiva = acento
     public static let pestanaInactiva = dinamico(claro: Color(red: 0.38, green: 0.40, blue: 0.44), oscuro: Color(red: 0.70, green: 0.72, blue: 0.75))
 
-    // ---- acento semántico según modo (verde lima en noche, violeta en día para texto/íconos/estados) ----
-    public static let textoAcento = dinamico(claro: secundario, oscuro: acento)
-    public static let iconoAcento = dinamico(claro: secundario, oscuro: acento)
-    public static let seleccionadoFondo = dinamico(claro: secundario.opacity(0.10), oscuro: acento.opacity(0.15))
-    public static let seleccionadoBorde = dinamico(claro: secundario, oscuro: acento)
-    public static let bordeEnfocado = dinamico(claro: secundario, oscuro: acento)
-    public static let interruptorActivo = dinamico(claro: secundario, oscuro: acento)
+    // ---- acento semántico (#FF23A7) ----
+    public static let textoAcento = acento
+    public static let iconoAcento = acento
+    public static let seleccionadoFondo = acento.opacity(0.15)
+    public static let seleccionadoBorde = acento
+    public static let bordeEnfocado = acento
+    public static let interruptorActivo = acento
     public static let interruptorThumb = dinamico(claro: Color.white, oscuro: sobreAcento)
 
     // ---- bordes ----

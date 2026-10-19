@@ -191,20 +191,20 @@ extension View {
                                alDeslizarDerecha: (() -> Void)? = nil) -> some View {
         frame(maxWidth: .infinity, maxHeight: .infinity)
             .contentShape(Rectangle())
-            .highPriorityGesture(
-                DragGesture(minimumDistance: 16)
+            .simultaneousGesture(
+                DragGesture(minimumDistance: 24)
                     .onEnded { valor in
                         let dx = valor.translation.width, dy = valor.translation.height
                         if abs(dx) > abs(dy) {
-                            if dx < 0 {
+                            if dx < -20 {
                                 alDeslizarIzquierda?()
-                            } else {
+                            } else if dx > 20 {
                                 alDeslizarDerecha?()
                             }
                         } else {
-                            if dy < 0 {
+                            if dy < -20 {
                                 alDeslizarArriba?()
-                            } else {
+                            } else if dy > 20 {
                                 alDeslizarAbajo?()
                             }
                         }

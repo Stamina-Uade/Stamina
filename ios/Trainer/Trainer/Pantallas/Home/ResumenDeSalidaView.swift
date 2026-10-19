@@ -424,11 +424,11 @@ struct ResumenDeSalidaView: View {
                 HStack(spacing: TokensEspaciado.e12) {
                     ZStack {
                         Circle()
-                            .fill(Color.orange.opacity(0.2))
+                            .fill(Paleta.acento.opacity(0.2))
                             .frame(width: 44, height: 44)
                         Image(systemName: "flame.fill")
                             .font(.system(size: 22, weight: .bold))
-                            .foregroundStyle(Color.orange)
+                            .foregroundStyle(Paleta.acento)
                     }
 
                     VStack(alignment: .leading, spacing: 2) {

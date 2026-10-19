@@ -21,7 +21,10 @@ struct HistorialDeActividadesView: View {
     var body: some View {
         NavigationStack {
             ScrollView {
-                LazyVStack(spacing: TokensEspaciado.e10) {
+                VStack(spacing: TokensEspaciado.e14) {
+                    CalendarioDeHitosView()
+
+                    LazyVStack(spacing: TokensEspaciado.e10) {
                     if actividades.isEmpty, !cargando {
                         Text(fallo ? Textos.historialError : Textos.historialVacio)
                             .estilo(.cuerpoSecundario, color: Paleta.textoSecundario)
@@ -51,6 +54,7 @@ struct HistorialDeActividadesView: View {
                         .disabled(cargando)
                         .padding(TokensEspaciado.e14)
                     }
+                }
                 }
                 .padding(TokensEspaciado.e16)
             }
@@ -459,11 +463,11 @@ struct DetalleDeActividadView: View {
                                         HStack(spacing: 8) {
                                             Image(systemName: "pause.circle.fill")
                                                 .font(.system(size: 15))
-                                                .foregroundStyle(Color.orange)
+                                                .foregroundStyle(Paleta.acento)
                                             VStack(alignment: .leading, spacing: 1) {
                                                 Text("Pausa \(pausa.numero): \(Formato.cronometro(segundos: pausa.duracionSegundos))")
                                                     .font(.system(size: 12, weight: .bold))
-                                                    .foregroundStyle(Color.orange)
+                                                    .foregroundStyle(Paleta.acento)
                                                 Text("Pausa: \(horaPausa) · Reanudación: \(horaReanuda)")
                                                     .font(.system(size: 11, weight: .regular))
                                                     .foregroundStyle(Paleta.textoTerciario)
@@ -472,7 +476,7 @@ struct DetalleDeActividadView: View {
                                         .padding(.horizontal, 10)
                                         .padding(.vertical, 6)
                                         .frame(maxWidth: .infinity, alignment: .leading)
-                                        .background(Color.orange.opacity(0.10))
+                                        .background(Paleta.acento.opacity(0.12))
                                         .clipShape(RoundedRectangle(cornerRadius: 8))
                                     }
                                 }

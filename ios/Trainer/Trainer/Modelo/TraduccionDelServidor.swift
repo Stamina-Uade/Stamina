@@ -89,6 +89,8 @@ enum TraduccionDelServidor {
                 duracionMinutos: Int(d.durationMin),
                 minutoDelDia: d.scheduledMinuteOfDay.map { Int($0) },
                 geles: d.fueling.map { Int($0.gels) },
+                aguaMl: d.fueling.map { Int($0.fluidTotalMl) },
+                sales: d.fueling.map { $0.sodiumTotalMg > 0 ? max(1, Int(($0.sodiumTotalMg + 499) / 500)) : 0 },
                 esDescanso: esDescanso,
                 esFuerza: esFuerza
             )
