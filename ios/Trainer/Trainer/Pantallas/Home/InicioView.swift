@@ -11,12 +11,18 @@ import TrainerCore
 ///   HOY: la sesión del día y su avituallamiento
 ///   entrenamientos de hoy, tu día y la carga de la semana
 ///
-/// Las piezas chicas (agenda, gráfico de carga, racha) viven en `InicioPiezas.swift`.
-/// El calendario anual se mudó a la pestaña Historial.
+/// Las piezas chicas (agenda, gráfico de carga, racha) viven en `InicioPiezas.swift`;
+/// los accesos rápidos, la carga semanal y las hojas que explican la jerga, en los
+/// otros `Inicio*.swift`. El calendario anual se mudó a la pestaña Historial.
 struct InicioView: View {
     @EnvironmentObject private var estado: EstadoHome
+    @Environment(\.accessibilityReduceMotion) private var movimientoReducido
     @State private var actividadElegida: Actividad?
     @State private var mostrarApto = false
+    /// La hoja que explica la zona o la hidratación de hoy.
+    @State private var explicacion: ExplicacionDeInicio? = nil
+    /// Para la entrada suave de las tarjetas. Con Reducir movimiento no se anima.
+    @State private var aparecio = false
 
     var body: some View {
         ScrollView {
@@ -28,25 +34,35 @@ struct InicioView: View {
                     pildoras
                 }
 
+                guia
+
                 if estado.plan != nil {
                     AvisoDeLoGuardado(seccion: estado.contenido.plan)
                 }
 
                 tarjetaDelObjetivo
+                    .entradaDeTarjeta(0, visible: aparecio, movimientoReducido: movimientoReducido)
 
                 if let plan = estado.plan {
-                    if let sesion = estado.sesion {
-                        tarjetaDeHoy(sesion)
-                        if let avituallamiento = sesion.avituallamiento {
-                            chipsDelAvituallamiento(avituallamiento)
+                    VStack(alignment: .leading, spacing: TokensEspaciado.e10) {
+                        if let sesion = estado.sesion {
+                            tarjetaDeHoy(sesion)
+                            if let avituallamiento = sesion.avituallamiento {
+                                chipsDelAvituallamiento(avituallamiento, duracionMinutos: sesion.duracionMinutos)
+                            }
+                        } else {
+                            tarjetaDeHoySinSalida(plan.hoy)
                         }
-                    } else {
-                        tarjetaDeHoySinSalida(plan.hoy)
                     }
+                    .entradaDeTarjeta(1, visible: aparecio, movimientoReducido: movimientoReducido)
                 }
+
+                InicioAccesosRapidos(abrirApto: { mostrarApto = true })
+                    .entradaDeTarjeta(2, visible: aparecio, movimientoReducido: movimientoReducido)
 
                 if !estado.actividadesDeHoy.isEmpty {
                     seccionEntrenamientosDeHoy
+                        .entradaDeTarjeta(3, visible: aparecio, movimientoReducido: movimientoReducido)
                 }
 
                 if let plan = estado.plan {
@@ -57,8 +73,10 @@ struct InicioView: View {
                                 FilaDeAgendaView(fila: fila)
                             }
                         }
+                        .entradaDeTarjeta(4, visible: aparecio, movimientoReducido: movimientoReducido)
                     }
-                    tarjetaCargaSemanal(plan)
+                    InicioTarjetaDeCarga(plan: plan)
+                        .entradaDeTarjeta(5, visible: aparecio, movimientoReducido: movimientoReducido)
                 } else if estado.contenido.plan.problema != nil {
                     SinDatosView(problema: estado.contenido.plan.problema, actualizando: estado.actualizando) {
                         Task { await estado.actualizar() }
@@ -70,30 +88,63 @@ struct InicioView: View {
             .padding(.bottom, TokensEspaciado.e36)
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
+        // Tirar hacia abajo trae lo nuevo, igual que al volver a primer plano.
+        .refreshable { await estado.actualizar() }
+        .onAppear { aparecio = true }
         .sheet(item: $actividadElegida) { actividad in
             DetalleDeActividadView(
                 actividad: actividad,
                 puntosIniciales: estado.recorridosLocales[actividad.id] ?? AlmacenDeRecorridos.compartido.puntos(para: actividad.id),
-                servicio: estado.repositorio.servicioDeActividades()
+                servicio: estado.repositorio.servicioDeActividades(),
+                unidades: estado.sistemaDeUnidades
             )
         }
         .sheet(isPresented: $mostrarApto) {
             AptoFisicoView()
         }
+        .sheet(item: $explicacion) { explicacion in
+            HojaDeExplicacion(explicacion: explicacion)
+        }
     }
+
+    // MARK: - La guía: qué hay en esta pantalla
+
+    /// Se cierra con la X y no vuelve; el "?" de arriba la trae de nuevo.
+    private var guia: some View {
+        TarjetaDeGuia(
+            clave: Self.claveDeLaGuia,
+            titulo: String(localized: "Qué hay en tu inicio", comment: "Título de la guía del inicio"),
+            puntos: [
+                PuntoDeGuia("flag.fill", String(localized: "Arriba, tu próxima carrera y cuánto falta. Tocala para ver el plan.",
+                                                comment: "Guía del inicio: la carrera")),
+                PuntoDeGuia("figure.run", String(localized: "«Hoy» es la sesión que te toca. Tocá la zona o la hidratación y te explicamos qué significan.",
+                                                 comment: "Guía del inicio: hoy")),
+                PuntoDeGuia("square.grid.2x2.fill", String(localized: "Los accesos rápidos te llevan directo a correr, a tu plan, a tu historial o a tu apto.",
+                                                           comment: "Guía del inicio: accesos rápidos")),
+                PuntoDeGuia("chart.bar.fill", String(localized: "La carga semanal son los km de tu semana. Tocá una barra para ver ese día.",
+                                                     comment: "Guía del inicio: carga semanal")),
+            ])
+    }
+
+    private static let claveDeLaGuia = "guia_inicio"
 
     // MARK: - Barra superior: Stamina · racha · avatar
 
     private var barraSuperior: some View {
-        HStack(spacing: TokensEspaciado.e10) {
+        HStack(spacing: TokensEspaciado.e6) {
             Text(MarcaApp.nombre)
                 .estilo(.marca, color: Paleta.acento)
+                .lineLimit(1)
                 .accessibilityAddTraits(.isHeader)
             Spacer(minLength: 0)
             if let plan = estado.plan {
                 InsigniaDeRacha(racha: plan.racha)
             }
-            Button { estado.ir(a: .perfil) } label: {
+            BotonDeAyuda(clave: Self.claveDeLaGuia)
+            Button {
+                Haptico.toque()
+                estado.ir(a: .perfil)
+            } label: {
                 ZStack {
                     Circle().fill(Paleta.superficieAlterna)
                     Circle().strokeBorder(Paleta.bordeSuperficie, lineWidth: TokensEspaciado.e1)
@@ -175,7 +226,10 @@ struct InicioView: View {
     }
 
     private func tarjetaDeLaCarrera(_ bloque: BloqueDelPlan) -> some View {
-        Button { estado.ir(a: .plan) } label: {
+        Button {
+            Haptico.toque()
+            estado.ir(a: .plan)
+        } label: {
             TarjetaHeroe(imagen: "BienvenidaRuta", alto: TokensEspaciado.e56 * 4) {
                 VStack(alignment: .leading, spacing: 0) {
                     if let pildora = pildoraDeLaCarrera(bloque) {
@@ -252,6 +306,7 @@ struct InicioView: View {
                     .estilo(.cuerpoSecundario, color: Paleta.textoSecundario)
                     .fixedSize(horizontal: false, vertical: true)
                 BotonPrimario(String(localized: "Elegir objetivo", comment: "Botón de la tarjeta sin objetivo")) {
+                    Haptico.toque()
                     estado.ir(a: .plan)
                 }
             }
@@ -291,6 +346,10 @@ struct InicioView: View {
                 }
             }
 
+            if let zona = sesion.zona {
+                botonDeLaZona(zona)
+            }
+
             if !sesion.notaDelClima.isEmpty {
                 HStack(spacing: TokensEspaciado.e6) {
                     Image(systemName: "sun.max.fill")
@@ -304,7 +363,10 @@ struct InicioView: View {
             }
 
             if sesion.minutoDelDia != nil {
-                BotonPrimario(Textos.inicioPrepararSalida) { estado.ir(a: .entreno) }
+                BotonPrimario(Textos.inicioPrepararSalida) {
+                    Haptico.toque()
+                    estado.ir(a: .entreno)
+                }
             }
         }
         .padding(TokensEspaciado.e16)
@@ -317,27 +379,34 @@ struct InicioView: View {
         return "\(sesion.tipo) · \(Formato.distancia(metros, unidades: estado.sistemaDeUnidades))"
     }
 
-    /// "Sugerido 7:30 · ritmo moderado".
+    /// "Sugerido 7:30". La zona va aparte, en su píldora tocable.
     private func detalleDeLaSesion(_ sesion: SesionDelDia) -> String? {
-        var partes: [String] = []
-        if let minuto = sesion.minutoDelDia {
-            partes.append(String(localized: "Sugerido \(Formato.hora(minutoDelDia: minuto))",
-                                 comment: "Hora sugerida de la salida"))
-        }
-        if let zona = sesion.zona {
-            partes.append("\(zona.corta) · \(intensidad(zona))")
-        }
-        return partes.isEmpty ? nil : partes.joined(separator: " · ")
+        guard let minuto = sesion.minutoDelDia else { return nil }
+        return String(localized: "Sugerido \(Formato.hora(minutoDelDia: minuto))",
+                      comment: "Hora sugerida de la salida")
     }
 
-    private func intensidad(_ zona: ZonaDeIntensidad) -> String {
-        switch zona {
-        case .z1: return Textos.zonaBaja
-        case .z2: return Textos.zonaModerada
-        case .z3: return Textos.zonaModeradaAlta
-        case .z4: return Textos.zonaAlta
-        case .z5: return Textos.zonaMaxima
+    /// "Z2 · moderada  ¿Qué es?": la jerga, con la explicación a un toque.
+    private func botonDeLaZona(_ zona: ZonaDeIntensidad) -> some View {
+        Button {
+            Haptico.toque()
+            explicacion = .zonas(actual: zona)
+        } label: {
+            HStack(spacing: TokensEspaciado.e6) {
+                PildoraDeEstado("\(zona.corta) · \(InicioTextos.intensidad(zona))", simbolo: "speedometer", tono: .acento)
+                Text(String(localized: "¿Qué es?", comment: "Abre la explicación de la zona"))
+                    .estilo(.chip, color: Paleta.textoAcento)
+                Image(systemName: "chevron.right")
+                    .font(.system(size: TokensTipografia.chipTamano, weight: .bold))
+                    .foregroundStyle(Paleta.textoAcento)
+                    .accessibilityHidden(true)
+            }
+            .frame(minHeight: TokensTamano.objetivoTactilMinimo)
+            .contentShape(Rectangle())
         }
+        .buttonStyle(EstiloPresionado())
+        .accessibilityElement(children: .combine)
+        .accessibilityHint(String(localized: "Explica qué son las zonas de intensidad", comment: "VoiceOver de la píldora de la zona"))
     }
 
     private func iconoDelDia(fuerza: Bool) -> some View {
@@ -368,7 +437,10 @@ struct InicioView: View {
                         .fixedSize(horizontal: false, vertical: true)
                 }
                 if hoy?.esFuerza == true {
-                    BotonTexto(Textos.inicioVerRutina) { estado.ir(a: .gimnasio) }
+                    BotonTexto(Textos.inicioVerRutina) {
+                        Haptico.toque()
+                        estado.ir(a: .gimnasio)
+                    }
                 }
             }
             .frame(maxWidth: .infinity, alignment: .leading)
@@ -378,17 +450,37 @@ struct InicioView: View {
         .tarjeta()
     }
 
-    /// Las píldoras de abajo de la tarjeta de hoy: lo que hay que llevar.
-    private func chipsDelAvituallamiento(_ a: AvituallamientoDeSesion) -> some View {
-        FlujoHorizontal(espaciado: TokensEspaciado.e6) {
-            PildoraDeEstado(String(localized: "Hidratación \(a.mililitrosPorHora) ml/h", comment: "Píldora del inicio"),
-                            simbolo: "drop.fill", tono: .acento)
-            if a.geles > 0 {
-                PildoraDeEstado(String(localized: "\(a.geles) gel", comment: "Píldora del inicio"),
-                                simbolo: "bolt.fill")
+    /// Las píldoras de abajo de la tarjeta de hoy: lo que hay que llevar. Todo el
+    /// grupo es un botón que abre la hoja que explica cada número.
+    private func chipsDelAvituallamiento(_ a: AvituallamientoDeSesion, duracionMinutos: Int) -> some View {
+        Button {
+            Haptico.toque()
+            explicacion = .avituallamiento(a, duracionMinutos: duracionMinutos)
+        } label: {
+            FlujoHorizontal(espaciado: TokensEspaciado.e6) {
+                PildoraDeEstado(String(localized: "Hidratación \(a.mililitrosPorHora) ml/h", comment: "Píldora del inicio"),
+                                simbolo: "drop.fill", tono: .acento)
+                if a.geles > 0 {
+                    PildoraDeEstado(String(localized: "\(a.geles) gel", comment: "Píldora del inicio"),
+                                    simbolo: "bolt.fill")
+                }
+                PildoraDeEstado("\(a.carbohidratosPorHoraG) g/h", simbolo: "leaf.fill")
+                HStack(spacing: TokensEspaciado.e4) {
+                    Text(String(localized: "Qué llevar", comment: "Abre la explicación de la hidratación"))
+                        .estilo(.chip, color: Paleta.textoAcento)
+                    Image(systemName: "chevron.right")
+                        .font(.system(size: TokensTipografia.chipTamano, weight: .bold))
+                        .foregroundStyle(Paleta.textoAcento)
+                        .accessibilityHidden(true)
+                }
+                .padding(.vertical, TokensEspaciado.e6)
             }
-            PildoraDeEstado("\(a.carbohidratosPorHoraG) g/h", simbolo: "leaf.fill")
+            .frame(maxWidth: .infinity, minHeight: TokensTamano.objetivoTactilMinimo, alignment: .leading)
+            .contentShape(Rectangle())
         }
+        .buttonStyle(EstiloPresionado())
+        .accessibilityElement(children: .combine)
+        .accessibilityHint(String(localized: "Explica qué llevar en la salida", comment: "VoiceOver de los chips de hidratación"))
     }
 
     /// "1:36" o "42 min": cuánto falta para la hora sugerida.
@@ -407,40 +499,6 @@ struct InicioView: View {
         return falta >= 0 ? falta : falta + 24 * 60
     }
 
-    // MARK: - Carga semanal
-
-    private func tarjetaCargaSemanal(_ plan: PlanDelHome) -> some View {
-        VStack(alignment: .leading, spacing: TokensEspaciado.e10) {
-            EncabezadoDeSeccion(Textos.inicioCargaSemanal)
-            Button { estado.ir(a: .plan) } label: {
-                VStack(alignment: .leading, spacing: TokensEspaciado.e14) {
-                    if let semana = plan.bloque.semanas.first(where: { $0.numero == plan.semanaDeHoy }) {
-                        HStack(alignment: .firstTextBaseline, spacing: TokensEspaciado.e6) {
-                            Text(Formato.distancia(semana.metrosHechos, unidades: estado.sistemaDeUnidades, decimales: 0))
-                                .estilo(.metricaMedia)
-                            Text(Textos.inicioDePrevistos(
-                                Formato.distancia(semana.metrosPrevistos, unidades: estado.sistemaDeUnidades, decimales: 0)))
-                                .estilo(.labelCampo, color: Paleta.textoTerciario)
-                            Spacer(minLength: 0)
-                            Image(systemName: "chevron.right")
-                                .font(.system(size: TokensTipografia.notaLegalTamano, weight: .semibold))
-                                .foregroundStyle(Paleta.textoTerciario)
-                                .accessibilityHidden(true)
-                        }
-                    }
-                    GraficoDeCarga(metrosPorDia: plan.cargaSemanal,
-                                   diaDestacado: plan.indiceDeHoy ?? -1)
-                        .frame(height: TokensEspaciado.e56)
-                }
-                .padding(TokensEspaciado.e16)
-                .frame(maxWidth: .infinity, alignment: .leading)
-                .tarjeta()
-                .contentShape(Rectangle())
-            }
-            .buttonStyle(EstiloPresionado())
-        }
-    }
-
     // MARK: - Entrenamientos de hoy
 
     private var seccionEntrenamientosDeHoy: some View {
@@ -448,10 +506,14 @@ struct InicioView: View {
             EncabezadoDeSeccion(
                 String(localized: "Entrenamientos de hoy", comment: "Título de sección del inicio"),
                 accion: String(localized: "Ver historial", comment: "Abre el historial de actividades"),
-                alTocar: { estado.ir(a: .historial) })
+                alTocar: {
+                    Haptico.toque()
+                    estado.ir(a: .historial)
+                })
 
             ForEach(estado.actividadesDeHoy) { actividad in
                 Button {
+                    Haptico.toque()
                     actividadElegida = actividad
                 } label: {
                     InicioFilaDeActividad(actividad: actividad, unidades: estado.sistemaDeUnidades)
@@ -540,5 +602,32 @@ private extension String {
     var capitalizedPrimeraLetra: String {
         guard let primera = first else { return self }
         return primera.uppercased() + String(dropFirst())
+    }
+}
+
+// MARK: - Entrada de las tarjetas
+
+/// Cada tarjeta entra con un fundido y un desplazamiento chico, una detrás de
+/// otra. Con Reducir movimiento aparecen quietas, ya en su lugar.
+private struct EntradaDeTarjeta: ViewModifier {
+    let orden: Int
+    let visible: Bool
+    let movimientoReducido: Bool
+
+    func body(content: Content) -> some View {
+        let mostrar = visible || movimientoReducido
+        return content
+            .opacity(mostrar ? 1 : 0)
+            .offset(y: mostrar ? 0 : TokensEspaciado.e12)
+            .animation(movimientoReducido
+                       ? nil
+                       : .easeOut(duration: TokensMovimiento.media).delay(Double(orden) * 0.05),
+                       value: visible)
+    }
+}
+
+private extension View {
+    func entradaDeTarjeta(_ orden: Int, visible: Bool, movimientoReducido: Bool) -> some View {
+        modifier(EntradaDeTarjeta(orden: orden, visible: visible, movimientoReducido: movimientoReducido))
     }
 }

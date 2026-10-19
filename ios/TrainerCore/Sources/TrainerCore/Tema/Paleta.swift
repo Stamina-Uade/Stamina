@@ -101,7 +101,30 @@ public enum Paleta {
     /// Si el catálogo no está disponible —previews del paquete, `swift test`
     /// fuera de la app— cae al valor generado desde `tokens.json`, que es el
     /// mismo número.
-    public static let acento: Color = acentoDelCatalogo ?? TokensAcento.respaldo
+    ///
+    /// 🎨 Desde el 2026-10 la persona puede elegir otro color en Ajustes
+    /// (`AcentoPersonalizado`). Por eso en el teléfono es un color DINÁMICO: se
+    /// resuelve al dibujar, con la elección del momento. Sin elección, es el del
+    /// catálogo de siempre. En el reloj y en macOS sigue siendo fijo.
+    public static let acento: Color = {
+        #if canImport(UIKit) && !os(watchOS)
+        let deFabrica = acentoUIDelCatalogo
+        return Color(uiColor: UIColor { _ in
+            if let c = AcentoPersonalizado.componentesActuales {
+                return UIColor(red: CGFloat(c.0), green: CGFloat(c.1), blue: CGFloat(c.2), alpha: 1)
+            }
+            return deFabrica
+        })
+        #else
+        return acentoDelCatalogo ?? TokensAcento.respaldo
+        #endif
+    }()
+
+    #if canImport(UIKit) && !os(watchOS)
+    private static var acentoUIDelCatalogo: UIColor {
+        UIColor(named: TokensAcento.nombreEnAssets) ?? UIColor(TokensAcento.respaldo)
+    }
+    #endif
 
     private static var acentoDelCatalogo: Color? {
         #if canImport(UIKit)
@@ -115,7 +138,21 @@ public enum Paleta {
     /// El texto sobre el acento. **No** se deriva: es el casi-negro del diseño y
     /// no cambia con el acento. Si algún día el acento pasa a ser oscuro, este
     /// rol hay que revisarlo — está anotado en la decisión 0007 §12.
-    public static let sobreAcento = TokensColor.marcaSobreAcento
+    ///
+    /// 🎨 2026-10: con el color elegible, ya no alcanza un valor fijo. En el
+    /// teléfono se elige midiendo (`AcentoPersonalizado.textoOscuroEncima`):
+    /// casi-negro sobre colores claros, blanco sobre oscuros.
+    public static let sobreAcento: Color = {
+        #if canImport(UIKit) && !os(watchOS)
+        let casiNegro = UIColor(TokensColor.marcaSobreAcento)
+        return Color(uiColor: UIColor { _ in
+            guard let c = AcentoPersonalizado.componentesActuales else { return casiNegro }
+            return AcentoPersonalizado.textoOscuroEncima(c.0, c.1, c.2) ? casiNegro : UIColor.white
+        })
+        #else
+        return TokensColor.marcaSobreAcento
+        #endif
+    }()
 
     public static let acentoSuaveFondo = acento.opacity(TokensAcento.alfaSuaveFondo)
     public static let acentoSuaveBorde = acento.opacity(TokensAcento.alfaSuaveBorde)

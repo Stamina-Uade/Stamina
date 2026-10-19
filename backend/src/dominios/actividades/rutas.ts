@@ -49,6 +49,9 @@ export function actividadAApi(f: ActividadFila) {
   return salida;
 }
 
+/** 10.000 puntos × ~65 bytes, con margen. Ver la nota en PUT …/route. */
+const TOPE_DEL_RECORRIDO_BYTES = 1024 * 1024;
+
 export async function rutasActividades(app: FastifyInstance, ctx: Contexto): Promise<void> {
   const guardia = crearGuardia(ctx);
   const repo = crearRepoActividades(ctx.db);
@@ -119,6 +122,10 @@ export async function rutasActividades(app: FastifyInstance, ctx: Contexto): Pro
   });
 
   app.put("/activities/:activity_id/route", {
+    // 🛑 El tope global del servidor es 64 KB, y un recorrido de 10.000 puntos
+    // (lo que acepta el contrato) pesa ~650 KB: con el tope global, toda salida
+    // de más de ~18 min a 1 Hz recibía 413. Este tope es SÓLO para esta ruta.
+    bodyLimit: TOPE_DEL_RECORRIDO_BYTES,
     preHandler: guardia,
     schema: { params: parametrosRecorrido, body: { type: "object", required: ["points"], additionalProperties: false,
       properties: { points: esquemaPuntos } } },

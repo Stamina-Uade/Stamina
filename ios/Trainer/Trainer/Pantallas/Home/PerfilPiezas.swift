@@ -1,0 +1,140 @@
+import SwiftUI
+import TrainerCore
+
+// =============================================================================
+// Piezas chicas del perfil: la fila de acceso (ícono, título, subtítulo y
+// flecha), la barra de progreso de una meta y el chip redondo de un día.
+// Separadas para que el `body` de PerfilView se lea de corrido.
+// =============================================================================
+
+/// Una fila que lleva a otro lado: ícono, qué es, qué vas a encontrar y la flecha.
+struct FilaDeAccesoDePerfil: View {
+    let simbolo: String
+    let titulo: String
+    let subtitulo: String
+    var colorDelSubtitulo: Color = Paleta.textoSecundario
+    let accion: () -> Void
+
+    var body: some View {
+        Button {
+            Haptico.toque()
+            accion()
+        } label: {
+            HStack(spacing: TokensEspaciado.e12) {
+                ZStack {
+                    Circle().fill(Paleta.acentoChipActivo)
+                    Image(systemName: simbolo)
+                        .font(.system(size: TokensTipografia.valorDatoTamano, weight: .bold))
+                        .foregroundStyle(Paleta.acento)
+                }
+                .frame(width: TokensEspaciado.e40, height: TokensEspaciado.e40)
+                .accessibilityHidden(true)
+
+                VStack(alignment: .leading, spacing: TokensEspaciado.e3) {
+                    Text(titulo)
+                        .estilo(.opcionTitulo)
+                    Text(subtitulo)
+                        .estilo(.notaLegal, color: colorDelSubtitulo)
+                        .fixedSize(horizontal: false, vertical: true)
+                }
+                Spacer(minLength: 0)
+                Image(systemName: "chevron.right")
+                    .font(.system(size: TokensTipografia.notaLegalTamano, weight: .semibold))
+                    .foregroundStyle(Paleta.textoTerciario)
+                    .accessibilityHidden(true)
+            }
+            .padding(.horizontal, TokensEspaciado.e14)
+            .padding(.vertical, TokensEspaciado.e12)
+            .frame(maxWidth: .infinity, minHeight: TokensTamano.objetivoTactilMinimo, alignment: .leading)
+            .contentShape(Rectangle())
+        }
+        .buttonStyle(EstiloPresionado())
+        .accessibilityElement(children: .combine)
+        .accessibilityAddTraits(.isButton)
+    }
+}
+
+/// La barrita de "semana 3 de 12" de una meta.
+struct BarraDeProgresoDeMeta: View {
+    let actual: Int
+    let total: Int
+
+    private var fraccion: CGFloat {
+        guard total > 0 else { return 0 }
+        return CGFloat(min(max(actual, 0), total)) / CGFloat(total)
+    }
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: TokensEspaciado.e4) {
+            GeometryReader { geo in
+                ZStack(alignment: .leading) {
+                    Capsule().fill(Paleta.superficieControl)
+                    Capsule()
+                        .fill(Paleta.acento)
+                        .frame(width: max(TokensEspaciado.e6, geo.size.width * fraccion))
+                }
+            }
+            .frame(height: TokensEspaciado.e6)
+            .accessibilityHidden(true)
+
+            Text(String(localized: "Semana \(actual) de \(total) del plan", comment: "Progreso de una meta"))
+                .estilo(.notaLegal, color: Paleta.textoTerciario)
+        }
+        .accessibilityElement(children: .combine)
+    }
+}
+
+/// Un día de la semana como chip redondo: lleno si se entrena, con la hora abajo.
+struct ChipDeDiaDePerfil: View {
+    let nombreCorto: String
+    let nombreLargo: String
+    /// Minuto del día del entrenamiento; `nil` si ese día no se eligió.
+    let minutoDelDia: Int?
+    let esHoy: Bool
+
+    private var activo: Bool { minutoDelDia != nil }
+
+    var body: some View {
+        VStack(spacing: TokensEspaciado.e6) {
+            ZStack {
+                Circle()
+                    .fill(activo ? Paleta.acento : Paleta.superficie)
+                Circle()
+                    .strokeBorder(borde, lineWidth: esHoy ? TokensEspaciado.e2 : TokensEspaciado.e1)
+                Text(nombreCorto)
+                    .estilo(.chip, color: activo ? Paleta.sobreAcento : Paleta.textoTerciario)
+                    .lineLimit(1)
+                    .minimumScaleFactor(0.7)
+            }
+            .aspectRatio(1, contentMode: .fit)
+            .shadow(color: activo ? Paleta.acentoBrillo : Color.clear, radius: TokensEspaciado.e6)
+
+            Text(minutoDelDia.map { Formato.hora(minutoDelDia: $0) } ?? "—")
+                .estilo(.etiquetaSeccion.enMinusculas,
+                        color: activo ? Paleta.textoSecundario : Paleta.textoTerciario)
+                .monospacedDigit()
+                .lineLimit(1)
+                .minimumScaleFactor(0.6)
+        }
+        .frame(maxWidth: .infinity)
+        .accessibilityElement(children: .ignore)
+        .accessibilityLabel(Text(verbatim: textoAccesible))
+    }
+
+    private var borde: Color {
+        if esHoy { return Paleta.textoPrimario }
+        return activo ? Paleta.acentoSuaveBorde : Paleta.bordeSuperficie
+    }
+
+    private var textoAccesible: String {
+        var partes = [nombreLargo]
+        if esHoy { partes.append(String(localized: "hoy", comment: "Día de hoy en los días de entrenamiento")) }
+        if let minutoDelDia {
+            partes.append(String(localized: "entrenás a las \(Formato.hora(minutoDelDia: minutoDelDia))",
+                                 comment: "Día de entrenamiento elegido"))
+        } else {
+            partes.append(String(localized: "sin entrenamiento", comment: "Día no elegido para entrenar"))
+        }
+        return partes.joined(separator: ", ")
+    }
+}

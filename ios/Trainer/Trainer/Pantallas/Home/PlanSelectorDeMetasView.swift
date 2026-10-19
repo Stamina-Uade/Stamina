@@ -5,6 +5,7 @@ import TrainerCore
 struct SelectorInteractivoDeMetasView: View {
     @EnvironmentObject private var estado: EstadoHome
     @EnvironmentObject private var flujo: FlujoEntrada
+    @Environment(\.accessibilityReduceMotion) private var reducirMovimiento
 
     struct MetaDidactica: Identifiable {
         let id: Objetivo
@@ -59,14 +60,11 @@ struct SelectorInteractivoDeMetasView: View {
     var body: some View {
         VStack(alignment: .leading, spacing: TokensEspaciado.e16) {
             cabecera
-            carruselDeMetas
+            pasos
+            grillaDeMetas
             tarjetaExplicativa
             selectorDeFecha
-
-            BotonPrimario(String(localized: "Diseñar nuevo plan para \(metaActual.titulo)", comment: "Selector de metas"), cargando: guardando) {
-                guardar()
-            }
-            .padding(.top, TokensEspaciado.e4)
+            llamadoAAccion
         }
         .alert("No se pudo guardar el objetivo", isPresented: $errorGuardado) {
             Button("Aceptar", role: .cancel) {}
@@ -81,38 +79,65 @@ struct SelectorInteractivoDeMetasView: View {
         VStack(alignment: .leading, spacing: TokensEspaciado.e6) {
             PildoraDeEstado(String(localized: "Nueva etapa", comment: "Selector de metas"), simbolo: "flag.checkered", tono: .acento)
 
-            Text("Elegí tu próxima meta")
+            Text(String(localized: "Elegí tu próxima carrera", comment: "Selector de metas, título"))
                 .estilo(.tituloPantalla)
                 .accessibilityAddTraits(.isHeader)
 
-            Text("Tus metas anteriores ya finalizaron. Seleccioná el objetivo que querés conquistar para que el motor diseñe tu nuevo plan periodizado.")
+            Text(String(localized: "Tu plan anterior terminó o todavía no tenés una meta. Contanos qué querés correr y cuándo, y armamos semanas a tu medida.",
+                        comment: "Selector de metas, explicación"))
                 .estilo(.cuerpoSecundario, color: Paleta.textoTerciario)
                 .fixedSize(horizontal: false, vertical: true)
         }
         .padding(.top, TokensEspaciado.e4)
     }
 
-    // MARK: - Carrusel de metas
+    /// Los tres pasos, para que se sepa cuánto falta antes de empezar.
+    private var pasos: some View {
+        HStack(alignment: .top, spacing: TokensEspaciado.e8) {
+            paso(1, String(localized: "Elegí la meta", comment: "Selector de metas, paso 1"))
+            paso(2, String(localized: "Poné la fecha", comment: "Selector de metas, paso 2"))
+            paso(3, String(localized: "Armamos tu plan", comment: "Selector de metas, paso 3"))
+        }
+        .accessibilityElement(children: .combine)
+    }
 
-    private var carruselDeMetas: some View {
-        ScrollView(.horizontal, showsIndicators: false) {
-            HStack(spacing: TokensEspaciado.e10) {
-                ForEach(metas) { meta in
-                    tarjetaDeMeta(meta, elegida: meta.id == seleccionada)
-                }
+    private func paso(_ numero: Int, _ texto: String) -> some View {
+        HStack(spacing: TokensEspaciado.e6) {
+            Text("\(numero)")
+                .estilo(.chip, color: Paleta.sobreAcento)
+                .frame(width: TokensEspaciado.e20, height: TokensEspaciado.e20)
+                .background(Circle().fill(Paleta.acento))
+            Text(texto)
+                .estilo(.labelCampo, color: Paleta.textoSecundario)
+                .lineLimit(2)
+                .fixedSize(horizontal: false, vertical: true)
+        }
+        .frame(maxWidth: .infinity, alignment: .leading)
+    }
+
+    // MARK: - Grilla de metas
+
+    /// Dos columnas: las siete metas a la vista, sin tener que descubrir que
+    /// había más deslizando de costado.
+    private var grillaDeMetas: some View {
+        LazyVGrid(columns: [GridItem(.flexible(), spacing: TokensEspaciado.e10),
+                            GridItem(.flexible(), spacing: TokensEspaciado.e10)],
+                  spacing: TokensEspaciado.e10) {
+            ForEach(metas) { meta in
+                tarjetaDeMeta(meta, elegida: meta.id == seleccionada)
             }
-            .padding(.vertical, TokensEspaciado.e2)
         }
     }
 
     private func tarjetaDeMeta(_ meta: MetaDidactica, elegida: Bool) -> some View {
         Button {
-            withAnimation(.spring(response: 0.35, dampingFraction: 0.8)) {
+            if !elegida { Haptico.seleccion() }
+            withAnimation(reducirMovimiento ? nil : .spring(response: 0.35, dampingFraction: 0.8)) {
                 seleccionada = meta.id
                 fechaEvento = Calendar.current.date(byAdding: .weekOfYear, value: meta.semanasMinimas, to: Date()) ?? Date()
             }
         } label: {
-            VStack(alignment: .leading, spacing: TokensEspaciado.e8) {
+            VStack(alignment: .leading, spacing: TokensEspaciado.e6) {
                 HStack {
                     ZStack {
                         Circle()
@@ -123,6 +148,7 @@ struct SelectorInteractivoDeMetasView: View {
                             .foregroundStyle(elegida ? Paleta.sobreAcento : Paleta.textoSecundario)
                     }
                     .frame(width: TokensEspaciado.e36, height: TokensEspaciado.e36)
+                    .accessibilityHidden(true)
 
                     Spacer()
 
@@ -130,29 +156,46 @@ struct SelectorInteractivoDeMetasView: View {
                         Image(systemName: "checkmark.circle.fill")
                             .font(.system(size: TokensEspaciado.e16, weight: .bold))
                             .foregroundStyle(Paleta.acento)
+                            .accessibilityHidden(true)
                     }
                 }
 
                 Text(meta.titulo)
                     .estilo(.opcionTitulo, color: elegida ? Paleta.textoPrimario : Paleta.textoSecundario)
-                    .lineLimit(1)
+                    .lineLimit(2)
+                    .fixedSize(horizontal: false, vertical: true)
 
                 Text(meta.distancia)
                     .estilo(.chip, color: elegida ? Paleta.acento : Paleta.textoTerciario)
+
+                Spacer(minLength: 0)
+
+                HStack(spacing: TokensEspaciado.e4) {
+                    Image(systemName: "calendar")
+                        .font(.system(size: TokensTipografia.chipTamano, weight: .semibold))
+                        .accessibilityHidden(true)
+                    Text(meta.semanasRecomendadas)
+                        .estilo(.labelCampo, color: Paleta.textoTerciario)
+                        .lineLimit(1)
+                        .minimumScaleFactor(0.8)
+                }
+                .foregroundStyle(Paleta.textoTerciario)
             }
             .padding(TokensEspaciado.e12)
-            .frame(width: TokensEspaciado.e56 * 2 + TokensEspaciado.e40,
-                   height: TokensEspaciado.e56 * 2, alignment: .leading)
-            .background(Paleta.superficie)
+            .frame(maxWidth: .infinity, minHeight: TokensEspaciado.e56 * 2 + TokensEspaciado.e40, alignment: .topLeading)
+            .background(elegida ? Paleta.acentoSuaveFondo : Paleta.superficie)
             .clipShape(RoundedRectangle(cornerRadius: TokensRadio.card, style: .continuous))
             .overlay(
                 RoundedRectangle(cornerRadius: TokensRadio.card, style: .continuous)
                     .strokeBorder(elegida ? Paleta.acento : Paleta.bordeSuperficie,
                                   lineWidth: elegida ? TokensEspaciado.e2 : TokensEspaciado.e1)
             )
+            .contentShape(RoundedRectangle(cornerRadius: TokensRadio.card, style: .continuous))
         }
-        .buttonStyle(.plain)
+        .buttonStyle(EstiloPresionado())
+        .accessibilityElement(children: .combine)
         .accessibilityAddTraits(elegida ? [.isButton, .isSelected] : .isButton)
+        .accessibilityHint(String(localized: "Elige esta meta para tu próximo plan", comment: "VoiceOver, selector de metas"))
     }
 
     // MARK: - Tarjeta didáctica de la meta elegida
@@ -163,7 +206,8 @@ struct SelectorInteractivoDeMetasView: View {
                 Image(systemName: "info.circle.fill")
                     .font(.system(size: TokensEspaciado.e14, weight: .semibold))
                     .foregroundStyle(Paleta.acento)
-                Text("¿En qué consiste?")
+                    .accessibilityHidden(true)
+                Text(String(localized: "¿En qué consiste \(metaActual.titulo)?", comment: "Selector de metas"))
                     .estilo(.tituloCard)
             }
 
@@ -182,15 +226,24 @@ struct SelectorInteractivoDeMetasView: View {
         .padding(TokensEspaciado.e14)
         .frame(maxWidth: .infinity, alignment: .leading)
         .tarjeta()
+        .accessibilityElement(children: .combine)
     }
 
     // MARK: - Fecha del evento
 
+    /// Con fecha, menos semanas que las mínimas de la meta merecen un aviso.
+    private var faltaTiempo: Bool { conFecha && semanasCalculadas < metaActual.semanasMinimas }
+
     private var selectorDeFecha: some View {
         VStack(alignment: .leading, spacing: TokensEspaciado.e10) {
             HStack {
-                Text("Fecha del evento")
-                    .estilo(.opcionTitulo)
+                VStack(alignment: .leading, spacing: TokensEspaciado.e2) {
+                    Text(String(localized: "¿Ya tenés fecha de carrera?", comment: "Selector de metas, fecha"))
+                        .estilo(.opcionTitulo)
+                    Text(String(localized: "Con fecha, el plan cuenta las semanas hasta ese día.", comment: "Selector de metas, fecha"))
+                        .estilo(.labelCampo, color: Paleta.textoTerciario)
+                        .fixedSize(horizontal: false, vertical: true)
+                }
                 Spacer()
                 Toggle("", isOn: $conFecha)
                     .labelsHidden()
@@ -207,8 +260,27 @@ struct SelectorInteractivoDeMetasView: View {
                     Image(systemName: "calendar.badge.clock")
                         .font(.system(size: TokensEspaciado.e12))
                         .foregroundStyle(Paleta.acento)
+                        .accessibilityHidden(true)
                     Text("El plan durará \(semanasCalculadas) semanas de preparación")
                         .estilo(.chip, color: Paleta.acento)
+                }
+
+                if faltaTiempo {
+                    HStack(alignment: .top, spacing: TokensEspaciado.e6) {
+                        Image(systemName: "exclamationmark.triangle")
+                            .font(.system(size: TokensEspaciado.e12, weight: .semibold))
+                            .foregroundStyle(Paleta.textoSecundario)
+                            .accessibilityHidden(true)
+                        Text(String(localized: "Es menos de lo recomendado para esta meta (al menos \(metaActual.semanasMinimas) semanas). Podés elegir una fecha más lejana o una meta más corta.",
+                                    comment: "Selector de metas, aviso de poco tiempo"))
+                            .estilo(.labelCampo, color: Paleta.textoSecundario)
+                            .fixedSize(horizontal: false, vertical: true)
+                    }
+                    .padding(TokensEspaciado.e10)
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                    .background(Paleta.superficieAlterna)
+                    .clipShape(RoundedRectangle(cornerRadius: TokensRadio.input, style: .continuous))
+                    .accessibilityElement(children: .combine)
                 }
             } else {
                 Text("Se armará un plan continuo sin fecha límite.")
@@ -220,6 +292,24 @@ struct SelectorInteractivoDeMetasView: View {
         .tarjeta()
     }
 
+    // MARK: - Llamado a la acción
+
+    private var llamadoAAccion: some View {
+        VStack(spacing: TokensEspaciado.e8) {
+            BotonPrimario(String(localized: "Armar mi plan de \(metaActual.titulo)", comment: "Selector de metas"), cargando: guardando) {
+                Haptico.toque()
+                guardar()
+            }
+            Text(String(localized: "Con tu meta y la fecha, el plan arma tus semanas: etapas, días y kilómetros.",
+                        comment: "Selector de metas, qué pasa al tocar"))
+                .estilo(.labelCampo, color: Paleta.textoTerciario)
+                .multilineTextAlignment(.center)
+                .frame(maxWidth: .infinity)
+                .fixedSize(horizontal: false, vertical: true)
+        }
+        .padding(.top, TokensEspaciado.e4)
+    }
+
     // MARK: - Guardar
 
     private func guardar() {
@@ -228,6 +318,7 @@ struct SelectorInteractivoDeMetasView: View {
             let fechaMs: Int64? = conFecha ? DatosRegistro.fechaDelCalendarioEnMs(fechaEvento, zona: .current) : nil
             let nuevoObjetivo = ObjetivoDeUsuario(id: "principal", goal: seleccionada, goalDateMs: fechaMs)
             if await flujo.guardarObjetivos([nuevoObjetivo]) {
+                Haptico.exito()
                 await estado.actualizar()
             } else {
                 errorGuardado = true

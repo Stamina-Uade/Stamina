@@ -1,0 +1,614 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<title>Backend de Stamina</title>
+<meta name="viewport" content="width=2400">
+<style>
+  :root {
+    --bg: #0B0B0C;
+    --s1: #121214;
+    --s2: #18181B;
+    --s3: #202024;
+    --line: #2C2C31;
+    --line2: #3A3A40;
+    --t1: #F2F2F4;
+    --t2: #B4B4BA;
+    --t3: #7C7C84;
+    --pink: #FF23A7;
+    --pink-soft: rgba(255, 35, 167, 0.12);
+    --pink-line: rgba(255, 35, 167, 0.55);
+    --mono: "DejaVu Sans Mono", "JetBrains Mono", ui-monospace, Menlo, monospace;
+    --sans: "Inter", "Inter Display", system-ui, -apple-system, "Segoe UI", sans-serif;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body { background: var(--bg); color: var(--t1); font-family: var(--sans); }
+  body { width: 2400px; }
+  #lienzo { position: relative; width: 2400px; padding: 56px 56px 60px; }
+  svg#flechas { position: absolute; left: 0; top: 0; pointer-events: none; overflow: visible; z-index: 5; }
+
+  .mono { font-family: var(--mono); }
+  .rosa { color: var(--pink); }
+  .t2 { color: var(--t2); }
+  .t3 { color: var(--t3); }
+
+  /* ---------- encabezado ---------- */
+  header { display: flex; flex-direction: column; gap: 22px; margin-bottom: 40px; }
+  .titulo { font-size: 46px; font-weight: 800; letter-spacing: -0.02em; line-height: 1.05; }
+  .titulo b { color: var(--pink); font-weight: 800; }
+  .subtitulo { margin-top: 12px; font-size: 19px; color: var(--t2); }
+  .subtitulo .mono { font-size: 16px; color: var(--t1); }
+  .leyenda { display: flex; gap: 34px; white-space: nowrap; align-items: center; font-size: 15px; color: var(--t2); }
+  .leyenda span { display: inline-flex; align-items: center; gap: 8px; }
+  .lin { width: 34px; height: 0; border-top: 3px solid var(--pink); display: inline-block; }
+  .lin.gris { border-top-color: var(--t3); }
+  .lin.punt { border-top: 3px dashed var(--t3); }
+
+  /* ---------- columnas ---------- */
+  .principal { display: grid; grid-template-columns: 330px 1350px 468px; column-gap: 70px; align-items: start; }
+  .columna-titulo { font-size: 14px; font-weight: 700; letter-spacing: 0.14em; text-transform: uppercase; color: var(--t3); margin-bottom: 14px; }
+  .caja { background: var(--s1); border: 1px solid var(--line); border-radius: 16px; padding: 18px 20px; }
+  .caja h3 { font-size: 20px; font-weight: 700; margin-bottom: 4px; display: flex; align-items: center; gap: 10px; }
+  .caja .sub { font-size: 14px; color: var(--t3); margin-bottom: 10px; }
+  .caja ul { list-style: none; font-size: 14.5px; color: var(--t2); line-height: 1.5; }
+  .caja ul li { padding-left: 14px; position: relative; margin-top: 3px; }
+  .caja ul li::before { content: ""; position: absolute; left: 0; top: 9px; width: 5px; height: 5px; border-radius: 50%; background: var(--t3); }
+  .caja ul li b { color: var(--t1); font-weight: 600; }
+  .icono { width: 30px; height: 30px; border-radius: 8px; background: var(--s3); border: 1px solid var(--line2); display: inline-flex; align-items: center; justify-content: center; flex: none; }
+  .icono svg { width: 18px; height: 18px; stroke: var(--t1); fill: none; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
+  .icono.rosa { background: var(--pink-soft); border-color: var(--pink-line); }
+  .icono.rosa svg { stroke: var(--pink); }
+
+  .clientes { display: flex; flex-direction: column; gap: 22px; }
+  #c-reloj { margin-bottom: 26px; }
+  .clientes .caja.destacada { border-color: var(--pink-line); box-shadow: 0 0 0 1px rgba(255,35,167,0.12) inset; }
+
+  /* ---------- pipeline ---------- */
+  .servidor-marco { border: 1px solid var(--line); border-radius: 22px; padding: 22px 24px 26px; background: linear-gradient(180deg, #101012 0%, #0D0D0F 100%); position: relative; }
+  .servidor-cab { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 18px; }
+  .servidor-cab h2 { font-size: 26px; font-weight: 800; letter-spacing: -0.01em; }
+  .servidor-cab h2 .mono { font-size: 17px; color: var(--t2); font-weight: 400; margin-left: 10px; }
+  .servidor-cab .nota { font-size: 14.5px; color: var(--t2); text-align: right; line-height: 1.45; }
+
+  .pipeline { display: grid; grid-template-columns: repeat(8, minmax(0, 1fr)); column-gap: 20px; }
+  .etapa { background: var(--s2); border: 1px solid var(--line2); border-radius: 12px; padding: 12px 12px 14px; position: relative; min-height: 206px; }
+  .etapa .n { font-family: var(--mono); font-size: 13px; color: var(--pink); font-weight: 700; }
+  .etapa h4 { font-size: 16px; font-weight: 700; margin: 4px 0 7px; line-height: 1.2; }
+  .etapa p { font-size: 14px; color: var(--t2); line-height: 1.42; overflow-wrap: anywhere; }
+  .etapa p code { white-space: normal !important; }
+  .etapa p code, .dom code, .paso code, .hall code { font-family: var(--mono); font-size: 13px; color: var(--t1); background: var(--s3); padding: 1px 5px; border-radius: 5px; white-space: nowrap; }
+  .etapa.clave { border-color: var(--pink-line); background: linear-gradient(180deg, rgba(255,35,167,0.10), rgba(255,35,167,0.03)); }
+  .etapa + .etapa::before { content: ""; position: absolute; left: -19px; top: 50%; width: 18px; height: 2px; background: var(--pink); }
+  .etapa + .etapa::after { content: ""; position: absolute; left: -7px; top: calc(50% - 5px); border-left: 7px solid var(--pink); border-top: 6px solid transparent; border-bottom: 6px solid transparent; }
+  .corte { margin-top: 14px; display: flex; align-items: center; gap: 12px; font-size: 14.5px; color: var(--t2); }
+  .corte .barra { flex: 1; height: 0; border-top: 2px dashed var(--line2); }
+  .corte b { color: var(--t1); font-weight: 600; }
+
+  /* ---------- dominios ---------- */
+  .dominios-cab { display: flex; justify-content: space-between; align-items: baseline; margin: 28px 0 12px; }
+  .dominios-cab h3 { font-size: 20px; font-weight: 700; }
+  .dominios-cab .t3 { font-size: 14.5px; }
+  .dominios { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; }
+  .dom { background: var(--s1); border: 1px solid var(--line); border-radius: 14px; padding: 14px 15px 14px; display: flex; flex-direction: column; }
+  .dom .cab { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
+  .dom .cab h5 { font-size: 17px; font-weight: 700; }
+  .dom .cab .carpeta { font-family: var(--mono); font-size: 12.5px; color: var(--t3); }
+  .ep { font-family: var(--mono); font-size: 13.5px; color: var(--t1); line-height: 1.62; white-space: nowrap; }
+  .ep .m { display: inline-block; width: 52px; color: var(--t3); font-weight: 700; }
+  .ep .m.w { color: var(--pink); }
+  .dom .desc { font-size: 14px; color: var(--t2); line-height: 1.42; margin-top: 8px; }
+  .tablas { margin-top: auto; padding-top: 10px; display: flex; flex-wrap: wrap; gap: 5px; }
+  .tabla { font-family: var(--mono); font-size: 12.5px; color: var(--t2); border: 1px solid var(--line2); background: var(--s2); border-radius: 6px; padding: 2px 7px; }
+  .tabla.r { border-color: rgba(255,255,255,0.18); color: var(--t1); background: #26262B; }
+  .tabla.x { border-style: dashed; color: var(--t2); }
+  .badge { font-family: var(--mono); font-size: 11.5px; font-weight: 700; letter-spacing: 0.04em; padding: 2px 7px; border-radius: 999px; }
+  .badge.jwt { color: var(--pink); background: var(--pink-soft); border: 1px solid var(--pink-line); }
+  .badge.pub { color: var(--t2); background: var(--s3); border: 1px solid var(--line2); }
+  .badge.mix { color: var(--t1); background: var(--s3); border: 1px solid var(--line2); }
+  .dom.motor { border-color: var(--pink-line); }
+
+  /* ---------- datos ---------- */
+  .datos { display: flex; flex-direction: column; gap: 20px; }
+  .grupo { margin-top: 10px; }
+  .grupo .g { font-size: 13px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: var(--t3); margin-bottom: 6px; }
+  .grupo .tablas { padding-top: 0; }
+  .grupo .tabla { font-size: 13px; padding: 3px 8px; }
+  .kv { font-size: 14px; color: var(--t2); line-height: 1.45; display: grid; grid-template-columns: 172px 1fr; column-gap: 10px; row-gap: 5px; margin-top: 8px; }
+  .kv .k { font-family: var(--mono); font-size: 13px; color: var(--t1); white-space: nowrap; }
+  .ext { display: grid; grid-template-columns: 1fr; gap: 10px; margin-top: 6px; }
+  .ext .e { background: var(--s2); border: 1px solid var(--line2); border-radius: 10px; padding: 10px 12px; }
+  .ext .e b { font-size: 15px; display: block; margin-bottom: 2px; }
+  .ext .e > span { font-size: 14px; color: var(--t2); line-height: 1.42; display: block; }
+
+  /* ---------- secuencias ---------- */
+  .banda { margin-top: 64px; border-top: 1px solid var(--line); padding-top: 34px; }
+  .banda-cab { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 22px; }
+  .banda-cab h2 { font-size: 28px; font-weight: 800; }
+  .banda-cab .t3 { font-size: 15px; }
+  .secuencias { display: grid; grid-template-columns: repeat(3, 1fr); gap: 34px; align-items: start; }
+  .sec { background: var(--s1); border: 1px solid var(--line); border-radius: 18px; padding: 20px 22px 22px; }
+  .sec h3 { font-size: 21px; font-weight: 800; margin-bottom: 4px; }
+  .sec h3 .rosa { font-family: var(--mono); margin-right: 8px; }
+  .sec .sub { font-size: 14.5px; color: var(--t3); margin-bottom: 16px; }
+  .pasos { display: flex; flex-direction: column; }
+  .paso { position: relative; background: var(--s2); border: 1px solid var(--line2); border-radius: 12px; padding: 11px 14px 12px 50px; }
+  .paso .num { position: absolute; left: 12px; top: 11px; width: 26px; height: 26px; border-radius: 50%; background: var(--pink-soft); border: 1px solid var(--pink-line); color: var(--pink); font-family: var(--mono); font-size: 13px; font-weight: 700; display: flex; align-items: center; justify-content: center; }
+  .paso .q { font-size: 15.5px; font-weight: 700; line-height: 1.3; }
+  .paso .q .mono { font-size: 14px; font-weight: 700; }
+  .paso .d { font-size: 14px; color: var(--t2); line-height: 1.45; margin-top: 3px; }
+  .paso.donde .q::after { content: attr(data-actor); float: right; font-family: var(--mono); font-size: 12px; font-weight: 400; color: var(--t3); border: 1px solid var(--line2); border-radius: 999px; padding: 1px 8px; margin-left: 8px; }
+  .baja { height: 24px; position: relative; }
+  .baja::before { content: ""; position: absolute; left: 25px; top: 2px; bottom: 7px; width: 2px; background: var(--pink); }
+  .baja::after { content: ""; position: absolute; left: 20px; bottom: 1px; border-top: 7px solid var(--pink); border-left: 6px solid transparent; border-right: 6px solid transparent; }
+  .baja span { position: absolute; left: 44px; top: 3px; font-size: 13px; color: var(--t3); font-family: var(--mono); }
+  .rama { display: grid; gap: 10px; }
+  .rama.dos { grid-template-columns: 1fr 1fr; }
+  .rama.tres { grid-template-columns: 1fr 1fr 1fr; }
+  .hoja { border-radius: 10px; padding: 9px 11px; border: 1px solid var(--line2); background: var(--bg); }
+  .hoja b { font-size: 14.5px; display: block; margin-bottom: 2px; }
+  .hoja > span { font-size: 13.5px; color: var(--t2); line-height: 1.4; display: block; }
+  .hoja.ok b { color: var(--t1); }
+  .hoja.mal { border-color: var(--pink-line); }
+  .hoja.mal b { color: var(--pink); }
+  .alerta { margin-top: 12px; font-size: 14px; color: var(--t2); line-height: 1.45; border-left: 3px solid var(--pink); padding: 6px 0 6px 12px; }
+  .alerta b { color: var(--pink); }
+
+  /* ---------- hallazgos ---------- */
+  .hallazgos { margin-top: 40px; }
+  .hallazgos h2 { font-size: 22px; font-weight: 800; margin-bottom: 14px; }
+  .hallazgos h2 .t3 { font-size: 15px; font-weight: 400; margin-left: 10px; }
+  .halls { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; }
+  .hall { background: var(--s1); border: 1px solid var(--line); border-radius: 12px; padding: 12px 14px; }
+  .hall .sev { font-family: var(--mono); font-size: 12px; font-weight: 700; color: var(--pink); letter-spacing: 0.06em; }
+  .hall .sev.m { color: var(--t2); }
+  .hall b { display: block; font-size: 15px; margin: 3px 0 4px; line-height: 1.3; }
+  .hall > span { font-size: 13.5px; color: var(--t2); line-height: 1.42; display: block; }
+  .hall .ref { font-family: var(--mono); font-size: 12.5px; color: var(--t3); margin-top: 6px; display: block; }
+
+  .etq { font-family: var(--sans); font-size: 13.5px; fill: var(--t2); }
+  .etq-fondo { fill: var(--bg); }
+</style>
+</head>
+<body>
+<div id="lienzo">
+<svg id="flechas"></svg>
+
+<header>
+  <div>
+    <div class="titulo">Stamina · <b>cómo funciona el backend</b></div>
+    <div class="subtitulo">Node 22 · TypeScript · Fastify 5 · PostgreSQL · Redis &nbsp;—&nbsp; un solo proceso en <span class="mono">127.0.0.1:8082</span>, todo bajo <span class="mono">/v1</span>, contrato <span class="mono">shared/api/openapi.yaml 1.2.0</span></div>
+  </div>
+  <div class="leyenda">
+    <span><i class="lin"></i>pedido HTTP / flujo principal</span>
+    <span><i class="lin gris"></i>lectura / escritura de datos</span>
+    <span><i class="lin punt"></i>en segundo plano / fuera de banda</span>
+    <span><span class="badge jwt">JWT</span>&nbsp;requiere sesión</span>
+    <span><span class="badge pub">PÚBLICO</span></span>
+  </div>
+</header>
+
+<div class="principal">
+
+  <!-- =================== CLIENTES =================== -->
+  <div>
+    <div class="columna-titulo">Clientes</div>
+    <div class="clientes">
+      <div class="caja" id="c-reloj">
+        <h3><span class="icono"><svg viewBox="0 0 24 24"><rect x="6" y="6" width="12" height="12" rx="3"/><path d="M9 6l1-3h4l1 3M9 18l1 3h4l1-3"/></svg></span>Apple Watch</h3>
+        <div class="sub">watchOS · no habla con el servidor</div>
+        <ul>
+          <li>Graba la salida: GPS, pulso, tramos</li>
+          <li>La guarda como archivo JSON durable hasta que el teléfono confirma</li>
+          <li>Comparte series de gimnasio con el teléfono</li>
+        </ul>
+      </div>
+      <div class="caja destacada" id="c-iphone">
+        <h3><span class="icono rosa"><svg viewBox="0 0 24 24"><rect x="7" y="2.5" width="10" height="19" rx="2.5"/><path d="M11 18.5h2"/></svg></span>App iPhone</h3>
+        <div class="sub">SwiftUI · paquete TrainerCore</div>
+        <ul>
+          <li><b>ClienteAPI</b> + <b>RenovadorDeSesion</b>: un solo refresh en vuelo; ante 401, renueva y reintenta una vez</li>
+          <li><b>CacheDelServidor</b>: offline‑first, muestra lo último guardado</li>
+          <li>Colas en disco: salidas, <b>ColaDeComidas</b>, series</li>
+          <li><b>PuertaDeVersion</b> → <span class="mono">GET /version</span></li>
+        </ul>
+      </div>
+      <div class="caja" id="c-android">
+        <h3><span class="icono"><svg viewBox="0 0 24 24"><rect x="7" y="2.5" width="10" height="19" rx="2.5"/><path d="M10 5h4"/></svg></span>Android + Wear OS</h3>
+        <div class="sub">Kotlin · ClienteApi.kt</div>
+        <ul>
+          <li>Mismo contrato y mismas reglas de sesión e idempotencia</li>
+          <li>Plataformas de la puerta: <span class="mono">android</span>, <span class="mono">wear</span></li>
+        </ul>
+      </div>
+      <div class="caja" id="c-web">
+        <h3><span class="icono"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3c3 3.5 3 14.5 0 18M12 3c-3 3.5-3 14.5 0 18"/></svg></span>Landing web</h3>
+        <div class="sub">stamina.com.ar</div>
+        <ul>
+          <li>Sitio estático que sirve Apache desde <span class="mono">/var/www/stamina-web</span></li>
+          <li>Sin CORS: la API es sólo para apps nativas</li>
+        </ul>
+      </div>
+      <div class="columna-titulo" style="margin:18px 0 -8px">Despliegue</div>
+      <div class="caja" id="ops">
+        <h3><span class="icono"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3M4.9 4.9l2.1 2.1M17 17l2.1 2.1M4.9 19.1L7 17M17 7l2.1-2.1"/></svg></span>Operación · systemd</h3>
+        <div class="kv" style="grid-template-columns:118px 1fr">
+          <span class="k">trainer-api</span><span>MemoryMax 300 M, CPU 60 %, sistema de archivos de sólo lectura</span>
+          <span class="k">trainer-redis</span><span>su propio Redis, 64 M</span>
+          <span class="k" id="k-purga">trainer-purgar</span><span>timer diario 04:40 → <span class="mono">purgar.js</span>: historial de series de más de 90 días, idempotencia y sesiones vencidas</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- =================== SERVIDOR =================== -->
+  <div>
+    <div class="columna-titulo">Servidor · una máquina EC2 compartida</div>
+    <div class="servidor-marco" id="servidor">
+      <div class="servidor-cab">
+        <h2>trainer-api <span class="mono">backend/src/servidor.ts · index.ts</span></h2>
+        <div class="nota">Al arrancar: secretos de AWS → <span class="mono">config.ts</span> (falla si falta algo)<br>No migra solo: <span class="mono">npm run migrar</span> es un paso aparte</div>
+      </div>
+
+      <div class="pipeline" id="pipeline">
+        <div class="etapa" id="e1"><div class="n">01</div><h4>TLS y proxy</h4><p>Apache termina TLS y pasa sólo <code>/v1/*</code> a <code>127.0.0.1:8082</code>. Si el backend cae, responde 502/503 en JSON.</p></div>
+        <div class="etapa" id="e2"><div class="n">02</div><h4>Fastify + límite de tasa</h4><p>Cuerpo ≤ 64 KB, quita <code>__proto__</code>. 60 pedidos/min por ruta + IP; 8/min en login, alta y recuperación.</p></div>
+        <div class="etapa" id="e3"><div class="n">03</div><h4>Validación de esquema</h4><p>Ajv con esquemas generados desde <code>openapi.yaml</code>. Si no cumple: <code>bad_request</code> o <code>weak_password</code>.</p></div>
+        <div class="etapa clave" id="e4"><div class="n">04</div><h4>Guardia de auth</h4><p>JWT HS256 fijado en código (iss <code>trainer</code>, aud <code>trainer-app</code>) y además la sesión viva en <code>sesiones</code>.</p></div>
+        <div class="etapa clave" id="e5"><div class="n">05</div><h4>Idempotencia</h4><p><code>Idempotency-Key</code> + usuario + ruta + hash del cuerpo en la tabla <code>idempotencia</code> (24 h). Si se repite, la misma respuesta.</p></div>
+        <div class="etapa" id="e6"><div class="n">06</div><h4>Ruta de dominio</h4><p><code>rutas.ts</code> traduce el contrato y llama a <code>servicio.ts</code> o al motor. El id de usuario sale sólo del token.</p></div>
+        <div class="etapa" id="e7"><div class="n">07</div><h4>Repositorio</h4><p>SQL siempre parametrizado; cada consulta filtra por <code>usuario_id</code>. Pool de 5 y tope de 10 s por consulta.</p></div>
+        <div class="etapa" id="e8"><div class="n">08</div><h4>Respuesta o error</h4><p>Éxito: <code>{ data }</code>. Error: <code>{ error: { code, message } }</code>, con códigos estables y <code>Retry-After</code> en el 429.</p></div>
+      </div>
+      <div class="corte"><span><b>Cualquier etapa puede cortar</b> → <span class="mono">setErrorHandler</span> (400 · 401 · 409 · 413 · 426 · 429 · 500 sin detalle en producción)</span><span class="barra"></span><span>Rutas públicas (<span class="mono">/health</span>, <span class="mono">/version</span>, <span class="mono">/legal</span>, <span class="mono">/auth/*</span>) saltean 04</span></div>
+
+      <div class="dominios-cab">
+        <h3>Dominios · <span class="mono t2" style="font-size:16px;font-weight:400">src/dominios/*</span></h3>
+        <span class="t3">rutas → servicio → repositorio · <span class="tabla r" style="font-size:12.5px">tabla</span> escribe &nbsp;<span class="tabla" style="font-size:12.5px">tabla</span> sólo lee</span>
+      </div>
+      <div class="dominios" id="dominios">
+
+        <div class="dom" id="d-auth">
+          <div class="cab"><h5>Auth</h5><span class="badge mix">PÚBLICO</span></div>
+          <div class="ep"><span class="m w">POST</span>/auth/register</div>
+          <div class="ep"><span class="m w">POST</span>/auth/register/verify</div>
+          <div class="ep"><span class="m w">POST</span>/auth/register/complete</div>
+          <div class="ep"><span class="m w">POST</span>/auth/login</div>
+          <div class="ep"><span class="m w">POST</span>/auth/refresh</div>
+          <div class="ep"><span class="m w">POST</span>/auth/logout <span class="badge jwt">JWT</span></div>
+          <div class="ep"><span class="m w">POST</span>/auth/password/forgot</div>
+          <div class="ep"><span class="m w">POST</span>/auth/password/verify</div>
+          <div class="ep"><span class="m w">POST</span>/auth/password/reset</div>
+          <div class="desc">argon2id, anti‑enumeración (también por tiempo), códigos de correo en Redis.</div>
+          <div class="tablas"><span class="tabla r">usuarios</span><span class="tabla r">sesiones</span><span class="tabla r">aceptaciones_legales</span><span class="tabla r">perfiles</span><span class="tabla x">Redis</span></div>
+        </div>
+
+        <div class="dom motor" id="d-plan">
+          <div class="cab"><h5>Plan · <span class="rosa">motor</span></h5><span class="badge jwt">JWT</span></div>
+          <div class="ep"><span class="m">GET</span>/plan</div>
+          <div class="ep"><span class="m">GET</span>/plans</div>
+          <div class="ep"><span class="m">GET</span>/plan/routine?date_ms=</div>
+          <div class="desc">El plan no se guarda: se recalcula en cada pedido con un motor puro (<code>motor/</code>). Sólo se guarda el ancla del bloque. La rutina elige ejercicios según el equipamiento y muestra las series anteriores.</div>
+          <div class="tablas"><span class="tabla r">planes</span><span class="tabla">perfiles</span><span class="tabla">objetivos_usuario</span><span class="tabla">actividades</span><span class="tabla">series_gimnasio</span><span class="tabla">ejercicios</span></div>
+        </div>
+
+        <div class="dom" id="d-act">
+          <div class="cab"><h5>Actividades</h5><span class="badge jwt">JWT</span></div>
+          <div class="ep"><span class="m">GET</span>/activities?cursor=</div>
+          <div class="ep"><span class="m w">PUT</span>/activities/{id}</div>
+          <div class="ep"><span class="m w">DEL</span>/activities/{id}</div>
+          <div class="ep"><span class="m w">PUT</span>/activities/{id}/route</div>
+          <div class="ep"><span class="m">GET</span>/activities/{id}/route</div>
+          <div class="desc">El id lo genera el cliente: un PUT repetido no duplica. Se borra de forma lógica y el borrado gana sobre un PUT tardío.</div>
+          <div class="tablas"><span class="tabla r">actividades</span><span class="tabla r">recorridos_actividades</span></div>
+        </div>
+
+        <div class="dom" id="d-gym">
+          <div class="cab"><h5>Gimnasio</h5><span class="badge jwt">JWT</span></div>
+          <div class="ep"><span class="m">GET</span>/gym/sessions</div>
+          <div class="ep"><span class="m">GET</span>/gym/sessions/{id}</div>
+          <div class="ep"><span class="m w">POST</span>/gym/sessions/{id}/sets</div>
+          <div class="desc">Sincroniza un lote: fusiona fila por fila (conmutativa e idempotente, igual que en el teléfono) en una transacción. Usa <code>Idempotency-Key</code>.</div>
+          <div class="tablas"><span class="tabla r">sesiones_gimnasio</span><span class="tabla r">series_gimnasio</span><span class="tabla r">series_gimnasio_historial</span></div>
+        </div>
+
+        <div class="dom" id="d-perfil">
+          <div class="cab"><h5>Perfil</h5><span class="badge jwt">JWT</span></div>
+          <div class="ep"><span class="m">GET</span>/me</div>
+          <div class="ep"><span class="m w">PATCH</span>/me <span class="t3" style="font-size:12px">idempotente</span></div>
+          <div class="desc">Objetivo, nivel, deporte, zona horaria, días y horario, peso, nacimiento, sexo, equipamiento.</div>
+          <div class="tablas"><span class="tabla r">perfiles</span><span class="tabla r">idempotencia</span></div>
+        </div>
+
+        <div class="dom" id="d-obj">
+          <div class="cab"><h5>Objetivos</h5><span class="badge jwt">JWT</span></div>
+          <div class="ep"><span class="m">GET</span>/me/goals</div>
+          <div class="ep"><span class="m w">PUT</span>/me/goals</div>
+          <div class="desc">El principal más objetivos adicionales; cada uno tiene su propia ancla de plan.</div>
+          <div class="tablas"><span class="tabla r">objetivos_usuario</span><span class="tabla r">perfiles</span></div>
+        </div>
+
+        <div class="dom" id="d-nut">
+          <div class="cab"><h5>Nutrición</h5><span class="badge jwt">JWT</span></div>
+          <div class="ep"><span class="m">GET</span>/nutrition/day?date_ms=</div>
+          <div class="ep"><span class="m w">PUT</span>/meals/{id}</div>
+          <div class="ep"><span class="m w">DEL</span>/meals/{id}</div>
+          <div class="desc">Las metas del día salen del perfil y de la sesión del plan, con guardarrailes. Las comidas se guardan con el id que pone el cliente.</div>
+          <div class="tablas"><span class="tabla r">comidas</span><span class="tabla">perfiles</span><span class="tabla">planes</span></div>
+        </div>
+
+        <div class="dom" id="d-cuenta">
+          <div class="cab"><h5>Cuenta</h5><span class="badge jwt">JWT</span></div>
+          <div class="ep"><span class="m w">POST</span>/me/delete</div>
+          <div class="ep"><span class="m">GET</span>/me/export</div>
+          <div class="desc">Borrar pide la contraseña y es un <code>DELETE</code> físico que arrastra todo en cascada. Exportar junta todo (3/min).</div>
+          <div class="tablas"><span class="tabla r">usuarios ↘ cascada</span><span class="tabla">todas las del usuario</span></div>
+        </div>
+
+        <div class="dom" id="d-cat">
+          <div class="cab"><h5>Catálogo</h5><span class="badge jwt">JWT</span></div>
+          <div class="ep"><span class="m">GET</span>/exercises?cursor=</div>
+          <div class="ep"><span class="m">GET</span>/exercises/dictionary</div>
+          <div class="desc">Ejercicios, músculos, patrones y equipamiento, con nombres traducidos. Se cargan con <code>npm run sembrar</code>.</div>
+          <div class="tablas"><span class="tabla">ejercicios</span><span class="tabla">diccionario_ejercicios</span></div>
+        </div>
+
+        <div class="dom" id="d-clima">
+          <div class="cab"><h5>Clima</h5><span class="badge jwt">JWT</span></div>
+          <div class="ep"><span class="m w">POST</span>/weather/forecast</div>
+          <div class="desc">Redondea la ubicación a 0,1° (unos 11 km) y le pide la temperatura de las próximas 48 h a MET Norway. Caché en memoria (128 celdas) y 6 pedidos/min.</div>
+          <div class="tablas"><span class="tabla x">api.met.no</span></div>
+        </div>
+
+        <div class="dom" id="d-ver">
+          <div class="cab"><h5>Versión</h5><span class="badge pub">PÚBLICO</span></div>
+          <div class="ep"><span class="m">GET</span>/version?platform=&amp;build=</div>
+          <div class="desc">Devuelve <code>ok</code>, <code>update_recommended</code> o <code>update_required</code>. Se cambia con un UPDATE, sin desplegar. Si falla, 503 y la app deja pasar.</div>
+          <div class="tablas"><span class="tabla">app_version_gate</span><span class="tabla x">Redis 60 s</span></div>
+        </div>
+
+        <div class="dom" id="d-legal">
+          <div class="cab"><h5>Legal · Health</h5><span class="badge pub">PÚBLICO</span></div>
+          <div class="ep"><span class="m">GET</span>/legal</div>
+          <div class="ep"><span class="m">GET</span>/health</div>
+          <div class="desc">Aviso de salud y términos con su versión (el alta exige la vigente). Health informa base y Redis, y nada más.</div>
+          <div class="tablas"><span class="tabla x">legal/textos.ts</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- =================== DATOS =================== -->
+  <div>
+    <div class="columna-titulo">Datos y servicios externos</div>
+    <div class="datos">
+      <div class="caja" id="pg">
+        <h3><span class="icono rosa"><svg viewBox="0 0 24 24"><ellipse cx="12" cy="6" rx="7" ry="3"/><path d="M5 6v12c0 1.7 3.1 3 7 3s7-1.3 7-3V6M5 12c0 1.7 3.1 3 7 3s7-1.3 7-3"/></svg></span>PostgreSQL</h3>
+        <div class="sub">Fuente de verdad · base y rol propios · 15 migraciones <span class="mono">001–015</span></div>
+        <div class="grupo"><div class="g">Identidad y sesión</div><div class="tablas"><span class="tabla r">usuarios</span><span class="tabla r">sesiones</span><span class="tabla r">aceptaciones_legales</span><span class="tabla r">idempotencia</span></div></div>
+        <div class="grupo"><div class="g">Perfil y plan</div><div class="tablas"><span class="tabla r">perfiles</span><span class="tabla r">objetivos_usuario</span><span class="tabla r">planes</span></div></div>
+        <div class="grupo"><div class="g">Entrenamiento</div><div class="tablas"><span class="tabla r">actividades</span><span class="tabla r">recorridos_actividades</span><span class="tabla r">sesiones_gimnasio</span><span class="tabla r">series_gimnasio</span><span class="tabla r">series_gimnasio_historial</span></div></div>
+        <div class="grupo"><div class="g">Nutrición</div><div class="tablas"><span class="tabla r">comidas</span></div></div>
+        <div class="grupo"><div class="g">Referencia</div><div class="tablas"><span class="tabla">ejercicios</span><span class="tabla">diccionario_ejercicios</span><span class="tabla">app_version_gate</span></div></div>
+        <div class="kv" style="margin-top:12px">
+          <span class="k">sesiones</span><span>refresh guardado como SHA‑256, en familias con <span class="mono">anterior_id</span></span>
+          <span class="k">planes</span><span>sólo el ancla: hash, fecha de inicio y versión del motor</span>
+          <span class="k">on delete cascade</span><span>borrar un usuario borra todo lo suyo</span>
+        </div>
+      </div>
+
+      <div class="caja" id="redis">
+        <h3><span class="icono"><svg viewBox="0 0 24 24"><path d="M4 8l8-4 8 4-8 4-8-4zM4 12l8 4 8-4M4 16l8 4 8-4"/></svg></span>Redis privado</h3>
+        <div class="sub">DB 3 · prefijo <span class="mono">trainer:</span> · 16 MB · todo con TTL<br>Con <span class="mono">REDIS_URL=disabled</span>: un Map en memoria</div>
+        <div class="kv">
+          <span class="k">rl:*</span><span>contadores del límite de tasa</span>
+          <span class="k">auth:codigo:*</span><span>hash del código de 6 caracteres, 15 min</span>
+          <span class="k">codigo-intentos:*</span><span>3 intentos y el código muere</span>
+          <span class="k">…:reenvio</span><span>espera de 60 s entre reenvíos</span>
+          <span class="k">auth:paso:*</span><span>permiso de un solo uso, 10 min</span>
+          <span class="k">auth:aviso-registro:*</span><span>evita mandar avisos repetidos</span>
+          <span class="k">gate:{plataforma}</span><span>puerta de versión, 60 s</span>
+        </div>
+      </div>
+
+      <div class="caja" id="externos">
+        <h3><span class="icono"><svg viewBox="0 0 24 24"><path d="M7 17a4 4 0 010-8 5 5 0 019.6-1.5A3.5 3.5 0 0117 17H7z"/></svg></span>Servicios externos</h3>
+        <div class="ext">
+          <div class="e" id="x-aws"><b>AWS Secrets Manager</b><span>Una vez, al arrancar, con el rol del EC2: <span class="mono">DATABASE_URL</span>, <span class="mono">REDIS_URL</span>, <span class="mono">JWT_SECRET</span>, <span class="mono">SMTP_*</span></span></div>
+          <div class="e" id="x-smtp"><b>SMTP (nodemailer)</b><span>TLS 1.2 o más: códigos de alta y de recuperación, y el aviso de “alguien intentó registrarse”</span></div>
+          <div class="e" id="x-met"><b>MET Norway · api.met.no</b><span>Pronóstico por hora; respeta <span class="mono">Expires</span> y <span class="mono">If‑Modified‑Since</span></span></div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<!-- =================== SECUENCIAS =================== -->
+<section class="banda">
+  <div class="banda-cab">
+    <h2>Tres recorridos clave, paso a paso</h2>
+    <span class="t3">Nombres reales del código: rutas, tablas y clases</span>
+  </div>
+  <div class="secuencias">
+
+    <!-- (a) -->
+    <div class="sec">
+      <h3><span class="rosa">a</span>Alta, login y rotación del refresh</h3>
+      <div class="sub">dominios/auth/servicio.ts · infra/cripto.ts</div>
+      <div class="pasos">
+        <div class="paso donde" ><div class="num">1</div><div class="q" data-actor="Redis + SMTP"><span class="mono">POST /auth/register</span></div><div class="d">Genera un código de 6 caracteres y guarda su hash en Redis (15 min). Responde 202 igual, exista o no la cuenta: si existe, al dueño le llega sólo un aviso.</div></div>
+        <div class="baja"></div>
+        <div class="paso donde"><div class="num">2</div><div class="q" data-actor="Redis"><span class="mono">POST /auth/register/verify</span></div><div class="d">Compara en tiempo constante; con 3 errores el código muere. Devuelve un <code>registration_token</code>: JWT de un uso, válido 10 min.</div></div>
+        <div class="baja"></div>
+        <div class="paso donde"><div class="num">3</div><div class="q" data-actor="Postgres"><span class="mono">POST /auth/register/complete</span></div><div class="d">Política de contraseña, aviso legal vigente y argon2id → <code>usuarios</code> + <code>aceptaciones_legales</code> + <code>perfiles</code> + primera sesión.</div></div>
+        <div class="baja"></div>
+        <div class="paso donde"><div class="num">4</div><div class="q" data-actor="Postgres"><span class="mono">POST /auth/login</span></div><div class="d">argon2id (si el correo no existe, con un hash de descarte para gastar el mismo tiempo) → <b>access</b> JWT de 30 min + <b>refresh</b> opaco de 30 días, guardado como hash en <code>sesiones</code>.</div></div>
+        <div class="baja"><span>a los 30 min, o ante un 401</span></div>
+        <div class="paso donde"><div class="num">5</div><div class="q" data-actor="tx · FOR UPDATE"><span class="mono">POST /auth/refresh</span></div><div class="d">Bloquea la fila, la marca usada y crea la sucesora en la misma familia. Sucesor = HMAC(refresh viejo), así que el servidor puede volver a entregarlo sin haberlo guardado.</div></div>
+        <div class="baja"><span>¿ese refresh ya se usó?</span></div>
+        <div class="rama dos">
+          <div class="hoja ok"><b>Reintento (≤ 2 min)</b><span>La respuesta se perdió en el camino: se devuelve la misma sucesora con un access nuevo.</span></div>
+          <div class="hoja mal"><b>Reuso → familia revocada</b><span>Puede ser un robo: se revoca toda la familia y responde <code>session_revoked</code>.</span></div>
+        </div>
+        <div class="alerta"><b>Recuperación:</b> <span class="mono">/password/forgot → /verify → /reset</span> sigue el mismo camino de código y permiso de un uso; al cambiar la clave se revocan <b>todas</b> las sesiones y se abre una nueva.</div>
+      </div>
+    </div>
+
+    <!-- (b) -->
+    <div class="sec">
+      <h3><span class="rosa">b</span>Generación del plan</h3>
+      <div class="sub">dominios/plan/servicio.ts → motor/generador.ts (puro: no lee la base ni el reloj)</div>
+      <div class="pasos">
+        <div class="paso donde"><div class="num">1</div><div class="q" data-actor="perfiles"><span class="mono">GET /plan</span> → leer el perfil</div><div class="d">Objetivo (o uno adicional de <code>objetivos_usuario</code>), nivel, deporte, zona horaria, días, fecha del evento, peso, edad y sexo. Si falta algo: <code>profile_incomplete</code>.</div></div>
+        <div class="baja"></div>
+        <div class="paso donde"><div class="num">2</div><div class="q" data-actor="planes">Hash estructural → ancla del bloque</div><div class="d">SHA‑256 de objetivo, nivel, deporte, zona, fecha y días. Si cambió, el ancla vieja queda reemplazada y nace otra que empieza hoy. Si cambian el peso o el horario, el bloque sigue.</div></div>
+        <div class="baja"></div>
+        <div class="paso"><div class="num">3</div><div class="q">Macrociclo y fases</div><div class="d">De 2 a 52 semanas: <b>base → construcción → pico → afinamiento → carrera</b>. El volumen arranca en el 55 % del pico, con una semana de descarga (72 %) cada 4.</div></div>
+        <div class="baja"></div>
+        <div class="paso"><div class="num">4</div><div class="q">Semanas → días → sesiones</div><div class="d">Cada día elegido recibe un papel (fondo, calidad, suave, regenerativo, fuerza) → tipo, deporte (el triatlón rota), minutos, distancia, ritmos y zona de pulso.</div></div>
+        <div class="baja"></div>
+        <div class="paso"><div class="num">5</div><div class="q">Energía y avituallamiento</div><div class="d">kcal por METs y peso; líquido, sodio, hidratos y geles por hora, y lo de antes y después. Usa siempre el clima por defecto: 22 °C y 55 % de humedad.</div></div>
+        <div class="baja"></div>
+        <div class="paso donde"><div class="num">6</div><div class="q" data-actor="actividades · series">Juntar lo hecho → JSON</div><div class="d">Cruza con <code>actividades</code> y <code>series_gimnasio</code>: <code>done</code>, totales por semana y racha. Textos según <span class="mono">Accept-Language</span>. Devuelve <code>motor_version</code> + <code>input_hash</code>.</div></div>
+      </div>
+    </div>
+
+    <!-- (c) -->
+    <div class="sec">
+      <h3><span class="rosa">c</span>Subir una salida desde el reloj</h3>
+      <div class="sub">Sincronizacion/SincronizadorDeSesion.swift · Flujo/SeguimientoDeSalida.swift</div>
+      <div class="pasos">
+        <div class="paso donde"><div class="num">1</div><div class="q" data-actor="Apple Watch">Termina la salida</div><div class="d"><code>SalidaDelReloj</code> con un id propio se escribe a disco (<code>AlmacenDeTransferenciasDeSalida</code>) antes de entregársela al sistema.</div></div>
+        <div class="baja"><span>WCSession.transferFile</span></div>
+        <div class="paso donde"><div class="num">2</div><div class="q" data-actor="iPhone">Recibir del reloj → cola en disco</div><div class="d"><code>recibirDelReloj</code> descarta si el id ya está; si no, la agrega a <code>pendientes</code>. El reloj borra su copia cuando llega <code>didFinish</code>.</div></div>
+        <div class="baja"><span>con red · subirPendientes(), en orden</span></div>
+        <div class="paso donde"><div class="num">3</div><div class="q" data-actor="HTTPS"><span class="mono">PUT /v1/activities/{id}</span></div><div class="d">Idempotente por id, que lo genera el cliente; no hace falta un POST con clave. Pasa por las etapas 01 → 08 del pipeline.</div></div>
+        <div class="baja"></div>
+        <div class="paso donde"><div class="num">4</div><div class="q" data-actor="Postgres">Upsert con “el borrado gana”</div><div class="d"><code>INSERT … ON CONFLICT (usuario_id, id) DO UPDATE … WHERE borrada_en_ms IS NULL</code> en <code>actividades</code>. Si se había borrado: 404.</div></div>
+        <div class="baja"></div>
+        <div class="paso donde"><div class="num">5</div><div class="q" data-actor="Postgres"><span class="mono">PUT /v1/activities/{id}/route</span></div><div class="d">Puntos ordenados por instante → <code>recorridos_actividades.puntos</code> (jsonb), sólo si la actividad es tuya y sigue viva.</div></div>
+        <div class="baja"><span>desenlace</span></div>
+        <div class="rama tres">
+          <div class="hoja ok"><b>2xx</b><span>Sale de la cola</span></div>
+          <div class="hoja ok"><b>Sin red, 5xx, 401, 429</b><span>Queda y se reintenta en orden</span></div>
+          <div class="hoja mal"><b>Otro 4xx</b><span>A cuarentena, sin borrarse</span></div>
+        </div>
+        <div class="alerta"><b>Ojo:</b> el cuerpo tiene un tope de 64 KB y entran unos 1.070 puntos. Una ruta más larga (unos 18 min a 1 Hz) recibe un 413 y la salida termina en cuarentena, aunque la actividad ya se haya guardado.</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- =================== HALLAZGOS =================== -->
+<section class="hallazgos">
+  <h2>Puntos a revisar <span class="t3">verificados en el código</span></h2>
+  <div class="halls">
+    <div class="hall"><div class="sev">ALTA · BUG</div><b>Recorridos de más de 64 KB → 413</b><span>El contrato y la app aceptan hasta 10.000 puntos (unos 613 KB), pero <code>bodyLimit</code> es global. La app lo toma como rechazo definitivo.</span><span class="ref">servidor.ts:24 · actividades/rutas.ts:61 · SeguimientoDeSalida.swift:564</span></div>
+    <div class="hall"><div class="sev">MEDIA</div><b>El alta no es atómica</b><span>Usuario, aceptación, sesión y perfil se escriben fuera de una transacción y el permiso ya se consumió: si falla el perfil, queda una cuenta a medias que no se puede completar.</span><span class="ref">auth/servicio.ts:222-236 · auth/rutas.ts:55</span></div>
+    <div class="hall"><div class="sev">MEDIA</div><b>Staging puede escribir los códigos en el log</b><span><code>MAIL_PROVIDER=log</code> sólo se prohíbe en producción, aunque staging está en internet.</span><span class="ref">config.ts:163</span></div>
+    <div class="hall"><div class="sev">MEDIA</div><b>Las bajas lógicas nunca se purgan</b><span>Las actividades (con pulso) y las comidas borradas quedan para siempre. Además, la unidad de purga describe una tarea que ya no existe.</span><span class="ref">cuenta/purgar.ts:349 · trainer-purgar.service:3</span></div>
+    <div class="hall"><div class="sev m">BAJA</div><b>Si falla el SMTP, se puede saber si la cuenta existe</b><span>El aviso a una cuenta existente no se captura: da 500, mientras que la rama nueva da 503.</span><span class="ref">auth/servicio.ts:180 vs 115-119</span></div>
+    <div class="hall"><div class="sev m">BAJA</div><b><code>GET /plan</code> escribe, y <code>/plans</code> calcula en serie</b><span>Un GET puede crear el ancla; <code>/plans</code> recalcula un plan completo por cada objetivo.</span><span class="ref">plan/servicio.ts:116 · plan/rutas.ts:129</span></div>
+    <div class="hall"><div class="sev m">BAJA</div><b>El avituallamiento no usa el clima</b><span>El motor siempre usa 22 °C, aunque existe <code>/weather/forecast</code>. Las constantes están marcadas como “sin verificar” y bloquean el arranque en producción.</span><span class="ref">motor/generador.ts:458,510 · tipos.ts:199</span></div>
+    <div class="hall"><div class="sev m">BAJA</div><b>Código muerto peligroso</b><span><code>verificarPasoDeCorreo</code> acepta cualquier token sin “.”. Hoy nadie lo llama; conviene borrarlo.</span><span class="ref">infra/cripto.ts:182</span></div>
+  </div>
+</section>
+</div>
+
+<script>
+(function () {
+  const lienzo = document.getElementById('lienzo');
+  const svg = document.getElementById('flechas');
+  const NS = 'http://www.w3.org/2000/svg';
+  const ROSA = '#FF23A7', GRIS = '#7C7C84';
+
+  function caja(id) {
+    const r = document.getElementById(id).getBoundingClientRect();
+    const b = lienzo.getBoundingClientRect();
+    return { x: r.left - b.left, y: r.top - b.top, w: r.width, h: r.height,
+             get cx() { return this.x + this.w / 2; }, get cy() { return this.y + this.h / 2; },
+             get r() { return this.x + this.w; }, get b() { return this.y + this.h; } };
+  }
+  function el(tag, attrs) { const e = document.createElementNS(NS, tag); for (const k in attrs) e.setAttribute(k, attrs[k]); svg.appendChild(e); return e; }
+
+  function marcador(id, color) {
+    let defs = svg.querySelector('defs') || el('defs', {});
+    const m = document.createElementNS(NS, 'marker');
+    m.setAttribute('id', id); m.setAttribute('viewBox', '0 0 10 10'); m.setAttribute('refX', '8.5'); m.setAttribute('refY', '5');
+    m.setAttribute('markerWidth', '7'); m.setAttribute('markerHeight', '7'); m.setAttribute('orient', 'auto-start-reverse');
+    const p = document.createElementNS(NS, 'path'); p.setAttribute('d', 'M0,0 L10,5 L0,10 z'); p.setAttribute('fill', color);
+    m.appendChild(p); defs.appendChild(m);
+  }
+
+  function linea(puntos, { color = ROSA, punteada = false, ancho = 2.5, inicio = false, sinPunta = false } = {}) {
+    const d = puntos.map((p, i) => (i ? 'L' : 'M') + p[0].toFixed(1) + ',' + p[1].toFixed(1)).join(' ');
+    const mk = color === ROSA ? 'url(#fr)' : 'url(#fg)';
+    const a = { d, fill: 'none', stroke: color, 'stroke-width': ancho, 'stroke-linejoin': 'round', 'marker-end': mk };
+    if (inicio) a['marker-start'] = mk;
+    if (sinPunta) delete a['marker-end'];
+    if (punteada) a['stroke-dasharray'] = '7 6';
+    el('path', a);
+  }
+  function etiqueta(x, y, texto, { ancla = 'middle', color } = {}) {
+    const t = el('text', { x, y, 'text-anchor': ancla, 'dominant-baseline': 'middle', class: 'etq' });
+    t.textContent = texto;
+    if (color) t.setAttribute('style', 'fill:' + color);
+    const bb = t.getBBox();
+    const r = document.createElementNS(NS, 'rect');
+    r.setAttribute('x', bb.x - 6); r.setAttribute('y', bb.y - 3); r.setAttribute('width', bb.width + 12); r.setAttribute('height', bb.height + 6);
+    r.setAttribute('rx', 6); r.setAttribute('class', 'etq-fondo');
+    svg.insertBefore(r, t);
+  }
+
+  function dibujar() {
+    svg.innerHTML = '';
+    svg.setAttribute('width', lienzo.scrollWidth); svg.setAttribute('height', lienzo.scrollHeight);
+    marcador('fr', ROSA); marcador('fg', GRIS);
+
+    const reloj = caja('c-reloj'), iphone = caja('c-iphone'), android = caja('c-android'), web = caja('c-web');
+    const e1 = caja('e1'), e7 = caja('e7'), e2 = caja('e2');
+    const serv = caja('servidor'), pg = caja('pg'), redis = caja('redis'), ext = caja('externos');
+    const met = caja('x-met'), aws = caja('x-aws'), smtp = caja('x-smtp');
+    const ops = caja('ops'), dom = caja('dominios');
+
+    // Reloj → iPhone (WatchConnectivity)
+    linea([[reloj.cx, reloj.b + 2], [reloj.cx, iphone.y - 3]], { punteada: true, color: ROSA });
+    etiqueta(reloj.cx, (reloj.b + iphone.y) / 2, 'WatchConnectivity → teléfono');
+
+    // Clientes → etapa 01
+    const yE1 = e1.y + 40;
+    const busX = iphone.r + 30;
+    linea([[iphone.r + 2, iphone.y + 60], [busX, iphone.y + 60], [busX, yE1], [e1.x - 3, yE1]], { ancho: 3 });
+    linea([[android.r + 2, android.y + 50], [busX, android.y + 50], [busX, yE1 + 2]], { ancho: 3 });
+    const tv = el('text', { x: 0, y: 0, 'text-anchor': 'middle', 'dominant-baseline': 'middle', class: 'etq',
+      transform: `translate(${busX + 18}, ${(iphone.y + 60 + android.y + 50) / 2}) rotate(-90)` });
+    tv.textContent = 'HTTPS /v1 · JSON';
+    // Landing → Apache (estático)
+    const bx2 = busX + 14;
+    linea([[web.r + 2, web.y + 40], [bx2 + 10, web.y + 40], [bx2 + 10, yE1 + 50], [e1.x - 3, yE1 + 50]], { punteada: true, color: GRIS, ancho: 2 });
+
+    // Dominios → PostgreSQL
+    const gx = serv.r + 34;
+    const yPg = pg.y + 34;
+    linea([[serv.r + 1, dom.y + 120], [gx, dom.y + 120], [gx, yPg], [pg.x - 3, yPg]], { color: GRIS, ancho: 3 });
+    linea([[serv.r + 1, e7.cy], [gx + 1.5, e7.cy]], { color: GRIS, ancho: 3, sinPunta: true });
+
+    // → Redis
+    const yR = redis.y + 40;
+    linea([[serv.r + 1, Math.min(yR, serv.b - 40)], [serv.r + 22, Math.min(yR, serv.b - 40)], [serv.r + 22, yR], [redis.x - 3, yR]], { color: GRIS, ancho: 2 });
+
+    // → servicios externos
+    for (const x of [aws, smtp, met]) {
+      const y0 = Math.min(x.cy, serv.b - 24);
+      if (Math.abs(y0 - x.cy) < 1) linea([[serv.r + 1, x.cy], [x.x - 3, x.cy]], { color: GRIS, ancho: 2, punteada: true });
+      else linea([[serv.r + 1, y0], [serv.r + 46, y0], [serv.r + 46, x.cy], [x.x - 3, x.cy]], { color: GRIS, ancho: 2, punteada: true });
+    }
+  }
+
+  window.__dibujar = dibujar;
+  (document.fonts ? document.fonts.ready : Promise.resolve()).then(() => { dibujar(); document.body.setAttribute('data-listo', '1'); });
+  window.addEventListener('resize', dibujar);
+})();
+</script>
+</body>
+</html>

@@ -50,7 +50,7 @@ struct FilaDeAgendaView: View {
                         avituallamiento.mililitrosPorHora,
                         avituallamiento.carbohidratosPorHoraG,
                         zona.corta,
-                        intensidad(zona)))
+                        InicioTextos.intensidad(zona)))
                         .estilo(.etiquetaSeccion.enMinusculas, color: Paleta.textoTerciario)
                         .fixedSize(horizontal: false, vertical: true)
                 }
@@ -98,16 +98,6 @@ struct FilaDeAgendaView: View {
         return partes.joined(separator: " · ")
     }
 
-    private func intensidad(_ zona: ZonaDeIntensidad) -> String {
-        switch zona {
-        case .z1: return Textos.zonaBaja
-        case .z2: return Textos.zonaModerada
-        case .z3: return Textos.zonaModeradaAlta
-        case .z4: return Textos.zonaAlta
-        case .z5: return Textos.zonaMaxima
-        }
-    }
-
     private func chips(de avituallamiento: AvituallamientoDeSesion) -> [(String, Bool)] {
         var chips: [(String, Bool)] = []
         if avituallamiento.geles > 0 {
@@ -136,30 +126,75 @@ struct FlujoDeChips: View {
 
 // MARK: - Gráfico de carga
 
-/// Las barras de la carga semanal: rosa apagado lo que tiene metros, rosa vivo
-/// con halo el día de hoy. Se estiran al alto que les dé la tarjeta.
+/// Las barras de la carga semanal: acento apagado lo que tiene metros, acento
+/// vivo con halo el día de hoy. Se estiran al alto que les dé la tarjeta.
+///
+/// Con `alElegir`, cada barra es un botón (y VoiceOver la lee con su etiqueta);
+/// sin él, es un dibujo y se oculta: el número está arriba.
 struct GraficoDeCarga: View {
     let metrosPorDia: [Int]
     let diaDestacado: Int
+    /// La barra elegida, con un borde para que se note cuál se está mirando.
+    var seleccionado: Int? = nil
+    /// "L M M J…" debajo de cada barra. Vacío o de otro largo, no se dibuja.
+    var etiquetas: [String] = []
+    /// "Lunes 20, 8 km": lo que dice VoiceOver de cada barra tocable.
+    var etiquetasAccesibles: [String] = []
+    var alElegir: ((Int) -> Void)? = nil
 
     var body: some View {
         let maximo = max(metrosPorDia.max() ?? 1, 1)
-        GeometryReader { geo in
-            HStack(alignment: .bottom, spacing: TokensEspaciado.e6) {
-                ForEach(Array(metrosPorDia.enumerated()), id: \.offset) { indice, metros in
-                    let esHoy = indice == diaDestacado
-                    Capsule(style: .continuous)
-                        .fill(color(metros: metros, esHoy: esHoy))
-                        .shadow(color: esHoy ? Paleta.acentoBrillo : Color.clear, radius: TokensEspaciado.e6)
-                        .frame(maxWidth: .infinity)
-                        .frame(height: max(TokensEspaciado.e6,
-                                           geo.size.height * CGFloat(metros) / CGFloat(maximo)))
+        VStack(spacing: TokensEspaciado.e6) {
+            GeometryReader { geo in
+                HStack(alignment: .bottom, spacing: TokensEspaciado.e6) {
+                    ForEach(Array(metrosPorDia.enumerated()), id: \.offset) { indice, metros in
+                        barra(indice: indice,
+                              alto: max(TokensEspaciado.e6, geo.size.height * CGFloat(metros) / CGFloat(maximo)),
+                              metros: metros)
+                    }
                 }
+                .frame(width: geo.size.width, height: geo.size.height, alignment: .bottom)
             }
-            .frame(width: geo.size.width, height: geo.size.height, alignment: .bottom)
+            if !etiquetas.isEmpty, etiquetas.count == metrosPorDia.count {
+                HStack(spacing: TokensEspaciado.e6) {
+                    ForEach(Array(etiquetas.enumerated()), id: \.offset) { indice, etiqueta in
+                        Text(etiqueta)
+                            .estilo(.notaLegal, color: indice == seleccionado ? Paleta.textoPrimario : Paleta.textoTerciario)
+                            .lineLimit(1)
+                            .frame(maxWidth: .infinity)
+                    }
+                }
+                .accessibilityHidden(true)
+            }
         }
-        // Un gráfico decorativo no se lee dato por dato: el número está arriba.
-        .accessibilityHidden(true)
+        .accessibilityHidden(alElegir == nil)
+    }
+
+    @ViewBuilder
+    private func barra(indice: Int, alto: CGFloat, metros: Int) -> some View {
+        let esHoy = indice == diaDestacado
+        let elegida = indice == seleccionado
+        let capsula = Capsule(style: .continuous)
+            .fill(color(metros: metros, esHoy: esHoy))
+            .overlay(
+                Capsule(style: .continuous)
+                    .strokeBorder(elegida ? Paleta.textoPrimario : Color.clear, lineWidth: TokensEspaciado.e2)
+            )
+            .shadow(color: esHoy ? Paleta.acentoBrillo : Color.clear, radius: TokensEspaciado.e6)
+            .frame(maxWidth: .infinity)
+            .frame(height: alto)
+        if let alElegir {
+            Button { alElegir(indice) } label: {
+                capsula
+                    .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .bottom)
+                    .contentShape(Rectangle())
+            }
+            .buttonStyle(EstiloPresionado())
+            .accessibilityLabel(indice < etiquetasAccesibles.count ? etiquetasAccesibles[indice] : "\(indice + 1)")
+            .accessibilityAddTraits(elegida ? .isSelected : [])
+        } else {
+            capsula
+        }
     }
 
     private func color(metros: Int, esHoy: Bool) -> Color {

@@ -23,6 +23,7 @@ struct RaizFlujoView: View {
     }
 
     @AppStorage(ModoApariencia.clave) private var modoApariencia: ModoApariencia = ModoApariencia.predeterminado
+    @AppStorage(AcentoPersonalizado.clave) private var acentoGuardado = ""
 
     var body: some View {
         ZStack {
@@ -46,6 +47,10 @@ struct RaizFlujoView: View {
         .frame(maxWidth: .infinity, maxHeight: .infinity)
         .background(Paleta.fondo)
         .preferredColorScheme(modoApariencia.colorScheme)
+        // Los controles del sistema (Toggle, DatePicker, ColorPicker) también
+        // llevan el color elegido.
+        .tint(AcentoPersonalizado.componentes(de: acentoGuardado)
+            .map { Color(.sRGB, red: $0.0, green: $0.1, blue: $0.2, opacity: 1) } ?? Paleta.acento)
         .environmentObject(flujo)
         .animation(.easeInOut(duration: TokensMovimiento.media), value: flujo.pantalla)
         .animation(.easeInOut(duration: TokensMovimiento.media), value: flujo.decisionDeVersion)

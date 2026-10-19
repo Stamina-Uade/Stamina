@@ -78,3 +78,23 @@ pulso en vivo en el teléfono) **no se inventó**.
 - Plan cuenta **días** a la carrera cuando el servidor manda `event_date_ms`.
 - **El reloj no se tocó en esta ronda.** De la primera quedaron dos arreglos invisibles de sincronización
   (la salida a medias no cambia de dueño al cerrar sesión, y el reloj se entera del cierre de sesión).
+
+## Tercera ronda (19-10, noche)
+
+- **Diagrama del backend:** `docs/diagrama-backend-stamina.png` (y `.html`). Clientes, el camino de un pedido,
+  los 12 dominios con rutas y tablas, Postgres/Redis/externos, y tres recorridos: alta+login+refresh,
+  generación del plan y subida de una salida del reloj. Abajo, 9 puntos a revisar encontrados en el código.
+- **Arreglado en el backend:** `PUT /activities/{id}/route` tenía el tope global de 64 KB y un recorrido de
+  más de ~18 min recibía 413 (y la app mandaba la salida a cuarentena). Ahora esa ruta acepta hasta 1 MB.
+  `tsc --noEmit` pasa. Hay que desplegarlo.
+- **Color de la app elegible** (Ajustes → Apariencia): 10 colores + uno libre con el selector del sistema, con
+  vista previa en vivo y aviso de contraste. El texto encima del color se elige solo (negro o blanco, WCAG).
+  Sólo el teléfono: el reloj y Android no cambian.
+- **Modo claro/noche/automático** con tres teléfonos en miniatura para elegir.
+- **Guía en cada pestaña** ("qué hay acá", se cierra con la X y vuelve con el "?") y **tour de 5 páginas** la
+  primera vez, que se puede volver a ver desde Perfil o Ajustes.
+- **Inicio:** accesos rápidos, zonas y avituallamiento explicados al tocarlos, barras de la semana tocables,
+  tirar para actualizar. **Plan:** fases explicadas, semanas con anillo de km y deslizables, días que se abren
+  con el detalle y el "por qué hoy". **Historial:** números de semana/mes/todo, filtro por deporte, lista por
+  mes, calendario con leyenda. **Perfil:** para qué se usa cada dato, metas con cuenta regresiva, días de
+  entrenamiento, accesos claros. Vibración al tocar en todas.

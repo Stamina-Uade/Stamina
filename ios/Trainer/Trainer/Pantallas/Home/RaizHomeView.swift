@@ -10,6 +10,13 @@ struct RaizHomeView: View {
     @StateObject private var estado: EstadoHome
     @EnvironmentObject private var flujo: FlujoEntrada
     @Environment(\.scenePhase) private var fase
+    /// El color elegido en Ajustes. Cambiarlo re-crea el contenido (`.id`) para
+    /// que todo se vuelva a pintar con el color nuevo; el estado del Home
+    /// (`EstadoHome`, la pestaña abierta) no se pierde porque vive acá arriba.
+    @AppStorage(AcentoPersonalizado.clave) private var acentoGuardado = ""
+    /// Si ya se vio "Así funciona Stamina". El tour sale una sola vez.
+    @AppStorage("tour_visto") private var tourVisto = false
+    @State private var mostrarTour = false
 
     /// El perfil guardado (`GET /me` o la última respuesta de `PATCH /me`). Llega
     /// DESPUÉS de que el Home ya se ve: esperar a la red para mostrar la primera
@@ -72,6 +79,7 @@ struct RaizHomeView: View {
                 }
             }
             .frame(maxWidth: .infinity, maxHeight: .infinity)
+            .id(acentoGuardado)
 
             if estado.pestana == .entreno {
                 EntrenoView()
@@ -105,6 +113,17 @@ struct RaizHomeView: View {
         // El aviso lleva al primer paso que falta, y QUÉ falta lo dice el perfil.
         .onChange(of: estado.faltaPerfil) { falta in
             if falta, flujo.pasoPendienteDelPerfil == nil { Task { await flujo.cargarPerfil() } }
+        }
+        // El tour de la primera vez. Se marca como visto al terminarlo, al
+        // saltearlo y también si la hoja se cierra por otro lado.
+        // Perfil y Ajustes lo vuelven a pedir poniendo la clave en `false`.
+        .onAppear { if !tourVisto { mostrarTour = true } }
+        .onChange(of: tourVisto) { visto in if !visto { mostrarTour = true } }
+        .fullScreenCover(isPresented: $mostrarTour, onDismiss: { tourVisto = true }) {
+            TourView {
+                tourVisto = true
+                mostrarTour = false
+            }
         }
     }
 

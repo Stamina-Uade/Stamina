@@ -3,12 +3,19 @@ import TrainerCore
 
 /// Historial leído de GET /activities. El mapa de detalle se pide sólo al abrir
 /// la actividad: el listado del servidor nunca arrastra puntos GPS.
+///
+/// Ronda 3: guía de la pantalla, resumen Semana | Mes | Todo, filtro por
+/// deporte, lista agrupada por mes y un estado vacío que lleva al entreno.
+/// El resumen y el filtro se calculan sobre lo ya cargado (sin pedir más red).
 struct HistorialDeActividadesView: View {
     let servicio: (any ServicioDeActividades)?
     /// `true` cuando es una pestaña de la barra (rediseño 2026-10): lleva el
     /// encabezado grande y no tiene botón de cerrar. `false` cuando se abre como
     /// hoja desde otra pantalla.
     var esPestana: Bool = false
+    /// 🪤 Como hoja (desde Plan) llega igual: desde iOS 14 una `.sheet` hereda
+    /// los `environmentObject` de la vista que la presenta.
+    @EnvironmentObject private var estado: EstadoHome
     @Environment(\.dismiss) private var cerrar
     @State private var actividades: [Actividad] = []
     @State private var cursor: String?
@@ -16,10 +23,34 @@ struct HistorialDeActividadesView: View {
     @State private var cargando = false
     @State private var fallo = false
     @State private var elegida: ActividadElegida?
+    @State private var periodo: HistorialPeriodo = .semana
+    @State private var deporteElegido: DeporteDeSesion?
+
+    private static let claveGuia = "guia_historial"
 
     struct ActividadElegida: Identifiable {
         let actividad: Actividad
         var id: String { actividad.id }
+    }
+
+    private var unidades: SistemaDeUnidades { estado.sistemaDeUnidades }
+
+    /// Los deportes que aparecen en lo cargado, en el orden de siempre.
+    private var deportesPresentes: [DeporteDeSesion] {
+        let presentes = Set(actividades.map(\.sport))
+        return DeporteDeSesion.allCases.filter { presentes.contains($0) }
+    }
+
+    /// El filtro vigente. Si el deporte elegido ya no está (p. ej. después de
+    /// actualizar), vuelve solo a "Todos".
+    private var filtro: DeporteDeSesion? {
+        guard let deporteElegido, deportesPresentes.contains(deporteElegido) else { return nil }
+        return deporteElegido
+    }
+
+    private var filtradas: [Actividad] {
+        guard let filtro else { return actividades }
+        return actividades.filter { $0.sport == filtro }
     }
 
     var body: some View {
@@ -44,7 +75,8 @@ struct HistorialDeActividadesView: View {
             DetalleDeActividadView(
                 actividad: seleccion.actividad,
                 puntosIniciales: AlmacenDeRecorridos.compartido.puntos(para: seleccion.actividad.id),
-                servicio: servicio
+                servicio: servicio,
+                unidades: unidades
             )
         }
     }
@@ -53,71 +85,155 @@ struct HistorialDeActividadesView: View {
         ScrollView {
             VStack(alignment: .leading, spacing: TokensEspaciado.e14) {
                 if conEncabezado {
-                    EncabezadoDePestana(
-                        String(localized: "Historial", comment: "Título de la pestaña del historial"),
-                        sobretitulo: String(localized: "Todo lo que entrenaste", comment: "Sobretítulo del historial"))
+                    encabezado
                 }
 
-                CalendarioDeHitosView()
+                guia
 
-                LazyVStack(spacing: TokensEspaciado.e10) {
-                    if actividades.isEmpty, !cargando {
-                        HistorialAvisoVacio(fallo: fallo)
-                    }
-                    ForEach(actividades, id: \.id) { actividad in
-                        Button { elegida = ActividadElegida(actividad: actividad) } label: {
-                            HistorialTarjetaDeActividad(actividad: actividad)
-                        }
-                        .buttonStyle(EstiloPresionado())
-                    }
-                    if hayMas {
-                        BotonTonal(cargando ? Textos.historialCargando : Textos.historialMas) {
-                            Task { await cargar() }
-                        }
-                        .disabled(cargando)
-                        .padding(.vertical, TokensEspaciado.e8)
-                    }
+                if actividades.isEmpty, !cargando {
+                    HistorialEstadoVacio(
+                        fallo: fallo,
+                        reintentar: { Task { await cargar(desdeElPrincipio: true) } },
+                        empezar: empezarPrimeraSalida
+                    )
+                } else if !actividades.isEmpty {
+                    HistorialFranjaDeResumen(
+                        actividades: filtradas,
+                        deporte: filtro,
+                        unidades: unidades,
+                        hayMasPorCargar: hayMas,
+                        periodo: $periodo
+                    )
                 }
+
+                CalendarioDeHitosView(unidades: unidades)
+
+                salidas
             }
             .padding(.horizontal, TokensEspaciado.e16)
             .padding(.top, conEncabezado ? TokensEspaciado.e8 : TokensEspaciado.e16)
             .padding(.bottom, TokensEspaciado.e36)
         }
         .background(Paleta.fondo)
+        .refreshable { await cargar(desdeElPrincipio: true) }
     }
 
-    private func cargar() async {
-        guard !cargando, hayMas, let servicio else { return }
+    // MARK: - Encabezado y guía
+
+    private var encabezado: some View {
+        EncabezadoDePestana(
+            String(localized: "Historial", comment: "Título de la pestaña del historial"),
+            sobretitulo: String(localized: "Todo lo que entrenaste", comment: "Sobretítulo del historial")
+        ) {
+            BotonDeAyuda(clave: Self.claveGuia)
+        }
+    }
+
+    private var guia: some View {
+        TarjetaDeGuia(
+            clave: Self.claveGuia,
+            titulo: String(localized: "Qué hay en tu historial", comment: "Guía del historial: título"),
+            puntos: [
+                PuntoDeGuia("chart.bar.fill", String(localized: "Arriba, tus números: distancia, salidas y tiempo. Elegí Semana, Mes o Todo.",
+                                                     comment: "Guía del historial")),
+                PuntoDeGuia("calendar", String(localized: "En el calendario cada cuadrito es un día: cuanto más fuerte el color, más te moviste. Tocá uno para ver qué hiciste.",
+                                               comment: "Guía del historial")),
+                PuntoDeGuia("line.3.horizontal.decrease.circle", String(localized: "Filtrá por deporte y tocá una salida para ver su mapa, sus parciales y sus pausas.",
+                                                                        comment: "Guía del historial")),
+                PuntoDeGuia("arrow.down", String(localized: "Deslizá hacia abajo para actualizar la lista.",
+                                                 comment: "Guía del historial"))
+            ]
+        )
+    }
+
+    // MARK: - Lista de salidas, por mes
+
+    @ViewBuilder
+    private var salidas: some View {
+        if !actividades.isEmpty {
+            EncabezadoDeSeccion(String(localized: "Tus salidas", comment: "Historial: título de la lista"),
+                                detalle: String(localized: "tocá una para ver el detalle", comment: "Historial: cómo abrir una salida"))
+            if deportesPresentes.count > 1 {
+                HistorialChipsDeDeporte(deportes: deportesPresentes, elegido: $deporteElegido)
+            }
+        }
+
+        LazyVStack(alignment: .leading, spacing: TokensEspaciado.e10, pinnedViews: [.sectionHeaders]) {
+            ForEach(HistorialGrupoDeMes.agrupar(filtradas)) { grupo in
+                Section {
+                    ForEach(grupo.actividades, id: \.id) { actividad in
+                        fila(actividad)
+                    }
+                } header: {
+                    HistorialEncabezadoDeMes(grupo: grupo, unidades: unidades)
+                }
+            }
+            // Vacío y sin cargar ya tiene sus propios botones (reintentar, empezar).
+            if hayMas, !actividades.isEmpty || cargando {
+                BotonTonal(cargando ? Textos.historialCargando : Textos.historialMas) {
+                    Task { await cargar() }
+                }
+                .disabled(cargando)
+                .padding(.vertical, TokensEspaciado.e8)
+            }
+        }
+    }
+
+    private func fila(_ actividad: Actividad) -> some View {
+        Button { abrir(actividad) } label: {
+            HistorialTarjetaDeActividad(actividad: actividad, unidades: unidades)
+        }
+        .buttonStyle(EstiloPresionado())
+        .accessibilityHint(String(localized: "Abre el mapa, los parciales y las pausas de esta salida",
+                                  comment: "Historial: qué pasa al tocar una salida"))
+        .contentShape(.contextMenuPreview, RoundedRectangle(cornerRadius: TokensRadio.card, style: .continuous))
+        .contextMenu {
+            Button { abrir(actividad) } label: {
+                Label(String(localized: "Ver detalle", comment: "Historial: menú de una salida"), systemImage: "map")
+            }
+        }
+    }
+
+    // MARK: - Acciones
+
+    private func abrir(_ actividad: Actividad) {
+        Haptico.toque()
+        elegida = ActividadElegida(actividad: actividad)
+    }
+
+    /// Del estado vacío al entreno. Como hoja, primero se cierra.
+    private func empezarPrimeraSalida() {
+        if !esPestana { cerrar() }
+        estado.ir(a: .entreno)
+    }
+
+    /// La página siguiente; con `desdeElPrincipio` (tirar hacia abajo, reintentar)
+    /// vuelve a la primera y reemplaza la lista sólo cuando la respuesta llegó bien.
+    private func cargar(desdeElPrincipio: Bool = false) async {
+        guard !cargando, hayMas || desdeElPrincipio, let servicio else { return }
         cargando = true
         defer { cargando = false }
-        let respuesta = await servicio.actividades(limite: 20, cursor: cursor)
+        let respuesta = await servicio.actividades(limite: 20, cursor: desdeElPrincipio ? nil : cursor)
         guard case .ok(let pagina) = respuesta else { fallo = true; return }
         fallo = false
-        actividades.append(contentsOf: pagina.elementos.filter { nuevo in
-            !actividades.contains { $0.id == nuevo.id }
-        })
+        let base = desdeElPrincipio ? [] : actividades
+        actividades = base + pagina.elementos.filter { nuevo in
+            !base.contains { $0.id == nuevo.id }
+        }
         cursor = pagina.paginacion.nextCursor
         hayMas = pagina.paginacion.hasMore
     }
 }
 
-/// Una actividad del listado: ícono en círculo rosado, deporte, fecha, la
-/// distancia en rosa y abajo el tiempo y el ritmo (o la velocidad).
+/// Una actividad del listado: ícono en círculo, deporte, fecha, la distancia en
+/// el acento y abajo el tiempo y el ritmo (o la velocidad). El chevron dice que
+/// se abre.
 private struct HistorialTarjetaDeActividad: View {
     let actividad: Actividad
+    let unidades: SistemaDeUnidades
 
     private var metros: Int { Int(actividad.distanceM ?? 0) }
     private var segundos: Int { Int(actividad.durationS) }
-
-    /// Ritmo o velocidad promedio, sólo si hay distancia para calcularlo.
-    private var ritmoOVelocidad: String? {
-        if actividad.sport == .ciclismo {
-            guard metros >= 50, segundos > 0 else { return nil }
-            return Formato.velocidad(metros: metros, segundos: segundos, unidades: .metrico)
-        }
-        guard let ritmo = ResumenFormato.ritmoMedio(metros: metros, segundos: segundos) else { return nil }
-        return "\(Formato.ritmo(segundosPorKm: ritmo, unidades: .metrico)) \(ResumenFormato.unidadDeRitmo(.metrico))"
-    }
 
     var body: some View {
         HStack(spacing: TokensEspaciado.e12) {
@@ -136,48 +252,30 @@ private struct HistorialTarjetaDeActividad: View {
 
             VStack(alignment: .trailing, spacing: TokensEspaciado.e3) {
                 HStack(alignment: .firstTextBaseline, spacing: TokensEspaciado.e2) {
-                    Text(Formato.distanciaNumero(metros, unidades: .metrico))
+                    Text(Formato.distanciaNumero(metros, unidades: unidades))
                         .estilo(.metricaMedia, color: Paleta.acento)
-                    Text(Formato.unidadDeDistancia(.metrico))
+                    Text(Formato.unidadDeDistancia(unidades))
                         .estilo(.labelCampo, color: Paleta.acento)
                 }
                 Text(Formato.cronometro(segundos: segundos))
                     .estilo(.resumenCifraChica, color: Paleta.textoSecundario)
-                if let ritmoOVelocidad {
-                    Text(ritmoOVelocidad)
+                if let ritmo = HistorialFormato.ritmoOVelocidad(actividad, unidades: unidades) {
+                    Text(ritmo)
                         .estilo(.resumenCifraChica, color: Paleta.textoTerciario)
                 }
             }
             .lineLimit(1)
 
             Image(systemName: "chevron.right")
-                .font(.system(size: TokensTipografia.notaTamano, weight: .bold))
-                .foregroundStyle(Paleta.textoTerciario)
+                .font(.system(size: TokensTipografia.tituloCardTamano, weight: .semibold))
+                .foregroundStyle(Paleta.textoSecundario)
                 .accessibilityHidden(true)
         }
         .padding(TokensEspaciado.e14)
         .frame(maxWidth: .infinity, alignment: .leading)
         .resumenTarjeta()
+        .contentShape(Rectangle())
         .accessibilityElement(children: .combine)
-    }
-}
-
-/// Lista vacía o error de carga, en una tarjeta en vez de texto suelto.
-private struct HistorialAvisoVacio: View {
-    let fallo: Bool
-
-    var body: some View {
-        HStack(spacing: TokensEspaciado.e12) {
-            Image(systemName: fallo ? "exclamationmark.triangle.fill" : "figure.run")
-                .font(.system(size: TokensEspaciado.e20, weight: .semibold))
-                .foregroundStyle(fallo ? Paleta.error : Paleta.acento)
-                .accessibilityHidden(true)
-            Text(fallo ? Textos.historialError : Textos.historialVacio)
-                .estilo(.cuerpoSecundario, color: Paleta.textoSecundario)
-                .frame(maxWidth: .infinity, alignment: .leading)
-        }
-        .padding(TokensEspaciado.e14)
-        .resumenTarjeta()
     }
 }
 
@@ -188,11 +286,14 @@ struct DetalleDeActividadView: View {
     @Environment(\.dismiss) private var cerrar
     @State private var puntos: [PuntoDeRecorrido]
     @State private var cargando: Bool
-    @State private var sistemaDeUnidades: SistemaDeUnidades = .metrico
+    /// Km o millas, lo que eligió la persona. Quien abre el detalle lo pasa.
+    private let sistemaDeUnidades: SistemaDeUnidades
 
-    init(actividad: Actividad, puntosIniciales: [PuntoDeRecorrido]? = nil, servicio: (any ServicioDeActividades)?) {
+    init(actividad: Actividad, puntosIniciales: [PuntoDeRecorrido]? = nil, servicio: (any ServicioDeActividades)?,
+         unidades: SistemaDeUnidades = .metrico) {
         self.actividad = actividad
         self.servicio = servicio
+        self.sistemaDeUnidades = unidades
         let puntosLocales = (puntosIniciales != nil && !puntosIniciales!.isEmpty)
             ? puntosIniciales
             : AlmacenDeRecorridos.compartido.puntos(para: actividad.id)

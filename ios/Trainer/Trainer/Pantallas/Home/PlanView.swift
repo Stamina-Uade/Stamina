@@ -4,15 +4,23 @@ import TrainerCore
 /// `plan` — el bloque de semanas, con sus fases, el selector de semana y los
 /// siete días.
 ///
-/// El selector de metas para cuando el plan terminó vive en
+/// Las piezas viven al lado, con prefijo `Plan`: las fases en
+/// `PlanTarjetaDeFases.swift`, la semana en `PlanSemana.swift`, cada día en
+/// `PlanFilaDeDia.swift` y el selector de metas para cuando el plan terminó en
 /// `PlanSelectorDeMetasView.swift`.
 struct PlanView: View {
     @EnvironmentObject private var estado: EstadoHome
     @EnvironmentObject private var flujo: FlujoEntrada
+    @Environment(\.accessibilityReduceMotion) private var reducirMovimiento
     @State private var mostrarHistorial = false
     @State private var planesDeObjetivos: [PlanDeObjetivo] = []
     @State private var objetivoElegido = "principal"
     @State private var faltanObjetivos = false
+    /// El día abierto en la línea de tiempo (`"semana-día"`). Uno a la vez: es un
+    /// acordeón. Vive acá y no en la fila porque los días de un objetivo que no es
+    /// el principal se traducen de nuevo en cada `body` y sus `id` cambian.
+    @State private var diaAbierto: String?
+    @State private var yaAbrioHoy = false
 
     private var bloqueVisible: BloqueDelPlan? {
         guard objetivoElegido != "principal" else { return estado.bloque }
@@ -26,11 +34,17 @@ struct PlanView: View {
     }
 
     private var planVencido: Bool { estado.planVencido }
+    private var esElPrincipal: Bool { objetivoElegido == "principal" }
+
+    private var animacion: Animation? {
+        reducirMovimiento ? nil : .spring(response: TokensMovimiento.media, dampingFraction: 0.86)
+    }
 
     var body: some View {
         ScrollView {
             VStack(alignment: .leading, spacing: TokensEspaciado.e20) {
                 encabezado
+                guia
 
                 if !planVencido && planesDeObjetivos.count > 1 {
                     selectorDeObjetivo
@@ -39,21 +53,13 @@ struct PlanView: View {
                 if planVencido || faltanObjetivos {
                     SelectorInteractivoDeMetasView()
                 } else if let bloque = bloqueVisible, let semana = semanaVisible {
-                    if objetivoElegido == "principal" { AvisoDeLoGuardado(seccion: estado.contenido.plan) }
+                    if esElPrincipal { AvisoDeLoGuardado(seccion: estado.contenido.plan) }
                     tarjetaDelEvento(bloque)
-                    selectorDeSemana(bloque)
-
-                    VStack(alignment: .leading, spacing: TokensEspaciado.e10) {
-                        encabezadoDeLaSemana(semana)
-                        // Línea de tiempo: sin hueco entre filas para que la línea no se corte.
-                        VStack(spacing: 0) {
-                            ForEach(Array(semana.dias.enumerated()), id: \.element.id) { indice, dia in
-                                FilaDeDiaDelPlan(dia: dia,
-                                                 esPrimero: indice == 0,
-                                                 esUltimo: indice == semana.dias.count - 1)
-                            }
-                        }
+                    if !bloque.fases.isEmpty {
+                        PlanTarjetaDeFases(fases: bloque.fases)
+                            .id(objetivoElegido)
                     }
+                    semanaYDias(bloque: bloque, semana: semana)
                 } else {
                     SinDatosView(problema: estado.contenido.plan.problema, actualizando: estado.actualizando) {
                         Task { await estado.actualizar() }
@@ -69,21 +75,54 @@ struct PlanView: View {
             await estado.cargarPasosDeLaSemana()
         }
         .task { await cargarPlanes() }
+        .onAppear { abrirHoySiHaceFalta() }
+        .onChange(of: estado.semanaElegida) { _ in
+            withAnimation(animacion) { diaAbierto = nil }
+            abrirHoySiHaceFalta()
+        }
         .sheet(isPresented: $mostrarHistorial) {
             HistorialDeActividadesView(servicio: estado.repositorio.servicioDeActividades())
+                .environmentObject(estado)
         }
     }
 
-    // MARK: - Encabezado
+    // MARK: - Encabezado y guía
 
-    /// "Tu plan" grande, el subtítulo del bloque arriba y el historial a la derecha.
+    /// "Tu plan" grande, el subtítulo del bloque arriba; la ayuda y el historial a la derecha.
     private var encabezado: some View {
         EncabezadoDePestana(
             String(localized: "Tu plan", comment: "Título de la pestaña del plan"),
             sobretitulo: (!planVencido ? bloqueVisible?.subtitulo : nil)
         ) {
-            BotonCircular("map", etiqueta: Textos.historialTitulo) { mostrarHistorial = true }
+            HStack(spacing: TokensEspaciado.e8) {
+                BotonDeAyuda(clave: "guia_plan")
+                BotonCircular("map", etiqueta: Textos.historialTitulo) {
+                    Haptico.toque()
+                    mostrarHistorial = true
+                }
+                .accessibilityHint(String(localized: "Abre tus salidas anteriores", comment: "VoiceOver, botón historial del plan"))
+            }
         }
+    }
+
+    private var guia: some View {
+        TarjetaDeGuia(
+            clave: "guia_plan",
+            titulo: String(localized: "Tu plan, semana a semana", comment: "Guía del plan, título"),
+            puntos: [
+                PuntoDeGuia("flag.checkered",
+                            String(localized: "Arriba, tu carrera y las etapas del plan. Tocá una etapa para saber para qué sirve.",
+                                   comment: "Guía del plan")),
+                PuntoDeGuia("calendar",
+                            String(localized: "Elegí la semana con los botones o deslizando los días. El anillo muestra cuántos km llevás.",
+                                   comment: "Guía del plan")),
+                PuntoDeGuia("hand.tap",
+                            String(localized: "Abajo, los días: tocá uno para ver qué hacer y por qué.",
+                                   comment: "Guía del plan")),
+                PuntoDeGuia("checkmark.circle",
+                            String(localized: "El tilde marca lo que ya hiciste; el día de hoy brilla con tu color.",
+                                   comment: "Guía del plan")),
+            ])
     }
 
     // MARK: - Selector de objetivo
@@ -96,8 +135,13 @@ struct PlanView: View {
                 ForEach(planesDeObjetivos, id: \.goalId) { item in
                     let elegido = objetivoElegido == item.goalId
                     Button {
-                        objetivoElegido = item.goalId
-                        estado.semanaElegida = 1
+                        guard !elegido else { return }
+                        Haptico.seleccion()
+                        withAnimation(animacion) {
+                            objetivoElegido = item.goalId
+                            estado.semanaElegida = 1
+                            diaAbierto = nil
+                        }
                     } label: {
                         Text(nombreDelObjetivo(item.plan.goal))
                             .estilo(.tituloCard, color: elegido ? Paleta.textoPrimario : Paleta.textoTerciario)
@@ -111,6 +155,7 @@ struct PlanView: View {
                     }
                     .buttonStyle(EstiloPresionado())
                     .accessibilityAddTraits(elegido ? [.isButton, .isSelected] : .isButton)
+                    .accessibilityHint(String(localized: "Muestra el plan de esta meta", comment: "VoiceOver, selector de objetivo"))
                 }
             }
             .padding(TokensEspaciado.e4)
@@ -142,7 +187,8 @@ struct PlanView: View {
 
     // MARK: - Tarjeta héroe del evento
 
-    /// Foto + cuenta regresiva ("6 semanas") + las fases del bloque.
+    /// Foto + cuenta regresiva ("6 semanas") + la etapa en la que estás. La
+    /// barra de etapas, ahora tocable, va en su propia tarjeta abajo.
     private func tarjetaDelEvento(_ bloque: BloqueDelPlan) -> some View {
         TarjetaHeroe(imagen: "BienvenidaMontana") {
             VStack(alignment: .leading, spacing: TokensEspaciado.e12) {
@@ -170,216 +216,108 @@ struct PlanView: View {
                         .fixedSize(horizontal: false, vertical: true)
                 }
 
-                barraDeFases(bloque)
-            }
-        }
-    }
-
-    /// Las fases, proporcionales a su cantidad de semanas, con el nombre abajo.
-    private func barraDeFases(_ bloque: BloqueDelPlan) -> some View {
-        VStack(alignment: .leading, spacing: TokensEspaciado.e8) {
-            // `layoutPriority` no reparte ancho en proporción —sólo decide quién
-            // se achica primero—, así que el ancho se calcula.
-            GeometryReader { geo in
-                let huecos = TokensEspaciado.e4 * CGFloat(max(0, bloque.fases.count - 1))
-                let util = max(0, geo.size.width - huecos)
-                let total = CGFloat(bloque.fases.reduce(0) { $0 + $1.peso })
-                HStack(spacing: TokensEspaciado.e4) {
-                    ForEach(bloque.fases) { fase in
-                        Capsule()
-                            .fill(colorDeFase(fase))
-                            .shadow(color: fase.enCurso ? Paleta.acentoBrillo : Color.clear, radius: TokensEspaciado.e4)
-                            .frame(width: total > 0 ? util * CGFloat(fase.peso) / total : 0)
-                    }
-                }
-            }
-            .frame(height: TokensEspaciado.e4)
-            .accessibilityHidden(true)
-
-            HStack(alignment: .top, spacing: TokensEspaciado.e8) {
-                ForEach(bloque.fases) { fase in
-                    Text(fase.titulo)
-                        .estilo(.etiquetaSeccion.enMinusculas,
-                                color: fase.enCurso ? Paleta.acento : Paleta.textoSecundario)
-                        .frame(maxWidth: .infinity, alignment: alineacion(de: fase, en: bloque))
+                if let actual = bloque.fases.first(where: { $0.enCurso }) {
+                    PildoraDeEstado(
+                        String(localized: "Etapa actual: \(actual.titulo)", comment: "Píldora de la tarjeta del plan"),
+                        simbolo: "location.fill", tono: .acento)
                 }
             }
         }
     }
 
-    private func colorDeFase(_ fase: FaseDelPlan) -> Color {
-        if fase.hecha { return Paleta.acento }
-        if fase.enCurso { return Paleta.acentoApagado }
-        return Paleta.superficieControl
-    }
+    // MARK: - Semana y días
 
-    private func alineacion(de fase: FaseDelPlan, en bloque: BloqueDelPlan) -> Alignment {
-        guard let primera = bloque.fases.first, let ultima = bloque.fases.last else { return .center }
-        if fase.id == primera.id { return .leading }
-        if fase.id == ultima.id { return .trailing }
-        return .center
-    }
-
-    // MARK: - Selector de semana
-
-    /// Las semanas como segmentos del mismo control que el de objetivos.
-    private func selectorDeSemana(_ bloque: BloqueDelPlan) -> some View {
-        HStack(spacing: TokensEspaciado.e2) {
-            ForEach(bloque.semanas) { semana in
-                let elegida = semana.numero == estado.semanaElegida
-                Button { estado.semanaElegida = semana.numero } label: {
-                    Text(Textos.planSemanaChip(semana.numero))
-                        .estilo(.tituloCard, color: elegida ? Paleta.sobreAcento : Paleta.textoTerciario)
-                        .lineLimit(1)
-                        .minimumScaleFactor(0.8)
-                        .frame(maxWidth: .infinity)
-                        .frame(minHeight: TokensEspaciado.e40)
-                        .background(Capsule().fill(elegida ? Paleta.acento : Color.clear))
-                        .contentShape(Capsule())
-                }
-                .buttonStyle(EstiloPresionado())
-                .accessibilityLabel(Textos.planSemana(semana.numero))
-                .accessibilityAddTraits(elegida ? [.isButton, .isSelected] : .isButton)
+    private func semanaYDias(bloque: BloqueDelPlan, semana: SemanaDelPlan) -> some View {
+        VStack(alignment: .leading, spacing: TokensEspaciado.e12) {
+            PlanSelectorDeSemana(semanas: bloque.semanas, elegida: semana.numero) { numero in
+                elegirSemana(numero)
             }
+
+            PlanProgresoDeLaSemana(
+                semana: semana,
+                unidades: estado.sistemaDeUnidades,
+                hayAnterior: indice(de: semana, en: bloque).map { $0 > 0 } ?? false,
+                haySiguiente: indice(de: semana, en: bloque).map { $0 < bloque.semanas.count - 1 } ?? false,
+                alMoverse: { paso in moverSemana(paso, desde: semana, en: bloque) })
+
+            lineaDeTiempo(semana)
+                // Deslizar de costado sobre los días cambia de semana. Es simultáneo
+                // para no robarle el gesto vertical al scroll.
+                .simultaneousGesture(
+                    DragGesture(minimumDistance: TokensEspaciado.e26)
+                        .onEnded { arrastre in
+                            let dx = arrastre.translation.width
+                            let dy = arrastre.translation.height
+                            guard abs(dx) > TokensEspaciado.e56, abs(dx) > abs(dy) * 2 else { return }
+                            moverSemana(dx < 0 ? 1 : -1, desde: semana, en: bloque)
+                        })
         }
-        .padding(TokensEspaciado.e4)
-        .background(Capsule().fill(Paleta.superficie))
-        .overlay(Capsule().strokeBorder(Paleta.bordeSuperficie, lineWidth: TokensEspaciado.e1))
-        .frame(minHeight: TokensTamano.objetivoTactilMinimo)
     }
 
-    private func encabezadoDeLaSemana(_ semana: SemanaDelPlan) -> some View {
-        EncabezadoDeSeccion(
-            semana.enCurso ? Textos.planSemanaEnCurso(semana.numero) : Textos.planSemana(semana.numero),
-            detalle: Textos.planKmDe(
-                Formato.distancia(semana.metrosHechos, unidades: estado.sistemaDeUnidades, decimales: 0),
-                Formato.distancia(semana.metrosPrevistos, unidades: estado.sistemaDeUnidades, decimales: 0)))
-    }
-}
-
-// MARK: - Un día, en la línea de tiempo
-
-/// Un día del plan. Lo hecho se atenúa y lleva tilde; hoy lleva el acento y la
-/// palabra — nunca sólo el color (AGENTS.md §10.1). A la izquierda, el punto y
-/// la línea de "Semana de carrera" del mockup.
-struct FilaDeDiaDelPlan: View {
-    @EnvironmentObject private var estado: EstadoHome
-    let dia: DiaDelPlan
-    var esPrimero: Bool = false
-    var esUltimo: Bool = false
-
-    var body: some View {
-        Button {
-            guard dia.abrible else { return }
-            estado.ir(a: .entreno)
-        } label: {
-            tarjeta
-        }
-        .buttonStyle(EstiloPresionado())
-        .disabled(!dia.abrible)
-        .accessibilityElement(children: .combine)
-        .padding(.leading, TokensEspaciado.e26)
-        .padding(.vertical, TokensEspaciado.e4)
-        .overlay(alignment: .topLeading) { lineaDeTiempo }
-    }
-
-    private var tarjeta: some View {
-        HStack(spacing: TokensEspaciado.e10) {
-            VStack(alignment: .leading, spacing: 0) {
-                Text(nombreDelDia)
-                Text("\(dia.numeroDeDia) \(dia.mesCorto)")
-            }
-            .estilo(.etiquetaSeccion.enMinusculas, color: dia.esHoy ? Paleta.acento : Paleta.textoTerciario)
-            .monospacedDigit()
-            .frame(width: TokensEspaciado.e34, alignment: .leading)
-
-            VStack(alignment: .leading, spacing: TokensEspaciado.e2) {
-                Text(dia.titulo).estilo(.cuerpoDestacado)
-                HStack(spacing: TokensEspaciado.e6) {
-                    Text(dia.detalle)
-                        .estilo(.labelCampo, color: Paleta.textoSecundario)
-                    if let pasos = estado.pasos(para: dia), pasos > 0 {
-                        pildoraDePasos(pasos)
-                    }
-                }
-            }
-            .frame(maxWidth: .infinity, alignment: .leading)
-
-            if dia.hecho {
-                Image(systemName: "checkmark")
-                    .font(.system(size: TokensTipografia.notaLegalTamano,
-                                  weight: TokensTipografia.tituloCardPeso))
-                    .foregroundStyle(Paleta.acento)
-                    .accessibilityLabel(Textos.planHecho)
-            } else if dia.esHoy {
-                Text(Textos.planHoy)
-                    .estilo(.etiquetaSeccion, color: Paleta.acento)
-            }
-        }
-        .padding(.horizontal, TokensEspaciado.e13)
-        .padding(.vertical, TokensEspaciado.e12)
-        .frame(maxWidth: .infinity)
-        .background(dia.esHoy ? Paleta.acentoSuaveFondo : Paleta.superficie)
-        .clipShape(RoundedRectangle(cornerRadius: TokensRadio.boton, style: .continuous))
-        .overlay(
-            RoundedRectangle(cornerRadius: TokensRadio.boton, style: .continuous)
-                .strokeBorder(dia.esHoy ? Paleta.acentoSuaveBorde : Paleta.bordeSuperficie,
-                              lineWidth: TokensEspaciado.e1)
-        )
-        .opacity(dia.hecho ? 0.6 : 1)
-        .objetivoTactilAlto()
-    }
-
-    private func pildoraDePasos(_ pasos: Int) -> some View {
-        HStack(spacing: TokensEspaciado.e3) {
-            Image(systemName: "figure.walk")
-                .font(.system(size: TokensTipografia.etiquetaSeccionTamano, weight: .semibold))
-            Text(Formato.pasos(pasos))
-                .estilo(.etiquetaSeccion.enMinusculas, color: Paleta.textoTerciario)
-                .monospacedDigit()
-        }
-        .foregroundStyle(Paleta.textoTerciario)
-        .padding(.horizontal, TokensEspaciado.e5)
-        .padding(.vertical, TokensEspaciado.e2)
-        .background(Paleta.superficieAlterna)
-        .clipShape(Capsule())
-    }
-
-    /// El punto y la línea vertical. Es decoración: el estado ya lo dicen la
-    /// tilde y "HOY" dentro de la tarjeta.
-    private var lineaDeTiempo: some View {
+    private func lineaDeTiempo(_ semana: SemanaDelPlan) -> some View {
+        // Sin hueco entre filas para que la línea no se corte.
         VStack(spacing: 0) {
-            Rectangle()
-                .fill(esPrimero ? Color.clear : Paleta.acentoSuaveBorde)
-                .frame(width: TokensEspaciado.e2, height: TokensEspaciado.e22)
-            Circle()
-                .fill(colorDelPunto)
-                .frame(width: TokensEspaciado.e12, height: TokensEspaciado.e12)
-                .overlay(Circle().strokeBorder(dia.hecho || dia.esHoy ? Color.clear : Paleta.bordeSuperficie,
-                                               lineWidth: TokensEspaciado.e1))
-                .shadow(color: dia.esHoy ? Paleta.acentoBrillo : Color.clear, radius: TokensEspaciado.e6)
-            Rectangle()
-                .fill(esUltimo ? Color.clear : Paleta.acentoSuaveBorde)
-                .frame(width: TokensEspaciado.e2)
-                .frame(maxHeight: .infinity)
+            ForEach(Array(semana.dias.enumerated()), id: \.offset) { indice, dia in
+                let clave = claveDelDia(dia, en: semana)
+                FilaDeDiaDelPlan(dia: dia,
+                                 datos: datos(de: dia),
+                                 abierto: diaAbierto == clave,
+                                 esPrimero: indice == 0,
+                                 esUltimo: indice == semana.dias.count - 1,
+                                 alTocar: { alternar(clave) },
+                                 abrirHistorial: {
+                                     Haptico.toque()
+                                     mostrarHistorial = true
+                                 })
+            }
         }
-        .frame(width: TokensEspaciado.e16)
-        .frame(maxHeight: .infinity, alignment: .top)
-        .accessibilityHidden(true)
     }
 
-    private var colorDelPunto: Color {
-        if dia.esHoy || dia.hecho { return Paleta.acento }
-        return Paleta.superficieControl
+    private func indice(de semana: SemanaDelPlan, en bloque: BloqueDelPlan) -> Int? {
+        bloque.semanas.firstIndex { $0.numero == semana.numero }
     }
 
-    /// El nombre corto del día, del calendario en el idioma de la app y no de una lista fija.
-    private var nombreDelDia: String {
-        var calendario = Calendar.current
-        calendario.locale = Locale(identifier: Bundle.main.preferredLocalizations.first ?? "es")
-        let simbolos = calendario.shortWeekdaySymbols
-        // `shortWeekdaySymbols` arranca en domingo; el plan arranca en lunes.
-        let indice = (dia.diaDeLaSemana % 7)
-        return simbolos.indices.contains(indice) ? simbolos[indice].capitalized : ""
+    private func elegirSemana(_ numero: Int) {
+        guard numero != estado.semanaElegida else { return }
+        Haptico.seleccion()
+        withAnimation(animacion) { estado.semanaElegida = numero }
+    }
+
+    private func moverSemana(_ paso: Int, desde semana: SemanaDelPlan, en bloque: BloqueDelPlan) {
+        guard let actual = indice(de: semana, en: bloque) else { return }
+        let destino = actual + paso
+        guard bloque.semanas.indices.contains(destino) else { return }
+        elegirSemana(bloque.semanas[destino].numero)
+    }
+
+    private func claveDelDia(_ dia: DiaDelPlan, en semana: SemanaDelPlan) -> String {
+        "\(semana.numero)-\(dia.diaDeLaSemana)"
+    }
+
+    private func alternar(_ clave: String) {
+        Haptico.toque()
+        withAnimation(animacion) { diaAbierto = diaAbierto == clave ? nil : clave }
+    }
+
+    /// La primera vez, el día de hoy aparece abierto: es lo que más se busca.
+    /// Después lo que abra o cierre la persona manda.
+    private func abrirHoySiHaceFalta() {
+        guard !yaAbrioHoy, let semana = semanaVisible, let hoy = semana.dias.first(where: { $0.esHoy }) else { return }
+        yaAbrioHoy = true
+        diaAbierto = claveDelDia(hoy, en: semana)
+    }
+
+    /// Lo que se sabe de un día además de su fila: el cronograma del plan
+    /// principal y, si es hoy, la sesión entera. De otro objetivo no hay más
+    /// que el título y el detalle.
+    private func datos(de dia: DiaDelPlan) -> PlanDatosDelDia {
+        guard esElPrincipal else { return PlanDatosDelDia(dia: dia) }
+        let planificado: DiaPlanificadoCompartido? = dia.fecha.flatMap { fecha in
+            estado.plan?.cronograma.first { $0.fechaIso == PlanDatosDelDia.iso(fecha) }
+        }
+        let deHoy = dia.esHoy ? estado.hoy : nil
+        return PlanDatosDelDia(dia: dia, planificado: planificado,
+                               sesion: deHoy?.sesion,
+                               esFuerzaHoy: deHoy?.esFuerza ?? false)
     }
 }
