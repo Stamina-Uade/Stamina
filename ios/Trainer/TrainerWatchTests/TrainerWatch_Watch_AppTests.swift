@@ -80,36 +80,46 @@ struct TrainerWatch_Watch_AppTests {
         estado.sincronizador.simularUsuarioRemoto("usuario_123")
         try? await Task.sleep(nanoseconds: 10_000_000)
 
-        // 1. Caminata interior
-        estado.prepararInicioConCuentaRegresiva(deporte: .trekking, esInterior: true, icono: "figure.walk.treadmill")
-        #expect(estado.simboloDeporteEnCurso == "figure.walk.treadmill", "caminata interior debe mostrar la caminadora")
-        #expect(estado.simboloDeporteEnCurso != "figure.hiking", "nunca debe mostrar trekking/senderismo")
-        estado.cancelarCuentaRegresiva()
-        #expect(estado.iconoDeporteEnCurso == nil)
+        // MVP sólo running: la caminata queda escondida (ver `MVP`).
+        if MVP.permite(.trekking) {
+            // 1. Caminata interior
+            estado.prepararInicioConCuentaRegresiva(deporte: .trekking, esInterior: true, icono: "figure.walk.treadmill")
+            #expect(estado.simboloDeporteEnCurso == "figure.walk.treadmill", "caminata interior debe mostrar la caminadora")
+            #expect(estado.simboloDeporteEnCurso != "figure.hiking", "nunca debe mostrar trekking/senderismo")
+            estado.cancelarCuentaRegresiva()
+            #expect(estado.iconoDeporteEnCurso == nil)
 
-        // 2. Caminata exterior
-        estado.prepararInicioConCuentaRegresiva(deporte: .trekking, esInterior: false, icono: "figure.walk")
-        #expect(estado.simboloDeporteEnCurso == "figure.walk", "caminata exterior debe mostrar caminante")
-        #expect(estado.simboloDeporteEnCurso != "figure.hiking")
-        estado.completarCuentaRegresiva()
-        #expect(estado.simboloDeporteEnCurso == "figure.walk")
-        estado.descartar()
-        #expect(estado.iconoDeporteEnCurso == nil)
+            // 2. Caminata exterior
+            estado.prepararInicioConCuentaRegresiva(deporte: .trekking, esInterior: false, icono: "figure.walk")
+            #expect(estado.simboloDeporteEnCurso == "figure.walk", "caminata exterior debe mostrar caminante")
+            #expect(estado.simboloDeporteEnCurso != "figure.hiking")
+            estado.completarCuentaRegresiva()
+            #expect(estado.simboloDeporteEnCurso == "figure.walk")
+            estado.descartar()
+            #expect(estado.iconoDeporteEnCurso == nil)
+        }
 
         // 3. Carrera interior
         estado.empezar(deporte: .running, esInterior: true, icono: "figure.run.treadmill")
         #expect(estado.simboloDeporteEnCurso == "figure.run.treadmill", "carrera interior debe mostrar cinta")
         estado.descartar()
 
-        // 4. Bicicleta interior
-        estado.empezar(deporte: .ciclismo, esInterior: true, icono: "figure.indoor.cycle")
-        #expect(estado.simboloDeporteEnCurso == "figure.indoor.cycle", "bici interior debe mostrar ciclo indoor")
-        estado.descartar()
+        if MVP.permite(.ciclismo) {
+            // 4. Bicicleta interior
+            estado.empezar(deporte: .ciclismo, esInterior: true, icono: "figure.indoor.cycle")
+            #expect(estado.simboloDeporteEnCurso == "figure.indoor.cycle", "bici interior debe mostrar ciclo indoor")
+            estado.descartar()
 
-        // 5. Bicicleta exterior
-        estado.empezar(deporte: .ciclismo, esInterior: false, icono: "bicycle")
-        #expect(estado.simboloDeporteEnCurso == "bicycle", "bici exterior debe mostrar bicicleta")
-        estado.descartar()
+            // 5. Bicicleta exterior
+            estado.empezar(deporte: .ciclismo, esInterior: false, icono: "bicycle")
+            #expect(estado.simboloDeporteEnCurso == "bicycle", "bici exterior debe mostrar bicicleta")
+            estado.descartar()
+        } else {
+            // MVP sólo running: pedir bici arranca una carrera.
+            estado.empezar(deporte: .ciclismo, esInterior: false, icono: "bicycle")
+            #expect(estado.deporte == .running, "con el MVP sólo running, la bici se graba como carrera")
+            estado.descartar()
+        }
 
         // Limpiar sesión
         estado.sincronizador.simularUsuarioRemoto(nil)

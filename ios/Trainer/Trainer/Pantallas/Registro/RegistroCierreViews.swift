@@ -197,24 +197,84 @@ struct RegDiasView: View {
 ///
 /// No guarda nada: cada paso anterior ya guardó lo suyo. Lo que se ve acá es un
 /// espejo de eso, no un último pedido que pueda fallar.
+///
+/// Rediseño 2026-10 (ronda 4): en vez del sello con tilde, festeja la mascota
+/// con la medalla y dice el título en un globito. El párrafo largo
+/// (`regListoTexto`) se cambió por una línea. Arma su propio andamio —el de
+/// `PantallaCierre` dibuja el sello— con el mismo pie fijo de los pasos.
 struct RegListoView: View {
     @EnvironmentObject private var flujo: FlujoEntrada
 
     var body: some View {
-        PantallaCierre(titulo: Textos.regListoTitulo(nombre), texto: Textos.regListoTexto) {
-            Tarjeta {
-                VStack(spacing: TokensEspaciado.e9) {
-                    FilaResumen(Textos.regListoNacimiento,
-                                flujo.datos.nacimiento.map { $0.formatted(.dateTime.day().month().year()) } ?? "—")
-                    FilaResumen(Textos.regListoDeporte, deporte)
-                    FilaResumen(Textos.regListoNivel, nivel)
-                    FilaResumen(Textos.regListoDias, dias)
-                    FilaResumen(Textos.regListoObjetivo, objetivo)
+        VStack(spacing: 0) {
+            ScrollView {
+                VStack(spacing: TokensEspaciado.e16) {
+                    MascotaConBocadillo(pose: .medalla,
+                                        texto: Textos.regListoTitulo(nombre),
+                                        altoMaximo: TokensEspaciado.e56 * 4)
+
+                    Text(String(localized: "Tu perfil quedó completo.", comment: "reg-listo: la línea bajo la mascota"))
+                        .estilo(.cuerpoDestacado, color: Paleta.textoSecundario)
+                        .multilineTextAlignment(.center)
+                        .fixedSize(horizontal: false, vertical: true)
+
+                    resumen
                 }
+                .frame(maxWidth: .infinity)
+                .padding(.horizontal, TokensEspaciado.e22)
+                .padding(.top, TokensEspaciado.e26)
+                .padding(.bottom, TokensEspaciado.e20)
             }
-        } pie: {
+
+            pie
+        }
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
+        .background(fondo)
+        .onAppear { Haptico.exito() }
+    }
+
+    private var resumen: some View {
+        Tarjeta {
+            VStack(spacing: TokensEspaciado.e9) {
+                FilaResumen(Textos.regListoNacimiento,
+                            flujo.datos.nacimiento.map { $0.formatted(.dateTime.day().month().year()) } ?? "—")
+                FilaResumen(Textos.regListoDeporte, deporte)
+                FilaResumen(Textos.regListoNivel, nivel)
+                FilaResumen(Textos.regListoDias, dias)
+                FilaResumen(Textos.regListoObjetivo, objetivo)
+            }
+        }
+    }
+
+    /// El mismo pie fijo de `PantallaCierre`: la cápsula, con un fundido arriba
+    /// para que el resumen que scrollea se pierda debajo.
+    private var pie: some View {
+        VStack(spacing: TokensEspaciado.e10) {
             BotonPrimario(Textos.regListoIrAInicio) { flujo.terminarRegistro() }
         }
+        .padding(.horizontal, TokensEspaciado.e22)
+        .padding(.bottom, TokensEspaciado.e34)
+        .padding(.top, TokensEspaciado.e12)
+        .background(alignment: .top) {
+            LinearGradient(colors: [Paleta.fondo.opacity(0), Paleta.fondo],
+                           startPoint: .top, endPoint: .bottom)
+                .frame(height: TokensEspaciado.e20)
+                .offset(y: -TokensEspaciado.e20)
+                .allowsHitTesting(false)
+                .accessibilityHidden(true)
+        }
+    }
+
+    /// El halo del acento arriba, como los otros cierres: es un final, no un paso.
+    private var fondo: some View {
+        ZStack {
+            Paleta.fondo
+            RadialGradient(colors: [Paleta.acentoProfundo, Color.clear],
+                           center: .top, startRadius: 0,
+                           endRadius: TokensEspaciado.e56 * 5)
+        }
+        .ignoresSafeArea()
+        .accessibilityHidden(true)
     }
 
     private var nombre: String {

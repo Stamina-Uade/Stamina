@@ -14,7 +14,11 @@ export async function rutasObjetivos(app: FastifyInstance, ctx: Contexto): Promi
     data: await repo.listar(usuarioDe(req)),
   }));
   app.put("/me/goals", { preHandler: guardia, schema: { body: cuerpo("replaceGoals") } }, async (req) => {
-    const { goals } = req.body as { goals: ObjetivoActivo[] };
+    // `goal_date_ms` ausente es "sin fecha", igual que `null`: hasta la 1.2.0 el contrato lo exigía
+    // y la app de iPhone lo omitía cuando no había fecha (Codable no escribe los nil), así que
+    // cada "sin fecha" —y cada objetivo adicional del alta— volvía con un 400 y no se guardaba.
+    const crudos = (req.body as { goals: Array<Omit<ObjetivoActivo, "goal_date_ms"> & { goal_date_ms?: number | null }> }).goals;
+    const goals: ObjetivoActivo[] = crudos.map((g) => ({ ...g, goal_date_ms: g.goal_date_ms ?? null }));
     const ids = new Set<string>();
     for (const [i, goal] of goals.entries()) {
       const id = goal.id ?? "";

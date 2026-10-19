@@ -52,6 +52,19 @@ public struct ObjetivoDeUsuario: Codable, Equatable, Sendable, Identifiable {
         self.goal = goal
         self.goalDateMs = goalDateMs
     }
+
+    /// 🛑 `goal_date_ms` viaja SIEMPRE, también sin fecha, como `null` explícito.
+    /// El `Encodable` sintetizado usa `encodeIfPresent` y omite los `nil`: hasta el
+    /// contrato 1.2.0 `ObjetivoEntrada` lo exigía, así que cada "sin fecha" —y cada
+    /// objetivo adicional del alta, que nunca tiene fecha— volvía con un 400 y el
+    /// objetivo no se guardaba. El servidor de la 1.2.1 ya acepta la clave ausente,
+    /// pero así funciona también contra uno anterior.
+    public func encode(to encoder: Encoder) throws {
+        var c = encoder.container(keyedBy: CodingKeys.self)
+        try c.encode(id, forKey: .id)
+        try c.encode(goal, forKey: .goal)
+        try c.encode(goalDateMs, forKey: .goalDateMs)
+    }
 }
 
 private struct CuerpoDeObjetivos: Encodable {

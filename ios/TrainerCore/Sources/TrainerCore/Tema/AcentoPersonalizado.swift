@@ -17,8 +17,11 @@ import UIKit
 // contraste (WCAG) del color elegido contra casi-negro y contra blanco y se
 // queda con el que más se lee. Con un azul oscuro el texto pasa a blanco solo.
 //
-// 🛑 Es sólo del teléfono. El reloj sigue con su acento del catálogo (pedido de
-// Ivan: el reloj no se toca) y Android con `colors.xml`.
+// El reloj copia el color en vivo: el teléfono lo manda por WatchConnectivity
+// (`AparienciaCompartida` en `SincronizadorDeSesion`), el reloj lo guarda bajo
+// esta MISMA clave en su UserDefaults y `PaletaReloj.acento` lo lee de ahí (ver
+// `AparienciaDelReloj`). El modo día/noche viaja pero el reloj lo ignora:
+// watchOS es siempre oscuro. Android sigue con `colors.xml`.
 // =============================================================================
 
 /// Un color de la paleta de elección.

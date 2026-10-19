@@ -3,7 +3,7 @@
 // NO EDITAR A MANO: se reescribe en cada `npm run generar:modelos`, y el CI
 // falla si el archivo commiteado no coincide con lo que el generador produce.
 //
-// Contrato 1.1.0
+// Contrato 1.2.1
 //
 // AGENTS.md §4.2: los modelos de red se generan desde el contrato, no se
 // escriben a mano. AGENTS.md §5: a partir de la primera versión en tienda,
@@ -263,6 +263,7 @@ public enum Objetivo: String, Codable, CaseIterable, Sendable {
     case volverSinLesiones = "volver_sin_lesiones"
 }
 
+/// `goal_date_ms` ausente equivale a `null` (sin fecha) desde la 1.2.1; antes era obligatorio y un cliente que omitía los nulos recibía un 400.
 public struct ObjetivoEntrada: Codable, Equatable, Sendable {
     /// principal para el primero, UUID existente para los demás; omitir al crear.
     public let id: String?

@@ -17,7 +17,7 @@ struct SelectorInteractivoDeMetasView: View {
         let semanasMinimas: Int
     }
 
-    private let metas: [MetaDidactica] = [
+    private let todasLasMetas: [MetaDidactica] = [
         MetaDidactica(id: .c5k, titulo: "5K Express", distancia: "5 km", icono: "figure.run",
                       descripcion: "Velocidad y consistencia. Ideal para iniciarse o mejorar marca personal.",
                       semanasRecomendadas: "6 a 8 semanas", semanasMinimas: 6),
@@ -40,6 +40,11 @@ struct SelectorInteractivoDeMetasView: View {
                       descripcion: "Acondicionamiento físico suave para retomar el hábito con seguridad.",
                       semanasRecomendadas: "6 a 10 semanas", semanasMinimas: 6)
     ]
+
+    /// Las que se ofrecen: el MVP (sólo running) esconde el triatlón.
+    private var metas: [MetaDidactica] {
+        todasLasMetas.filter { MVP.permite($0.id) }
+    }
 
     @State private var seleccionada: Objetivo = .mediaMaraton
     @State private var conFecha = true
@@ -117,7 +122,7 @@ struct SelectorInteractivoDeMetasView: View {
 
     // MARK: - Grilla de metas
 
-    /// Dos columnas: las siete metas a la vista, sin tener que descubrir que
+    /// Dos columnas: todas las metas a la vista, sin tener que descubrir que
     /// había más deslizando de costado.
     private var grillaDeMetas: some View {
         LazyVGrid(columns: [GridItem(.flexible(), spacing: TokensEspaciado.e10),
@@ -317,7 +322,9 @@ struct SelectorInteractivoDeMetasView: View {
         Task {
             let fechaMs: Int64? = conFecha ? DatosRegistro.fechaDelCalendarioEnMs(fechaEvento, zona: .current) : nil
             let nuevoObjetivo = ObjetivoDeUsuario(id: "principal", goal: seleccionada, goalDateMs: fechaMs)
-            if await flujo.guardarObjetivos([nuevoObjetivo]) {
+            // Los objetivos adicionales se conservan: antes este guardado los borraba.
+            let adicionales = flujo.objetivosActivos.filter { $0.id != "principal" }
+            if await flujo.guardarObjetivos([nuevoObjetivo] + adicionales) {
                 Haptico.exito()
                 await estado.actualizar()
             } else {

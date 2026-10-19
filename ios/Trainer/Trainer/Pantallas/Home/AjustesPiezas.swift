@@ -2,32 +2,106 @@ import SwiftUI
 import TrainerCore
 
 // =============================================================================
-// Las piezas con las que se arma Ajustes (rediseño 2026-10, ronda 3).
+// Las piezas con las que se arma Ajustes (rediseño 2026-10, ronda 4).
 //
-// Pedido de Ivan: "entro y no entiendo qué hace cada cosa". Cada ajuste lleva su
-// ícono, su título y UNA frase que dice qué pasa si lo tocás.
+// Pedido de Ivan: limpio, visual, textos ultra cortos. La raíz es una lista
+// corta de filas (ícono + una o dos palabras + valor + chevron) y cada fila
+// abre su página, con la flecha para volver y el título grande.
 // =============================================================================
+
+/// Las páginas que se abren desde la raíz de Ajustes.
+enum PaginaDeAjustes: String, Hashable {
+    case aspecto, notificaciones, unidades, objetivos
+}
+
+/// Lo que sobrevive a que el color re-cree el Home (`RaizHomeView` usa
+/// `.id(acentoGuardado)` y todo `@State` de Ajustes se pierde). Es `static`
+/// justamente por eso: `AjustesView` lo lee y lo borra en su `onAppear`.
+enum AjustesAncla {
+    /// El `id` del bloque de color, para volver a él con el scroll.
+    static let color = "ajustes_color"
+    /// La página que estaba abierta cuando se aplicó el color.
+    static var paginaAlVolver: PaginaDeAjustes?
+}
 
 /// El tono del cuadradito del ícono. El color nunca va solo: siempre hay texto.
 enum AjustesTono {
     case acento, neutro, alerta
 }
 
-/// El rótulo chico en mayúsculas que separa los grupos ("APARIENCIA", "AVISOS").
-struct AjustesRotulo: View {
-    private let texto: String
+// MARK: - Página
 
-    init(_ texto: String) { self.texto = texto }
+/// Una página de Ajustes: la flecha para volver, el título grande y el
+/// contenido. Se vuelve también deslizando desde el borde izquierdo.
+struct AjustesPagina<Contenido: View>: View {
+    private let titulo: String
+    /// Si viene, el scroll arranca en ese `id` (ver `AjustesAncla`).
+    private let ancla: String?
+    private let volver: () -> Void
+    private let contenido: Contenido
+
+    init(_ titulo: String, ancla: String? = nil, volver: @escaping () -> Void,
+         @ViewBuilder contenido: () -> Contenido) {
+        self.titulo = titulo
+        self.ancla = ancla
+        self.volver = volver
+        self.contenido = contenido()
+    }
 
     var body: some View {
-        Text(texto)
-            .estilo(.etiquetaSeccion, color: Paleta.textoTerciario)
-            .frame(maxWidth: .infinity, alignment: .leading)
-            .padding(.leading, TokensEspaciado.e4)
-            .padding(.top, TokensEspaciado.e10)
-            .accessibilityAddTraits(.isHeader)
+        VStack(spacing: 0) {
+            HStack {
+                FlechaVolver(accion: volver)
+                Spacer()
+            }
+            .padding(.horizontal, TokensEspaciado.e16)
+            .padding(.bottom, TokensEspaciado.e4)
+
+            ScrollViewReader { proxy in
+                ScrollView {
+                    VStack(alignment: .leading, spacing: TokensEspaciado.e16) {
+                        Text(titulo)
+                            .estilo(.display)
+                            .frame(maxWidth: .infinity, alignment: .leading)
+                            .accessibilityAddTraits(.isHeader)
+                        contenido
+                    }
+                    .padding(.horizontal, TokensEspaciado.e16)
+                    .padding(.top, TokensEspaciado.e4)
+                    .padding(.bottom, TokensEspaciado.e36)
+                }
+                .onAppear {
+                    guard let ancla else { return }
+                    DispatchQueue.main.async { proxy.scrollTo(ancla, anchor: .top) }
+                }
+            }
+        }
+        .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
+        .background(Paleta.fondo)
+        .modifier(AjustesDeslizarParaVolver(accion: volver))
     }
 }
+
+/// El gesto de volver de iOS, hecho a mano: Ajustes vive en las pestañas
+/// propias del Home, no en un `NavigationStack`.
+private struct AjustesDeslizarParaVolver: ViewModifier {
+    let accion: () -> Void
+
+    func body(content: Content) -> some View {
+        content.simultaneousGesture(
+            DragGesture(minimumDistance: TokensEspaciado.e20)
+                .onEnded { gesto in
+                    let dx = gesto.translation.width
+                    guard gesto.startLocation.x < TokensEspaciado.e26,
+                          dx > TokensEspaciado.e56 + TokensEspaciado.e20,
+                          abs(gesto.translation.height) < dx / 2 else { return }
+                    accion()
+                }
+        )
+    }
+}
+
+// MARK: - Filas
 
 /// El ícono de un ajuste, en su cuadradito tonal.
 struct AjustesIcono: View {
@@ -61,127 +135,123 @@ struct AjustesIcono: View {
     }
 }
 
-/// Ícono + título + la frase que explica qué hace. Arriba de cada tarjeta.
-struct AjustesEncabezado: View {
-    let simbolo: String
-    let titulo: String
-    let explicacion: String
-    var tono: AjustesTono = .acento
-    /// Un dato al costado ("2 activos"), en píldora.
-    var detalle: String? = nil
-
-    var body: some View {
-        HStack(alignment: .top, spacing: TokensEspaciado.e12) {
-            AjustesIcono(simbolo: simbolo, tono: tono)
-            VStack(alignment: .leading, spacing: TokensEspaciado.e2) {
-                Text(titulo)
-                    .estilo(.tituloCardGrande)
-                    .fixedSize(horizontal: false, vertical: true)
-                    .accessibilityAddTraits(.isHeader)
-                Text(explicacion)
-                    .estilo(.cuerpoSecundario, color: Paleta.textoSecundario)
-                    .fixedSize(horizontal: false, vertical: true)
-            }
-            Spacer(minLength: 0)
-            if let detalle {
-                PildoraDeEstado(detalle)
-            }
-        }
-    }
-}
-
-/// Una tarjeta de Ajustes: encabezado explicado y, abajo, sus controles.
-struct AjustesGrupo<Contenido: View>: View {
-    private let titulo: String
-    private let simbolo: String
-    private let explicacion: String
-    private let tono: AjustesTono
-    private let detalle: String?
+/// Una tarjeta con filas una abajo de la otra, separadas por un divisor.
+struct AjustesTarjetaDeFilas<Contenido: View>: View {
     private let contenido: Contenido
 
-    init(_ titulo: String, simbolo: String, explicacion: String,
-         tono: AjustesTono = .acento, detalle: String? = nil,
-         @ViewBuilder contenido: () -> Contenido) {
-        self.titulo = titulo
-        self.simbolo = simbolo
-        self.explicacion = explicacion
-        self.tono = tono
-        self.detalle = detalle
+    init(@ViewBuilder contenido: () -> Contenido) {
         self.contenido = contenido()
     }
 
     var body: some View {
-        VStack(alignment: .leading, spacing: TokensEspaciado.e14) {
-            AjustesEncabezado(simbolo: simbolo, titulo: titulo, explicacion: explicacion,
-                              tono: tono, detalle: detalle)
+        VStack(spacing: 0) {
             contenido
         }
-        .padding(TokensEspaciado.e14)
-        .frame(maxWidth: .infinity, alignment: .leading)
+        .frame(maxWidth: .infinity)
         .tarjeta(radio: TokensRadio.card)
     }
 }
 
-/// Un aviso que se prende y se apaga: ícono, qué es y cuándo llega.
-struct AjustesFilaInterruptor: View {
-    let simbolo: String
-    let titulo: String
-    let detalle: String
-    @Binding var encendido: Bool
-
+/// El divisor entre filas, alineado con el texto (no con el ícono).
+struct AjustesDivisorDeFila: View {
     var body: some View {
-        Toggle(isOn: $encendido) {
-            HStack(alignment: .top, spacing: TokensEspaciado.e12) {
-                AjustesIcono(simbolo: simbolo, tono: encendido ? .acento : .neutro)
-                VStack(alignment: .leading, spacing: TokensEspaciado.e2) {
-                    Text(titulo)
-                        .estilo(.tituloCard, color: Paleta.textoPrimario)
-                    Text(detalle)
-                        .estilo(.notaLegal, color: Paleta.textoTerciario)
-                        .fixedSize(horizontal: false, vertical: true)
-                }
-            }
-        }
-        .tint(Paleta.interruptorActivo)
-        .objetivoTactilAlto()
-        .onChange(of: encendido) { _ in Haptico.seleccion() }
+        Divider()
+            .background(Paleta.divisor)
+            .padding(.leading, TokensEspaciado.e14 + TokensEspaciado.e34 + TokensEspaciado.e12)
     }
 }
 
-/// Una fila que HACE algo al tocarla: ícono, qué hace, y a la derecha la
-/// flecha (o el estado, si ya se hizo).
-struct AjustesFilaDeAccion: View {
+/// Una fila que se toca: ícono, título, un valor corto y el chevron.
+struct AjustesFila: View {
     let simbolo: String
     let titulo: String
-    let detalle: String
-    var simboloFinal: String = "chevron.right"
+    var valor: String? = nil
+    /// Un puntito de color al lado del valor (el color de la app).
+    var muestra: Color? = nil
+    /// Lo que lee VoiceOver como valor, si no alcanza con `valor`.
+    var valorAccesible: String? = nil
+    var tono: AjustesTono = .acento
+    /// `nil`: sin nada al final (p.ej. Cerrar sesión).
+    var simboloFinal: String? = "chevron.right"
     let accion: () -> Void
 
     var body: some View {
         Button(action: accion) {
-            HStack(alignment: .center, spacing: TokensEspaciado.e12) {
-                AjustesIcono(simbolo: simbolo)
-                VStack(alignment: .leading, spacing: TokensEspaciado.e2) {
-                    Text(titulo)
-                        .estilo(.tituloCard, color: Paleta.textoPrimario)
-                        .fixedSize(horizontal: false, vertical: true)
-                    Text(detalle)
-                        .estilo(.notaLegal, color: Paleta.textoTerciario)
-                        .fixedSize(horizontal: false, vertical: true)
+            HStack(spacing: TokensEspaciado.e12) {
+                AjustesIcono(simbolo: simbolo, tono: tono)
+                Text(titulo)
+                    .estilo(.opcionTitulo, color: tono == .alerta ? Paleta.error : Paleta.textoPrimario)
+                    .lineLimit(1)
+                    .minimumScaleFactor(0.85)
+                Spacer(minLength: TokensEspaciado.e8)
+                if let valor {
+                    Text(valor)
+                        .estilo(.cuerpoSecundario, color: Paleta.textoTerciario)
+                        .lineLimit(1)
                 }
-                .frame(maxWidth: .infinity, alignment: .leading)
-                Image(systemName: simboloFinal)
-                    .font(.system(size: TokensTipografia.labelCampoTamano, weight: .bold))
-                    .foregroundStyle(simboloFinal == "chevron.right" ? Paleta.textoTerciario : Paleta.acento)
-                    .accessibilityHidden(true)
+                if let muestra {
+                    Circle()
+                        .fill(muestra)
+                        .frame(width: TokensEspaciado.e12, height: TokensEspaciado.e12)
+                        .overlay(Circle().strokeBorder(Paleta.bordeSuperficie, lineWidth: TokensEspaciado.e1))
+                }
+                if let simboloFinal {
+                    Image(systemName: simboloFinal)
+                        .font(.system(size: TokensTipografia.labelCampoTamano, weight: .bold))
+                        .foregroundStyle(simboloFinal == "chevron.right" ? Paleta.textoTerciario : Paleta.acento)
+                }
             }
-            .padding(TokensEspaciado.e14)
+            .padding(.horizontal, TokensEspaciado.e14)
+            .padding(.vertical, TokensEspaciado.e8)
             .frame(maxWidth: .infinity)
-            .tarjeta(radio: TokensRadio.card)
             .objetivoTactilAlto()
         }
         .buttonStyle(EstiloPresionado())
-        .accessibilityElement(children: .combine)
+        .accessibilityElement(children: .ignore)
+        .accessibilityLabel(titulo)
+        .accessibilityValue(valorAccesible ?? valor ?? "")
         .accessibilityAddTraits(.isButton)
+    }
+}
+
+/// Un aviso que se prende y se apaga: ícono y título. Lo que hace va en la
+/// pista de VoiceOver, no en pantalla.
+struct AjustesFilaInterruptor: View {
+    let simbolo: String
+    let titulo: String
+    var pista: String? = nil
+    @Binding var encendido: Bool
+
+    var body: some View {
+        Toggle(isOn: $encendido) {
+            HStack(spacing: TokensEspaciado.e12) {
+                AjustesIcono(simbolo: simbolo, tono: encendido ? .acento : .neutro)
+                Text(titulo)
+                    .estilo(.opcionTitulo, color: Paleta.textoPrimario)
+                    .lineLimit(1)
+                    .minimumScaleFactor(0.85)
+            }
+        }
+        .tint(Paleta.interruptorActivo)
+        .padding(.horizontal, TokensEspaciado.e14)
+        .padding(.vertical, TokensEspaciado.e8)
+        .objetivoTactilAlto()
+        .accessibilityHint(pista ?? "")
+        .onChange(of: encendido) { _ in Haptico.seleccion() }
+    }
+}
+
+/// El rótulo chico en mayúsculas que separa bloques ("MODO", "COLOR").
+struct AjustesRotulo: View {
+    private let texto: String
+
+    init(_ texto: String) { self.texto = texto }
+
+    var body: some View {
+        Text(texto)
+            .estilo(.etiquetaSeccion, color: Paleta.textoTerciario)
+            .frame(maxWidth: .infinity, alignment: .leading)
+            .padding(.leading, TokensEspaciado.e4)
+            .accessibilityAddTraits(.isHeader)
     }
 }

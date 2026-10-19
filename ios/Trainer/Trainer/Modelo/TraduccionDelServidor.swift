@@ -41,8 +41,10 @@ enum TraduccionDelServidor {
             .sorted { $0.number < $1.number }
             .filter { Int($0.number) >= primera && Int($0.number) < primera + semanasALaVista }
 
-        let esTriatlon = plan.days.contains { $0.sport == .natacion } ||
-                         (plan.days.contains { $0.sport == .ciclismo } && plan.days.contains { $0.sport == .running })
+        // MVP sólo running: nunca se deduce triatlón (un día de bici es cross-training).
+        let esTriatlon = MVP.permite(.triatlon) &&
+                         (plan.days.contains { $0.sport == .natacion } ||
+                          (plan.days.contains { $0.sport == .ciclismo } && plan.days.contains { $0.sport == .running }))
 
         let bloque = BloqueDelPlan(
             subtitulo: subtitulo(plan, semanaDeHoy: semanaDeHoy, enTriatlon: esTriatlon),

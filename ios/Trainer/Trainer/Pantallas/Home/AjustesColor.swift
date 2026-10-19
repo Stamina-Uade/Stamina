@@ -2,11 +2,12 @@ import SwiftUI
 import TrainerCore
 
 // =============================================================================
-// Ajustes → Apariencia → Color de la app.
+// Ajustes → Aspecto → Color de la app.
 //
 // Arriba, una vista previa EN VIVO pintada con el color candidato (armado con
 // sus componentes, no con `Paleta.acento`, que es el que ya está aplicado).
-// Abajo, la paleta y un último círculo para elegir cualquier color.
+// Abajo, la paleta y un último círculo para elegir cualquier color. Sin
+// nombres a la vista: los nombres son para VoiceOver.
 //
 // 🪤 Guardar el color re-crea el Home entero (`RaizHomeView` usa
 // `.id(acentoGuardado)`), así que todo `@State` de acá se pierde al aplicar.
@@ -14,17 +15,9 @@ import TrainerCore
 //  - Un círculo de la paleta se aplica al toque: no hay pasos que recordar.
 //  - El selector libre NO guarda en cada arrastre (re-crearía la pantalla y le
 //    cerraría el selector del sistema en la mano). Muestra el candidato en la
-//    vista previa y recién guarda con "Usar este color", que es el último paso.
-//  - `AjustesAncla` recuerda volver acá, porque el scroll arranca de cero.
+//    vista previa y recién guarda con "Usar", que es el último paso.
+//  - `AjustesAncla` (en `AjustesPiezas.swift`) recuerda volver a Aspecto.
 // =============================================================================
-
-/// Dónde dejar el scroll de Ajustes después de que el color re-crea el Home.
-/// Es `static` justamente para sobrevivir a esa re-creación.
-enum AjustesAncla {
-    static let color = "ajustes_color"
-    /// Se lee y se borra en el `onAppear` de `AjustesView`.
-    static var alVolver: String?
-}
 
 struct AjustesSelectorDeColor: View {
     @AppStorage(AcentoPersonalizado.clave) private var acentoGuardado = ""
@@ -37,14 +30,13 @@ struct AjustesSelectorDeColor: View {
     @State private var librePendiente: String?
 
     private let columnas = [
-        GridItem(.adaptive(minimum: TokensEspaciado.e56 + TokensEspaciado.e8),
+        GridItem(.adaptive(minimum: TokensEspaciado.e52),
                  spacing: TokensEspaciado.e8, alignment: .top),
     ]
 
     var body: some View {
         VStack(alignment: .leading, spacing: TokensEspaciado.e14) {
-            AjustesVistaPreviaDeColor(componentes: componentesCandidatos,
-                                      sinAplicar: librePendiente != nil)
+            AjustesVistaPreviaDeColor(componentes: componentesCandidatos)
 
             if let librePendiente {
                 confirmacion(librePendiente)
@@ -95,14 +87,11 @@ struct AjustesSelectorDeColor: View {
         return Button {
             elegir(opcion)
         } label: {
-            VStack(spacing: TokensEspaciado.e6) {
-                AjustesCirculoDeColor(color: opcion.color, elegido: elegida,
-                                      tildeOscuro: AcentoPersonalizado.textoOscuroEncima(
-                                          opcion.rojo, opcion.verde, opcion.azul))
-                nombre(opcion.nombre, elegido: elegida)
-            }
-            .frame(maxWidth: .infinity)
-            .contentShape(Rectangle())
+            AjustesCirculoDeColor(color: opcion.color, elegido: elegida,
+                                  tildeOscuro: AcentoPersonalizado.textoOscuroEncima(
+                                      opcion.rojo, opcion.verde, opcion.azul))
+                .frame(maxWidth: .infinity)
+                .contentShape(Rectangle())
         }
         .buttonStyle(EstiloPresionado())
         .accessibilityElement(children: .ignore)
@@ -113,35 +102,21 @@ struct AjustesSelectorDeColor: View {
     /// El último círculo: el selector de color del sistema, con su aro de
     /// colores (que ya dice "cualquier color" sin palabras).
     private var muestraLibre: some View {
-        VStack(spacing: TokensEspaciado.e6) {
-            ZStack {
-                Circle()
-                    .strokeBorder(libreElegido ? Paleta.textoPrimario : Color.clear,
-                                  lineWidth: TokensEspaciado.e2)
-                    .allowsHitTesting(false)
-                ColorPicker(String(localized: "Color personalizado",
-                                   comment: "Ajustes: selector de un color libre para la app"),
-                            selection: bindingLibre, supportsOpacity: false)
-                    .labelsHidden()
-                    .scaleEffect(1.45)
-                    .accessibilityHint(String(localized: "Elegí cualquier color y después tocá Usar este color",
-                                              comment: "Ajustes: cómo se usa el color personalizado"))
-            }
-            .frame(width: TokensEspaciado.e52, height: TokensEspaciado.e52)
-            nombre(String(localized: "Personalizado", comment: "Ajustes: el color libre"),
-                   elegido: libreElegido)
-                .accessibilityHidden(true)
+        ZStack {
+            Circle()
+                .strokeBorder(libreElegido ? Paleta.textoPrimario : Color.clear,
+                              lineWidth: TokensEspaciado.e2)
+                .allowsHitTesting(false)
+            ColorPicker(String(localized: "Color personalizado",
+                               comment: "Ajustes: selector de un color libre para la app"),
+                        selection: bindingLibre, supportsOpacity: false)
+                .labelsHidden()
+                .scaleEffect(1.45)
+                .accessibilityHint(String(localized: "Elegí cualquier color y después tocá Usar",
+                                          comment: "Ajustes: cómo se usa el color personalizado"))
         }
+        .frame(width: TokensEspaciado.e52, height: TokensEspaciado.e52)
         .frame(maxWidth: .infinity)
-    }
-
-    private func nombre(_ texto: String, elegido: Bool) -> some View {
-        Text(texto)
-            .estilo(.notaLegal, color: elegido ? Paleta.textoPrimario : Paleta.textoSecundario)
-            .multilineTextAlignment(.center)
-            .lineLimit(2)
-            .minimumScaleFactor(0.8)
-            .fixedSize(horizontal: false, vertical: true)
     }
 
     private var bindingLibre: Binding<Color> {
@@ -176,7 +151,7 @@ struct AjustesSelectorDeColor: View {
             Button {
                 aplicar(guardado)
             } label: {
-                Text(String(localized: "Usar este color", comment: "Ajustes: aplicar el color elegido"))
+                Text(String(localized: "Usar", comment: "Ajustes: aplicar el color elegido"))
                     .estilo(.botonPrimario, color: encima)
                     .frame(maxWidth: .infinity)
                     .frame(minHeight: TokensTamano.botonPrimario)
@@ -193,8 +168,7 @@ struct AjustesSelectorDeColor: View {
             guardar("")
         } label: {
             Label {
-                Text(String(localized: "Restablecer color de Stamina",
-                            comment: "Ajustes: volver al color de fábrica"))
+                Text(String(localized: "Restablecer", comment: "Ajustes: volver al color de fábrica"))
                     .estilo(.tituloCard, color: Paleta.textoAcento)
             } icon: {
                 Image(systemName: "arrow.uturn.backward")
@@ -227,9 +201,10 @@ struct AjustesSelectorDeColor: View {
         guardar(guardado)
     }
 
-    /// Lo último que pasa antes de que el Home se re-cree: recordar volver acá.
+    /// Lo último que pasa antes de que el Home se re-cree: recordar volver a
+    /// Aspecto (lo lee `AjustesView` al aparecer).
     private func guardar(_ valor: String) {
-        AjustesAncla.alVolver = AjustesAncla.color
+        AjustesAncla.paginaAlVolver = .aspecto
         acentoGuardado = valor
     }
 }
@@ -269,46 +244,29 @@ struct AjustesCirculoDeColor: View {
 /// candidato, así se ve el resultado ANTES de aplicarlo.
 struct AjustesVistaPreviaDeColor: View {
     let componentes: (Double, Double, Double)
-    /// `true` mientras el color libre no se aplicó.
-    let sinAplicar: Bool
 
     private var color: Color {
         Color(.sRGB, red: componentes.0, green: componentes.1, blue: componentes.2, opacity: 1)
     }
 
-    private var textoOscuro: Bool {
+    /// Texto en casi-negro o en blanco: el que más se lee encima del color.
+    private var encima: Color {
         AcentoPersonalizado.textoOscuroEncima(componentes.0, componentes.1, componentes.2)
+            ? TokensColor.marcaSobreAcento : Color.white
     }
-
-    private var encima: Color { textoOscuro ? TokensColor.marcaSobreAcento : Color.white }
 
     private var seLeePoco: Bool {
         AcentoPersonalizado.contrasteSobreNegro(componentes.0, componentes.1, componentes.2) < 3
     }
 
     var body: some View {
-        VStack(alignment: .leading, spacing: TokensEspaciado.e10) {
-            Text(sinAplicar
-                 ? String(localized: "Vista previa · todavía sin aplicar", comment: "Ajustes: rótulo de la vista previa")
-                 : String(localized: "Así se ve", comment: "Ajustes: rótulo de la vista previa"))
-                .estilo(.etiquetaSeccion, color: sinAplicar ? Paleta.textoSecundario : Paleta.textoTerciario)
-
+        VStack(alignment: .leading, spacing: TokensEspaciado.e8) {
             pantalla
                 .accessibilityHidden(true)
-
-            nota(simbolo: "textformat",
-                 texto: textoOscuro
-                    ? String(localized: "Encima de este color el texto va en negro, que se lee mejor.",
-                             comment: "Ajustes: contraste del texto sobre el color elegido")
-                    : String(localized: "Encima de este color el texto va en blanco, que se lee mejor.",
-                             comment: "Ajustes: contraste del texto sobre el color elegido"),
-                 colorDelIcono: Paleta.textoTerciario)
-
             if seLeePoco {
-                nota(simbolo: "exclamationmark.triangle.fill",
-                     texto: String(localized: "Este color se lee poco sobre fondo oscuro. Probá uno más claro.",
-                                   comment: "Ajustes: aviso de bajo contraste del color elegido"),
-                     colorDelIcono: Paleta.error)
+                PildoraDeEstado(String(localized: "Poco contraste",
+                                       comment: "Ajustes: el color elegido se lee poco sobre fondo oscuro"),
+                                simbolo: "exclamationmark.triangle.fill", tono: .alerta)
             }
         }
     }
@@ -337,13 +295,13 @@ struct AjustesVistaPreviaDeColor: View {
                 Text(String(localized: "Empezar", comment: "Ajustes: ejemplo de botón en la vista previa"))
                     .estilo(.botonPrimario, color: encima)
                     .frame(maxWidth: .infinity)
-                    .frame(height: TokensEspaciado.e40)
+                    .frame(height: TokensEspaciado.e36)
                     .background(Capsule().fill(color))
                     .shadow(color: color.opacity(0.45), radius: TokensEspaciado.e8)
                 rayo
             }
         }
-        .padding(TokensEspaciado.e14)
+        .padding(TokensEspaciado.e12)
         .background(Paleta.fondo)
         .clipShape(RoundedRectangle(cornerRadius: TokensRadio.boton, style: .continuous))
         .overlay(
@@ -380,21 +338,8 @@ struct AjustesVistaPreviaDeColor: View {
         Image(systemName: "bolt.fill")
             .font(.system(size: TokensTipografia.valorDatoTamano, weight: .bold))
             .foregroundStyle(encima)
-            .frame(width: TokensEspaciado.e44, height: TokensEspaciado.e44)
+            .frame(width: TokensEspaciado.e40, height: TokensEspaciado.e40)
             .background(Circle().fill(color))
             .shadow(color: color.opacity(0.45), radius: TokensEspaciado.e8)
-    }
-
-    private func nota(simbolo: String, texto: String, colorDelIcono: Color) -> some View {
-        HStack(alignment: .top, spacing: TokensEspaciado.e8) {
-            Image(systemName: simbolo)
-                .font(.system(size: TokensTipografia.notaTamano, weight: .semibold))
-                .foregroundStyle(colorDelIcono)
-                .padding(.top, TokensEspaciado.e1)
-                .accessibilityHidden(true)
-            Text(texto)
-                .estilo(.notaLegal, color: Paleta.textoSecundario)
-                .fixedSize(horizontal: false, vertical: true)
-        }
     }
 }

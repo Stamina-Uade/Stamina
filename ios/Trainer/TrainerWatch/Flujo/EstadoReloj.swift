@@ -961,11 +961,15 @@ final class EstadoReloj: ObservableObject {
     private var esTriatlonPendiente: Bool = false
     private var iconoPendiente: String?
 
-    func prepararInicioConCuentaRegresiva(deporte: DeporteDeSesion, esInterior: Bool = false, objetivoMetros: Int? = nil, esTriatlon: Bool = false, icono: String? = nil) {
+    func prepararInicioConCuentaRegresiva(deporte deportePedido: DeporteDeSesion, esInterior: Bool = false, objetivoMetros: Int? = nil, esTriatlon triatlonPedido: Bool = false, icono iconoPedido: String? = nil) {
         guard estaAutenticado else {
             ir(a: .sinTelefono)
             return
         }
+        // MVP sólo running: un deporte escondido arranca como carrera (y sin su ícono).
+        let deporte = MVP.acotado(deportePedido)
+        let esTriatlon = triatlonPedido && MVP.permite(.triatlon)
+        let icono = deporte == deportePedido ? iconoPedido : nil
         self.deporte = deporte
         self.esTriatlon = esTriatlon
         self.deportePendiente = deporte
@@ -1029,7 +1033,11 @@ final class EstadoReloj: ObservableObject {
         ir(a: .abrir)
     }
 
-    func empezar(deporte: DeporteDeSesion? = nil, esInterior: Bool = false, objetivoMetros: Int? = nil, esTriatlon: Bool = false, icono: String? = nil) {
+    func empezar(deporte deportePedido: DeporteDeSesion? = nil, esInterior: Bool = false, objetivoMetros: Int? = nil, esTriatlon triatlonPedido: Bool = false, icono iconoPedido: String? = nil) {
+        // MVP sólo running: mismo acotado que en `prepararInicioConCuentaRegresiva`.
+        let deporte = deportePedido.map { MVP.acotado($0) }
+        let esTriatlon = triatlonPedido && MVP.permite(.triatlon)
+        let icono = deporte == deportePedido ? iconoPedido : nil
         planificadorDeAvituallamiento = PlanificadorDeAvituallamiento()
         avisoDeAvituallamiento = nil
         cuentaRegresivaActiva = false
@@ -1085,7 +1093,7 @@ final class EstadoReloj: ObservableObject {
             fuenteLocal = true
             corriendo = true
             pausada = false
-            let tipo: DeporteDeSesion = self.deporte
+            let tipo: DeporteDeSesion = MVP.acotado(self.deporte)
             let obj = objetivoMetros ?? (sesionPlanificada?.distanciaMetros)
             seguimiento.empezar(deporte: tipo, esInterior: esInterior, objetivoMetros: obj, esTriatlon: esTriatlon)
             ir(a: .metricas)

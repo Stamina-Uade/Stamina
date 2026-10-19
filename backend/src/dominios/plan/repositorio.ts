@@ -69,5 +69,46 @@ export function crearRepoPlan(db: Db) {
         return quedo;
       });
     },
+
+    /**
+     * Reemplaza ESA ancla —la de un bloque que ya terminó— por una nueva desde `inicioFecha`,
+     * aunque el hash sea el mismo. Se reemplaza por id y no por hash: si dos pedidos llegan a la
+     * vez, el segundo no encuentra nada que reemplazar, su insert choca con el índice parcial y
+     * lee la que dejó el primero.
+     */
+    async renovar(
+      usuarioId: string,
+      anclaId: string,
+      motorVersion: string,
+      entradaHash: string,
+      inicioFecha: string,
+      zona: string,
+      ahoraMs: number,
+      objetivoId: string | null = null
+    ): Promise<PlanFila> {
+      return db.enTransaccion(async (tx) => {
+        await tx.consultar(
+          `update planes set reemplazado_en_ms = $3
+            where id = $1 and usuario_id = $2 and reemplazado_en_ms is null`,
+          [anclaId, usuarioId, ahoraMs]
+        );
+        const nueva = await tx.unaFila<PlanFila>(
+          `insert into planes (usuario_id, motor_version, entrada_hash, inicio_fecha, zona_horaria, creado_en_ms, objetivo_id)
+                values ($1, $2, $3, $4, $5, $6, $7)
+           on conflict do nothing
+           returning ${COLUMNAS}`,
+          [usuarioId, motorVersion, entradaHash, inicioFecha, zona, ahoraMs, objetivoId]
+        );
+        if (nueva !== null) return nueva;
+        const quedo = await tx.unaFila<PlanFila>(
+          `select ${COLUMNAS} from planes
+            where usuario_id = $1 and objetivo_id is not distinct from $2::uuid
+              and reemplazado_en_ms is null`,
+          [usuarioId, objetivoId]
+        );
+        if (quedo === null) throw new Error("renovar: no quedó ningún plan vigente");
+        return quedo;
+      });
+    },
   };
 }

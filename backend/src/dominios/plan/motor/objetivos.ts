@@ -28,6 +28,7 @@ import type {
   Objetivo,
   PerfilDelMotor,
 } from "./tipos.js";
+import { MVP_SOLO_RUNNING, OBJETIVO_SOLO_RUNNING } from "./tipos.js";
 
 /** GoalType de Profile.kt: deporte, distancia y estimatedEventMinutes por nivel. */
 const GOAL_TYPES: Readonly<Record<GoalTypeKotlin, Omit<MetaDelMotor, "goalType">>> = {
@@ -103,18 +104,35 @@ function normalizarAgenda(dias: readonly DiaDeEntrenamiento[]): Map<number, numb
   return new Map([...primeros].sort(([a], [b]) => a - b));
 }
 
+/**
+ * El objetivo y el deporte con los que se PLANIFICA. Con la puerta del MVP (tipos.ts,
+ * MVP_SOLO_RUNNING) el deporte es siempre running y el triatlón se planifica como su 10K; sin
+ * ella, lo que eligió la persona, como en el Kotlin.
+ */
+export function objetivoYDeporteAPlanificar(
+  objetivo: Objetivo,
+  deporte: DeportePerfil,
+  soloRunning: boolean
+): { objetivo: Objetivo; deporte: DeportePerfil } {
+  if (!soloRunning) return { objetivo, deporte };
+  return { objetivo: OBJETIVO_SOLO_RUNNING[objetivo] ?? objetivo, deporte: "running" };
+}
+
 /** La entrada del contrato, como UserProfile. */
-export function perfilDelMotor(entrada: EntradaDelMotor): PerfilDelMotor {
+export function perfilDelMotor(entrada: EntradaDelMotor, soloRunning: boolean = MVP_SOLO_RUNNING): PerfilDelMotor {
   if (!NIVELES.includes(entrada.nivel)) throw new RangeError(`nivel desconocido: "${entrada.nivel}"`);
   if (!DEPORTES.includes(entrada.deporte)) throw new RangeError(`deporte desconocido: "${entrada.deporte}"`);
+  // Se valida lo que llegó antes de mapearlo: un objetivo inválido falla igual con la puerta prendida.
+  metaDelObjetivo(entrada.objetivo, entrada.deporte);
   const { pesoG, edad } = entrada;
   if (pesoG !== null && !(Number.isFinite(pesoG) && pesoG > 0)) throw new RangeError(`pesoG inválido: ${pesoG}`);
   if (edad !== null && !(Number.isInteger(edad) && edad >= 0)) throw new RangeError(`edad inválida: ${edad}`);
+  const { objetivo, deporte } = objetivoYDeporteAPlanificar(entrada.objetivo, entrada.deporte, soloRunning);
   return {
-    objetivo: entrada.objetivo,
-    meta: metaDelObjetivo(entrada.objetivo, entrada.deporte),
+    objetivo,
+    meta: metaDelObjetivo(objetivo, deporte),
     nivel: entrada.nivel,
-    deportePrincipal: entrada.deporte,
+    deportePrincipal: deporte,
     // Sin peso, el plan de entrenamiento sale igual; lo que no sale es lo que se calcula por kilo
     // (kcal y avituallamiento). docs/PROPUESTA-MOTOR.md §4.3.
     pesoKg: pesoG === null ? null : pesoG / 1000,

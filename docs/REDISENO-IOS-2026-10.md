@@ -98,3 +98,25 @@ pulso en vivo en el teléfono) **no se inventó**.
   con el detalle y el "por qué hoy". **Historial:** números de semana/mes/todo, filtro por deporte, lista por
   mes, calendario con leyenda. **Perfil:** para qué se usa cada dato, metas con cuenta regresiva, días de
   entrenamiento, accesos claros. Vibración al tocar en todas.
+
+## Cuarta ronda (19-10, noche) — MVP, mascota y ajustes
+
+- **Mascota** (serval de Ivan) en `Assets.xcassets`: `MascotaSaludo`, `MascotaCorriendo`, `MascotaMedalla`, con
+  fondo transparente. Componente `MascotaConBocadillo` (bocadillo + animación suave, sin animación con Reducir
+  movimiento). Reemplaza los íconos del tour, de la bienvenida y del cierre del alta.
+- **Ajustes en páginas:** raíz con filas cortas (Aspecto, Notificaciones, Unidades, Objetivos, Ver tour, Cerrar
+  sesión) y cada una abre su pantalla. Sin textos explicativos (quedan como pistas de VoiceOver).
+- **Reloj en tiempo real:** el color del teléfono viaja al reloj (application context + mensaje inmediato si está
+  al alcance) y el reloj se repinta sin cortar la salida en curso. El modo claro/oscuro se manda pero el reloj
+  sigue siempre oscuro (watchOS no tiene modo claro).
+- **MVP sólo running:** una llave, `MVP.soloRunning` (iOS: `TrainerCore/MVP.swift`; backend:
+  `MVP_SOLO_RUNNING` en `motor/tipos.ts`). Bici, natación, triatlón y caminata quedan ocultos en el alta, el
+  selector de metas, el entreno, el historial, el perfil y el reloj. Nada se borró. **Strava no existe en el
+  código**: no había nada que filtrar.
+- **Objetivo que no se guardaba:** la app mandaba `PUT /me/goals` sin `goal_date_ms` (Swift omite los nil) y el
+  contrato lo exigía → 400 en cada objetivo sin fecha. Arreglado en los dos lados (contrato 1.2.1: el campo es
+  opcional; la app manda `null` explícito). Además un bloque terminado con el mismo objetivo ahora arranca uno
+  nuevo, y el selector del Plan ya no borra los objetivos adicionales.
+- **Sesiones de bici:** el motor usaba el deporte del perfil para todas las sesiones. Con la llave, siempre
+  running (+ fuerza). Triatlón olímpico se planifica como 10K. 182/182 tests unitarios del backend pasan
+  (14 nuevos). Los de integración necesitan Postgres/Redis.

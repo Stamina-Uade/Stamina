@@ -291,8 +291,10 @@ final class SeguimientoDeSalida: NSObject, ObservableObject, CLLocationManagerDe
         }
     }
 
-    func pedirPermisoYEmpezar(deporte: DeporteDeSesion) {
+    func pedirPermisoYEmpezar(deporte deportePedido: DeporteDeSesion) {
         guard fase == .detenida else { return }
+        // MVP sólo running: un deporte escondido se graba como carrera.
+        let deporte = MVP.acotado(deportePedido)
         errorDeUbicacion = false
         switch manager.authorizationStatus {
         case .authorizedWhenInUse, .authorizedAlways:

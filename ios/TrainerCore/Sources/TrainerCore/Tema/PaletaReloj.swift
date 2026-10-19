@@ -23,6 +23,14 @@ import UIKit
 // "48dp / 44pt" sin separar plataformas, y el diseño del reloj usa 44. Acá se usa
 // **44**, que es el mínimo de Apple para watchOS, y queda anotado que la regla
 // para el reloj todavía no está fijada.
+//
+// EL ACENTO SIGUE AL TELÉFONO, EN VIVO. El iPhone manda su color elegido por
+// WatchConnectivity (`AparienciaCompartida`, ver `SincronizadorDeSesion`); el
+// reloj lo guarda en su propio UserDefaults bajo `AcentoPersonalizado.clave` y lo
+// anuncia en `AparienciaDelReloj.compartida`, que la raíz del reloj escucha para
+// redibujar. Del MODO (día/noche/automático) sólo se guarda el valor: watchOS es
+// siempre oscuro y el fondo negro puro es un requisito de batería, así que en la
+// muñeca no se aplica.
 // =============================================================================
 
 public enum PaletaReloj {
@@ -54,9 +62,23 @@ public enum PaletaReloj {
 
     // ---- marca ----
 
-    /// El acento, del catálogo de assets del reloj para que la perilla de color
-    /// funcione también en la muñeca (decisión 0007 §12.1).
-    public static let acento: Color = acentoDelCatalogo ?? Color(red: 1.0, green: 35.0 / 255.0, blue: 167.0 / 255.0)
+    /// El acento. Es el que eligió la persona en el teléfono (Ajustes →
+    /// Apariencia), que llega por `SincronizadorDeSesion` y queda guardado en
+    /// `AcentoPersonalizado.clave` de ESTE dispositivo; sin elección, el del
+    /// catálogo de assets del reloj (decisión 0007 §12.1).
+    ///
+    /// 🪤 Es `var` calculada y no `let`: un `let` estático se evalúa una sola vez
+    /// y el color nuevo no llegaría nunca. watchOS no garantiza el `UIColor`
+    /// dinámico que usa `Paleta.acento` en el teléfono, así que se lee lo guardado
+    /// en cada dibujo (UserDefaults lo tiene en memoria) y el redibujo lo fuerza
+    /// `AparienciaDelReloj`.
+    public static var acento: Color {
+        guard let c = AcentoPersonalizado.componentesActuales else { return acentoDeFabrica }
+        return Color(.sRGB, red: c.0, green: c.1, blue: c.2, opacity: 1)
+    }
+
+    private static let acentoDeFabrica: Color =
+        acentoDelCatalogo ?? Color(red: 1.0, green: 35.0 / 255.0, blue: 167.0 / 255.0)
 
     private static var acentoDelCatalogo: Color? {
         #if canImport(UIKit)
@@ -67,13 +89,19 @@ public enum PaletaReloj {
         #endif
     }
 
-    public static let sobreAcento = TokensColor.marcaSobreAcento
-    public static let acentoSuave = acento.opacity(TokensAcento.alfaChipActivo)
+    /// El texto encima del acento: casi-negro o blanco, el que más contraste dé
+    /// (WCAG) contra el color elegido. Igual que `Paleta.sobreAcento`.
+    public static var sobreAcento: Color {
+        guard let c = AcentoPersonalizado.componentesActuales else { return TokensColor.marcaSobreAcento }
+        return AcentoPersonalizado.textoOscuroEncima(c.0, c.1, c.2) ? TokensColor.marcaSobreAcento : Color.white
+    }
+
+    public static var acentoSuave: Color { acento.opacity(TokensAcento.alfaChipActivo) }
 
     // ---- secundario (Pantone 802 C verde lima) ----
-    public static let secundario = acento
-    public static let secundarioSuaveFondo = acento.opacity(TokensAcento.alfaChipActivo)
-    public static let secundarioSuaveBorde = acento.opacity(0.35)
+    public static var secundario: Color { acento }
+    public static var secundarioSuaveFondo: Color { acento.opacity(TokensAcento.alfaChipActivo) }
+    public static var secundarioSuaveBorde: Color { acento.opacity(0.35) }
 
     // ---- bordes y estado ----
 
@@ -85,12 +113,12 @@ public enum PaletaReloj {
     // Tres colores propios del reloj, para distinguir métricas de un vistazo.
 
     public static let dato1 = TokensColor.datosSerie1
-    public static let dato2 = acento
-    public static let dato3 = acento
+    public static var dato2: Color { acento }
+    public static var dato3: Color { acento }
 
     // Acción de vuelta en los controles (verde lima)
-    public static let vuelta = acento
-    public static let vueltaFondo = acento.opacity(0.18)
+    public static var vuelta: Color { acento }
+    public static var vueltaFondo: Color { acento.opacity(0.18) }
 
     // Controles de sesión (Pausa y Reanudar en naranja atlético)
     public static let controlPausa = Color(red: 1.0, green: 0.584, blue: 0.0)
@@ -110,5 +138,46 @@ extension View {
         frame(minWidth: PaletaReloj.objetivoTactilMinimo,
               minHeight: PaletaReloj.objetivoTactilMinimo)
             .contentShape(Rectangle())
+    }
+}
+
+// MARK: - Lo que llega del teléfono
+
+/// La apariencia que el teléfono le mandó al reloj, publicada para que la raíz
+/// del reloj se redibuje en cuanto cambia el color.
+///
+/// La fuente de verdad es el UserDefaults del dispositivo (la misma clave que el
+/// teléfono, `AcentoPersonalizado.clave`), así `PaletaReloj.acento` se resuelve
+/// sin pasar por este objeto y el último color sobrevive al reinicio del reloj.
+/// Esto sólo avisa del cambio.
+public final class AparienciaDelReloj: ObservableObject {
+    public static let compartida = AparienciaDelReloj()
+
+    /// "r,g,b" (0–255) o vacío = el color del catálogo.
+    @Published public private(set) var acentoGuardado: String
+    /// `ModoApariencia.rawValue` del teléfono. Se guarda para el futuro; el reloj
+    /// no lo aplica (watchOS es siempre oscuro).
+    @Published public private(set) var modoGuardado: String
+
+    private let defaults: UserDefaults
+
+    public init(defaults: UserDefaults = .standard) {
+        self.defaults = defaults
+        self.acentoGuardado = defaults.string(forKey: AcentoPersonalizado.clave) ?? ""
+        self.modoGuardado = defaults.string(forKey: ModoApariencia.clave) ?? ""
+    }
+
+    /// Guarda y publica. Primero se escribe UserDefaults y después se publica, así
+    /// el redibujo que dispara `@Published` ya lee el color nuevo.
+    @MainActor
+    public func aplicar(_ apariencia: AparienciaCompartida) {
+        if apariencia.acento != acentoGuardado {
+            defaults.set(apariencia.acento, forKey: AcentoPersonalizado.clave)
+            acentoGuardado = apariencia.acento
+        }
+        if apariencia.modo != modoGuardado {
+            defaults.set(apariencia.modo, forKey: ModoApariencia.clave)
+            modoGuardado = apariencia.modo
+        }
     }
 }

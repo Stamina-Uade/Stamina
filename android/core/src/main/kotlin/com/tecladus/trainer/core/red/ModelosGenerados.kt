@@ -3,7 +3,7 @@
 // NO EDITAR A MANO: se reescribe con `npm run generar:modelos` y el CI falla si
 // lo commiteado no coincide.
 //
-// contrato: Trainer API v1.1.0
+// contrato: Trainer API v1.2.1
 //
 // AGENTS.md §5: el JSON va en snake_case, los tiempos son enteros de milisegundos
 // desde epoch y todo viaja en un sobre {"data": …} o {"error": {…}}. Los nombres
@@ -194,14 +194,14 @@ enum class Objetivo {
 
 }
 
-/** ObjetivoEntrada */
+/** `goal_date_ms` ausente equivale a `null` (sin fecha) desde la 1.2.1; antes era obligatorio y un cliente que omitía los nulos recibía un 400. */
 @Serializable
 data class ObjetivoEntrada(
     /** principal para el primero, UUID existente para los demás; omitir al crear. */
     val id: String? = null,
     val goal: Objetivo,
     @SerialName("goal_date_ms")
-    val goalDateMs: Long?,
+    val goalDateMs: Long? = null,
 )
 
 /** ObjetivoActivo */
@@ -224,6 +224,7 @@ data class PlanDeObjetivo(
 /** PronosticoDeCalor */
 @Serializable
 data class PronosticoDeCalor(
+    /** MET Norway */
     val source: String,
     @SerialName("source_url")
     val sourceUrl: String,

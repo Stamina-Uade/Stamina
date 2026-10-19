@@ -33,6 +33,7 @@ import {
 } from "./ritmos.js";
 import {
   CLIMA_POR_DEFECTO,
+  MVP_SOLO_RUNNING,
   TIPOS,
   ZONAS,
   acotar,
@@ -46,6 +47,7 @@ import {
   type GoalTypeKotlin,
   type Nivel,
   type Objetivo,
+  type OpcionesDelMotor,
   type PerfilDelMotor,
   type PlanGenerado,
   type SemanaPlanificada,
@@ -58,7 +60,7 @@ import {
  * Se guarda con cada plan (docs/PROPUESTA-MOTOR.md §1, "versionado"). Cambiar una regla o un
  * número del motor es cambiar esta versión: si no, el historial deja de significar lo mismo.
  */
-export const MOTOR_VERSION: string = "1.0.0";
+export const MOTOR_VERSION: string = "1.1.0";
 
 /** Excepción b). El Kotlin topaba en 26: ver macrociclo(). */
 export const SEMANAS_MAXIMAS = 52;
@@ -169,9 +171,14 @@ interface Lugar {
   readonly esSemanaDeDescarga: boolean;
 }
 
-/** generate. `entrada.inicio` es el "hoy" del plan: el motor no lee el reloj. */
-export function generarPlan(entrada: EntradaDelMotor): PlanGenerado {
-  const perfil = perfilDelMotor(entrada);
+/**
+ * generate. `entrada.inicio` es el "hoy" del plan: el motor no lee el reloj.
+ *
+ * 1.1.0: la puerta del MVP (tipos.ts, MVP_SOLO_RUNNING) planifica todo corriendo. Con
+ * `{ soloRunning: false }` sale el port literal del Kotlin, multideporte.
+ */
+export function generarPlan(entrada: EntradaDelMotor, opciones: OpcionesDelMotor = {}): PlanGenerado {
+  const perfil = perfilDelMotor(entrada, opciones.soloRunning ?? MVP_SOLO_RUNNING);
   const inicio = aDia(entrada.inicio);
   const pedida = entrada.fechaEvento === null ? null : aDia(entrada.fechaEvento);
 

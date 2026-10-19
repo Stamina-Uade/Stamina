@@ -658,6 +658,50 @@ describe("plan", { skip: SIN_SERVICIOS }, () => {
     assert.equal(historico?.total, 1);
   });
 
+  test("el 10K elegido SIN fecha y sin goal_date_ms se guarda, y el plan es ese 10K", async () => {
+    // Así lo mandaba la app de iPhone: Codable omite los nil, y el contrato 1.2.0 exigía la clave.
+    const { sesion } = await registrar(nuevoEmail(), perfilCompleto());
+    const token = sesion.access_token;
+    const guardar = await pedir("PUT", "/v1/me/goals", { goals: [{ id: "principal", goal: "c10k" }, { id: "", goal: "c5k" }] }, token);
+    assert.equal(guardar.status, 200, JSON.stringify(guardar.json));
+    assert.deepEqual(guardar.json.data.map((g: { goal: string; goal_date_ms: number | null }) => [g.goal, g.goal_date_ms]),
+      [["c10k", null], ["c5k", null]]);
+    const yo = (await pedir("GET", "/v1/me", undefined, token)).json.data;
+    assert.equal(yo.goal, "c10k");
+    assert.equal(yo.goal_date_ms, null);
+    const plan = (await pedir("GET", "/v1/plan", undefined, token)).json.data;
+    assert.equal(plan.goal, "c10k");
+  });
+
+  test("MVP 100 % running: con ciclismo o triatlón en el perfil, todas las sesiones son a pie", async () => {
+    for (const [sport, goal] of [["ciclismo", "c10k"], ["triatlon", "triatlon_olimpico"]] as const) {
+      const { sesion } = await registrar(nuevoEmail(), perfilCompleto({ sport, goal }));
+      const r = await pedir("GET", "/v1/plan", undefined, sesion.access_token);
+      assert.equal(r.status, 200, JSON.stringify(r.json));
+      assert.equal(r.json.data.goal, goal, "el objetivo es el guardado");
+      for (const d of r.json.data.days as Array<{ type: string; sport: string }>) {
+        if (d.type === "descanso") continue;
+        assert.ok(d.sport === "running" || (d.type === "fuerza" && d.sport === "fuerza"), `${sport}: ${d.type} en ${d.sport}`);
+      }
+      assert.equal(r.json.data.days.at(-1).distance_m, 10_000);
+    }
+  });
+
+  test("un bloque sin fecha que ya terminó arranca de nuevo hoy, con el mismo objetivo", async () => {
+    const { sesion } = await registrar(nuevoEmail(), perfilCompleto({ goal: "c10k", goal_date_ms: null }));
+    const token = sesion.access_token;
+    const antes = (await pedir("GET", "/v1/plan", undefined, token)).json.data;
+    // Se envejece el ancla: el bloque de 8 semanas queda entero en el pasado.
+    await db.consultar(`update planes set inicio_fecha = $2 where usuario_id = $1 and reemplazado_en_ms is null`,
+      [sesion.user_id, fechaLocal(Date.now() - 80 * DIA_MS, ZONA)]);
+    await pedir("PUT", "/v1/me/goals", { goals: [{ id: "principal", goal: "c10k", goal_date_ms: null }] }, token);
+    const despues = (await pedir("GET", "/v1/plan", undefined, token)).json.data;
+    assert.equal(despues.goal, "c10k");
+    assert.ok(despues.generated_at_ms >= antes.generated_at_ms);
+    const hoy = fechaLocal(Date.now(), ZONA);
+    assert.ok(despues.days.some((d: { date_ms: number }) => fechaLocal(d.date_ms, ZONA) >= hoy), "el plan llega a hoy");
+  });
+
   test("con el perfil incompleto, profile_incomplete", async () => {
     const { sesion } = await registrar();
     const r = await pedir("GET", "/v1/plan", undefined, sesion.access_token);

@@ -49,7 +49,10 @@ struct RaizReloj: View {
     @StateObject private var estado = EstadoReloj()
 
     var body: some View {
+        // El color que llega del teléfono re-crea SÓLO el contenido: `estado`
+        // (la salida en curso) vive arriba y no se reinicia.
         contenido
+            .redibujoConAcentoDelReloj()
             .frame(maxWidth: .infinity, maxHeight: .infinity)
             .background(PaletaReloj.fondo)
             .environmentObject(estado)
@@ -144,10 +147,13 @@ struct AbrirView: View {
                            nombre: "Triatlón\ncompleto", icono: "figure.mixed.cardio")
     ]
 
-    /// Para el MVP únicamente están disponibles carrera exterior y carrera interior.
-    /// Los demás deportes permanecen definidos arriba para reincorporarlos a futuro.
+    /// Lo que deja elegir `MVP` (hoy: sólo carrera exterior e interior). Los
+    /// demás deportes siguen definidos arriba y vuelven con `MVP.soloRunning = false`.
     private var deportesVisibles: [OpcionDeporteReloj] {
-        deportes.filter { $0.id == "run-ext" || $0.id == "run-int" }
+        deportes.filter { opcion in
+            let esTriatlon = opcion.id == "triatlon"
+            return esTriatlon ? MVP.permite(.triatlon) : MVP.permite(opcion.deporte)
+        }
     }
 
     var body: some View {
@@ -227,8 +233,10 @@ struct AbrirView: View {
 
     private func tarjetaEntrenamientoDeHoy(_ sesion: SesionCompartida) -> some View {
         Button {
-            let esTri = sesion.tipo.lowercased().contains("triatl") || sesion.tipo.lowercased().contains("ironman")
-            let dep = esTri ? .natacion : deporteDesdeTipo(sesion.tipo)
+            // MVP sólo running: no se deduce triatlón del título.
+            let esTri = MVP.permite(.triatlon) &&
+                (sesion.tipo.lowercased().contains("triatl") || sesion.tipo.lowercased().contains("ironman"))
+            let dep: DeporteDeSesion = esTri ? .natacion : deporteDesdeTipo(sesion.tipo)
             let interior = sesion.tipo.lowercased().contains("interior") || sesion.tipo.lowercased().contains("cinta")
             estado.prepararInicioConCuentaRegresiva(
                 deporte: dep,
@@ -370,7 +378,12 @@ struct AbrirView: View {
         .buttonStyle(.plain)
     }
 
+    /// El deporte deducido del título, acotado al MVP (sólo running: siempre running).
     private func deporteDesdeTipo(_ tipo: String) -> DeporteDeSesion {
+        MVP.acotado(deporteDesdeTipoSinAcotar(tipo))
+    }
+
+    private func deporteDesdeTipoSinAcotar(_ tipo: String) -> DeporteDeSesion {
         let t = tipo.lowercased()
         if t.contains("natac") || t.contains("natat") || t.contains("swim") || t.contains("nad") { return .natacion }
         if t.contains("bici") || t.contains("cicl") || t.contains("bik") || t.contains("cycl") || t.contains("velo") || t.contains("vélo") { return .ciclismo }
@@ -381,10 +394,11 @@ struct AbrirView: View {
     private func simbolo(para tipo: String) -> String {
         let t = tipo.lowercased()
         let interior = t.contains("interior") || t.contains("cinta")
-        if t.contains("triatl") || t.contains("ironman") { return "figure.mixed.cardio" }
-        if t.contains("natac") || t.contains("natat") || t.contains("swim") || t.contains("nad") { return "figure.pool.swim" }
-        if t.contains("bici") || t.contains("cicl") || t.contains("bik") || t.contains("cycl") || t.contains("velo") || t.contains("vélo") { return interior ? "figure.indoor.cycle" : "bicycle" }
-        if t.contains("trek") || t.contains("camin") || t.contains("hik") || t.contains("walk") || t.contains("randonn") { return interior ? "figure.walk.treadmill" : "figure.walk" }
+        // Cada ícono sólo si el MVP deja ese deporte; si no, cae al de carrera.
+        if MVP.permite(.triatlon), t.contains("triatl") || t.contains("ironman") { return "figure.mixed.cardio" }
+        if MVP.permite(.natacion), t.contains("natac") || t.contains("natat") || t.contains("swim") || t.contains("nad") { return "figure.pool.swim" }
+        if MVP.permite(.ciclismo), t.contains("bici") || t.contains("cicl") || t.contains("bik") || t.contains("cycl") || t.contains("velo") || t.contains("vélo") { return interior ? "figure.indoor.cycle" : "bicycle" }
+        if MVP.permite(.trekking), t.contains("trek") || t.contains("camin") || t.contains("hik") || t.contains("walk") || t.contains("randonn") { return interior ? "figure.walk.treadmill" : "figure.walk" }
         if t.contains("gim") || t.contains("fuerza") || t.contains("gym") || t.contains("strength") || t.contains("muscu") { return "dumbbell.fill" }
         return interior ? "figure.run.treadmill" : "figure.run"
     }

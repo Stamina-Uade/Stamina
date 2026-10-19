@@ -13,13 +13,8 @@ struct EntrenoView: View {
     @EnvironmentObject private var estado: EstadoHome
     @State private var explicarUbicacion = false
     @State private var deporteElegido: DeporteDeSesion = .running
-    @State private var deportesDisponibles: [DeporteDeSesion] = [
-        .running,
-        .ciclismo,
-        .natacion,
-        .trekking,
-        .triatlon
-    ]
+    /// MVP sólo running: la lista arranca (y queda) acotada por `MVP`.
+    @State private var deportesDisponibles: [DeporteDeSesion] = MVP.deportes
     @State private var seguirUsuario = true
     @State private var mapHeading: Double = 0.0
     @State private var mapType: MKMapType = .standard
@@ -55,7 +50,7 @@ struct EntrenoView: View {
         .background(Paleta.fondo)
         .onAppear {
             let usuarioId = estado.perfil?.id ?? "local"
-            deportesDisponibles = GestorDeportesFrecuentes.compartido.deportesOrdenados(usuarioId: usuarioId)
+            deportesDisponibles = deportesOrdenados(usuarioId: usuarioId)
             estado.seguimiento.prepararMapa()
             if let sugerido = deporteSugerido() {
                 deporteElegido = sugerido
@@ -87,9 +82,21 @@ struct EntrenoView: View {
         }
     }
 
+    /// Los deportes por frecuencia de uso, sólo los que el MVP deja elegir.
+    private func deportesOrdenados(usuarioId: String) -> [DeporteDeSesion] {
+        let ordenados = GestorDeportesFrecuentes.compartido.deportesOrdenados(usuarioId: usuarioId)
+            .filter { MVP.permite($0) }
+        return ordenados.isEmpty ? [.running] : ordenados
+    }
+
+    /// El deporte a preseleccionar, acotado al MVP (sólo running: siempre running).
+    private func deporteSugerido() -> DeporteDeSesion? {
+        deporteSugeridoSinAcotar().map { MVP.acotado($0) }
+    }
+
     /// El deporte que conviene preseleccionar: el de la sesión del plan (sólo
     /// trae el título, así que se deduce de él) o, sin sesión, el del perfil.
-    private func deporteSugerido() -> DeporteDeSesion? {
+    private func deporteSugeridoSinAcotar() -> DeporteDeSesion? {
         if let sesion = estado.sesion {
             let tipo = sesion.tipo.lowercased()
             if tipo.contains("natac") || tipo.contains("swim") || tipo.contains("nad") {
@@ -566,14 +573,39 @@ struct EntrenoView: View {
         estado.sesion != nil ? "Plan de hoy" : "Rutas"
     }
 
+    /// Con un solo deporte posible (MVP sólo running) no hay nada que elegir:
+    /// queda el ícono quieto, sin menú.
+    @ViewBuilder
     private var menuDeDeporte: some View {
+        if deportesDisponibles.count <= 1 {
+            iconoDelDeporteElegido
+                .accessibilityElement(children: .ignore)
+                .accessibilityLabel(String(localized: "Deporte", comment: "Selector de deporte del entreno"))
+                .accessibilityValue(deporteElegido.nombreVisible)
+        } else {
+            menuDeDeporteConOpciones
+        }
+    }
+
+    private var iconoDelDeporteElegido: some View {
+        ZStack {
+            Circle()
+                .fill(Paleta.superficieAlterna)
+            Circle()
+                .strokeBorder(Paleta.bordeSuperficie, lineWidth: TokensEspaciado.e1)
+            IconoDeporte(deporte: deporteElegido, color: Paleta.acento, tamano: TokensEspaciado.e20)
+        }
+        .frame(width: diametroSecundario, height: diametroSecundario)
+    }
+
+    private var menuDeDeporteConOpciones: some View {
         Menu {
             ForEach(deportesDisponibles, id: \.self) { dep in
                 Button {
                     deporteElegido = dep
                     let usuarioId = estado.perfil?.id ?? "local"
                     GestorDeportesFrecuentes.compartido.registrarSeleccion(deporte: dep, usuarioId: usuarioId)
-                    deportesDisponibles = GestorDeportesFrecuentes.compartido.deportesOrdenados(usuarioId: usuarioId)
+                    deportesDisponibles = deportesOrdenados(usuarioId: usuarioId)
                 } label: {
                     Label {
                         Text(dep.nombreVisible)
@@ -583,15 +615,8 @@ struct EntrenoView: View {
                 }
             }
         } label: {
-            ZStack {
-                Circle()
-                    .fill(Paleta.superficieAlterna)
-                Circle()
-                    .strokeBorder(Paleta.bordeSuperficie, lineWidth: TokensEspaciado.e1)
-                IconoDeporte(deporte: deporteElegido, color: Paleta.acento, tamano: TokensEspaciado.e20)
-            }
-            .frame(width: diametroSecundario, height: diametroSecundario)
-            .contentShape(Circle())
+            iconoDelDeporteElegido
+                .contentShape(Circle())
         }
         .buttonStyle(EstiloPresionado())
         .accessibilityLabel(String(localized: "Deporte", comment: "Selector de deporte del entreno"))

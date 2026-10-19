@@ -1,8 +1,12 @@
 import SwiftUI
 import TrainerCore
 
-/// `bienvenida` — carousel de 3 fotos con autoplay, que también se pasa
+/// `bienvenida` — carousel de 3 momentos con autoplay, que también se pasa
 /// deslizando, la marca, y las dos salidas: crear cuenta o entrar.
+///
+/// Rediseño 2026-10 (ronda 4): lo protagoniza la mascota. Cada momento es una
+/// pose (saluda, corre, festeja con la medalla) que dice el título en un
+/// globito; las fotos en blanco y negro quedan de fondo, bien veladas.
 ///
 /// Las fotos van **empaquetadas** y no se piden a la red. El diseño las trae de
 /// Unsplash en caliente y `design/ESPECIFICACION.md` §8.1 marca por qué eso no
@@ -22,49 +26,60 @@ struct BienvenidaView: View {
 
     private struct Foto {
         let recurso: String
+        let pose: PoseDeMascota
         let titulo: String
-        let texto: String
         let descripcion: String
     }
 
+    /// Sin el párrafo de cada foto (`bienvenidaSlideNTexto`): el pedido es
+    /// textos ultra cortos, y el título ya lo dice la mascota.
     private var fotos: [Foto] {
         [
-            Foto(recurso: "BienvenidaAmanecer", titulo: Textos.bienvenidaSlide1Titulo,
-                 texto: Textos.bienvenidaSlide1Texto, descripcion: Textos.bienvenidaSlide1Foto),
-            Foto(recurso: "BienvenidaRuta", titulo: Textos.bienvenidaSlide2Titulo,
-                 texto: Textos.bienvenidaSlide2Texto, descripcion: Textos.bienvenidaSlide2Foto),
-            Foto(recurso: "BienvenidaMontana", titulo: Textos.bienvenidaSlide3Titulo,
-                 texto: Textos.bienvenidaSlide3Texto, descripcion: Textos.bienvenidaSlide3Foto),
+            Foto(recurso: "BienvenidaAmanecer", pose: .saludo,
+                 titulo: Textos.bienvenidaSlide1Titulo, descripcion: Textos.bienvenidaSlide1Foto),
+            Foto(recurso: "BienvenidaRuta", pose: .corriendo,
+                 titulo: Textos.bienvenidaSlide2Titulo, descripcion: Textos.bienvenidaSlide2Foto),
+            Foto(recurso: "BienvenidaMontana", pose: .medalla,
+                 titulo: Textos.bienvenidaSlide3Titulo, descripcion: Textos.bienvenidaSlide3Foto),
         ]
     }
 
     var body: some View {
         // La foto va a sangre —también bajo la barra de estado, como el diseño—
-        // y el pie se queda DENTRO del área segura.
+        // y la marca, la mascota y el pie se quedan DENTRO del área segura.
         //
         // 🪤 La foto va como FONDO y no como hermana en un ZStack. Con
         // `scaledToFill` la imagen reporta un tamaño mayor que la pantalla, y en
         // un ZStack eso se propaga: el pie recibía más ancho del que hay y se
         // cortaba por los dos lados. `background` no participa del layout.
-        pie
-            .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .bottom)
-            .background(carousel.ignoresSafeArea())
-            .background(Paleta.fondo)
-            // Se desliza en toda la pantalla y no sólo sobre la foto: el pie ocupa
-            // la mitad de abajo, que es donde está el pulgar.
-            //
-            // 🪤 `highPriorityGesture` y no `gesture`. Con `gesture` gana el botón:
-            // un deslizamiento que empezaba arriba de «Crear cuenta gratis» no
-            // pasaba de foto (lo cazó el test de UI). Con prioridad pasa lo de
-            // cualquier carousel: si el dedo se mueve, pasa de foto y el botón no
-            // se dispara; un toque que no se mueve sigue siendo del botón.
-            .contentShape(Rectangle())
-            .highPriorityGesture(deslizar)
-            .onChange(of: deslizando) { enCurso in
-                if enCurso { pausarAutoplay() } else { arrancarAutoplay() }
-            }
-            .onAppear(perform: arrancarAutoplay)
-            .onDisappear(perform: pausarAutoplay)
+        //
+        // 🪤 La marca va arriba y el pie mide siempre lo mismo (ver
+        // `conElAltoDelMasAlto`): la mascota se lleva el alto que sobra, así ni la
+        // marca ni el título se mueven al cambiar de foto (lo mira un test de UI).
+        VStack(spacing: 0) {
+            marca
+            escenario
+                .frame(maxWidth: .infinity, maxHeight: .infinity)
+            pie
+        }
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
+        .background(carousel.ignoresSafeArea())
+        .background(Paleta.fondo)
+        // Se desliza en toda la pantalla y no sólo sobre la foto: el pie ocupa
+        // la mitad de abajo, que es donde está el pulgar.
+        //
+        // 🪤 `highPriorityGesture` y no `gesture`. Con `gesture` gana el botón:
+        // un deslizamiento que empezaba arriba de «Crear cuenta gratis» no
+        // pasaba de foto (lo cazó el test de UI). Con prioridad pasa lo de
+        // cualquier carousel: si el dedo se mueve, pasa de foto y el botón no
+        // se dispara; un toque que no se mueve sigue siendo del botón.
+        .contentShape(Rectangle())
+        .highPriorityGesture(deslizar)
+        .onChange(of: deslizando) { enCurso in
+            if enCurso { pausarAutoplay() } else { arrancarAutoplay() }
+        }
+        .onAppear(perform: arrancarAutoplay)
+        .onDisappear(perform: pausarAutoplay)
     }
 
     private var carousel: some View {
@@ -88,14 +103,15 @@ struct BienvenidaView: View {
         .accessibilityElement(children: .contain)
     }
 
-    /// El velo: oscurece la foto entera y la funde con el fondo abajo, donde va
-    /// el texto. Abajo a la derecha, el halo rosa de la marca.
+    /// El velo: oscurece bastante la foto —es fondo; la protagonista es la
+    /// mascota— y la funde con el fondo abajo, donde va el pie. Abajo a la
+    /// derecha, el halo del acento.
     private var veloDeLaFoto: some View {
         ZStack {
             LinearGradient(
                 stops: [
-                    .init(color: Paleta.fondo.opacity(0.35), location: 0.0),
-                    .init(color: Paleta.fondo.opacity(0.15), location: 0.25),
+                    .init(color: Paleta.fondo.opacity(0.6), location: 0.0),
+                    .init(color: Paleta.fondo.opacity(0.5), location: 0.3),
                     .init(color: Paleta.fondo.opacity(0.85), location: 0.55),
                     .init(color: Paleta.fondo, location: 0.72),
                     .init(color: Paleta.fondo, location: 1.0),
@@ -109,33 +125,54 @@ struct BienvenidaView: View {
         .accessibilityHidden(true)
     }
 
+    private var marca: some View {
+        HStack(spacing: TokensEspaciado.e9) {
+            LogoApp()
+            Text(MarcaApp.nombre).estilo(.marca, color: Paleta.textoAcento)
+        }
+        .accessibilityElement(children: .ignore)
+        .accessibilityLabel(MarcaApp.nombre)
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .padding(.horizontal, TokensEspaciado.e22)
+        .padding(.top, TokensEspaciado.e8)
+    }
+
+    /// Las tres poses, una encima de la otra: la de la foto actual se ve y se
+    /// mueve; las otras se funden. Al entrar, la nueva sube un poquito.
+    private var escenario: some View {
+        ZStack {
+            ForEach(Array(fotos.enumerated()), id: \.offset) { indice, foto in
+                let esLaActual = indice == actual
+                Mascota(pose: foto.pose, altoMaximo: TokensEspaciado.e56 * 6, activa: esLaActual)
+                    .opacity(esLaActual ? 1 : 0)
+                    .offset(y: esLaActual || movimientoReducido ? 0 : TokensEspaciado.e16)
+            }
+        }
+        .padding(.horizontal, TokensEspaciado.e22)
+        .padding(.vertical, TokensEspaciado.e12)
+        .animation(movimientoReducido ? nil : .easeInOut(duration: TokensMovimiento.lenta),
+                   value: actual)
+        .accessibilityHidden(true)
+    }
+
     private var pie: some View {
         VStack(alignment: .leading, spacing: TokensEspaciado.e16) {
-            HStack(spacing: TokensEspaciado.e9) {
-                LogoApp()
-                Text(MarcaApp.nombre).estilo(.marca, color: Paleta.textoAcento)
-            }
-            .accessibilityElement(children: .ignore)
-            .accessibilityLabel(MarcaApp.nombre)
-
-            // 🪤 Los títulos y los textos de las tres fotos no miden lo mismo, y el
-            // pie está pegado abajo: con uno de dos renglones al lado de uno de uno,
-            // cada cambio de foto movía la marca y el título. Cada bloque se reserva
-            // el alto del más alto de los tres —al tamaño de letra que tenga puesto
-            // la persona, sin cortar nada— dibujando los tres debajo del que se ve.
-            VStack(alignment: .leading, spacing: TokensEspaciado.e12) {
+            // El título lo dice la mascota, en un globito que apunta hacia ella.
+            // El globito NO se anima en tamaño ni posición: sólo cambia el texto,
+            // con un fundido (el test de UI mide dónde queda el título).
+            //
+            // 🪤 Los títulos de las tres fotos no miden lo mismo, y el pie está
+            // pegado abajo: con uno de dos renglones al lado de uno de uno, cada
+            // cambio de foto movía todo. El globito se reserva el alto del más
+            // alto de los tres —al tamaño de letra que tenga puesto la persona,
+            // sin cortar nada— dibujando los tres debajo del que se ve.
+            Bocadillo(cola: .arriba) {
                 conElAltoDelMasAlto(fotos.map(\.titulo)) { titulo in
-                    Text(titulo)
-                        .estilo(.display)
-                        .fixedSize(horizontal: false, vertical: true)
-                }
-                conElAltoDelMasAlto(fotos.map(\.texto)) { texto in
-                    Text(texto)
-                        .estilo(.cuerpoDestacado, color: Paleta.textoSecundario)
-                        .fixedSize(horizontal: false, vertical: true)
+                    TextoDeBocadillo(texto: titulo)
+                        .frame(maxWidth: .infinity)
                 }
             }
-            .frame(maxWidth: .infinity, alignment: .leading)
+            .frame(maxWidth: .infinity)
             .animation(movimientoReducido ? nil : .easeInOut(duration: TokensMovimiento.lenta),
                        value: actual)
 
@@ -157,7 +194,7 @@ struct BienvenidaView: View {
         _ valores: [String],
         @ViewBuilder _ dibujar: @escaping (String) -> Contenido
     ) -> some View {
-        ZStack(alignment: .topLeading) {
+        ZStack(alignment: .top) {
             ForEach(valores.indices, id: \.self) { indice in
                 dibujar(valores[indice])
                     .hidden()

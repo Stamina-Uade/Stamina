@@ -148,6 +148,49 @@ public struct DiaPlanificadoCompartido: Codable, Equatable, Sendable {
     }
 }
 
+/// El color (y el modo) que eligió la persona en el teléfono, para que el reloj
+/// pinte con el mismo acento. Viaja en el application context —un reloj dormido
+/// lo recibe al despertar— y, si el reloj está alcanzable, también como mensaje
+/// para que el cambio se vea al instante.
+///
+/// El reloj sólo aplica el acento: watchOS es siempre oscuro (fondo negro puro,
+/// AGENTS.md §10.2), así que el modo viaja pero se ignora.
+public struct AparienciaCompartida: Equatable, Sendable {
+    public static let claveAcento = "aparienciaAcento"
+    public static let claveModo = "aparienciaModo"
+
+    /// "r,g,b" (0–255) como `AcentoPersonalizado.clave`, o vacío = el color de
+    /// fábrica. Un valor mal escrito se normaliza a vacío.
+    public let acento: String
+    /// `ModoApariencia.rawValue`, o vacío si no se sabe.
+    public let modo: String
+
+    public init(acento: String, modo: String) {
+        let limpio = acento.trimmingCharacters(in: .whitespaces)
+        self.acento = AcentoPersonalizado.componentes(de: limpio) == nil ? "" : limpio
+        self.modo = modo
+    }
+
+    /// Lo que se suma al contexto, al mensaje inmediato y al `pong`.
+    public var campos: [String: Any] {
+        [Self.claveAcento: acento, Self.claveModo: modo]
+    }
+
+    /// `nil` si el diccionario no dice nada del color (un contexto de un build
+    /// anterior, o uno que mandó el reloj): en ese caso no se toca lo guardado.
+    public static func leer(de diccionario: [String: Any]) -> AparienciaCompartida? {
+        guard let acento = diccionario[claveAcento] as? String else { return nil }
+        return AparienciaCompartida(acento: acento, modo: diccionario[claveModo] as? String ?? "")
+    }
+
+    /// Lo que este dispositivo tiene guardado en sus ajustes.
+    public static func guardada(en defaults: UserDefaults = .standard) -> AparienciaCompartida {
+        AparienciaCompartida(
+            acento: defaults.string(forKey: AcentoPersonalizado.clave) ?? "",
+            modo: defaults.string(forKey: ModoApariencia.clave) ?? ModoApariencia.predeterminado.rawValue)
+    }
+}
+
 public enum ComandoDeSalida: String, Sendable {
     case pausar, reanudar, terminar, descartar
     case musicaAlternar, musicaSiguiente, musicaAnterior, musicaRebobinar
@@ -233,12 +276,18 @@ public final class SincronizadorDeSesion: NSObject, ObservableObject {
     @Published public private(set) var sesionRemota: SesionCompartida?
     @Published public private(set) var cronogramaRemoto: [DiaPlanificadoCompartido] = []
     @Published public private(set) var telefonoAlcanzable: Bool = false
+    /// En el reloj: la última apariencia que mandó el teléfono. Al cambiar,
+    /// `EstadoReloj` reenvía el aviso y las pantallas se redibujan.
+    @Published public private(set) var aparienciaRemota: AparienciaCompartida?
 
     private var salidaPublicada: EstadoDeSalidaCompartido?
     private var rutinaPublicada: [EjercicioCompartido]?
     private var sesionPublicada: SesionCompartida?
     private var cronogramaPublicado: [DiaPlanificadoCompartido] = []
     private var usuarioPublicadoId: String?
+    /// En el teléfono: el color y el modo que van en cada snapshot.
+    private var aparienciaPublicada: AparienciaCompartida?
+    private var observadorDeAjustes: NSObjectProtocol?
     /// Se cerró la sesión (o se arrancó sin ninguna). Distinto de "todavía no se
     /// sabe quién es", que es el arranque con sesión guardada y el perfil sin cargar:
     /// ahí el reloj NO se tiene que desvincular.
@@ -274,7 +323,17 @@ public final class SincronizadorDeSesion: NSObject, ObservableObject {
             self.cronogramaRemoto = cached
         }
         #endif
+        #if os(iOS)
+        // Desde el arranque: así el primer snapshot ya lleva el color, aunque
+        // todavía no se haya abierto el Home.
+        self.aparienciaPublicada = AparienciaCompartida.guardada()
+        observarAjustesDeApariencia()
+        #endif
         activar()
+    }
+
+    deinit {
+        if let observadorDeAjustes { NotificationCenter.default.removeObserver(observadorDeAjustes) }
     }
 
     public func configurar(prescritasPorEjercicio: [String: Int]) {
@@ -362,6 +421,52 @@ public final class SincronizadorDeSesion: NSObject, ObservableObject {
         propagar()
     }
 
+    /// Manda al reloj el color y el modo elegidos en el teléfono: en el
+    /// application context (llega aunque el reloj esté dormido) y, si está
+    /// alcanzable, también como mensaje inmediato. Repetir el mismo valor no
+    /// manda nada.
+    public func publicarApariencia(acento: String, modo: String) {
+        let nueva = AparienciaCompartida(acento: acento, modo: modo)
+        guard nueva != aparienciaPublicada else { return }
+        aparienciaPublicada = nueva
+        propagar()
+        enviarAparienciaAlInstante(nueva)
+    }
+
+    /// `publicarApariencia` con lo guardado en los ajustes de este dispositivo.
+    public func publicarAparienciaGuardada() {
+        let guardada = AparienciaCompartida.guardada()
+        publicarApariencia(acento: guardada.acento, modo: guardada.modo)
+    }
+
+    /// Ajustes escribe con `@AppStorage`; esto se entera de cualquier cambio
+    /// —color o modo— sin depender de qué pantalla esté abierta.
+    private func observarAjustesDeApariencia() {
+        observadorDeAjustes = NotificationCenter.default.addObserver(
+            forName: UserDefaults.didChangeNotification, object: nil, queue: .main
+        ) { [weak self] _ in
+            Task { @MainActor in self?.publicarAparienciaGuardada() }
+        }
+    }
+
+    private func enviarAparienciaAlInstante(_ apariencia: AparienciaCompartida) {
+        #if canImport(WatchConnectivity) && os(iOS)
+        guard WCSession.isSupported() else { return }
+        let sesion = WCSession.default
+        guard sesion.activationState == .activated, sesion.isReachable else { return }
+        // Sin respuesta y sin reintento: si se pierde, el contexto ya lo lleva.
+        sesion.sendMessage(apariencia.campos, replyHandler: nil, errorHandler: nil)
+        #endif
+    }
+
+    /// En el reloj: guarda el color que llegó y avisa para redibujar.
+    private func recibirApariencia(_ apariencia: AparienciaCompartida) {
+        #if os(watchOS)
+        AparienciaDelReloj.compartida.aplicar(apariencia)
+        if aparienciaRemota != apariencia { aparienciaRemota = apariencia }
+        #endif
+    }
+
     /// Simula la recepción de un usuario desde el otro dispositivo (útil para tests y previsualizaciones).
     public func simularUsuarioRemoto(_ id: String?) {
         usuarioRemotoId = id
@@ -441,6 +546,9 @@ public final class SincronizadorDeSesion: NSObject, ObservableObject {
                     self?.telefonoAlcanzable = true
                     if let cuenta = SincronizadorDeSesion.cuentaInformada(en: respuesta) {
                         self?.usuarioRemotoId = cuenta
+                    }
+                    if let apariencia = AparienciaCompartida.leer(de: respuesta) {
+                        self?.recibirApariencia(apariencia)
                     }
                 }
             }, errorHandler: { [weak self] _ in
@@ -567,6 +675,9 @@ public final class SincronizadorDeSesion: NSObject, ObservableObject {
         }
         #if !os(watchOS)
         contexto.merge(campoDeCuenta()) { _, nuevo in nuevo }
+        if let aparienciaPublicada {
+            contexto.merge(aparienciaPublicada.campos) { _, nuevo in nuevo }
+        }
         #endif
         contexto["sesionPlanificada"] = sesionPublicada.flatMap { try? JSONEncoder().encode($0) } ?? Data()
         if let cronogramaData = try? JSONEncoder().encode(cronogramaPublicado), !cronogramaPublicado.isEmpty {
@@ -618,6 +729,9 @@ extension SincronizadorDeSesion: WCSessionDelegate {
             Task { @MainActor in
                 var respuesta: [String: Any] = ["pong": true]
                 respuesta.merge(self.campoDeCuenta()) { _, nuevo in nuevo }
+                if let apariencia = self.aparienciaPublicada {
+                    respuesta.merge(apariencia.campos) { _, nuevo in nuevo }
+                }
                 replyHandler(respuesta)
             }
             return
@@ -644,6 +758,9 @@ extension SincronizadorDeSesion: WCSessionDelegate {
         if let raw = message["comandoSalida"] as? String,
            let comando = ComandoDeSalida(rawValue: raw) {
             Task { @MainActor in self.alComandoDeSalida?(comando) }
+        }
+        if let apariencia = AparienciaCompartida.leer(de: message) {
+            Task { @MainActor in self.recibirApariencia(apariencia) }
         }
         if let datos = message["salidaEnCurso"] as? Data,
            let salida = try? JSONDecoder().decode(EstadoDeSalidaCompartido.self, from: datos) {
@@ -702,6 +819,9 @@ extension SincronizadorDeSesion: WCSessionDelegate {
             if let cuenta = SincronizadorDeSesion.cuentaInformada(en: contexto) {
                 self.usuarioRemotoId = cuenta
             }
+            if let apariencia = AparienciaCompartida.leer(de: contexto) {
+                self.recibirApariencia(apariencia)
+            }
             if let salidaData = contexto["salida"] as? Data,
                let salida = try? JSONDecoder().decode(EstadoDeSalidaCompartido.self, from: salidaData) {
                 self.salidaRemota = salida
@@ -751,7 +871,9 @@ extension SincronizadorDeSesion: WCSessionDelegate {
             #endif
             return decoded
         }
+        let apariencia = AparienciaCompartida.leer(de: contexto)
         Task { @MainActor in
+            if let apariencia { self.recibirApariencia(apariencia) }
             if let entrantes { self.fusionar(entrantes) }
             self.salidaRemota = salida
             if let rutina { self.rutinaRemota = rutina }

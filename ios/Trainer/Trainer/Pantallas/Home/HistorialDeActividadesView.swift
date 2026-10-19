@@ -35,10 +35,12 @@ struct HistorialDeActividadesView: View {
 
     private var unidades: SistemaDeUnidades { estado.sistemaDeUnidades }
 
-    /// Los deportes que aparecen en lo cargado, en el orden de siempre.
+    /// Los deportes que aparecen en lo cargado, en el orden de siempre. Los
+    /// chips sólo ofrecen los del MVP (sólo running); las salidas de otros
+    /// deportes que ya existan se siguen viendo en "Todos".
     private var deportesPresentes: [DeporteDeSesion] {
         let presentes = Set(actividades.map(\.sport))
-        return DeporteDeSesion.allCases.filter { presentes.contains($0) }
+        return DeporteDeSesion.allCases.filter { presentes.contains($0) && MVP.permite($0) }
     }
 
     /// El filtro vigente. Si el deporte elegido ya no está (p. ej. después de

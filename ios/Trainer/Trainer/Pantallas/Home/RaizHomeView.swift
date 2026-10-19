@@ -102,8 +102,11 @@ struct RaizHomeView: View {
                 GestorDeMapa.shared.precalentar()
             }
             aplicar(perfil)
+            estado.sincronizador.publicarAparienciaGuardada()
         }
         .onChange(of: perfil) { aplicar($0) }
+        // El reloj pinta con el mismo color, al instante (ver `AparienciaCompartida`).
+        .onChange(of: acentoGuardado) { _ in estado.sincronizador.publicarAparienciaGuardada() }
         // Offline primero (AGENTS.md §6): lo guardado ya se ve. Esto trae lo nuevo al
         // entrar y cada vez que la app vuelve a primer plano.
         .task { await estado.actualizar() }

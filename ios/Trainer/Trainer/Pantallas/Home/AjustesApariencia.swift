@@ -2,13 +2,44 @@ import SwiftUI
 import TrainerCore
 
 // =============================================================================
-// Ajustes → Apariencia → Modo: tres teléfonos en miniatura para elegir.
+// Ajustes → Aspecto: la página, y el modo con tres teléfonos en miniatura.
 //
 // Cada miniatura se dibuja con la Paleta de VERDAD: el mismo `Paleta.fondo`,
 // `superficie` y `acento` de la app, resueltos en claro o en oscuro con
 // `.environment(\.colorScheme, …)`. Si mañana cambia un color, la miniatura
 // cambia sola. "Automático" es la mitad de cada una, cortada en diagonal.
 // =============================================================================
+
+/// La página Aspecto: el modo y el color de la app, sin más.
+struct AjustesPaginaAspecto: View {
+    @Binding var modo: ModoApariencia
+    /// Al volver de aplicar un color, el scroll arranca en el bloque de color.
+    let ancla: String?
+    let volver: () -> Void
+
+    var body: some View {
+        AjustesPagina(String(localized: "Aspecto", comment: "Ajustes: página de modo y color"),
+                      ancla: ancla, volver: volver) {
+            AjustesSelectorDeModo(modo: $modo)
+
+            AjustesRotulo(String(localized: "Color", comment: "Ajustes: bloque del color de la app"))
+                .padding(.top, TokensEspaciado.e8)
+                .id(AjustesAncla.color)
+            AjustesSelectorDeColor()
+        }
+    }
+}
+
+extension ModoApariencia {
+    /// "Automático", "Claro", "Oscuro": lo que se ve en Ajustes.
+    var nombreCorto: String {
+        switch self {
+        case .automatico: return String(localized: "Automático", comment: "Ajustes: modo de apariencia")
+        case .claro: return String(localized: "Claro", comment: "Ajustes: modo de apariencia")
+        case .oscuro: return String(localized: "Oscuro", comment: "Ajustes: modo de apariencia")
+        }
+    }
+}
 
 struct AjustesSelectorDeModo: View {
     @Binding var modo: ModoApariencia
@@ -48,23 +79,18 @@ struct AjustesSelectorDeModo: View {
                     Image(systemName: icono(de: opcion))
                         .font(.system(size: TokensTipografia.labelCampoTamano, weight: .bold))
                         .foregroundStyle(elegido ? Paleta.acento : Paleta.textoSecundario)
-                    Text(opcion.titulo)
+                    Text(opcion.nombreCorto)
                         .estilo(.tituloCard, color: elegido ? Paleta.textoAcento : Paleta.textoPrimario)
                         .lineLimit(1)
                         .minimumScaleFactor(0.8)
                 }
-
-                Text(descripcion(de: opcion))
-                    .estilo(.notaLegal, color: Paleta.textoTerciario)
-                    .multilineTextAlignment(.center)
-                    .fixedSize(horizontal: false, vertical: true)
             }
             .frame(maxWidth: .infinity)
             .contentShape(Rectangle())
         }
         .buttonStyle(EstiloPresionado())
         .accessibilityElement(children: .ignore)
-        .accessibilityLabel(opcion.titulo)
+        .accessibilityLabel(opcion.nombreCorto)
         .accessibilityHint(descripcion(de: opcion))
         .accessibilityAddTraits(elegido ? [.isButton, .isSelected] : .isButton)
     }
@@ -96,6 +122,7 @@ struct AjustesSelectorDeModo: View {
         }
     }
 
+    /// Sólo para VoiceOver: en pantalla, la miniatura ya lo dice.
     private func descripcion(de modo: ModoApariencia) -> String {
         switch modo {
         case .automatico:

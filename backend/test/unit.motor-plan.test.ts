@@ -66,6 +66,9 @@ const perfil: EntradaDelMotor = {
   sexo: "masculino",
 };
 
+/** El port literal del Kotlin, multideporte: sin la puerta del MVP 100 % running. */
+const PORT_LITERAL = { soloRunning: false } as const;
+
 // Las entradas de los casos de oro: las mismas que se le pasaron al Kotlin.
 const corredora: EntradaDelMotor = {
   objetivo: "media_maraton",
@@ -291,7 +294,9 @@ const ORO: readonly DiaDeOro[] = [
 describe("casos de oro: lo que devolvió el Kotlin original, compilado", () => {
   for (const oro of ORO) {
     test(`${oro.entrada.objetivo}/${oro.entrada.deporte} ${oro.fecha}: ${oro.titulo}`, () => {
-      const d = generarPlan(oro.entrada).dias.find((x) => x.fecha === oro.fecha);
+      // Los casos de oro son del Kotlin multideporte: se comparan contra el port literal, sin la
+      // puerta del MVP (tipos.ts, MVP_SOLO_RUNNING), que tiene sus propios tests abajo.
+      const d = generarPlan(oro.entrada, PORT_LITERAL).dias.find((x) => x.fecha === oro.fecha);
       assert.ok(d, oro.fecha);
       const { fecha: _f, indice: _i, weekday: _w, semana: _s, esSemanaDeDescarga: _e, avituallamiento, motivos, ...datos } = d;
       assert.deepEqual(datos, oro.datos);
@@ -711,7 +716,7 @@ describe("⚠️ rarezas del Kotlin portadas tal cual: arreglarlas es una decisi
   });
 
   test("el ritmo sale del deporte principal: la natación de un triatlón trae ritmo a pie", () => {
-    const nado = generarPlan(triatleta).dias.find((d) => d.deporte === "natacion");
+    const nado = generarPlan(triatleta, PORT_LITERAL).dias.find((d) => d.deporte === "natacion");
     assert.equal(nado?.ritmoMinSegKm, 440); // 7:20 min/km, en el agua
   });
 

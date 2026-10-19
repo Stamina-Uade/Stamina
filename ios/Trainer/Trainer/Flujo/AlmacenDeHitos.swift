@@ -452,6 +452,8 @@ public final class AlmacenDeHitos: ObservableObject {
             if let fecha = cal.date(byAdding: .day, value: -item.diasAtras, to: hoy) {
                 let clave = Self.clave(para: fecha)
                 pasosPorDia[clave] = item.pasos
+                // MVP sólo running: el ejemplo no siembra salidas de bici.
+                guard MVP.permite(item.deporte) else { continue }
 
                 let inicioMs = Int64(cal.startOfDay(for: fecha).timeIntervalSince1970 * 1000) + 9 * 3600 * 1000
                 let act = Actividad(

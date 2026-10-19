@@ -8,23 +8,27 @@ import TrainerCore
 // Los 7 objetivos son una **lista cerrada** y eso no es pereza de diseño: es lo
 // que permite que el motor del plan sea determinístico y explicable (AGENTS.md
 // §9.1). Un objetivo libre no se puede periodizar.
+//
+// MVP sólo running: deporte y objetivos se filtran con `MVP` (TrainerCore).
 // =============================================================================
 
 /// `reg-deporte` · paso 9 de 15
 struct RegDeporteView: View {
     @EnvironmentObject private var flujo: FlujoEntrada
 
+    /// Todas las opciones; el MVP (sólo running) filtra cuáles se muestran.
     private var opciones: [(Deporte, String, String)] {
-        [
+        let todas: [(Deporte, String, String)] = [
             (.running, Textos.regDeporteRunning, Textos.regDeporteRunningDetalle),
             (.ciclismo, Textos.regDeporteCiclismo, Textos.regDeporteCiclismoDetalle),
             (.trekking, Textos.regDeporteTrekking, Textos.regDeporteTrekkingDetalle),
             (.triatlon, Textos.regDeporteTriatlon, Textos.regDeporteTriatlonDetalle),
         ]
+        return todas.filter { MVP.deportesDePerfil.contains($0.0) }
     }
 
     var body: some View {
-        PantallaPaso(titulo: Textos.regDeporteTitulo, texto: Textos.regDeporteTexto) {
+        PantallaPaso(titulo: Textos.regDeporteTitulo, texto: texto) {
             VStack(spacing: TokensEspaciado.e10) {
                 ForEach(opciones, id: \.0) { valor, titulo, detalle in
                     FilaOpcion(titulo: titulo, detalle: detalle,
@@ -36,6 +40,26 @@ struct RegDeporteView: View {
             .disabled(flujo.enCurso)
         } pie: {
             PieDePerfil(habilitado: flujo.datos.deporte != nil)
+        }
+        .onAppear(perform: preseleccionar)
+    }
+
+    /// El texto de siempre habla de bici; con una sola opción (MVP sólo
+    /// running) va una línea que dice por qué no hay más.
+    private var texto: String {
+        opciones.count == 1
+            ? String(localized: "Por ahora, Stamina es sólo para correr.",
+                     comment: "Paso deporte del alta cuando el MVP ofrece una sola opción")
+            : Textos.regDeporteTexto
+    }
+
+    /// Con una sola opción (MVP sólo running) queda elegida de entrada; y si
+    /// venía un deporte escondido, se reemplaza para que al servidor vaya running.
+    private func preseleccionar() {
+        let permitidos = MVP.deportesDePerfil
+        if let actual = flujo.datos.deporte, permitidos.contains(actual) { return }
+        if permitidos.count == 1 || flujo.datos.deporte != nil {
+            flujo.datos.deporte = permitidos.first
         }
     }
 }
@@ -79,7 +103,7 @@ struct RegObjetivoView: View {
     @EnvironmentObject private var flujo: FlujoEntrada
 
     private var objetivos: [(Objetivo, String, String)] {
-        [
+        let todos: [(Objetivo, String, String)] = [
             (.c5k, Textos.regObjetivoC5k, Textos.regObjetivoC5kDetalle),
             (.c10k, Textos.regObjetivoC10k, Textos.regObjetivoC10kDetalle),
             (.mediaMaraton, Textos.regObjetivoMediaMaraton, Textos.regObjetivoMediaMaratonDetalle),
@@ -90,6 +114,8 @@ struct RegObjetivoView: View {
             (.volverSinLesiones, Textos.regObjetivoVolverSinLesiones,
              Textos.regObjetivoVolverSinLesionesDetalle),
         ]
+        // MVP sólo running: el triatlón queda escondido (ver `MVP`).
+        return todos.filter { MVP.permite($0.0) }
     }
 
     var body: some View {

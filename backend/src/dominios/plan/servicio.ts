@@ -117,20 +117,35 @@ export async function calcularPlan(ctx: Contexto, usuarioId: string, objetivoId:
     ancla = await repo.anclar(usuarioId, MOTOR_VERSION, estructural, fechaLocal(ahora, zona), zona, ahora, objetivoId);
   }
 
-  const entrada: EntradaDelMotor = {
+  const entradaDesde = (inicio: string): EntradaDelMotor => ({
     objetivo: perfil.objetivo as Objetivo,
     nivel: perfil.nivel as Nivel,
     deporte: perfil.deporte as DeportePerfil,
     dias,
-    inicio: ancla.inicio_fecha,
+    inicio,
     fechaEvento,
     pesoG: perfil.peso_g,
     // La edad al empezar el bloque: si cumple años a mitad, el bloque no cambia.
-    edad: perfil.nacimiento_ms === null ? null : edadEn(perfil.nacimiento_ms, ancla.inicio_fecha),
+    edad: perfil.nacimiento_ms === null ? null : edadEn(perfil.nacimiento_ms, inicio),
     sexo: perfil.sexo_biologico as SexoBiologico | null,
-  };
+  });
 
-  const plan = generarPlan(entrada);
+  let entrada = entradaDesde(ancla.inicio_fecha);
+  let plan = generarPlan(entrada);
+
+  // Un bloque que ya terminó y cuyo objetivo sigue vigente —sin fecha, o con la fecha todavía por
+  // delante— arranca de nuevo HOY. Sin esto, volver a elegir el mismo objetivo (el mismo hash
+  // estructural) dejaba el ancla vieja, y el plan seguía entero en el pasado: la app mostraba
+  // "tu plan terminó" una y otra vez, como si la meta no se hubiera guardado. Si la fecha del
+  // evento ya pasó, el bloque terminado se conserva: es la carrera hecha, y la app ofrece otra meta.
+  const hoy = fechaLocal(ahora, zona);
+  const ultimoDia = plan.dias.at(-1)?.fecha;
+  if (ultimoDia !== undefined && ultimoDia < hoy && (fechaEvento === null || fechaEvento >= hoy)) {
+    ancla = await repo.renovar(usuarioId, ancla.id, MOTOR_VERSION, estructural, hoy, zona, ahora, objetivoId);
+    entrada = entradaDesde(ancla.inicio_fecha);
+    plan = generarPlan(entrada);
+  }
+
   return {
     plan,
     ancla,

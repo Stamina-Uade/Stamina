@@ -599,8 +599,9 @@ struct PerfilView: View {
 
     /// El deporte del perfil como deporte de sesión, para `IconoDeporte` y
     /// `nombreVisible`: los dos enums comparten los valores crudos.
+    /// MVP sólo running: un deporte escondido se muestra como running.
     private var deporteDeLaSesion: DeporteDeSesion {
-        estado.perfil?.sport.flatMap { DeporteDeSesion(rawValue: $0.rawValue) } ?? .running
+        MVP.acotado(estado.perfil?.sport.flatMap { DeporteDeSesion(rawValue: $0.rawValue) } ?? .running)
     }
 
     private func iconoParaObjetivo(_ obj: Objetivo) -> String {
@@ -674,7 +675,8 @@ struct PerfilView: View {
     private var deporteYNivel: String {
         guard let perfil = estado.perfil else { return "—" }
         let deporte: String? = perfil.sport
-            .flatMap { DeporteDeSesion(rawValue: $0.rawValue) }?.nombreVisible
+            .flatMap { DeporteDeSesion(rawValue: $0.rawValue) }
+            .map { MVP.acotado($0).nombreVisible }
         let nivel: String? = switch perfil.level {
         case .principiante: Textos.regNivelPrincipiante
         case .intermedio: Textos.regNivelIntermedio

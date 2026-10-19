@@ -11,6 +11,32 @@
  * La interfaz pública ya la consume otro módulo: se cambia sólo agregando.
  */
 
+// ─── La puerta del MVP ──────────────────────────────────────────────────────────────────────
+
+/**
+ * 🛑 MVP 100 % running (pedido de producto, 2026-10-19). Con esto en `true` el motor planifica
+ * SIEMPRE corriendo, sea cual sea el deporte del perfil:
+ *  - ciclismo, trekking y triatlón en el perfil se planifican como running (el dato guardado no se
+ *    toca: apagar la puerta devuelve el plan multideporte sin migrar nada);
+ *  - el objetivo `triatlon_olimpico` se planifica como su tramo a pie, un 10K
+ *    (`OBJETIVO_SOLO_RUNNING`); el objetivo guardado y el `goal` del plan siguen siendo el elegido;
+ *  - la fuerza (gimnasio) se queda: es parte de un plan de running, y la rutina sale de ahí;
+ *  - el descanso sigue siendo `otro`: no es una sesión.
+ * El port literal del Kotlin sigue entero detrás de `generarPlan(entrada, { soloRunning: false })`,
+ * que es lo que usan los casos de oro.
+ */
+export const MVP_SOLO_RUNNING = true;
+
+/** Cómo se planifica cada objetivo con la puerta prendida: todos a pie. */
+export const OBJETIVO_SOLO_RUNNING: Readonly<Partial<Record<Objetivo, Objetivo>>> = {
+  triatlon_olimpico: "c10k",
+};
+
+export interface OpcionesDelMotor {
+  /** Por defecto, `MVP_SOLO_RUNNING`. */
+  readonly soloRunning?: boolean;
+}
+
 // ─── La interfaz pública ────────────────────────────────────────────────────────────────────
 
 export type Nivel = "principiante" | "intermedio" | "avanzado";
