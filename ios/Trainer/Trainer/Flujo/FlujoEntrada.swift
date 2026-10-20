@@ -849,6 +849,26 @@ final class FlujoEntrada: ObservableObject {
         return false
     }
 
+    /// Ajustes → Datos personales / Entrenamiento: UN `PATCH /me` con lo que
+    /// cambió (`EditorDePerfil.swift`). La clave la trae quien llama: una por
+    /// INTENTO, la misma en el reintento de ese intento (docs/API.md §6). Con
+    /// éxito el perfil nuevo queda acá y el Home lo toma (`RaizHomeView.aplicar`).
+    func guardarEdicionDelPerfil(_ cambios: PerfilEntrada, anulando: Set<CampoAnulable>,
+                                 claveDeIdempotencia: String) async -> Resultado<Perfil> {
+        let respuesta = await servicio.guardarPerfil(cambios, anulando: anulando,
+                                                      claveDeIdempotencia: claveDeIdempotencia)
+        switch respuesta {
+        case .ok(let guardado):
+            perfil = guardado
+        case .rechazado(let codigo, _) where Self.codigosDeSesionMuerta.contains(codigo):
+            // Igual que en el alta: sin sesión, reintentar no tiene salida.
+            irAlLogin(aviso: TraductorDeErrores.texto(respuesta))
+        default:
+            break
+        }
+        return respuesta
+    }
+
     func cargarObjetivos() async {
         if case .ok(let recibidos) = await servicio.objetivos() {
             let inicioDeHoyMs = Int64(Calendar.current.startOfDay(for: Date()).timeIntervalSince1970 * 1000)

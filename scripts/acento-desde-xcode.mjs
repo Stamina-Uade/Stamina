@@ -6,7 +6,7 @@
  * `shared/design/tokens.json`, que es la fuente de verdad de los cuatro clientes
  * (AGENTS.md §4.2).
  *
- * Por qué existe. El acento vive en `Assets.xcassets/Acento.colorset` para que
+ * Por qué existe. El acento vive en `Assets.xcassets/AccentColor.colorset` para que
  * se pueda cambiar con el selector de color de Xcode, sin tocar código. Pero si
  * sólo se cambia ahí, **iOS y Android quedan de distinto color** y el CI falla
  * al regenerar el tema. Este script cierra el círculo:
@@ -21,7 +21,7 @@ import { fileURLToPath } from "node:url";
 import { execFileSync } from "node:child_process";
 
 const raiz = resolve(dirname(fileURLToPath(import.meta.url)), "..");
-const RUTA_COLORSET = resolve(raiz, "ios/Trainer/Trainer/Assets.xcassets/Acento.colorset/Contents.json");
+const RUTA_COLORSET = resolve(raiz, "ios/Trainer/Trainer/Assets.xcassets/AccentColor.colorset/Contents.json");
 const RUTA_TOKENS = resolve(raiz, "shared/design/tokens.json");
 
 /** Xcode escribe los componentes como "0x7C", como "124" o como "0.486". */

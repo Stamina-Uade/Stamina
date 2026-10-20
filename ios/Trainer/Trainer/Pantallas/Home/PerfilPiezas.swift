@@ -3,7 +3,8 @@ import TrainerCore
 
 // =============================================================================
 // Piezas chicas del perfil: la fila de acceso (ícono, título, subtítulo y
-// flecha), la barra de progreso de una meta y el chip redondo de un día.
+// flecha), la cápsula de "Completar", la barra de progreso de una meta y el
+// chip redondo de un día.
 // Separadas para que el `body` de PerfilView se lea de corrido.
 // =============================================================================
 
@@ -51,6 +52,28 @@ struct FilaDeAccesoDePerfil: View {
         .buttonStyle(EstiloPresionado())
         .accessibilityElement(children: .combine)
         .accessibilityAddTraits(.isButton)
+    }
+}
+
+/// La cápsula rosa chica con "+" y un texto ("Completar ahora"). Es sólo la
+/// etiqueta: el botón (o la tarjeta tocable) la pone quien la usa.
+struct EtiquetaCompletar: View {
+    let texto: String
+
+    var body: some View {
+        HStack(spacing: TokensEspaciado.e6) {
+            Image(systemName: "plus")
+                .font(.system(size: TokensTipografia.chipTamano, weight: .bold))
+                .accessibilityHidden(true)
+            Text(texto)
+                .estilo(.chip, color: Paleta.textoAcento)
+        }
+        .foregroundStyle(Paleta.textoAcento)
+        .padding(.horizontal, TokensEspaciado.e12)
+        .padding(.vertical, TokensEspaciado.e8)
+        .background(Paleta.acentoChipActivo)
+        .clipShape(Capsule())
+        .overlay(Capsule().strokeBorder(Paleta.acentoSuaveBorde, lineWidth: TokensEspaciado.e1))
     }
 }
 

@@ -186,3 +186,25 @@ target Trainer, agregar **HealthKit** si Xcode lo pide.
 - **Textos:** todas las keys de los dos catálogos son identificadores en inglés (`common.day`,
   `home.greeting.morning`…) con es/en/fr; el código usa `Textos.*` (iPhone) y `TextosReloj.*` (reloj). Los textos
   sueltos del reloj (Agua/Geles/Sales, "TIEMPO EN PAUSA"…) ahora también se traducen.
+
+## Sexta ronda (20-10)
+
+- **Assets duplicados:** `Acento.colorset` era el mismo color que `AccentColor` → se borró y el generador
+  (`scripts/generar-tema.mjs`, `acento-desde-xcode.mjs`) escribe ahora `AccentColor.colorset`; `TokensAcento.nombreEnAssets`
+  = "AccentColor". `LogoApp.imageset` era una copia de `AppIcon` → se borró y `LogoApp` dibuja el ícono instalado de la
+  app (`CFBundleIcons`), con la inicial como respaldo.
+- **Fondos:** las 20 `FondoRunning` se achicaron de 1536×2752 a 1179 px de ancho (58 MB → 5,4 MB). Los originales
+  quedaron en `_to_delete/fondos-originales/`.
+- **Mascota animada:** iOS no reproduce WebM (y menos con transparencia), así que los 8 `.webm` se convirtieron a
+  **WebP animado con alfa** (360 px, 12 fps) dentro de los mismos `.dataset`. `MascotaAnimada` los reproduce
+  decodificando sólo el cuadro que se ve (< 3 MB por mascota). Si un asset no se puede leer, muestra la pose fija.
+  Para agregar animaciones nuevas: `ffmpeg -c:v libvpx-vp9 -i X.webm -an -vf "fps=12,scale=360:360" -c:v libwebp_anim
+  -q:v 60 -loop 0 -pix_fmt yuva420p X.webp` y meterla en un `.dataset`.
+- **Tour estilo Clippy:** encima de la app real, con un velo translúcido, la mascota animada en una esquina y el
+  bocadillo junto a la boca; cambia de pestaña en cada paso. Se borraron `TourView` y `TourVistaPrevia`.
+- **Inicio:** sin el botón de perfil arriba a la derecha; la hoja de zonas/hidratación mide exactamente su contenido;
+  las barras de zona van alineadas abajo (como señal de celular) con bordes redondeados.
+- **Ajustes:** secciones con título (CUENTA, APARIENCIA, AVISOS, PREFERENCIAS, AYUDA) como en Configuración de iOS;
+  cerrar sesión pide confirmación con alerta; **Datos personales** y **Entrenamiento** editables (un solo `PATCH /me`
+  con lo que cambió); 11 colores + personalizado (se agregó Lavanda).
+- **Perfil:** sin opciones de Ajustes; tocar los datos del cuerpo o los días abre la página de Ajustes que los edita.

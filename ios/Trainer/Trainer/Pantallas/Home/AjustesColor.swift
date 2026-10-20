@@ -6,8 +6,9 @@ import TrainerCore
 //
 // Arriba, una vista previa EN VIVO pintada con el color candidato (armado con
 // sus componentes, no con `Paleta.acento`, que es el que ya está aplicado).
-// Abajo, la paleta y un último círculo para elegir cualquier color. Sin
-// nombres a la vista: los nombres son para VoiceOver.
+// Abajo, la paleta (11 colores) y un último círculo para elegir cualquier
+// color: 12, en 6×2 o 4×3 según el ancho. Sin nombres a la vista: los
+// nombres son para VoiceOver.
 //
 // 🪤 Guardar el color re-crea el Home entero (`RaizHomeView` usa
 // `.id(acentoGuardado)`), así que todo `@State` de acá se pierde al aplicar.
@@ -29,11 +30,6 @@ struct AjustesSelectorDeColor: View {
     /// "r,g,b" del color libre elegido y todavía NO aplicado.
     @State private var librePendiente: String?
 
-    private let columnas = [
-        GridItem(.adaptive(minimum: TokensEspaciado.e52),
-                 spacing: TokensEspaciado.e8, alignment: .top),
-    ]
-
     var body: some View {
         VStack(alignment: .leading, spacing: TokensEspaciado.e14) {
             AjustesVistaPreviaDeColor(componentes: componentesCandidatos)
@@ -43,12 +39,7 @@ struct AjustesSelectorDeColor: View {
                     .transition(.opacity.combined(with: .move(edge: .top)))
             }
 
-            LazyVGrid(columns: columnas, alignment: .center, spacing: TokensEspaciado.e12) {
-                ForEach(AcentoPersonalizado.opciones) { opcion in
-                    muestra(opcion)
-                }
-                muestraLibre
-            }
+            grillaDeColores
 
             if !AcentoPersonalizado.esPredeterminado(acentoGuardado) {
                 botonRestablecer
@@ -78,6 +69,56 @@ struct AjustesSelectorDeColor: View {
 
     private var libreElegido: Bool {
         librePendiente != nil || AcentoPersonalizado.esLibre(acentoGuardado)
+    }
+
+    // MARK: La grilla
+
+    /// Un lugar de la grilla: un color de la paleta o el selector libre.
+    private enum Celda: Identifiable {
+        case opcion(OpcionDeAcento)
+        case libre
+
+        var id: String {
+            switch self {
+            case .opcion(let opcion): return opcion.id
+            case .libre: return "libre"
+            }
+        }
+    }
+
+    /// Los 11 colores y el libre: 12, que se reparten parejo en 6×2 o 4×3.
+    private var celdas: [Celda] {
+        AcentoPersonalizado.opciones.map { Celda.opcion($0) } + [.libre]
+    }
+
+    /// 6×2 si una fila de seis entra (332 pt: todo iPhone con iOS 16, SE
+    /// incluido); si no —el zoom de pantalla de un SE o un mini—, 4×3.
+    /// Nunca queda una fila a medias.
+    private var grillaDeColores: some View {
+        ViewThatFits(in: .horizontal) {
+            grilla(columnas: 6)
+            grilla(columnas: 4)
+        }
+        .frame(maxWidth: .infinity)
+    }
+
+    private func grilla(columnas: Int) -> some View {
+        let todas = celdas
+        let filas = stride(from: 0, to: todas.count, by: columnas).map {
+            Array(todas[$0..<min($0 + columnas, todas.count)])
+        }
+        return VStack(spacing: TokensEspaciado.e12) {
+            ForEach(filas.indices, id: \.self) { indice in
+                HStack(spacing: TokensEspaciado.e4) {
+                    ForEach(filas[indice]) { celda in
+                        switch celda {
+                        case .opcion(let opcion): muestra(opcion)
+                        case .libre: muestraLibre
+                        }
+                    }
+                }
+            }
+        }
     }
 
     // MARK: Círculos

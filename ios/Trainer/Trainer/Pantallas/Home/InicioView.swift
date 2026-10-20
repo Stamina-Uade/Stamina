@@ -3,7 +3,7 @@ import TrainerCore
 
 /// `inicio` — la pantalla 2 del mockup del MVP, de arriba hacia abajo:
 ///
-///   Stamina · racha · avatar
+///   Stamina · racha (el perfil se abre desde su pestaña)
 ///   "Viernes 16 de octubre" / "Buen día, Sofi"
 ///   la píldora del apto físico
 ///   la tarjeta de la próxima carrera ("23 días para tu media maratón"), o
@@ -105,7 +105,7 @@ struct InicioView: View {
         }
     }
 
-    // MARK: - Barra superior: Stamina · racha · avatar
+    // MARK: - Barra superior: Stamina · racha
 
     private var barraSuperior: some View {
         HStack(spacing: TokensEspaciado.e6) {
@@ -117,28 +117,9 @@ struct InicioView: View {
             if let plan = estado.plan {
                 InsigniaDeRacha(racha: plan.racha)
             }
-            Button {
-                Haptico.toque()
-                estado.ir(a: .perfil)
-            } label: {
-                ZStack {
-                    Circle().fill(Paleta.superficieAlterna)
-                    Circle().strokeBorder(Paleta.bordeSuperficie, lineWidth: TokensEspaciado.e1)
-                    if estado.iniciales.isEmpty {
-                        Image(systemName: "person.fill")
-                            .font(.system(size: TokensTipografia.tituloCardTamano, weight: .bold))
-                            .foregroundStyle(Paleta.textoPrimario)
-                    } else {
-                        Text(estado.iniciales).estilo(.chip, color: Paleta.textoPrimario)
-                    }
-                }
-                .frame(width: TokensEspaciado.e36, height: TokensEspaciado.e36)
-                .frame(width: TokensTamano.objetivoTactilMinimo, height: TokensTamano.objetivoTactilMinimo)
-                .contentShape(Circle())
-            }
-            .buttonStyle(EstiloPresionado())
-            .accessibilityLabel(Textos.homeTabProfile)
         }
+        // El mismo alto que tenía con el avatar, para que el saludo no suba.
+        .frame(minHeight: TokensTamano.objetivoTactilMinimo)
     }
 
     // MARK: - Saludo

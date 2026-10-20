@@ -6,8 +6,13 @@ import TrainerCore
 ///
 /// Ronda 5: sin guías ni explicaciones. Los datos del cuerpo son tres tarjetas
 /// (`PerfilDatosDelCuerpo.swift`) y, si falta alguno, un botón chico para
-/// completarlo; las metas llevan al plan; y abajo quedan los accesos con ícono,
-/// título y subtítulo (`PerfilPiezas.swift`).
+/// completarlo; las metas llevan al plan; y abajo queda la fila del apto físico
+/// (`PerfilPiezas.swift`).
+///
+/// Ronda 6: nada de ajustes acá (ni el color ni el recorrido): todo eso vive en
+/// Ajustes. Queda el apto físico, que es un dato personal. Los datos del cuerpo
+/// y los días se editan en Ajustes: tocarlos abre Ajustes ya en "Datos
+/// personales" o en "Entrenamiento" (`AjustesAncla.paginaAlVolver`).
 struct PerfilView: View {
     @EnvironmentObject private var estado: EstadoHome
     @EnvironmentObject private var flujo: FlujoEntrada
@@ -16,10 +21,6 @@ struct PerfilView: View {
     @State private var mostrarApto = false
     @State private var mostrarRacha = false
     @ObservedObject private var apto = AlmacenDeAptoFisico.compartido
-    @AppStorage(AcentoPersonalizado.clave) private var acentoGuardado = ""
-
-    /// La lee `RaizHomeView` con `@AppStorage`: en `false`, muestra el recorrido.
-    private static let claveDelTour = "tour_visto"
 
     private var inicioDeHoyMs: Int64 {
         Int64(Calendar.current.startOfDay(for: Date()).timeIntervalSince1970 * 1000)
@@ -36,7 +37,7 @@ struct PerfilView: View {
                 }
                 seccionMetas
                 seccionDias
-                seccionAccesos
+                seccionApto
             }
             .padding(.horizontal, TokensEspaciado.e16)
             .padding(.top, TokensEspaciado.e8)
@@ -73,108 +74,60 @@ struct PerfilView: View {
 
     // MARK: - Identidad
 
-    /// Las iniciales con el halo del acento, el nombre, la píldora de deporte y
-    /// nivel, y abajo "Tu color", que lleva a Ajustes.
+    /// Las iniciales con el halo del acento, el nombre y la píldora de deporte y
+    /// nivel.
     private var tarjetaDeIdentidad: some View {
-        VStack(alignment: .leading, spacing: TokensEspaciado.e12) {
-            HStack(alignment: .center, spacing: TokensEspaciado.e14) {
-                ZStack {
-                    Circle()
-                        .fill(
-                            LinearGradient(
-                                colors: [Paleta.acentoProfundo, Paleta.superficie],
-                                startPoint: .topLeading,
-                                endPoint: .bottomTrailing
-                            )
+        HStack(alignment: .center, spacing: TokensEspaciado.e14) {
+            ZStack {
+                Circle()
+                    .fill(
+                        LinearGradient(
+                            colors: [Paleta.acentoProfundo, Paleta.superficie],
+                            startPoint: .topLeading,
+                            endPoint: .bottomTrailing
                         )
-                        .overlay(Circle().strokeBorder(Paleta.acentoSuaveBorde, lineWidth: TokensEspaciado.e2))
-                        .shadow(color: Paleta.acentoBrillo, radius: TokensEspaciado.e12)
-                    Text(estado.iniciales)
-                        .estilo(.unidadHeroe, color: Paleta.acento)
+                    )
+                    .overlay(Circle().strokeBorder(Paleta.acentoSuaveBorde, lineWidth: TokensEspaciado.e2))
+                    .shadow(color: Paleta.acentoBrillo, radius: TokensEspaciado.e12)
+                Text(estado.iniciales)
+                    .estilo(.unidadHeroe, color: Paleta.acento)
+            }
+            .frame(width: TokensEspaciado.e56, height: TokensEspaciado.e56)
+            .accessibilityLabel(Textos.profileNoPhoto)
+
+            VStack(alignment: .leading, spacing: TokensEspaciado.e6) {
+                Text(estado.nombreCompleto)
+                    .estilo(.tituloSeccion)
+                    .fixedSize(horizontal: false, vertical: true)
+                    .accessibilityAddTraits(.isHeader)
+
+                HStack(spacing: TokensEspaciado.e6) {
+                    IconoDeporte(deporte: deporteDeLaSesion, color: Paleta.acento,
+                                 tamano: TokensTipografia.chipTamano)
+                        .accessibilityHidden(true)
+                    Text(deporteYNivel)
+                        .estilo(.chip, color: Paleta.textoSecundario)
+                        .lineLimit(1)
                 }
-                .frame(width: TokensEspaciado.e56, height: TokensEspaciado.e56)
-                .accessibilityLabel(Textos.profileNoPhoto)
-
-                VStack(alignment: .leading, spacing: TokensEspaciado.e6) {
-                    Text(estado.nombreCompleto)
-                        .estilo(.tituloSeccion)
-                        .fixedSize(horizontal: false, vertical: true)
-                        .accessibilityAddTraits(.isHeader)
-
-                    HStack(spacing: TokensEspaciado.e6) {
-                        IconoDeporte(deporte: deporteDeLaSesion, color: Paleta.acento,
-                                     tamano: TokensTipografia.chipTamano)
-                            .accessibilityHidden(true)
-                        Text(deporteYNivel)
-                            .estilo(.chip, color: Paleta.textoSecundario)
-                            .lineLimit(1)
-                    }
-                    .padding(.horizontal, TokensEspaciado.e10)
-                    .padding(.vertical, TokensEspaciado.e6)
-                    .background(Paleta.acentoChipActivo)
-                    .clipShape(Capsule())
-                    .overlay(Capsule().strokeBorder(Paleta.acentoSuaveBorde, lineWidth: TokensEspaciado.e1))
-                    .accessibilityElement(children: .combine)
-                }
-
-                Spacer(minLength: 0)
+                .padding(.horizontal, TokensEspaciado.e10)
+                .padding(.vertical, TokensEspaciado.e6)
+                .background(Paleta.acentoChipActivo)
+                .clipShape(Capsule())
+                .overlay(Capsule().strokeBorder(Paleta.acentoSuaveBorde, lineWidth: TokensEspaciado.e1))
+                .accessibilityElement(children: .combine)
             }
 
-            Rectangle()
-                .fill(Paleta.divisor)
-                .frame(height: TokensEspaciado.e1)
-                .accessibilityHidden(true)
-
-            filaDeColor
+            Spacer(minLength: 0)
         }
         .padding(TokensEspaciado.e14)
         .frame(maxWidth: .infinity, alignment: .leading)
         .tarjeta()
     }
 
-    /// La muestra del acento elegido. Tocarla abre Ajustes, donde se cambia.
-    private var filaDeColor: some View {
-        Button {
-            Haptico.toque()
-            estado.ir(a: .ajustes)
-        } label: {
-            HStack(spacing: TokensEspaciado.e10) {
-                Circle()
-                    .fill(Paleta.acento)
-                    .overlay(Circle().strokeBorder(Paleta.bordeSuperficie, lineWidth: TokensEspaciado.e1))
-                    .shadow(color: Paleta.acentoBrillo, radius: TokensEspaciado.e4)
-                    .frame(width: TokensEspaciado.e22, height: TokensEspaciado.e22)
-                    .accessibilityHidden(true)
-                VStack(alignment: .leading, spacing: TokensEspaciado.e2) {
-                    Text(Textos.profileYourColor(nombreDelColor))
-                        .estilo(.tituloCard)
-                    Text(Textos.profileColorHint)
-                        .estilo(.notaLegal, color: Paleta.textoTerciario)
-                }
-                Spacer(minLength: 0)
-                Image(systemName: "chevron.right")
-                    .font(.system(size: TokensTipografia.notaLegalTamano, weight: .semibold))
-                    .foregroundStyle(Paleta.textoTerciario)
-                    .accessibilityHidden(true)
-            }
-            .frame(maxWidth: .infinity, minHeight: TokensTamano.objetivoTactilMinimo, alignment: .leading)
-            .contentShape(Rectangle())
-        }
-        .buttonStyle(EstiloPresionado())
-        .accessibilityElement(children: .combine)
-        .accessibilityAddTraits(.isButton)
-    }
-
-    private var nombreDelColor: String {
-        if acentoGuardado.isEmpty { return AcentoPersonalizado.predeterminado.nombre }
-        return AcentoPersonalizado.opcion(paraGuardado: acentoGuardado)?.nombre
-            ?? Textos.settingsColorCustom
-    }
-
     // MARK: - Datos del cuerpo
 
     /// Peso, altura y edad: tres tarjetas de métrica en fila. Si falta alguno,
-    /// abajo va un botón chico que lleva a los pasos del alta.
+    /// abajo va un botón chico para completarlo en Ajustes → Datos personales.
     private var datosDelCuerpo: some View {
         VStack(alignment: .leading, spacing: TokensEspaciado.e10) {
             EncabezadoDeSeccion(Textos.profileYourBody)
@@ -189,35 +142,31 @@ struct PerfilView: View {
         }
     }
 
+    /// Cada tarjeta abre Ajustes → Datos personales, donde se edita.
     private func tarjetaDeDato(_ dato: DatoDelCuerpo) -> some View {
-        TarjetaMetrica(dato.titulo, valor: valor(de: dato), simbolo: dato.simbolo, destacada: falta(dato))
-            .accessibilityElement(children: .ignore)
-            .accessibilityLabel(Text(verbatim: "\(dato.titulo), \(valor(de: dato))"))
-    }
-
-    /// "Completar ahora": chico, en línea, sólo si falta un dato.
-    private var botonCompletarDatos: some View {
         Button {
-            Haptico.toque()
-            retomarPerfil()
+            abrirAjustes(en: .datosPersonales)
         } label: {
-            HStack(spacing: TokensEspaciado.e6) {
-                Image(systemName: "plus")
-                    .font(.system(size: TokensTipografia.chipTamano, weight: .bold))
-                    .accessibilityHidden(true)
-                Text(Textos.profileCompleteNow)
-                    .estilo(.chip, color: Paleta.textoAcento)
-            }
-            .foregroundStyle(Paleta.textoAcento)
-            .padding(.horizontal, TokensEspaciado.e12)
-            .padding(.vertical, TokensEspaciado.e8)
-            .background(Paleta.acentoChipActivo)
-            .clipShape(Capsule())
-            .overlay(Capsule().strokeBorder(Paleta.acentoSuaveBorde, lineWidth: TokensEspaciado.e1))
-            .frame(minHeight: TokensTamano.objetivoTactilMinimo)
-            .contentShape(Rectangle())
+            TarjetaMetrica(dato.titulo, valor: valor(de: dato), simbolo: dato.simbolo, destacada: falta(dato))
+                .accessibilityElement(children: .ignore)
+                .accessibilityLabel(Text(verbatim: "\(dato.titulo), \(valor(de: dato))"))
         }
         .buttonStyle(EstiloPresionado())
+        .accessibilityHint(Self.pistaDatosPersonales)
+    }
+
+    /// "Completar ahora": chico, en línea, sólo si falta un dato. Abre Ajustes →
+    /// Datos personales.
+    private var botonCompletarDatos: some View {
+        Button {
+            abrirAjustes(en: .datosPersonales)
+        } label: {
+            EtiquetaCompletar(texto: Textos.profileCompleteNow)
+                .frame(minHeight: TokensTamano.objetivoTactilMinimo)
+                .contentShape(Rectangle())
+        }
+        .buttonStyle(EstiloPresionado())
+        .accessibilityHint(Self.pistaDatosPersonales)
     }
 
     private func valor(de dato: DatoDelCuerpo) -> String {
@@ -239,14 +188,12 @@ struct PerfilView: View {
         }
     }
 
-    /// Los mismos pasos del alta, al primer hueco (como el aviso del inicio en
-    /// `RaizHomeView`). Si el perfil todavía no llegó, primero se pide.
-    private func retomarPerfil() {
-        guard flujo.pasoPendienteDelPerfil == nil else { return flujo.retomarPerfil() }
-        Task {
-            await flujo.cargarPerfil()
-            flujo.retomarPerfil()
-        }
+    /// Abre Ajustes ya en una página. `AjustesView` lee el ancla en su
+    /// `onAppear` y la borra: al volver de la página se cae en la raíz de Ajustes.
+    private func abrirAjustes(en pagina: PaginaDeAjustes) {
+        Haptico.toque()
+        AjustesAncla.paginaAlVolver = pagina
+        estado.ir(a: .ajustes)
     }
 
     // MARK: - Tu actividad
@@ -307,8 +254,7 @@ struct PerfilView: View {
     private var seccionMetas: some View {
         VStack(alignment: .leading, spacing: TokensEspaciado.e10) {
             EncabezadoDeSeccion(Textos.profileGoalsTitle, accion: Textos.profileGoalsManage) {
-                Haptico.toque()
-                estado.ir(a: .ajustes)
+                abrirAjustes(en: .objetivos)
             }
 
             if metasActivas.isEmpty {
@@ -463,30 +409,35 @@ struct PerfilView: View {
                                     ? Textos.profilePerWeek(elegidos)
                                     : nil)
 
-            VStack(alignment: .leading, spacing: TokensEspaciado.e12) {
-                HStack(spacing: TokensEspaciado.e6) {
-                    ForEach(1...7, id: \.self) { weekday in
-                        chipDia(weekday: weekday)
+            // Toda la tarjeta abre Ajustes → Entrenamiento (días y horarios).
+            Button {
+                abrirAjustes(en: .entrenamiento)
+            } label: {
+                VStack(alignment: .leading, spacing: TokensEspaciado.e12) {
+                    HStack(spacing: TokensEspaciado.e6) {
+                        ForEach(1...7, id: \.self) { weekday in
+                            chipDia(weekday: weekday)
+                        }
                     }
-                }
 
-                if elegidos > 0 {
-                    Text(Textos.profileTrainingDaysDetail)
-                        .estilo(.notaLegal, color: Paleta.textoTerciario)
-                        .fixedSize(horizontal: false, vertical: true)
-                } else {
-                    Text(Textos.profileTrainingDaysNone)
-                        .estilo(.notaLegal, color: Paleta.textoTerciario)
-                        .fixedSize(horizontal: false, vertical: true)
-                    BotonTonal(Textos.profileCompleteProfile) {
-                        Haptico.toque()
-                        retomarPerfil()
+                    if elegidos > 0 {
+                        Text(Textos.profileTrainingDaysDetail)
+                            .estilo(.notaLegal, color: Paleta.textoTerciario)
+                            .fixedSize(horizontal: false, vertical: true)
+                    } else {
+                        Text(Textos.profileTrainingDaysNone)
+                            .estilo(.notaLegal, color: Paleta.textoTerciario)
+                            .fixedSize(horizontal: false, vertical: true)
+                        EtiquetaCompletar(texto: Textos.profileCompleteProfile)
                     }
                 }
+                .padding(TokensEspaciado.e14)
+                .frame(maxWidth: .infinity, alignment: .leading)
+                .tarjeta()
+                .contentShape(Rectangle())
             }
-            .padding(TokensEspaciado.e14)
-            .frame(maxWidth: .infinity, alignment: .leading)
-            .tarjeta()
+            .buttonStyle(EstiloPresionado())
+            .accessibilityHint(Self.pistaEntrenamiento)
         }
     }
 
@@ -504,44 +455,18 @@ struct PerfilView: View {
         return ((gregoriano + 5) % 7) + 1
     }
 
-    // MARK: - Accesos
+    // MARK: - Apto físico
 
-    /// Las filas de abajo: apto, ajustes y el recorrido por la app. Cerrar sesión
-    /// sigue en Ajustes.
-    private var seccionAccesos: some View {
-        VStack(alignment: .leading, spacing: TokensEspaciado.e10) {
-            EncabezadoDeSeccion(Textos.commonMore)
-            VStack(spacing: 0) {
-                FilaDeAccesoDePerfil(simbolo: "cross.case.fill",
-                                     titulo: Textos.medicalTitle,
-                                     subtitulo: textoDelApto,
-                                     colorDelSubtitulo: colorDelApto) {
-                    mostrarApto = true
-                }
-                separador
-                FilaDeAccesoDePerfil(simbolo: "paintpalette",
-                                     titulo: Textos.profileSettingsAndColor,
-                                     subtitulo: Textos.profileSettingsDetail) {
-                    estado.ir(a: .ajustes)
-                }
-                separador
-                FilaDeAccesoDePerfil(simbolo: "questionmark.circle",
-                                     titulo: Textos.profileHowItWorks,
-                                     subtitulo: Textos.profileTourAgain) {
-                    // `RaizHomeView` escucha esta clave con `@AppStorage`: el recorrido aparece al toque.
-                    UserDefaults.standard.set(false, forKey: Self.claveDelTour)
-                }
-            }
-            .tarjeta()
+    /// El apto es un dato tuyo: su vencimiento y, al tocarlo, la hoja para verlo
+    /// o cargarlo. Cerrar sesión, el color y el recorrido siguen en Ajustes.
+    private var seccionApto: some View {
+        FilaDeAccesoDePerfil(simbolo: "cross.case.fill",
+                             titulo: Textos.medicalTitle,
+                             subtitulo: textoDelApto,
+                             colorDelSubtitulo: colorDelApto) {
+            mostrarApto = true
         }
-    }
-
-    private var separador: some View {
-        Rectangle()
-            .fill(Paleta.divisor)
-            .frame(height: TokensEspaciado.e1)
-            .padding(.leading, TokensEspaciado.e14 + TokensEspaciado.e40 + TokensEspaciado.e12)
-            .accessibilityHidden(true)
+        .tarjeta()
     }
 
     private var textoDelApto: String {
@@ -565,6 +490,10 @@ struct PerfilView: View {
     }
 
     // MARK: - Auxiliares
+
+    private static let pistaDatosPersonales = Textos.profileOpensPersonalData
+
+    private static let pistaEntrenamiento = Textos.profileOpensTraining
 
     /// El deporte del perfil como deporte de sesión, para `IconoDeporte` y
     /// `nombreVisible`: los dos enums comparten los valores crudos.
@@ -653,38 +582,5 @@ struct PerfilView: View {
         case nil: nil
         }
         return [deporte, nivel].compactMap { $0 }.joined(separator: " · ")
-    }
-}
-
-/// Una fila que lleva a otro lado, con su valor actual y la flecha.
-struct FilaDeNavegacion: View {
-    let titulo: String
-    let valor: String?
-    let accion: () -> Void
-
-    var body: some View {
-        Button(action: accion) {
-            HStack(spacing: TokensEspaciado.e12) {
-                Text(titulo)
-                    .estilo(.tituloCard)
-                    .frame(maxWidth: .infinity, alignment: .leading)
-                if let valor {
-                    Text(valor)
-                        .estilo(.notaLegal, color: Paleta.textoTerciario)
-                        .multilineTextAlignment(.trailing)
-                }
-                Image(systemName: "chevron.right")
-                    .font(.system(size: TokensTipografia.etiquetaSeccionTamano,
-                                  weight: TokensTipografia.tituloCardPeso))
-                    .foregroundStyle(Paleta.textoTerciario)
-            }
-            .padding(.horizontal, TokensEspaciado.e14)
-            .padding(.vertical, TokensEspaciado.e14)
-            .frame(maxWidth: .infinity)
-            .tarjeta(radio: TokensRadio.boton)
-            .objetivoTactilAlto()
-        }
-        .buttonStyle(EstiloPresionado())
-        .accessibilityElement(children: .combine)
     }
 }

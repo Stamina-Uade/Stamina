@@ -1,7 +1,10 @@
 import SwiftUI
 import TrainerCore
 
-/// `ajustes` — una lista corta de filas, y cada una abre su página: Aspecto
+/// `ajustes` — secciones como las de Ajustes de iOS (rótulo gris arriba,
+/// tarjeta de filas abajo), y cada fila abre su página: Datos personales y
+/// Entrenamiento (editan el perfil: `AjustesDatosPersonales.swift`,
+/// `AjustesEntrenamiento.swift`, `AjustesEdicionPiezas.swift`), Aspecto
 /// (`AjustesApariencia.swift` + `AjustesColor.swift`), Notificaciones,
 /// Unidades y Objetivos (`Ajustes<Página>.swift`). Las piezas están en
 /// `AjustesPiezas.swift`.
@@ -76,15 +79,16 @@ struct AjustesView: View {
         } message: {
             Text(flujo.errorVisible ?? Textos.settingsGoalsSaveFailedMessage)
         }
-        .confirmationDialog(Textos.settingsSignOutConfirm,
-                            isPresented: $confirmandoCierre, titleVisibility: .visible) {
+        .alert(Self.tituloDeCierre, isPresented: $confirmandoCierre) {
+            Button(Textos.commonCancel, role: .cancel) {}
             Button(Textos.settingsSignOut, role: .destructive) {
                 // El llavero se borra antes de salir, sin esperar a la red: sin señal
                 // las credenciales se van igual, y `POST /auth/logout` sale por detrás
                 // (`FlujoEntrada.cerrarSesion`).
                 Task { await flujo.cerrarSesion() }
             }
-            Button(Textos.commonCancel, role: .cancel) {}
+        } message: {
+            Text(Self.mensajeDeCierre)
         }
     }
 
@@ -126,6 +130,10 @@ struct AjustesView: View {
     private func paginaAbierta(_ abierta: PaginaDeAjustes) -> some View {
         let volver = { ir(a: nil) }
         switch abierta {
+        case .datosPersonales:
+            AjustesPaginaDatosPersonales(volver: volver)
+        case .entrenamiento:
+            AjustesPaginaEntrenamiento(volver: volver)
         case .aspecto:
             AjustesPaginaAspecto(modo: $modoApariencia, ancla: anclaDeAspecto, volver: volver)
         case .notificaciones:
@@ -144,7 +152,21 @@ struct AjustesView: View {
 
     private var raiz: some View {
         AjustesPagina(Textos.settingsTitle, volver: { estado.volverDeLaPantallaSecundaria() }) {
-            AjustesTarjetaDeFilas {
+            AjustesSeccion(Textos.settingsAccount) {
+                AjustesFila(simbolo: "person.crop.circle.fill",
+                            titulo: AjustesPaginaDatosPersonales.titulo,
+                            valor: nombreDelPerfil) {
+                    ir(a: .datosPersonales)
+                }
+                AjustesDivisorDeFila()
+                AjustesFila(simbolo: "figure.run",
+                            titulo: AjustesPaginaEntrenamiento.titulo,
+                            valor: nivelDelPerfil) {
+                    ir(a: .entrenamiento)
+                }
+            }
+
+            AjustesSeccion(Self.seccionApariencia) {
                 AjustesFila(simbolo: "paintpalette.fill",
                             titulo: Textos.settingsAppearanceTitle,
                             valor: modoApariencia.nombreCorto,
@@ -152,7 +174,9 @@ struct AjustesView: View {
                             valorAccesible: "\(modoApariencia.nombreCorto), \(nombreDelColor)") {
                     ir(a: .aspecto)
                 }
-                AjustesDivisorDeFila()
+            }
+
+            AjustesSeccion(Textos.settingsAlerts) {
                 AjustesFila(simbolo: "bell.badge.fill",
                             titulo: Textos.settingsNotificationsTitle,
                             valor: resumenDeAvisos) {
@@ -160,7 +184,7 @@ struct AjustesView: View {
                 }
             }
 
-            AjustesTarjetaDeFilas {
+            AjustesSeccion(Self.seccionPreferencias) {
                 AjustesFila(simbolo: "ruler",
                             titulo: Textos.settingsUnits,
                             valor: estado.sistemaDeUnidades == .metrico ? "km" : "mi") {
@@ -174,12 +198,15 @@ struct AjustesView: View {
                 }
             }
 
-            AjustesTarjetaDeFilas {
+            AjustesSeccion(Self.seccionAyuda) {
                 AjustesFila(simbolo: "sparkles",
                             titulo: Textos.settingsViewTour) {
                     verTour()
                 }
-                AjustesDivisorDeFila()
+            }
+
+            // Lo destructivo va solo y al final, como en iOS.
+            AjustesSeccion {
                 AjustesFila(simbolo: "rectangle.portrait.and.arrow.right",
                             titulo: Textos.settingsSignOut,
                             tono: .peligro,
@@ -192,8 +219,21 @@ struct AjustesView: View {
             Text(Textos.settingsVersion(versionDeLaApp))
                 .estilo(.notaLegal, color: Paleta.textoTerciario)
                 .frame(maxWidth: .infinity)
-                .padding(.top, TokensEspaciado.e8)
+                .padding(.top, TokensEspaciado.e4)
         }
+    }
+
+    /// El nombre de pila, para la fila de Datos personales.
+    private var nombreDelPerfil: String? {
+        let nombre = (flujo.perfil ?? estado.perfil)?.firstName?
+            .trimmingCharacters(in: .whitespacesAndNewlines) ?? ""
+        return nombre.isEmpty ? nil : nombre
+    }
+
+    /// "Intermedio", para la fila de Entrenamiento.
+    private var nivelDelPerfil: String? {
+        guard let nivel = (flujo.perfil ?? estado.perfil)?.level else { return nil }
+        return AjustesPaginaEntrenamiento.nombre(de: nivel)
     }
 
     /// "3 activas", "1 activa" o "Apagadas".
@@ -258,6 +298,14 @@ struct AjustesView: View {
         Haptico.toque()
         UserDefaults.standard.set(false, forKey: Self.claveDelTour)
     }
+
+    // MARK: - Textos nuevos
+
+    private static let seccionApariencia = Textos.settingsSectionAppearance
+    private static let seccionPreferencias = Textos.settingsSectionPreferences
+    private static let seccionAyuda = Textos.settingsSectionHelp
+    private static let tituloDeCierre = Textos.settingsSignOutAlertTitle
+    private static let mensajeDeCierre = Textos.settingsSignOutAlertMessage
 
     private var versionDeLaApp: String {
         Bundle.main.object(forInfoDictionaryKey: "CFBundleShortVersionString") as? String ?? "0.9"

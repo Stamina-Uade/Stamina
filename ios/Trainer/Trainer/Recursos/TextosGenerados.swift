@@ -9,7 +9,7 @@
 // números y unidades se formatean con el locale del sistema. Esto resuelve lo
 // primero; lo segundo es de quien presenta el dato.
 //
-// 991 claves · idioma de autoría: es
+// 833 claves · idioma de autoría: es
 // =============================================================================
 
 import Foundation
@@ -163,15 +163,6 @@ enum Textos {
     /// Entendido
     static var commonGotIt: String { String(localized: "common.got_it") }
 
-    /// Entendido, ocultar la guía
-    static var commonGuideDismiss: String { String(localized: "common.guide.dismiss") }
-
-    /// Listo: las guías vuelven a aparecer en cada pestaña.
-    static var commonGuideResetDone: String { String(localized: "common.guide.reset_done") }
-
-    /// ¿Qué hay en esta pantalla?
-    static var commonGuideWhatsHere: String { String(localized: "common.guide.whats_here") }
-
     /// Seguir
     static var commonKeepGoing: String { String(localized: "common.keep_going") }
 
@@ -261,9 +252,6 @@ enum Textos {
     /// semanas
     static var commonWeeks: String { String(localized: "common.weeks") }
 
-    /// Anual
-    static var commonYearly: String { String(localized: "common.yearly") }
-
     /// Ayer
     static var commonYesterday: String { String(localized: "common.yesterday") }
 
@@ -332,9 +320,6 @@ enum Textos {
         String(format: String(localized: "error.unknown_code"), arg1)
     }
 
-    /// Hay un dato que el servidor no aceptó. Revisá lo que cargaste.
-    static var errorValidationFailed: String { String(localized: "error.validation_failed") }
-
     /// Esa contraseña es fácil de adivinar. Probá una más larga o menos común.
     static var errorWeakPassword: String { String(localized: "error.weak_password") }
 
@@ -349,9 +334,6 @@ enum Textos {
 
     /// Ver sustitutos
     static var exerciseSeeSubstitutes: String { String(localized: "exercise.see_substitutes") }
-
-    /// Reemplazar
-    static var exerciseSubstitutesReplace: String { String(localized: "exercise.substitutes.replace") }
 
     /// Mismo patrón de movimiento
     static var exerciseSubstitutesSamePattern: String { String(localized: "exercise.substitutes.same_pattern") }
@@ -446,9 +428,6 @@ enum Textos {
         String(format: String(localized: "goals.plan_duration"), arg1)
     }
 
-    /// ¡Listo para tu primera carrera!
-    static var goalsReadyFirstRace: String { String(localized: "goals.ready_first_race") }
-
     /// Revisá tu conexión e intentá de nuevo.
     static var goalsSaveFailedMessage: String { String(localized: "goals.save_failed.message") }
 
@@ -503,12 +482,6 @@ enum Textos {
 
     /// Agregar ejercicio
     static var gymAddExercise: String { String(localized: "gym.add_exercise") }
-
-    /// + Serie
-    static var gymAddSet: String { String(localized: "gym.add_set") }
-
-    /// ¿Seguro que quieres descartar estos datos?
-    static var gymDiscardConfirmation: String { String(localized: "gym.discard.confirmation") }
 
     /// Terminar sesión de gimnasio
     static var gymFinish: String { String(localized: "gym.finish") }
@@ -581,11 +554,6 @@ enum Textos {
     /// Salteada
     static var gymSetSkipped: String { String(localized: "gym.set.skipped") }
 
-    /// Serie %1$lld de %2$lld
-    static func gymSetTitle(_ arg1: Int, _ arg2: Int) -> String {
-        String(format: String(localized: "gym.set.title"), arg1, arg2)
-    }
-
     /// Peso
     static var gymSetWeight: String { String(localized: "gym.set.weight") }
 
@@ -600,38 +568,11 @@ enum Textos {
     /// Jue 28 ago · tren superior y core
     static var gymSubtitle: String { String(localized: "gym.subtitle") }
 
-    /// Descartar
-    static var gymSummaryDiscard: String { String(localized: "gym.summary.discard") }
-
-    /// Regresar
-    static var gymSummaryGoBack: String { String(localized: "gym.summary.go_back") }
-
-    /// Guardar
-    static var gymSummarySave: String { String(localized: "gym.summary.save") }
-
-    /// Entrenamiento finalizado
-    static var gymSummaryTitle: String { String(localized: "gym.summary.title") }
-
-    /// Técnica y movimiento
-    static var gymTechnique: String { String(localized: "gym.technique") }
-
-    /// Rutina de hoy
-    static var gymTitle: String { String(localized: "gym.title") }
-
-    /// Desmarcar serie
-    static var gymUnmarkSet: String { String(localized: "gym.unmark_set") }
-
-    /// Por qué
-    static var gymWhy: String { String(localized: "gym.why") }
-
     /// Todas tus salidas
     static var historyAllWorkouts: String { String(localized: "history.all_workouts") }
 
     /// Cerrar
     static var historyClose: String { String(localized: "history.close") }
-
-    /// Todavía no hay actividades guardadas.
-    static var historyEmpty: String { String(localized: "history.empty") }
 
     /// Tocá ⚡ para empezar la primera. Cuando la termines, aparece acá con su mapa, sus parciales y sus pausas.
     static var historyEmptyBody: String { String(localized: "history.empty.body") }
@@ -644,21 +585,6 @@ enum Textos {
 
     /// No se pudo cargar el historial. Probá de nuevo.
     static var historyError: String { String(localized: "history.error") }
-
-    /// Filtrá por deporte y tocá una salida para ver su mapa, sus parciales y sus pausas.
-    static var historyGuideFilter: String { String(localized: "history.guide.filter") }
-
-    /// Arriba, tus números: distancia, salidas y tiempo. Elegí Semana, Mes o Todo.
-    static var historyGuideNumbers: String { String(localized: "history.guide.numbers") }
-
-    /// Deslizá hacia abajo para actualizar la lista.
-    static var historyGuidePullToRefresh: String { String(localized: "history.guide.pull_to_refresh") }
-
-    /// Historial · mapa, números y tu constancia
-    static var historyGuideSummary: String { String(localized: "history.guide.summary") }
-
-    /// Qué hay en tu historial
-    static var historyGuideTitle: String { String(localized: "history.guide.title") }
 
     /// Cargar más
     static var historyLoadMore: String { String(localized: "history.load_more") }
@@ -727,11 +653,6 @@ enum Textos {
     /// Elegí tu próxima carrera y armamos el plan semana a semana.
     static var homeChooseNextRace: String { String(localized: "home.choose_next_race") }
 
-    /// para tu %1$@ de %2$@ · %3$@
-    static func homeCountdown(_ arg1: String, _ arg2: String, _ arg3: String) -> String {
-        String(format: String(localized: "home.countdown"), arg1, arg2, arg3)
-    }
-
     /// Todavía no hay nada para mostrar acá.
     static var homeDataEmpty: String { String(localized: "home.data.empty") }
 
@@ -759,14 +680,6 @@ enum Textos {
     static func homeDataSavedWithError(_ arg1: String) -> String {
         String(format: String(localized: "home.data.saved_with_error"), arg1)
     }
-
-    /// %1$@ · semana %2$lld/%3$lld
-    static func homeDate(_ arg1: String, _ arg2: Int, _ arg3: Int) -> String {
-        String(format: String(localized: "home.date"), arg1, arg2, arg3)
-    }
-
-    /// Editar
-    static var homeEdit: String { String(localized: "home.edit") }
 
     /// Ingresá tu nuevo objetivo
     static var homeEnterNewGoal: String { String(localized: "home.enter_new_goal") }
@@ -861,27 +774,6 @@ enum Textos {
     /// Buen día
     static var homeGreetingMorning: String { String(localized: "home.greeting.morning") }
 
-    /// Arriba, tu próxima carrera y cuánto falta. Tocala para ver el plan.
-    static var homeGuideNextRace: String { String(localized: "home.guide.next_race") }
-
-    /// Los accesos rápidos te llevan directo a correr, a tu plan, a tu historial o a tu apto.
-    static var homeGuideShortcuts: String { String(localized: "home.guide.shortcuts") }
-
-    /// Inicio · tocá una tarjeta para ver más
-    static var homeGuideSummary: String { String(localized: "home.guide.summary") }
-
-    /// Qué hay en tu inicio
-    static var homeGuideTitle: String { String(localized: "home.guide.title") }
-
-    /// «Hoy» es la sesión que te toca. Tocá la zona o la hidratación y te explicamos qué significan.
-    static var homeGuideToday: String { String(localized: "home.guide.today") }
-
-    /// La carga semanal son los km de tu semana. Tocá una barra para ver ese día.
-    static var homeGuideWeeklyLoad: String { String(localized: "home.guide.weekly_load") }
-
-    /// Las zonas ordenan la intensidad: la zona 2 (Z2) es un ritmo suave, en el que todavía podés charlar.
-    static var homeGuideZones: String { String(localized: "home.guide.zones") }
-
     /// %1$lld ml/h y %2$lld g de carbos/h · %3$@ es intensidad %4$@
     static func homeHydrationNote(_ arg1: Int, _ arg2: Int, _ arg3: String, _ arg4: String) -> String {
         String(format: String(localized: "home.hydration_note"), arg1, arg2, arg3, arg4)
@@ -911,9 +803,6 @@ enum Textos {
 
     /// Completar perfil
     static var homeProfileIncompleteButton: String { String(localized: "home.profile_incomplete.button") }
-
-    /// Ahora mismo
-    static var homeRightNow: String { String(localized: "home.right_now") }
 
     /// Volver a la salida
     static var homeShortcutsBackToWorkout: String { String(localized: "home.shortcuts.back_to_workout") }
@@ -950,17 +839,11 @@ enum Textos {
     /// Inicio
     static var homeTabHome: String { String(localized: "home.tab.home") }
 
-    /// Nutrición
-    static var homeTabNutrition: String { String(localized: "home.tab.nutrition") }
-
     /// Plan
     static var homeTabPlan: String { String(localized: "home.tab.plan") }
 
     /// Perfil
     static var homeTabProfile: String { String(localized: "home.tab.profile") }
-
-    /// Ajustes
-    static var homeTabSettings: String { String(localized: "home.tab.settings") }
 
     /// Entreno
     static var homeTabWorkout: String { String(localized: "home.tab.workout") }
@@ -1091,68 +974,6 @@ enum Textos {
         String(format: String(localized: "map.compass.accessibility"), arg1, arg2)
     }
 
-    /// Analizando la foto
-    static var mealLogAnalyzing: String { String(localized: "meal.log.analyzing") }
-
-    /// %lld %% de certeza
-    static func mealLogConfidence(_ arg1: Int) -> String {
-        String(format: String(localized: "meal.log.confidence"), arg1)
-    }
-
-    /// Frecuentes
-    static var mealLogFrequent: String { String(localized: "meal.log.frequent") }
-
-    /// Ingredientes
-    static var mealLogIngredients: String { String(localized: "meal.log.ingredients") }
-
-    /// Cargar a mano
-    static var mealLogManual: String { String(localized: "meal.log.manual") }
-
-    /// Ingresá los valores de tu comida o su etiqueta. Stamina guarda exactamente lo que cargás.
-    static var mealLogManualDetail: String { String(localized: "meal.log.manual.detail") }
-
-    /// Completá el nombre y todos los valores con números válidos.
-    static var mealLogManualIncomplete: String { String(localized: "meal.log.manual.incomplete") }
-
-    /// Nombre de la comida
-    static var mealLogName: String { String(localized: "meal.log.name") }
-
-    /// En el simulador no hay cámara: se usa una foto de ejemplo.
-    static var mealLogNoCamera: String { String(localized: "meal.log.no_camera") }
-
-    /// No es esto
-    static var mealLogNotThis: String { String(localized: "meal.log.not_this") }
-
-    /// Porción
-    static var mealLogPortion: String { String(localized: "meal.log.portion") }
-
-    /// Reconocido
-    static var mealLogRecognized: String { String(localized: "meal.log.recognized") }
-
-    /// Guardar comida
-    static var mealLogSave: String { String(localized: "meal.log.save") }
-
-    /// La cámara no existe en el simulador. Se usa una foto de ejemplo.
-    static var mealLogSimulatorCamera: String { String(localized: "meal.log.simulator_camera") }
-
-    /// Calculando calorías y macros
-    static var mealLogStepCalculate: String { String(localized: "meal.log.step.calculate") }
-
-    /// Estimando porciones
-    static var mealLogStepPortions: String { String(localized: "meal.log.step.portions") }
-
-    /// Reconociendo el plato
-    static var mealLogStepRecognize: String { String(localized: "meal.log.step.recognize") }
-
-    /// Sacar foto
-    static var mealLogTakePhoto: String { String(localized: "meal.log.take_photo") }
-
-    /// Registrar comida
-    static var mealLogTitle: String { String(localized: "meal.log.title") }
-
-    /// Sacar una foto
-    static var mealLogWithPhoto: String { String(localized: "meal.log.with_photo") }
-
     /// Con un apto vigente, Stamina puede darte sugerencias en carrera.
     static var medicalAddBody: String { String(localized: "medical.add_body") }
 
@@ -1280,9 +1101,6 @@ enum Textos {
 
     /// Abierta
     static var milestonesExpanded: String { String(localized: "milestones.expanded") }
-
-    /// En el calendario cada cuadrito es un día: cuanto más fuerte el color, más te moviste. Tocá uno para ver qué hi
-    static var milestonesGuideCalendar: String { String(localized: "milestones.guide.calendar") }
 
     /// Alto: dos salidas, o %@ o más en el día.
     static func milestonesLevelHigh(_ arg1: String) -> String {
@@ -1413,144 +1231,6 @@ enum Textos {
 
     /// ¡Entrenamiento completado!
     static var notificationWorkoutTitle: String { String(localized: "notification.workout.title") }
-
-    /// Carbos
-    static var nutritionCarbs: String { String(localized: "nutrition.carbs") }
-
-    /// Cena de recuperación
-    static var nutritionDinner: String { String(localized: "nutrition.dinner") }
-
-    /// 640 kcal · 25 g proteína · sugerida
-    static var nutritionDinnerDetail: String { String(localized: "nutrition.dinner.detail") }
-
-    /// Durante el entreno
-    static var nutritionDuringWorkout: String { String(localized: "nutrition.during_workout") }
-
-    /// %1$lld geles · %2$lld g carbos/h
-    static func nutritionDuringWorkoutDetail(_ arg1: Int, _ arg2: Int) -> String {
-        String(format: String(localized: "nutrition.during_workout.detail"), arg1, arg2)
-    }
-
-    /// Grasa
-    static var nutritionFat: String { String(localized: "nutrition.fat") }
-
-    /// Día de carga: te faltan carbohidratos para el fondo de esta tarde.
-    static var nutritionHint: String { String(localized: "nutrition.hint") }
-
-    /// %@ h
-    static func nutritionHours(_ arg1: String) -> String {
-        String(format: String(localized: "nutrition.hours"), arg1)
-    }
-
-    /// Hidratación
-    static var nutritionHydration: String { String(localized: "nutrition.hydration") }
-
-    /// Sumá %@ durante el entreno de esta tarde.
-    static func nutritionHydrationNote(_ arg1: String) -> String {
-        String(format: String(localized: "nutrition.hydration.note"), arg1)
-    }
-
-    /// %1$@ / %2$@
-    static func nutritionHydrationOf(_ arg1: String, _ arg2: String) -> String {
-        String(format: String(localized: "nutrition.hydration.of"), arg1, arg2)
-    }
-
-    /// %@ para hoy
-    static func nutritionHydrationTarget(_ arg1: String) -> String {
-        String(format: String(localized: "nutrition.hydration.target"), arg1)
-    }
-
-    /// %@ kcal restantes
-    static func nutritionKcalLeft(_ arg1: String) -> String {
-        String(format: String(localized: "nutrition.kcal_left"), arg1)
-    }
-
-    /// Registrar comida
-    static var nutritionLogMeal: String { String(localized: "nutrition.log_meal") }
-
-    /// %1$lld kcal · %2$lld g carbos · %3$lld g prote
-    static func nutritionMacrosRow(_ arg1: Int, _ arg2: Int, _ arg3: Int) -> String {
-        String(format: String(localized: "nutrition.macros_row"), arg1, arg2, arg3)
-    }
-
-    /// Comidas
-    static var nutritionMeals: String { String(localized: "nutrition.meals") }
-
-    /// %1$lld de %2$lld registradas
-    static func nutritionMealsSummary(_ arg1: Int, _ arg2: Int) -> String {
-        String(format: String(localized: "nutrition.meals_summary"), arg1, arg2)
-    }
-
-    /// Antes de los 18 no calculamos objetivos de calorías: en esa etapa conviene que te acompañe un profesional.
-    static var nutritionNoTargetsMinor: String { String(localized: "nutrition.no_targets.minor") }
-
-    /// Todavía no sabemos si estás embarazada o en lactancia, y eso cambia los números. Hasta saberlo, no los calcula
-    static var nutritionNoTargetsMissingPregnancyOrLactation: String { String(localized: "nutrition.no_targets.missing_pregnancy_or_lactation") }
-
-    /// Durante el embarazo o la lactancia no calculamos objetivos: lo mejor es seguirlo con tu equipo de salud.
-    static var nutritionNoTargetsPregnancyOrLactation: String { String(localized: "nutrition.no_targets.pregnancy_or_lactation") }
-
-    /// Faltan datos de tu perfil para calcularlos. Lo que comas se sigue anotando igual.
-    static var nutritionNoTargetsProfileIncomplete: String { String(localized: "nutrition.no_targets.profile_incomplete") }
-
-    /// Para calcularlos hace falta el sexo biológico: la fórmula lo usa, y no la promediamos.
-    static var nutritionNoTargetsSexUndisclosed: String { String(localized: "nutrition.no_targets.sex_undisclosed") }
-
-    /// Hoy no hay objetivos de calorías
-    static var nutritionNoTargetsTitle: String { String(localized: "nutrition.no_targets.title") }
-
-    /// de %@ kcal
-    static func nutritionOfTarget(_ arg1: String) -> String {
-        String(format: String(localized: "nutrition.of_target"), arg1)
-    }
-
-    /// Registrar
-    static var nutritionPending: String { String(localized: "nutrition.pending") }
-
-    /// Proteína
-    static var nutritionProtein: String { String(localized: "nutrition.protein") }
-
-    /// Números provisionales: todavía no los revisó un profesional.
-    static var nutritionProvisional: String { String(localized: "nutrition.provisional") }
-
-    /// Quitar
-    static var nutritionRemove: String { String(localized: "nutrition.remove") }
-
-    /// Descanso y sueño
-    static var nutritionRestAndSleep: String { String(localized: "nutrition.rest_and_sleep") }
-
-    /// Días de descanso
-    static var nutritionRestDays: String { String(localized: "nutrition.rest_days") }
-
-    /// Dos días sin correr por semana es lo previsto.
-    static var nutritionRestDaysNote: String { String(localized: "nutrition.rest_days.note") }
-
-    /// Sueño
-    static var nutritionSleep: String { String(localized: "nutrition.sleep") }
-
-    /// Con menos de 7 h, la recuperación se resiente.
-    static var nutritionSleepNoteLow: String { String(localized: "nutrition.sleep.note_low") }
-
-    /// Suficiente para una semana de carga.
-    static var nutritionSleepNoteOk: String { String(localized: "nutrition.sleep.note_ok") }
-
-    /// Anoche dormiste
-    static var nutritionSleptLastNight: String { String(localized: "nutrition.slept_last_night") }
-
-    /// Jueves 28 de agosto · día de carga
-    static var nutritionSubtitle: String { String(localized: "nutrition.subtitle") }
-
-    /// sugerida
-    static var nutritionSuggested: String { String(localized: "nutrition.suggested") }
-
-    /// esta semana
-    static var nutritionThisWeek: String { String(localized: "nutrition.this_week") }
-
-    /// Nutrición de hoy
-    static var nutritionTitle: String { String(localized: "nutrition.title") }
-
-    /// Comidas de hoy
-    static var nutritionTodayMeals: String { String(localized: "nutrition.today_meals") }
 
     /// Enviamos un código de 6 caracteres, con números y letras, a %@. Puede tardar hasta un minuto; si no aparece, r
     static func passwordResetCodeBody(_ arg1: String) -> String {
@@ -1732,27 +1412,6 @@ enum Textos {
 
     /// Muestra el plan de esta meta
     static var planGoalHint: String { String(localized: "plan.goal.hint") }
-
-    /// El tilde marca lo que ya hiciste; el día de hoy brilla con tu color.
-    static var planGuideCheck: String { String(localized: "plan.guide.check") }
-
-    /// Abajo, los días: tocá uno para ver qué hacer y por qué.
-    static var planGuideDays: String { String(localized: "plan.guide.days") }
-
-    /// Los días resaltados son los que elegiste para entrenar.
-    static var planGuideHighlightedDays: String { String(localized: "plan.guide.highlighted_days") }
-
-    /// Arriba, tu carrera y las etapas del plan. Tocá una etapa para saber para qué sirve.
-    static var planGuidePhases: String { String(localized: "plan.guide.phases") }
-
-    /// Plan · tocá un día para ver la sesión
-    static var planGuideSummary: String { String(localized: "plan.guide.summary") }
-
-    /// Tu plan, semana a semana
-    static var planGuideTitle: String { String(localized: "plan.guide.title") }
-
-    /// Elegí la semana con los botones o deslizando los días. El anillo muestra cuántos km llevás.
-    static var planGuideWeek: String { String(localized: "plan.guide.week") }
 
     /// %1$@ de %2$@
     static func planKmOf(_ arg1: String, _ arg2: String) -> String {
@@ -1936,19 +1595,10 @@ enum Textos {
     /// Edad
     static var profileAge: String { String(localized: "profile.age") }
 
-    /// Estima tu pulso máximo y, con él, tus zonas de pulso.
-    static var profileAgeUse: String { String(localized: "profile.age.use") }
-
     /// %lld años
     static func profileAgeYears(_ arg1: Int) -> String {
         String(format: String(localized: "profile.age_years"), arg1)
     }
-
-    /// Cambiar foto
-    static var profileChangePhoto: String { String(localized: "profile.change_photo") }
-
-    /// Cambiá el color de la app en Ajustes
-    static var profileColorHint: String { String(localized: "profile.color_hint") }
 
     /// Completar ahora
     static var profileCompleteNow: String { String(localized: "profile.complete_now") }
@@ -1956,20 +1606,8 @@ enum Textos {
     /// Completar perfil
     static var profileCompleteProfile: String { String(localized: "profile.complete_profile") }
 
-    /// Todavía no lo cargaste. Completalo con los mismos pasos del registro.
-    static var profileDataNotSet: String { String(localized: "profile.data.not_set") }
-
-    /// Lo cargaste al registrarte. Por ahora no se puede cambiar desde la app.
-    static var profileDataSetAtSignup: String { String(localized: "profile.data.set_at_signup") }
-
     /// Días y horarios
     static var profileDaysAndTimes: String { String(localized: "profile.days_and_times") }
-
-    /// Explica para qué lo usa la app
-    static var profileExplainsUseHint: String { String(localized: "profile.explains_use.hint") }
-
-    /// Objetivo
-    static var profileGoal: String { String(localized: "profile.goal") }
 
     /// Elegir nueva meta
     static var profileGoalsChooseNew: String { String(localized: "profile.goals.choose_new") }
@@ -2008,29 +1646,8 @@ enum Textos {
         String(format: String(localized: "profile.goals.weeks_left"), arg1)
     }
 
-    /// Tocá peso, altura o edad para ver para qué los usa la app.
-    static var profileGuideBodyData: String { String(localized: "profile.guide.body_data") }
-
-    /// Tus metas muestran cuánto falta; tocá una para ver tu plan.
-    static var profileGuideGoals: String { String(localized: "profile.guide.goals") }
-
-    /// En Ajustes cambiás el color, las notificaciones y las unidades.
-    static var profileGuideSettings: String { String(localized: "profile.guide.settings") }
-
-    /// Perfil · tus datos, ajustes y el color de la app
-    static var profileGuideSummary: String { String(localized: "profile.guide.summary") }
-
-    /// Tu perfil, en un vistazo
-    static var profileGuideTitle: String { String(localized: "profile.guide.title") }
-
     /// Altura
     static var profileHeight: String { String(localized: "profile.height") }
-
-    /// Junto con el peso, afina la estimación de la energía que gastás.
-    static var profileHeightUse: String { String(localized: "profile.height.use") }
-
-    /// Cómo funciona Stamina
-    static var profileHowItWorks: String { String(localized: "profile.how_it_works") }
 
     /// Vencido · renovalo
     static var profileMedicalExpired: String { String(localized: "profile.medical.expired") }
@@ -2059,8 +1676,14 @@ enum Textos {
         String(format: String(localized: "profile.of_text"), arg1)
     }
 
+    /// Abre tus datos personales en Ajustes
+    static var profileOpensPersonalData: String { String(localized: "profile.opens_personal_data") }
+
     /// Abre tu plan
     static var profileOpensPlan: String { String(localized: "profile.opens_plan") }
+
+    /// Abre tus días y horarios en Ajustes
+    static var profileOpensTraining: String { String(localized: "profile.opens_training") }
 
     /// %lld por semana
     static func profilePerWeek(_ arg1: Int) -> String {
@@ -2072,32 +1695,11 @@ enum Textos {
         String(format: String(localized: "profile.plan_week_of"), arg1, arg2)
     }
 
-    /// Color, apariencia, notificaciones, unidades y cerrar sesión
-    static var profileSettingsDetail: String { String(localized: "profile.settings.detail") }
-
-    /// Ajustes y color
-    static var profileSettingsAndColor: String { String(localized: "profile.settings_and_color") }
-
-    /// Ajusta la hidratación: cuánta agua tomar en las salidas largas.
-    static var profileSexUse: String { String(localized: "profile.sex.use") }
-
-    /// Deporte y nivel
-    static var profileSportAndLevel: String { String(localized: "profile.sport_and_level") }
-
     /// Muestra cómo funciona la racha
     static var profileStreakHint: String { String(localized: "profile.streak.hint") }
 
-    /// Tu perfil y tus datos
-    static var profileSubtitle: String { String(localized: "profile.subtitle") }
-
-    /// tocá un dato para saber por qué
-    static var profileTapItemForWhy: String { String(localized: "profile.tap_item_for_why") }
-
     /// Esta semana
     static var profileThisWeek: String { String(localized: "profile.this_week") }
-
-    /// Volvé a ver el recorrido por la app
-    static var profileTourAgain: String { String(localized: "profile.tour_again") }
 
     /// Días de entrenamiento
     static var profileTrainingDays: String { String(localized: "profile.training_days") }
@@ -2114,12 +1716,6 @@ enum Textos {
     /// Peso
     static var profileWeight: String { String(localized: "profile.weight") }
 
-    /// Calcula las calorías que gastás en cada entrenamiento.
-    static var profileWeightUse: String { String(localized: "profile.weight.use") }
-
-    /// Para qué lo usamos
-    static var profileWhatWeUseItFor: String { String(localized: "profile.what_we_use_it_for") }
-
     /// entrenás a las %@
     static func profileYouTrainAt(_ arg1: String) -> String {
         String(format: String(localized: "profile.you_train_at"), arg1)
@@ -2131,25 +1727,14 @@ enum Textos {
     /// Tu cuerpo
     static var profileYourBody: String { String(localized: "profile.your_body") }
 
-    /// Tu color · %@
-    static func profileYourColor(_ arg1: String) -> String {
-        String(format: String(localized: "profile.your_color"), arg1)
-    }
-
     /// Cerrar reproducción
     static var replayClose: String { String(localized: "replay.close") }
-
-    /// DISTANCIA
-    static var replayHeaderDistance: String { String(localized: "replay.header.distance") }
 
     /// KILÓMETRO
     static var replayHeaderKilometer: String { String(localized: "replay.header.kilometer") }
 
     /// RITMO
     static var replayHeaderPace: String { String(localized: "replay.header.pace") }
-
-    /// RECORRIDO
-    static var replayHeaderRoute: String { String(localized: "replay.header.route") }
 
     /// VELOCIDAD
     static var replayHeaderSpeed: String { String(localized: "replay.header.speed") }
@@ -2171,9 +1756,6 @@ enum Textos {
     /// Más opciones
     static var route3dMoreOptions: String { String(localized: "route3d.more_options") }
 
-    /// Ver mapa estático
-    static var route3dViewStaticMap: String { String(localized: "route3d.view_static_map") }
-
     /// Tu sesión ha expirado. Por favor, inicia sesión nuevamente para continuar.
     static var sessionExpiredMessage: String { String(localized: "session.expired.message") }
 
@@ -2182,9 +1764,6 @@ enum Textos {
 
     /// Cuenta
     static var settingsAccount: String { String(localized: "settings.account") }
-
-    /// Anticipación del aviso
-    static var settingsAlertLeadTime: String { String(localized: "settings.alert_lead_time") }
 
     /// Avisos
     static var settingsAlerts: String { String(localized: "settings.alerts") }
@@ -2233,6 +1812,9 @@ enum Textos {
 
     /// Fucsia
     static var settingsColorFuchsia: String { String(localized: "settings.color.fuchsia") }
+
+    /// Lavanda
+    static var settingsColorLavender: String { String(localized: "settings.color.lavender") }
 
     /// Verde lima
     static var settingsColorLime: String { String(localized: "settings.color.lime") }
@@ -2301,11 +1883,6 @@ enum Textos {
     /// Objetivos
     static var settingsGoalsTitle: String { String(localized: "settings.goals.title") }
 
-    /// %lld min
-    static func settingsMinutes(_ arg1: Int) -> String {
-        String(format: String(localized: "settings.minutes"), arg1)
-    }
-
     /// %lld activas
     static func settingsNotificationsCountOn(_ arg1: Int) -> String {
         String(format: String(localized: "settings.notifications.count_on"), arg1)
@@ -2338,35 +1915,83 @@ enum Textos {
     /// Notificaciones
     static var settingsNotificationsTitle: String { String(localized: "settings.notifications.title") }
 
-    /// Aviso de preparación
-    static var settingsPrepAlert: String { String(localized: "settings.prep_alert") }
+    /// Nacimiento
+    static var settingsPersonalBirthdate: String { String(localized: "settings.personal.birthdate") }
 
-    /// Antes de cada sesión, para armar bidones y geles
-    static var settingsPrepAlertDetail: String { String(localized: "settings.prep_alert.detail") }
+    /// Correo
+    static var settingsPersonalEmail: String { String(localized: "settings.personal.email") }
 
-    /// Privacidad
-    static var settingsPrivacy: String { String(localized: "settings.privacy") }
+    /// Pies
+    static var settingsPersonalHeightFeet: String { String(localized: "settings.personal.height_feet") }
 
-    /// Perfil privado
-    static var settingsPrivateProfile: String { String(localized: "settings.private_profile") }
+    /// Pulgadas
+    static var settingsPersonalHeightInches: String { String(localized: "settings.personal.height_inches") }
 
-    /// Nadie ve tus datos ni tus rutas
-    static var settingsPrivateProfileDetail: String { String(localized: "settings.private_profile.detail") }
+    /// Poné una altura entre 2′0″ y 8′6″.
+    static var settingsPersonalHeightOutOfRangeFt: String { String(localized: "settings.personal.height_out_of_range_ft") }
 
-    /// Avisos durante la salida
-    static var settingsRunAlerts: String { String(localized: "settings.run_alerts") }
+    /// Escribí tu nombre.
+    static var settingsPersonalNameRequired: String { String(localized: "settings.personal.name_required") }
 
-    /// Geles, sales e hidratación mientras entrenás
-    static var settingsRunAlertsDetail: String { String(localized: "settings.run_alerts.detail") }
+    /// Sexo
+    static var settingsPersonalSex: String { String(localized: "settings.personal.sex") }
+
+    /// Datos personales
+    static var settingsPersonalTitle: String { String(localized: "settings.personal.title") }
+
+    /// Peso (lb)
+    static var settingsPersonalWeightLabelLb: String { String(localized: "settings.personal.weight_label_lb") }
+
+    /// Poné un peso entre 45 y 880 lb.
+    static var settingsPersonalWeightOutOfRangeLb: String { String(localized: "settings.personal.weight_out_of_range_lb") }
+
+    /// Lo que cambiaste no se va a guardar.
+    static var settingsProfileDiscardMessage: String { String(localized: "settings.profile.discard_message") }
+
+    /// ¿Descartar cambios?
+    static var settingsProfileDiscardTitle: String { String(localized: "settings.profile.discard_title") }
+
+    /// Corregí lo marcado para guardar
+    static var settingsProfileFixToSave: String { String(localized: "settings.profile.fix_to_save") }
+
+    /// Seguir editando
+    static var settingsProfileKeepEditing: String { String(localized: "settings.profile.keep_editing") }
+
+    /// No pudimos traer tus datos.
+    static var settingsProfileLoadFailed: String { String(localized: "settings.profile.load_failed") }
+
+    /// Guardado
+    static var settingsProfileSaved: String { String(localized: "settings.profile.saved") }
+
+    /// Apariencia
+    static var settingsSectionAppearance: String { String(localized: "settings.section.appearance") }
+
+    /// Ayuda
+    static var settingsSectionHelp: String { String(localized: "settings.section.help") }
+
+    /// Preferencias
+    static var settingsSectionPreferences: String { String(localized: "settings.section.preferences") }
 
     /// Cerrar sesión
     static var settingsSignOut: String { String(localized: "settings.sign_out") }
 
-    /// ¿Cerrar la sesión?
-    static var settingsSignOutConfirm: String { String(localized: "settings.sign_out.confirm") }
+    /// ¿Estás seguro de que querés cerrar la sesión?
+    static var settingsSignOutAlertMessage: String { String(localized: "settings.sign_out.alert_message") }
+
+    /// ¿Cerrar sesión?
+    static var settingsSignOutAlertTitle: String { String(localized: "settings.sign_out.alert_title") }
 
     /// Ajustes
     static var settingsTitle: String { String(localized: "settings.title") }
+
+    /// Nivel
+    static var settingsTrainingLevel: String { String(localized: "settings.training.level") }
+
+    /// Deporte
+    static var settingsTrainingSport: String { String(localized: "settings.training.sport") }
+
+    /// Entrenamiento
+    static var settingsTrainingTitle: String { String(localized: "settings.training.title") }
 
     /// Unidades
     static var settingsUnits: String { String(localized: "settings.units") }
@@ -2374,14 +1999,8 @@ enum Textos {
     /// Cambia sólo cómo se muestran: lo guardado no cambia.
     static var settingsUnitsDetail: String { String(localized: "settings.units.detail") }
 
-    /// Imperial
-    static var settingsUnitsImperial: String { String(localized: "settings.units.imperial") }
-
     /// Kilómetros
     static var settingsUnitsKilometers: String { String(localized: "settings.units.kilometers") }
-
-    /// Métrico
-    static var settingsUnitsMetric: String { String(localized: "settings.units.metric") }
 
     /// Millas
     static var settingsUnitsMiles: String { String(localized: "settings.units.miles") }
@@ -2393,12 +2012,6 @@ enum Textos {
 
     /// Ver tour
     static var settingsViewTour: String { String(localized: "settings.view_tour") }
-
-    /// Resumen semanal
-    static var settingsWeeklySummary: String { String(localized: "settings.weekly_summary") }
-
-    /// Tu carga y tu progreso, los domingos
-    static var settingsWeeklySummaryDetail: String { String(localized: "settings.weekly_summary.detail") }
 
     /// La edad define tus zonas de frecuencia cardíaca, el ritmo de sudoración estimado y cuántas calorías necesitás 
     static var signupBirthBody: String { String(localized: "signup.birth.body") }
@@ -2493,9 +2106,6 @@ enum Textos {
     /// Nacimiento
     static var signupDoneBirth: String { String(localized: "signup.done.birth") }
 
-    /// Tu perfil quedó completo. Con estos datos ya calculamos hidratación, sales y carbohidratos para cada sesión, y
-    static var signupDoneBody: String { String(localized: "signup.done.body") }
-
     /// Días
     static var signupDoneDays: String { String(localized: "signup.done.days") }
 
@@ -2527,9 +2137,6 @@ enum Textos {
 
     /// Al continuar aceptás los términos y la política de privacidad. No mandamos publicidad.
     static var signupEmailLegal: String { String(localized: "signup.email.legal") }
-
-    /// Se ve bien. Te mandamos un código de 6 caracteres.
-    static var signupEmailOk: String { String(localized: "signup.email.ok") }
 
     /// Enviarme el código
     static var signupEmailSend: String { String(localized: "signup.email.send") }
@@ -2853,9 +2460,6 @@ enum Textos {
     /// cada km
     static var summaryPerKm: String { String(localized: "summary.per_km") }
 
-    /// ESTADÍSTICA POR KILÓMETRO
-    static var summaryPerKmStatsHeader: String { String(localized: "summary.per_km_stats.header") }
-
     /// Reproducir recorrido
     static var summaryReplayRoute: String { String(localized: "summary.replay_route") }
 
@@ -2864,9 +2468,6 @@ enum Textos {
 
     /// Tramos, pausas y reanudaciones
     static var summarySegmentsPauses: String { String(localized: "summary.segments_pauses") }
-
-    /// TRAMOS, PAUSAS Y REANUDACIONES
-    static var summarySegmentsPausesHeader: String { String(localized: "summary.segments_pauses.header") }
 
     /// Km %lld
     static func summarySplitKmNumber(_ arg1: Int) -> String {
@@ -2887,22 +2488,17 @@ enum Textos {
     /// Duración total
     static var summaryTotalDuration: String { String(localized: "summary.total_duration") }
 
-    /// Resumen del entrenamiento
-    static var summaryWorkoutTitle: String { String(localized: "summary.workout_title") }
-
     /// Cierra el tour y va al inicio
     static var tourCloseHint: String { String(localized: "tour.close.hint") }
 
-    /// Así funciona %@
-    static func tourHowItWorks(_ arg1: String) -> String {
-        String(format: String(localized: "tour.how_it_works"), arg1)
-    }
+    /// ¡Listo! Tocá ⚡ cuando quieras salir a correr.
+    static var tourCoachDoneBubble: String { String(localized: "tour.coach.done.bubble") }
 
-    /// Cada salida queda guardada.
-    static var tourLegacyHistoryBubble: String { String(localized: "tour.legacy.history.bubble") }
+    /// Tu semana de entrenamiento, día por día.
+    static var tourCoachPlanBubble: String { String(localized: "tour.coach.plan.bubble") }
 
-    /// Tu plan, semana a semana.
-    static var tourLegacyPlanBubble: String { String(localized: "tour.legacy.plan.bubble") }
+    /// Con ⚡ arrancás una salida: GPS, ritmo y pausa.
+    static var tourCoachWorkoutBubble: String { String(localized: "tour.coach.workout.bubble") }
 
     /// Cada salida queda acá, con tus números.
     static var tourPageHistoryBubble: String { String(localized: "tour.page.history.bubble") }
@@ -2910,25 +2506,13 @@ enum Textos {
     /// ¡Hola! Acá ves lo que te toca hoy.
     static var tourPageHomeBubble: String { String(localized: "tour.page.home.bubble") }
 
-    /// Tu semana, día por día. Tocá uno.
-    static var tourPagePlanBubble: String { String(localized: "tour.page.plan.bubble") }
-
     /// Tus datos, tus metas y el color de la app.
     static var tourPageProfileBubble: String { String(localized: "tour.page.profile.bubble") }
-
-    /// Tocá ⚡ y salimos a correr.
-    static var tourPageWorkoutBubble: String { String(localized: "tour.page.workout.bubble") }
 
     /// Página %lld de %lld
     static func tourPageOf(_ arg1: Int, _ arg2: Int) -> String {
         String(format: String(localized: "tour.page_of"), arg1, arg2)
     }
-
-    /// GPS, ritmo y pausa · también desde el reloj
-    static var tourPreviewWorkout: String { String(localized: "tour.preview.workout") }
-
-    /// Cómo actualizarlo
-    static var versionHowToUpdate: String { String(localized: "version.how_to_update") }
 
     /// Ahora no
     static var versionNotNow: String { String(localized: "version.not_now") }
@@ -2950,9 +2534,6 @@ enum Textos {
 
     /// Clima: Apple Weather. Fuentes de datos
     static var weatherAttributionAccessibility: String { String(localized: "weather.attribution.accessibility") }
-
-    /// Clima: MET Norway (CC BY 4.0)
-    static var weatherAttributionMetNorway: String { String(localized: "weather.attribution.met_norway") }
 
     /// Fuentes de datos
     static var weatherAttributionSources: String { String(localized: "weather.attribution.sources") }
@@ -2978,9 +2559,6 @@ enum Textos {
     /// Mié
     static var weekdayShortWed: String { String(localized: "weekday.short.wed") }
 
-    /// Stamina
-    static var welcomeBrand: String { String(localized: "welcome.brand") }
-
     /// Crear cuenta gratis
     static var welcomeCreateAccount: String { String(localized: "welcome.create_account") }
 
@@ -2992,26 +2570,17 @@ enum Textos {
     /// Ya tengo cuenta
     static var welcomeHaveAccount: String { String(localized: "welcome.have_account") }
 
-    /// Estimaciones de hidratación, sales y geles para cada salida. Sin planillas.
-    static var welcomeSlide1Body: String { String(localized: "welcome.slide1.body") }
-
     /// Corredores al amanecer
     static var welcomeSlide1Photo: String { String(localized: "welcome.slide1.photo") }
 
     /// Entrená y comé según la carga del día
     static var welcomeSlide1Title: String { String(localized: "welcome.slide1.title") }
 
-    /// Sugerencias según tu peso, la duración y la intensidad de cada salida.
-    static var welcomeSlide2Body: String { String(localized: "welcome.slide2.body") }
-
     /// Pelotón en ruta
     static var welcomeSlide2Photo: String { String(localized: "welcome.slide2.photo") }
 
     /// Hidratate y reponé con una guía clara
     static var welcomeSlide2Title: String { String(localized: "welcome.slide2.title") }
-
-    /// El plan se ajusta a los días y horarios que realmente tenés libres.
-    static var welcomeSlide3Body: String { String(localized: "welcome.slide3.body") }
 
     /// Trail en montaña
     static var welcomeSlide3Photo: String { String(localized: "welcome.slide3.photo") }
@@ -3022,65 +2591,8 @@ enum Textos {
     /// Cerrar el plan
     static var workoutClosePlan: String { String(localized: "workout.close_plan") }
 
-    /// Geles, sales y bebidas son un complemento, no reemplazan comer e hidratarte bien. Si tomás medicación o tenés 
-    static var workoutDisclaimer: String { String(localized: "workout.disclaimer") }
-
     /// Duración
     static var workoutDuration: String { String(localized: "workout.duration") }
-
-    /// Distancia
-    static var workoutEditDistance: String { String(localized: "workout.edit.distance") }
-
-    /// Cambiar esto recalcula la hidratación, los geles y los avisos.
-    static var workoutEditRecalculates: String { String(localized: "workout.edit.recalculates") }
-
-    /// Run-Walk-Run
-    static var workoutEditRunWalkRun: String { String(localized: "workout.edit.run_walk_run") }
-
-    /// Alterna trote y caminata. Útil si volvés después de un parate.
-    static var workoutEditRunWalkRunDetail: String { String(localized: "workout.edit.run_walk_run.detail") }
-
-    /// Guardar y recalcular
-    static var workoutEditSave: String { String(localized: "workout.edit.save") }
-
-    /// Hora
-    static var workoutEditTime: String { String(localized: "workout.edit.time") }
-
-    /// Editar el entreno de hoy
-    static var workoutEditTitle: String { String(localized: "workout.edit.title") }
-
-    /// Tipo de sesión
-    static var workoutEditType: String { String(localized: "workout.edit.type") }
-
-    /// Suave
-    static var workoutEditTypeEasy: String { String(localized: "workout.edit.type.easy") }
-
-    /// Series
-    static var workoutEditTypeIntervals: String { String(localized: "workout.edit.type.intervals") }
-
-    /// Fondo largo
-    static var workoutEditTypeLongRun: String { String(localized: "workout.edit.type.long_run") }
-
-    /// Ritmo
-    static var workoutEditTypeTempo: String { String(localized: "workout.edit.type.tempo") }
-
-    /// Zona
-    static var workoutEditZone: String { String(localized: "workout.edit.zone") }
-
-    /// Z1 · suave
-    static var workoutEditZoneZ1: String { String(localized: "workout.edit.zone.z1") }
-
-    /// Z2 · fondo
-    static var workoutEditZoneZ2: String { String(localized: "workout.edit.zone.z2") }
-
-    /// Z3 · ritmo
-    static var workoutEditZoneZ3: String { String(localized: "workout.edit.zone.z3") }
-
-    /// Z4 · series
-    static var workoutEditZoneZ4: String { String(localized: "workout.edit.zone.z4") }
-
-    /// Z5 · máxima
-    static var workoutEditZoneZ5: String { String(localized: "workout.edit.zone.z5") }
 
     /// Terminar
     static var workoutFinish: String { String(localized: "workout.finish") }
@@ -3090,9 +2602,6 @@ enum Textos {
 
     /// Avituallamiento
     static var workoutFueling: String { String(localized: "workout.fueling") }
-
-    /// Objetivo
-    static var workoutGoal: String { String(localized: "workout.goal") }
 
     /// Sin GPS
     static var workoutGpsNone: String { String(localized: "workout.gps.none") }
@@ -3112,9 +2621,6 @@ enum Textos {
     /// en curso
     static var workoutInProgressLowercase: String { String(localized: "workout.in_progress_lowercase") }
 
-    /// Para registrar el recorrido, permití el acceso a la ubicación en Ajustes.
-    static var workoutLocationDenied: String { String(localized: "workout.location_denied") }
-
     /// Centrar
     static var workoutMapCenter: String { String(localized: "workout.map.center") }
 
@@ -3127,26 +2633,14 @@ enum Textos {
     /// Vista 3D
     static var workoutMapView3d: String { String(localized: "workout.map.view_3d") }
 
-    /// El mapa llega con el GPS, que es de otra fase.
-    static var workoutMapUnavailable: String { String(localized: "workout.map_unavailable") }
-
-    /// Próximo aviso
-    static var workoutNextAlert: String { String(localized: "workout.next_alert") }
-
     /// El entrenamiento no registró desplazamiento suficiente o duró menos de 10 segundos. ¿Deseas descartarlo o rean
     static var workoutNoMovementMessage: String { String(localized: "workout.no_movement.message") }
 
     /// Sin movimiento
     static var workoutNoMovementTitle: String { String(localized: "workout.no_movement.title") }
 
-    /// Hoy no hay una salida en el plan.
-    static var workoutNoSession: String { String(localized: "workout.no_session") }
-
     /// Abre el plan de hoy
     static var workoutOpensTodayPlan: String { String(localized: "workout.opens_today_plan") }
-
-    /// Ritmo
-    static var workoutPace: String { String(localized: "workout.pace") }
 
     /// Pausar
     static var workoutPause: String { String(localized: "workout.pause") }

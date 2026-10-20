@@ -57,6 +57,6 @@ final class TemaTests: XCTestCase {
     /// es Stamina.
     func testMarcaAppCentralizada() {
         XCTAssertEqual(MarcaApp.nombre, "Stamina")
-        XCTAssertEqual(MarcaApp.recursoLogo, "LogoApp")
+        XCTAssertEqual(MarcaApp.recursoLogo, "AppIcon")
     }
 }

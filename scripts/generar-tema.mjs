@@ -30,11 +30,11 @@ const SALIDA_KT = resolve(raiz, "android/core/src/main/kotlin/com/tecladus/train
 const SALIDA_SWIFT = resolve(raiz, "ios/TrainerCore/Sources/TrainerCore/TokensGenerados.swift");
 // El acento, además, como color del catálogo de assets: es la perilla que se
 // puede girar desde Xcode sin tocar código (decisión 0007 §12).
-const SALIDA_COLORSET = resolve(raiz, "ios/Trainer/Trainer/Assets.xcassets/Acento.colorset/Contents.json");
+const SALIDA_COLORSET = resolve(raiz, "ios/Trainer/Trainer/Assets.xcassets/AccentColor.colorset/Contents.json");
 // El reloj tiene su propio catálogo de assets: sin esta copia, `PaletaReloj`
 // cae al valor de respaldo y cambiar el acento en Xcode dejaría el reloj del
 // color viejo.
-const SALIDA_COLORSET_RELOJ = resolve(raiz, "ios/Trainer/TrainerWatch/Assets.xcassets/Acento.colorset/Contents.json");
+const SALIDA_COLORSET_RELOJ = resolve(raiz, "ios/Trainer/TrainerWatch/Assets.xcassets/AccentColor.colorset/Contents.json");
 
 // ---------------------------------------------------------------- utilidades --
 
@@ -325,7 +325,7 @@ sw.push(`}
 /// Los alfa con los que el acento se deriva a sí mismo.
 ///
 /// 🛑 El VALOR del acento **no** está acá: vive en el catálogo de assets de la
-/// app (Assets.xcassets/Acento.colorset), para poder cambiarlo desde Xcode.
+/// app (Assets.xcassets/AccentColor.colorset), para poder cambiarlo desde Xcode.
 /// Estos son los alfa que Paleta le aplica encima, y salen de tokens.json para
 /// que Android e iOS deriven igual.
 public enum TokensAcento {
@@ -333,7 +333,7 @@ public enum TokensAcento {
     /// no está disponible (previews del paquete, tests fuera de la app).
     public static let respaldo = Color(.sRGB, red: ${(parseInt(acento.base.slice(1, 3), 16) / 255).toFixed(4)}, green: ${(parseInt(acento.base.slice(3, 5), 16) / 255).toFixed(4)}, blue: ${(parseInt(acento.base.slice(5, 7), 16) / 255).toFixed(4)}, opacity: 1)
     /// El nombre del color en el catálogo de assets.
-    public static let nombreEnAssets = "Acento"
+    public static let nombreEnAssets = "AccentColor"
 ${lineasDeAlfa}
 }
 

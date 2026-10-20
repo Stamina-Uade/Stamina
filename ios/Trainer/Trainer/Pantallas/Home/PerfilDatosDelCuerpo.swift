@@ -5,9 +5,8 @@ import TrainerCore
 // Peso, altura y edad: los tres datos del cuerpo que muestra el perfil.
 //
 // Ronda 5 (pedido de Ivan: UI limpia, sin explicaciones): ya no hay hoja que
-// explique cada dato. Editar uno ya cargado no existe todavía en la app; si
-// falta alguno, el perfil ofrece completarlo con los mismos pasos del alta
-// (`FlujoEntrada.retomarPerfil()`).
+// explique cada dato. Ronda 6: se editan en Ajustes → Datos personales; tocar
+// una tarjeta (o "Completar ahora") abre Ajustes ya en esa página.
 // =============================================================================
 
 /// Uno de los tres datos del cuerpo que muestra el perfil.

@@ -10,12 +10,14 @@ struct RaizHomeView: View {
     @StateObject private var estado: EstadoHome
     @EnvironmentObject private var flujo: FlujoEntrada
     @Environment(\.scenePhase) private var fase
+    @Environment(\.accessibilityReduceMotion) private var movimientoReducido
     /// El color elegido en Ajustes. Cambiarlo re-crea el contenido (`.id`) para
     /// que todo se vuelva a pintar con el color nuevo; el estado del Home
     /// (`EstadoHome`, la pestaña abierta) no se pierde porque vive acá arriba.
     @AppStorage(AcentoPersonalizado.clave) private var acentoGuardado = ""
     /// Si ya se vio "Así funciona Stamina". El tour sale una sola vez.
     @AppStorage("tour_visto") private var tourVisto = false
+    /// El tour guiado (`TourGuiado`) está encima de la app.
     @State private var mostrarTour = false
 
     /// El perfil guardado (`GET /me` o la última respuesta de `PATCH /me`). Llega
@@ -75,6 +77,8 @@ struct RaizHomeView: View {
                                 estado.ir(a: .entreno)
                             }
                         })
+                        // El tour la recorta del velo y apoya la mascota encima.
+                        .anchorPreference(key: MarcoDeLaBarraDelTour.self, value: .bounds) { $0 }
                         .transition(.move(edge: .bottom).combined(with: .opacity))
                 }
             }
@@ -95,8 +99,25 @@ struct RaizHomeView: View {
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
         .background(Paleta.fondo)
+        // Durante el tour, VoiceOver lee sólo el globito.
+        .accessibilityHidden(mostrarTour)
         .environmentObject(estado)
         .animation(.spring(response: 0.35, dampingFraction: 0.85), value: estado.pestana)
+        // El tour de la primera vez, ENCIMA de la app de verdad (barra incluida):
+        // un velo, la mascota en una esquina y su globito. Ver `TourGuiado`.
+        .overlayPreferenceValue(MarcoDeLaBarraDelTour.self) { ancla in
+            Group {
+                if mostrarTour {
+                    GeometryReader { geo in
+                        TourGuiado(tamano: geo.size, margenes: geo.safeAreaInsets,
+                                   marcoDeLaBarra: ancla.map { geo[$0] },
+                                   irA: irDuranteElTour, alTerminar: terminarTour)
+                    }
+                    .ignoresSafeArea()
+                    .transition(.opacity)
+                }
+            }
+        }
         .onAppear {
             DispatchQueue.main.asyncAfter(deadline: .now() + 0.6) {
                 GestorDeMapa.shared.precalentar()
@@ -117,19 +138,30 @@ struct RaizHomeView: View {
         .onChange(of: estado.faltaPerfil) { falta in
             if falta, flujo.pasoPendienteDelPerfil == nil { Task { await flujo.cargarPerfil() } }
         }
-        // El tour de la primera vez. Se marca como visto al terminarlo, al
-        // saltearlo y también si la hoja se cierra por otro lado.
-        // Perfil y Ajustes lo vuelven a pedir poniendo la clave en `false`.
+        // El tour de la primera vez. Se marca como visto al terminarlo o al
+        // saltearlo. Perfil y Ajustes lo vuelven a pedir poniendo la clave en `false`.
         .onAppear { if !tourVisto { mostrarTour = true } }
         .onChange(of: tourVisto) { visto in if !visto { mostrarTour = true } }
-        .fullScreenCover(isPresented: $mostrarTour, onDismiss: { tourVisto = true }) {
-            // El cover queda fuera de `.environmentObject(estado)`: se pasa a mano
-            // para que el tour muestre las pantallas reales.
-            TourView(estado: estado) {
-                tourVisto = true
-                mostrarTour = false
-            }
+    }
+
+    /// "Empezar" o "Saltar": queda visto y se vuelve a Inicio.
+    private func terminarTour() {
+        tourVisto = true
+        irDuranteElTour(.inicio)
+        if movimientoReducido {
+            mostrarTour = false
+        } else {
+            withAnimation(.easeOut(duration: TokensMovimiento.media)) { mostrarTour = false }
         }
+    }
+
+    /// El tour cambia la pestaña de verdad, detrás del velo. Con "Reducir
+    /// movimiento", sin la animación de la barra.
+    private func irDuranteElTour(_ destino: PestanaHome) {
+        guard movimientoReducido else { return estado.ir(a: destino) }
+        var sinAnimar = Transaction()
+        sinAnimar.disablesAnimations = true
+        withTransaction(sinAnimar) { estado.ir(a: destino) }
     }
 
     /// Al primer hueco del perfil. Si el que avisó fue el motor y el perfil todavía

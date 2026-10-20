@@ -312,7 +312,7 @@ public enum TokensTamano {
 /// Los alfa con los que el acento se deriva a sí mismo.
 ///
 /// 🛑 El VALOR del acento **no** está acá: vive en el catálogo de assets de la
-/// app (Assets.xcassets/Acento.colorset), para poder cambiarlo desde Xcode.
+/// app (Assets.xcassets/AccentColor.colorset), para poder cambiarlo desde Xcode.
 /// Estos son los alfa que Paleta le aplica encima, y salen de tokens.json para
 /// que Android e iOS deriven igual.
 public enum TokensAcento {
@@ -320,7 +320,7 @@ public enum TokensAcento {
     /// no está disponible (previews del paquete, tests fuera de la app).
     public static let respaldo = Color(.sRGB, red: 1.0000, green: 0.1373, blue: 0.6549, opacity: 1)
     /// El nombre del color en el catálogo de assets.
-    public static let nombreEnAssets = "Acento"
+    public static let nombreEnAssets = "AccentColor"
     public static let alfaApagado: Double = 0.35
     public static let alfaChipActivo: Double = 0.14
     public static let alfaSuaveBorde: Double = 0.25

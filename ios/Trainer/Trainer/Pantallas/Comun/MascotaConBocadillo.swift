@@ -5,15 +5,17 @@ import TrainerCore
 // La mascota de Stamina (el serval de remera negra) y su globito de diálogo.
 //
 // Tres poses, cada una para un momento:
-// - `saludo`: dar la bienvenida y explicar.
-// - `corriendo`: entrenamientos y progreso.
-// - `medalla`: logros y cierres.
+// - `saludo`: dar la bienvenida y explicar (animación `saludando`).
+// - `corriendo`: entrenamientos y progreso (`corriendo`).
+// - `medalla`: logros y cierres (`medalla`, una sola pasada que termina con la
+//   medalla en alto).
 //
-// Ronda 5: la mascota queda QUIETA en su lugar. Sólo entra una vez, con un
-// fundido y un leve crecimiento, cuando aparece (o cuando su página pasa a ser
-// la que se mira); nada de flotar ni de loops. Con "Reducir movimiento" ni
-// eso: aparece de una. Las imágenes sólo existen en el target del iPhone:
-// estas vistas no se usan en el reloj.
+// Ronda 6: la mascota se MUEVE (ver `MascotaAnimada`). Su lugar no cambia:
+// entra una vez, con un fundido y un leve crecimiento, cuando aparece (o cuando
+// su página pasa a ser la que se mira). Con "Reducir movimiento" no hay entrada
+// ni animación: queda el primer cuadro. Las animaciones (y las poses en PNG,
+// que quedan de respaldo) sólo existen en el target del iPhone: estas vistas
+// no se usan en el reloj.
 // =============================================================================
 
 enum PoseDeMascota {
@@ -21,6 +23,7 @@ enum PoseDeMascota {
     case corriendo
     case medalla
 
+    /// La pose quieta en PNG: el respaldo si la animación no se puede leer.
     var recurso: String {
         switch self {
         case .saludo: return "MascotaSaludo"
@@ -28,6 +31,18 @@ enum PoseDeMascota {
         case .medalla: return "MascotaMedalla"
         }
     }
+
+    /// La animación que la reemplaza.
+    var animacion: AnimacionDeMascota {
+        switch self {
+        case .saludo: return .saludando
+        case .corriendo: return .corriendo
+        case .medalla: return .medalla
+        }
+    }
+
+    /// La medalla se pasa una vez y queda en alto; las otras, en loop.
+    var repite: Bool { self != .medalla }
 
     /// Desde qué tamaño crece al entrar. Apenas: es una entrada, no un salto.
     fileprivate var escalaInicial: CGFloat {
@@ -56,9 +71,8 @@ struct Mascota: View {
     @State private var entro = false
 
     var body: some View {
-        Image(pose.recurso)
-            .resizable()
-            .scaledToFit()
+        // Sólo se reproduce la que se mira: las ocultas cargan un cuadro y nada más.
+        MascotaAnimada(pose.animacion, loop: pose.repite, alto: altoMaximo, reproducir: activa)
             .scaleEffect(x: espejada ? -1 : 1, y: 1)
             .scaleEffect(visible ? 1 : pose.escalaInicial, anchor: .bottom)
             .opacity(visible ? 1 : 0)

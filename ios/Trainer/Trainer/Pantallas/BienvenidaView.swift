@@ -139,8 +139,9 @@ struct BienvenidaView: View {
     }
 
     /// Las tres poses, una encima de la otra: la de la foto actual se ve,
-    /// quieta; las otras se funden. Al entrar, la nueva sube un poquito y
-    /// aparece (una sola vez: nada de loops, ver `Mascota`).
+    /// animada; las otras se funden y quedan en su primer cuadro (no cargan la
+    /// animación, ver `MascotaAnimada`). Al entrar, la nueva sube un poquito y
+    /// aparece.
     private var escenario: some View {
         ZStack {
             ForEach(Array(fotos.enumerated()), id: \.offset) { indice, foto in

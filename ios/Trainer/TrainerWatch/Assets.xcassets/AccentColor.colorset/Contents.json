@@ -1,5 +1,5 @@
 {
-  "colors" : [
+  "colors": [
     {
       "color": {
         "color-space": "srgb",
@@ -13,8 +13,8 @@
       "idiom": "universal"
     }
   ],
-  "info" : {
-    "author" : "xcode",
-    "version" : 1
+  "info": {
+    "author": "generar-tema.mjs",
+    "version": 1
   }
 }

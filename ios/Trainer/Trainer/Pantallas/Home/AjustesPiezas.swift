@@ -8,10 +8,14 @@ import TrainerCore
 // corta de filas (ícono + una o dos palabras + valor + chevron) y cada fila
 // abre su página. Ronda 5: la flecha y el título van fijos arriba, en una
 // línea, como una barra de navegación; abajo scrollea el contenido.
+// Ronda 6: la raíz se agrupa como Ajustes de iOS (`AjustesSeccion`: rótulo
+// gris en mayúsculas y la tarjeta abajo). Las piezas de las páginas que
+// editan el perfil están en `AjustesEdicionPiezas.swift`.
 // =============================================================================
 
 /// Las páginas que se abren desde la raíz de Ajustes.
 enum PaginaDeAjustes: String, Hashable {
+    case datosPersonales, entrenamiento
     case aspecto, notificaciones, unidades, objetivos
 }
 
@@ -129,6 +133,35 @@ struct AjustesIcono: View {
     }
 }
 
+/// Una sección como las de Ajustes de iOS: el rótulo chico en mayúsculas y
+/// gris arriba ("CUENTA", "AVISOS") y la tarjeta de filas abajo. Sin título,
+/// sólo la tarjeta (p.ej. Cerrar sesión, al final).
+struct AjustesSeccion<Contenido: View>: View {
+    private let titulo: String?
+    private let contenido: Contenido
+
+    init(_ titulo: String? = nil, @ViewBuilder contenido: () -> Contenido) {
+        self.titulo = titulo
+        self.contenido = contenido()
+    }
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: TokensEspaciado.e6) {
+            if let titulo {
+                Text(titulo)
+                    .estilo(.etiquetaSeccion, color: Paleta.textoTerciario)
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                    // Alineado con el ícono de las filas, como el de iOS.
+                    .padding(.leading, TokensEspaciado.e14)
+                    .accessibilityAddTraits(.isHeader)
+            }
+            AjustesTarjetaDeFilas { contenido }
+        }
+        // Entre secciones, más aire que entre filas: se leen como bloques.
+        .padding(.top, TokensEspaciado.e8)
+    }
+}
+
 /// Una tarjeta con filas una abajo de la otra, separadas por un divisor.
 struct AjustesTarjetaDeFilas<Contenido: View>: View {
     private let contenido: Contenido
@@ -205,6 +238,37 @@ struct AjustesFila: View {
         .accessibilityLabel(titulo)
         .accessibilityValue(valorAccesible ?? valor ?? "")
         .accessibilityAddTraits(.isButton)
+    }
+}
+
+/// Una fila que sólo informa (el correo, el deporte del MVP): sin chevron y
+/// sin botón, porque tocarla no hace nada.
+struct AjustesFilaDeDato: View {
+    let simbolo: String
+    let titulo: String
+    let valor: String
+
+    var body: some View {
+        HStack(spacing: TokensEspaciado.e12) {
+            AjustesIcono(simbolo: simbolo, tono: .neutro)
+            Text(titulo)
+                .estilo(.opcionTitulo, color: Paleta.textoPrimario)
+                .lineLimit(1)
+                .minimumScaleFactor(0.85)
+                .layoutPriority(1)
+            Spacer(minLength: TokensEspaciado.e8)
+            Text(valor)
+                .estilo(.cuerpoSecundario, color: Paleta.textoTerciario)
+                .lineLimit(1)
+                .truncationMode(.middle)
+        }
+        .padding(.horizontal, TokensEspaciado.e14)
+        .padding(.vertical, TokensEspaciado.e8)
+        .frame(maxWidth: .infinity)
+        .objetivoTactilAlto()
+        .accessibilityElement(children: .ignore)
+        .accessibilityLabel(titulo)
+        .accessibilityValue(valor)
     }
 }
 

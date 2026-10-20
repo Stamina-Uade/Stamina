@@ -53,12 +53,19 @@ public enum AcentoPersonalizado {
     /// La clave de `@AppStorage`. Vacía = el color de Stamina (rosa).
     public static let clave = "ajuste_color_acento"
 
-    /// Los colores de la paleta. Elegidos para que se lean sobre negro (≥ 3:1)
-    /// y para que no se confundan con el rojo de error.
+    /// Los colores de la paleta (11; con el libre de Ajustes, 12 círculos).
+    /// Elegidos para que se lean sobre negro (≥ 3:1) y para que no se confundan
+    /// con el rojo de error.
+    ///
+    /// Lavanda (ronda 6): el único hueco grande que quedaba era el de los
+    /// claros y suaves. Es el más lejano de todos los demás (ΔE76 ≥ 37, el más
+    /// cercano es Azul), lejísimos del rojo de error, y se lee 11:1 sobre negro.
+    /// Índigo y turquesa caían entre Violeta y Azul, y entre Cian y Menta.
     public static let opciones: [OpcionDeAcento] = [
         OpcionDeAcento(id: "rosa", nombre: String(localized: "settings.color.pink", defaultValue: "Rosa Stamina", bundle: .main, comment: "Nombre de un color de acento"), rojo: 1.0, verde: 0.137, azul: 0.655),
         OpcionDeAcento(id: "fucsia", nombre: String(localized: "settings.color.fuchsia", defaultValue: "Fucsia", bundle: .main, comment: "Nombre de un color de acento"), rojo: 0.851, verde: 0.275, azul: 0.937),
         OpcionDeAcento(id: "violeta", nombre: String(localized: "settings.color.violet", defaultValue: "Violeta", bundle: .main, comment: "Nombre de un color de acento"), rojo: 0.545, verde: 0.361, azul: 0.965),
+        OpcionDeAcento(id: "lavanda", nombre: String(localized: "settings.color.lavender", defaultValue: "Lavanda", bundle: .main, comment: "Nombre de un color de acento"), rojo: 0.769, verde: 0.710, azul: 0.992),
         OpcionDeAcento(id: "azul", nombre: String(localized: "settings.color.blue", defaultValue: "Azul", bundle: .main, comment: "Nombre de un color de acento"), rojo: 0.231, verde: 0.510, azul: 0.965),
         OpcionDeAcento(id: "cian", nombre: String(localized: "settings.color.cyan", defaultValue: "Cian", bundle: .main, comment: "Nombre de un color de acento"), rojo: 0.133, verde: 0.827, azul: 0.933),
         OpcionDeAcento(id: "menta", nombre: String(localized: "settings.color.mint", defaultValue: "Menta", bundle: .main, comment: "Nombre de un color de acento"), rojo: 0.204, verde: 0.827, azul: 0.600),

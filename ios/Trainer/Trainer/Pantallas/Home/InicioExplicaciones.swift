@@ -1,4 +1,5 @@
 import SwiftUI
+import UIKit
 import TrainerCore
 
 // Las hojas que explican la jerga de la tarjeta "Hoy": qué es una zona (Z1–Z5)
@@ -60,46 +61,114 @@ enum InicioTextos {
 // MARK: - La hoja
 
 /// El marco común: título, bajada, contenido y "Entendido".
+///
+/// La hoja mide exactamente lo que mide su contenido: se mide el alto ideal
+/// (dentro de un `ScrollView`, que no lo aprieta) y ese alto es el único detent.
+/// Hasta tenerlo medido se usa una estimación por tipo de hoja, para que no
+/// aparezca con un tamaño muy distinto y después salte. Si el contenido pasa del
+/// 85 % de la pantalla, la hoja va a `.large` y recién ahí se puede desplazar.
 struct HojaDeExplicacion: View {
     let explicacion: ExplicacionDeInicio
     @Environment(\.dismiss) private var cerrar
+    /// El alto ideal del contenido; `nil` hasta la primera medición.
+    @State private var altoMedido: CGFloat? = nil
 
     var body: some View {
         ScrollView {
-            VStack(alignment: .leading, spacing: TokensEspaciado.e16) {
-                switch explicacion {
-                case .zonas(let actual):
-                    encabezado(
-                        Textos.homeExplainerZonesTitle,
-                        bajada: Textos.homeExplainerZonesBody)
-                    ForEach(ZonaDeIntensidad.allCases, id: \.self) { zona in
-                        FilaDeZona(zona: zona, esLaDeHoy: zona == actual)
+            contenido
+                .background(
+                    GeometryReader { geo in
+                        Color.clear.preference(key: AltoDelContenidoDeLaHoja.self, value: geo.size.height)
                     }
-                case .avituallamiento(let a, let duracion):
-                    encabezado(
-                        Textos.homeExplainerWhatToBringToday,
-                        bajada: Textos.homeExplainerFuelingBody)
-                    if duracion > 0 {
-                        PildoraDeEstado(Textos.homeExplainerWorkoutMinutes(duracion),
-                                        simbolo: "clock", tono: .neutro)
-                    }
-                    ContenidoDelAvituallamiento(a: a)
-                }
-
-                BotonPrimario(Textos.commonGotIt) {
-                    Haptico.toque()
-                    cerrar()
-                }
-                .padding(.top, TokensEspaciado.e4)
+                )
+        }
+        .scrollDisabled(!desborda)
+        .onPreferenceChange(AltoDelContenidoDeLaHoja.self) { alto in
+            guard alto > 0 else { return }
+            let redondeado = alto.rounded(.up)
+            if abs(redondeado - (altoMedido ?? 0)) > 0.5 {
+                altoMedido = redondeado
             }
-            .padding(.horizontal, TokensEspaciado.e16)
-            .padding(.top, TokensEspaciado.e20)
-            .padding(.bottom, TokensEspaciado.e20)
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
         .background(Paleta.fondo)
-        .presentationDetents([.medium, .large])
+        .presentationDetents([desborda ? PresentationDetent.large : PresentationDetent.height(altoDelContenido)])
         .presentationDragIndicator(.visible)
+    }
+
+    private var contenido: some View {
+        VStack(alignment: .leading, spacing: TokensEspaciado.e16) {
+            switch explicacion {
+            case .zonas(let actual):
+                encabezado(
+                    Textos.homeExplainerZonesTitle,
+                    bajada: Textos.homeExplainerZonesBody)
+                ForEach(ZonaDeIntensidad.allCases, id: \.self) { zona in
+                    FilaDeZona(zona: zona, esLaDeHoy: zona == actual)
+                }
+            case .avituallamiento(let a, let duracion):
+                encabezado(
+                    Textos.homeExplainerWhatToBringToday,
+                    bajada: Textos.homeExplainerFuelingBody)
+                if duracion > 0 {
+                    PildoraDeEstado(Textos.homeExplainerWorkoutMinutes(duracion),
+                                    simbolo: "clock", tono: .neutro)
+                }
+                ContenidoDelAvituallamiento(a: a)
+            }
+
+            BotonPrimario(Textos.commonGotIt) {
+                Haptico.toque()
+                cerrar()
+            }
+            .padding(.top, TokensEspaciado.e4)
+        }
+        .padding(.horizontal, TokensEspaciado.e16)
+        .padding(.top, TokensEspaciado.e20)
+        .padding(.bottom, TokensEspaciado.e20)
+        .frame(maxWidth: .infinity, alignment: .leading)
+    }
+
+    // MARK: Alto de la hoja
+
+    /// Lo medido o, mientras tanto, la estimación.
+    private var altoDelContenido: CGFloat {
+        altoMedido ?? altoEstimado
+    }
+
+    /// Más del 85 % de la pantalla: la hoja se abre grande y se desplaza.
+    private var desborda: Bool {
+        altoDelContenido > altoDePantalla * 0.85
+    }
+
+    private var altoDePantalla: CGFloat {
+        let escena = UIApplication.shared.connectedScenes
+            .compactMap { $0 as? UIWindowScene }
+            .first
+        return escena?.screen.bounds.height ?? 800
+    }
+
+    /// Una cuenta gruesa con los tamaños de cada pieza (márgenes, encabezado,
+    /// filas, botón), sólo para el primer cuadro: después manda la medición.
+    private var altoEstimado: CGFloat {
+        let margenes = TokensEspaciado.e20 * 2
+        let encabezado: CGFloat = 96
+        let boton = TokensEspaciado.e52 + TokensEspaciado.e4
+        let separacion = TokensEspaciado.e16
+        switch explicacion {
+        case .zonas:
+            let filas = CGFloat(ZonaDeIntensidad.allCases.count)
+            return margenes + encabezado + filas * 92 + (filas + 1) * separacion + boton
+        case .avituallamiento(let a, let duracion):
+            var filas: CGFloat = 3
+            if a.sodioMg > 0 { filas += 1 }
+            if a.carbohidratosAntesG > 0 { filas += 1 }
+            if a.carbohidratosDespuesG > 0 || a.proteinaDespuesG > 0 { filas += 1 }
+            let pildora: CGFloat = duracion > 0 ? TokensEspaciado.e34 + separacion : 0
+            let cuerpo: CGFloat = filas * 88 + (filas - 1) * TokensEspaciado.e8
+            let marco: CGFloat = margenes + encabezado + pildora + 2 * separacion + boton
+            return marco + cuerpo
+        }
     }
 
     private func encabezado(_ titulo: String, bajada: String) -> some View {
@@ -157,17 +226,27 @@ private struct FilaDeZona: View {
         .accessibilityElement(children: .combine)
     }
 
-    /// Cinco rayitas: tantas llenas como el número de la zona.
+    /// Cinco rayitas como el ícono de señal: crecen de izquierda a derecha, todas
+    /// paradas sobre la misma base, y van llenas tantas como el número de la zona.
     private var medidor: some View {
-        HStack(spacing: TokensEspaciado.e2) {
+        let ancho = TokensEspaciado.e6
+        return HStack(alignment: .bottom, spacing: TokensEspaciado.e2) {
             ForEach(1...5, id: \.self) { nivel in
-                Capsule(style: .continuous)
+                RoundedRectangle(cornerRadius: ancho * 0.35, style: .continuous)
                     .fill(nivel <= zona.numero ? Paleta.acento : Paleta.superficieControl)
-                    .frame(width: TokensEspaciado.e6, height: TokensEspaciado.e4 + CGFloat(nivel) * TokensEspaciado.e2)
+                    .frame(width: ancho, height: TokensEspaciado.e4 + CGFloat(nivel) * TokensEspaciado.e3)
             }
         }
-        .frame(height: TokensEspaciado.e14, alignment: .bottom)
+        .frame(height: TokensEspaciado.e4 + 5 * TokensEspaciado.e3, alignment: .bottom)
         .accessibilityHidden(true)
+    }
+}
+
+/// El alto ideal del contenido de `HojaDeExplicacion`, medido desde adentro.
+private struct AltoDelContenidoDeLaHoja: PreferenceKey {
+    static let defaultValue: CGFloat = 0
+    static func reduce(value: inout CGFloat, nextValue: () -> CGFloat) {
+        value = max(value, nextValue())
     }
 }
 
