@@ -7197,6 +7197,30 @@
         }
       }
     },
+    "legal.health.title" : {
+      "comment" : "Title of the legal sheet showing the health notice.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Health notice"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Aviso de salud"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Avis de santé"
+          }
+        }
+      }
+    },
     "legal.loading" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -7401,6 +7425,78 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Recommencer depuis l'e-mail"
+          }
+        }
+      }
+    },
+    "legal.tab.health" : {
+      "comment" : "Tab in the legal sheet (health notice).",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Health"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Salud"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Santé"
+          }
+        }
+      }
+    },
+    "legal.tab.privacy" : {
+      "comment" : "Tab in the legal sheet.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Privacy"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Privacidad"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Confidentialité"
+          }
+        }
+      }
+    },
+    "legal.tab.terms" : {
+      "comment" : "Tab in the legal sheet.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Terms"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Términos"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Conditions"
           }
         }
       }
@@ -16432,19 +16528,19 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "By continuing you accept the terms and the privacy policy. We don't send marketing."
+            "value" : "By continuing you accept the terms and the privacy policy."
           }
         },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Al continuar aceptás los términos y la política de privacidad. No mandamos publicidad."
+            "value" : "Al continuar aceptás los términos y la política de privacidad."
           }
         },
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "En continuant, tu acceptes les conditions et la politique de confidentialité. Nous n'envoyons pas de publicité."
+            "value" : "En continuant, tu acceptes les conditions et la politique de confidentialité."
           }
         }
       }
@@ -16456,19 +16552,19 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "By continuing you accept the [Terms and Conditions](stamina-legal://terminos) and the [Privacy Policy](stamina-legal://privacidad). We don't send marketing."
+            "value" : "By continuing you accept the [Terms and Conditions](stamina-legal://terminos) and the [Privacy Policy](stamina-legal://privacidad)."
           }
         },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Al continuar aceptás los [Términos y condiciones](stamina-legal://terminos) y la [Política de privacidad](stamina-legal://privacidad). No mandamos publicidad."
+            "value" : "Al continuar aceptás los [Términos y condiciones](stamina-legal://terminos) y la [Política de privacidad](stamina-legal://privacidad)."
           }
         },
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "En continuant, tu acceptes les [Conditions générales](stamina-legal://terminos) et la [Politique de confidentialité](stamina-legal://privacidad). Nous n'envoyons pas de publicité."
+            "value" : "En continuant, tu acceptes les [Conditions générales](stamina-legal://terminos) et la [Politique de confidentialité](stamina-legal://privacidad)."
           }
         }
       }

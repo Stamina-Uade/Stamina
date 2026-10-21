@@ -94,29 +94,31 @@ struct LoginView: View {
                         }
                     }
                     .disabled(flujo.enCurso)
-
-                    // 2026-10-21: va DENTRO del scroll, debajo de Google y Apple, y
-                    // no pegado al pie. Pegado al pie subía con el teclado y se
-                    // chocaba con los botones de "Continuar con…".
-                    HStack(spacing: TokensEspaciado.e4) {
-                        Text(Textos.loginNoAccount)
-                            .estilo(.cuerpoSecundario, color: Paleta.textoTerciario)
-                        Button { flujo.ir(a: .regCorreo) } label: {
-                            Text(Textos.loginSignUp)
-                                .estilo(.cuerpoSecundario, color: Paleta.acento)
-                                .padding(.vertical, TokensEspaciado.e4)
-                                .contentShape(Rectangle())
-                        }
-                        .buttonStyle(.plain)
-                    }
-                    .frame(maxWidth: .infinity, alignment: .center)
-                    .padding(.top, TokensEspaciado.e8)
                 }
                 .padding(.horizontal, TokensEspaciado.e22)
                 .padding(.top, TokensEspaciado.e12)
-                .padding(.bottom, TokensEspaciado.e34)
+                .padding(.bottom, TokensEspaciado.e20)
             }
             .scrollDismissesKeyboardCompat()
+
+            // 2026-10-21 (Iván): "¿No tenés cuenta? Registrate" va en el pie, como
+            // la nota legal del alta: queda fuera del scroll y sube con el teclado.
+            // El scroll se achica en vez de quedar tapado, así que no se choca con
+            // los botones de Google y Apple.
+            PieDePaso {
+                HStack(spacing: TokensEspaciado.e4) {
+                    Text(Textos.loginNoAccount)
+                        .estilo(.cuerpoSecundario, color: Paleta.textoTerciario)
+                    Button { flujo.ir(a: .regCorreo) } label: {
+                        Text(Textos.loginSignUp)
+                            .estilo(.cuerpoSecundario, color: Paleta.acento)
+                            .padding(.vertical, TokensEspaciado.e4)
+                            .contentShape(Rectangle())
+                    }
+                    .buttonStyle(.plain)
+                }
+                .frame(maxWidth: .infinity, alignment: .center)
+            }
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
         .background(Paleta.fondo)

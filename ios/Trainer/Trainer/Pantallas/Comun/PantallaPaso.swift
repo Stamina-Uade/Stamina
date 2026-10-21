@@ -84,7 +84,7 @@ struct PantallaPaso<Contenido: View, Pie: View>: View {
 /// El pie fijo de los andamios: la cápsula primaria y lo que la acompaña, con un
 /// fundido arriba para que el contenido que scrollea se pierda debajo en vez de
 /// cortarse en seco.
-private struct PieDePaso<Contenido: View>: View {
+struct PieDePaso<Contenido: View>: View {
     private let contenido: Contenido
 
     init(@ViewBuilder _ contenido: () -> Contenido) {

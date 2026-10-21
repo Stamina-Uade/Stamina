@@ -9,7 +9,7 @@
 // números y unidades se formatean con el locale del sistema. Esto resuelve lo
 // primero; lo segundo es de quien presenta el dato.
 //
-// 882 claves · idioma de autoría: en
+// 886 claves · idioma de autoría: en
 // =============================================================================
 
 import Foundation
@@ -987,6 +987,9 @@ enum Textos {
     /// I already have an account, sign in
     static var legalGoToLogin: String { String(localized: "legal.go_to_login") }
 
+    /// Health notice
+    static var legalHealthTitle: String { String(localized: "legal.health.title") }
+
     /// We're fetching the health notice from the server.
     static var legalLoading: String { String(localized: "legal.loading") }
 
@@ -1013,6 +1016,15 @@ enum Textos {
 
     /// Start again from the email
     static var legalStartOver: String { String(localized: "legal.start_over") }
+
+    /// Health
+    static var legalTabHealth: String { String(localized: "legal.tab.health") }
+
+    /// Privacy
+    static var legalTabPrivacy: String { String(localized: "legal.tab.privacy") }
+
+    /// Terms
+    static var legalTabTerms: String { String(localized: "legal.tab.terms") }
 
     /// Terms and Conditions
     static var legalTermsTitle: String { String(localized: "legal.terms.title") }
@@ -2258,7 +2270,7 @@ enum Textos {
     /// That email doesn't look valid — check it has an @ and a domain.
     static var signupEmailInvalid: String { String(localized: "signup.email.invalid") }
 
-    /// By continuing you accept the terms and the privacy policy. We don't send marketing.
+    /// By continuing you accept the terms and the privacy policy.
     static var signupEmailLegal: String { String(localized: "signup.email.legal") }
 
     /// By continuing you accept the [Terms and Conditions](stamina-legal://terminos) and the [Privacy Policy](stamina

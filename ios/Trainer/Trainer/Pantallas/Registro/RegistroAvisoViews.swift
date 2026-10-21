@@ -161,8 +161,8 @@ struct SeccionesLegales: View {
 // MARK: - Términos y privacidad, desde el pie del registro
 
 /// Qué texto legal se abre desde un enlace.
-enum DocumentoLegal: String, Identifiable {
-    case terminos, privacidad
+enum DocumentoLegal: String, Identifiable, CaseIterable {
+    case terminos, privacidad, salud
     var id: String { rawValue }
 
     /// Los enlaces del catálogo son `stamina-legal://terminos` y
@@ -173,6 +173,24 @@ enum DocumentoLegal: String, Identifiable {
         guard url.scheme == Self.esquema, let host = url.host,
               let documento = DocumentoLegal(rawValue: host) else { return nil }
         self = documento
+    }
+
+    /// El nombre corto de la pestaña.
+    var pestana: String {
+        switch self {
+        case .terminos: return Textos.legalTabTerms
+        case .privacidad: return Textos.legalTabPrivacy
+        case .salud: return Textos.legalTabHealth
+        }
+    }
+
+    /// El título mientras el texto no llegó del servidor.
+    var tituloDeRespaldo: String {
+        switch self {
+        case .terminos: return Textos.legalTermsTitle
+        case .privacidad: return Textos.legalPrivacyTitle
+        case .salud: return Textos.legalHealthTitle
+        }
     }
 }
 
@@ -215,65 +233,155 @@ struct TextoConEnlacesLegales: View {
     }
 }
 
-/// Los términos o la política de privacidad completos, en una hoja que se cierra
-/// y vuelve al registro tal como estaba. Bajan de `GET /legal`, en el idioma del
-/// teléfono.
+/// Los textos legales en una hoja, con el diseño de la app (2026-10-21, Iván):
+/// el fondo con el halo del acento, una X a la izquierda para cerrar, y pestañas
+/// para pasar de términos a privacidad o al aviso de salud sin cerrar y volver a
+/// abrir. Bajan de `GET /legal`, en el idioma del teléfono.
 struct HojaLegal: View {
     @EnvironmentObject private var flujo: FlujoEntrada
     @Environment(\.dismiss) private var cerrar
-    let documento: DocumentoLegal
+    @Environment(\.accessibilityReduceMotion) private var reducirMovimiento
+    @State private var elegido: DocumentoLegal
 
-    private var bloque: BloqueLegal? {
+    init(documento: DocumentoLegal) {
+        _elegido = State(initialValue: documento)
+    }
+
+    private func bloque(_ documento: DocumentoLegal) -> BloqueLegal? {
         switch documento {
         case .terminos: return flujo.legales?.terms
         case .privacidad: return flujo.legales?.privacy
+        case .salud: return flujo.legales?.healthNotice
         }
-    }
-
-    private var tituloDeRespaldo: String {
-        documento == .terminos ? Textos.legalTermsTitle : Textos.legalPrivacyTitle
     }
 
     var body: some View {
-        NavigationStack {
-            ScrollView {
-                VStack(alignment: .leading, spacing: TokensEspaciado.e16) {
-                    if let bloque {
-                        Text(bloque.title)
-                            .estilo(.tituloPantalla)
-                            .fixedSize(horizontal: false, vertical: true)
-                            .accessibilityAddTraits(.isHeader)
-                        Text(bloque.summary)
-                            .estilo(.cuerpo, color: Paleta.textoSecundario)
-                            .fixedSize(horizontal: false, vertical: true)
-                        SeccionesLegales(secciones: bloque.sections, enTarjetas: false)
-                    } else if flujo.falloLegales || flujo.legales != nil {
-                        // Falló la carga, o el servidor es anterior a la 1.4.0 y no
-                        // manda la privacidad.
-                        Text(Textos.legalNoText)
-                            .estilo(.cuerpo, color: Paleta.textoSecundario)
-                        BotonTexto(Textos.legalRetry) { Task { await flujo.cargarLegales() } }
-                    } else {
-                        HStack(spacing: TokensEspaciado.e8) {
-                            ProgressView()
-                            Text(Textos.legalLoading)
-                                .estilo(.cuerpo, color: Paleta.textoSecundario)
-                        }
-                    }
-                }
-                .frame(maxWidth: .infinity, alignment: .leading)
-                .padding(TokensEspaciado.e20)
+        VStack(alignment: .leading, spacing: 0) {
+            HStack {
+                BotonCerrarHoja { cerrar() }
+                Spacer()
             }
-            .background(Paleta.fondo.ignoresSafeArea())
-            .navigationTitle(tituloDeRespaldo)
-            .navigationBarTitleDisplayMode(.inline)
-            .toolbar {
-                ToolbarItem(placement: .confirmationAction) {
-                    Button(Textos.commonClose) { cerrar() }
-                        .foregroundStyle(Paleta.enlace)
+            .padding(.horizontal, TokensEspaciado.e16)
+            .padding(.top, TokensEspaciado.e16)
+
+            pestanas
+                .padding(.horizontal, TokensEspaciado.e20)
+                .padding(.top, TokensEspaciado.e12)
+                .padding(.bottom, TokensEspaciado.e8)
+
+            ScrollViewReader { proxy in
+                ScrollView {
+                    contenido
+                        .id("arriba")
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                        .padding(.horizontal, TokensEspaciado.e20)
+                        .padding(.top, TokensEspaciado.e12)
+                        .padding(.bottom, TokensEspaciado.e34)
+                }
+                // Al cambiar de pestaña se empieza a leer desde arriba.
+                .onChange(of: elegido) { _ in proxy.scrollTo("arriba", anchor: .top) }
+            }
+        }
+        .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
+        .background(
+            ZStack {
+                Paleta.fondo
+                RadialGradient(colors: [Paleta.acentoProfundo, Color.clear],
+                               center: .topLeading, startRadius: 0,
+                               endRadius: TokensEspaciado.e56 * 4)
+            }
+            .ignoresSafeArea()
+            .accessibilityHidden(true)
+        )
+        .presentationDragIndicator(.visible)
+        .task { await flujo.cargarLegalesSiFaltan() }
+    }
+
+    /// Las pestañas: la misma cápsula segmentada de Ajustes › Unidades.
+    private var pestanas: some View {
+        HStack(spacing: TokensEspaciado.e4) {
+            ForEach(DocumentoLegal.allCases) { documento in
+                let esElegido = documento == elegido
+                Button {
+                    Haptico.seleccion()
+                    withAnimation(reducirMovimiento ? nil : .easeOut(duration: TokensMovimiento.rapida)) {
+                        elegido = documento
+                    }
+                } label: {
+                    Text(documento.pestana)
+                        .estilo(.opcionTitulo, color: esElegido ? Paleta.sobreAcento : Paleta.textoSecundario)
+                        .lineLimit(1)
+                        .minimumScaleFactor(0.8)
+                        .frame(maxWidth: .infinity)
+                        .frame(minHeight: TokensTamano.objetivoTactilMinimo)
+                        .background(
+                            RoundedRectangle(cornerRadius: TokensRadio.boton, style: .continuous)
+                                .fill(esElegido ? Paleta.acento : Color.clear)
+                        )
+                        .contentShape(Rectangle())
+                }
+                .buttonStyle(EstiloPresionado())
+                .accessibilityAddTraits(esElegido ? [.isSelected] : [])
+            }
+        }
+        .padding(TokensEspaciado.e4)
+        .background(Paleta.superficieHundida)
+        .clipShape(RoundedRectangle(cornerRadius: TokensRadio.boton + TokensEspaciado.e4, style: .continuous))
+        .overlay(
+            RoundedRectangle(cornerRadius: TokensRadio.boton + TokensEspaciado.e4, style: .continuous)
+                .strokeBorder(Paleta.bordeSuperficie, lineWidth: TokensEspaciado.e1)
+        )
+    }
+
+    @ViewBuilder
+    private var contenido: some View {
+        VStack(alignment: .leading, spacing: TokensEspaciado.e16) {
+            if let bloque = bloque(elegido) {
+                Text(bloque.title)
+                    .estilo(.tituloPantalla)
+                    .fixedSize(horizontal: false, vertical: true)
+                    .accessibilityAddTraits(.isHeader)
+                Text(bloque.summary)
+                    .estilo(.cuerpo, color: Paleta.textoSecundario)
+                    .fixedSize(horizontal: false, vertical: true)
+                SeccionesLegales(secciones: bloque.sections, enTarjetas: true)
+            } else if flujo.falloLegales || flujo.legales != nil {
+                // Falló la carga, o el servidor es anterior a la 1.4.0 y no manda
+                // la privacidad.
+                Text(elegido.tituloDeRespaldo)
+                    .estilo(.tituloPantalla)
+                    .accessibilityAddTraits(.isHeader)
+                Text(Textos.legalNoText)
+                    .estilo(.cuerpo, color: Paleta.textoSecundario)
+                    .fixedSize(horizontal: false, vertical: true)
+                BotonTexto(Textos.legalRetry) { Task { await flujo.cargarLegales() } }
+            } else {
+                HStack(spacing: TokensEspaciado.e8) {
+                    ProgressView().tint(Paleta.acento)
+                    Text(Textos.legalLoading)
+                        .estilo(.cuerpo, color: Paleta.textoSecundario)
                 }
             }
         }
-        .task { await flujo.cargarLegalesSiFaltan() }
+    }
+}
+
+/// La X de una hoja: el mismo círculo que la flecha de volver, a la izquierda.
+struct BotonCerrarHoja: View {
+    let accion: () -> Void
+
+    var body: some View {
+        Button(action: accion) {
+            Image(systemName: "xmark")
+                .font(.system(size: TokensTipografia.labelCampoTamano, weight: .bold))
+                .foregroundStyle(Paleta.textoPrimario)
+                .frame(width: TokensTamano.botonCircularCalendario + TokensEspaciado.e4,
+                       height: TokensTamano.botonCircularCalendario + TokensEspaciado.e4)
+                .background(Paleta.superficieAlterna)
+                .clipShape(Circle())
+                .overlay(Circle().strokeBorder(Paleta.bordeSuperficie, lineWidth: TokensEspaciado.e1))
+                .objetivoTactil()
+        }
+        .accessibilityLabel(Textos.commonClose)
     }
 }

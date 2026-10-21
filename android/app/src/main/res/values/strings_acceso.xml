@@ -66,7 +66,7 @@
 
     <string name="reg_correo_titulo">Empecemos por tu correo</string>
     <string name="reg_correo_cuerpo">Lo validamos antes de pedirte cualquier otro dato, así no completás todo el registro para descubrir al final que había un error de tipeo. Es también la dirección con la que vas a recuperar tu plan si cambiás de teléfono.</string>
-    <string name="reg_correo_legal">Al continuar aceptás los términos y la política de privacidad. No mandamos publicidad.</string>
+    <string name="reg_correo_legal">Al continuar aceptás los términos y la política de privacidad.</string>
     <string name="reg_correo_enviar">Enviarme el código</string>
     <string name="reg_correo_mal">Falta el arroba o el dominio.</string>
 
