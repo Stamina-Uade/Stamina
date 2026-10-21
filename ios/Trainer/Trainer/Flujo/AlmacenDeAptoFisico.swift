@@ -1,6 +1,8 @@
 import Foundation
 import Combine
-import UserNotifications
+// UserNotifications todavía no marca sus tipos como Sendable: sin esto, pasar el
+// centro y el pedido al callback de requestAuthorization da advertencias de Swift 6.
+@preconcurrency import UserNotifications
 import TrainerCore
 
 // =============================================================================

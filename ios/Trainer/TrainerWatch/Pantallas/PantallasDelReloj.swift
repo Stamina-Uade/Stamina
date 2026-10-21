@@ -729,10 +729,10 @@ struct CarruselEntrenamientoRelojView: View {
         .onAppear {
             actualizarPaginaSegunEstado()
         }
-        .onChange(of: estado.pantalla) { _ in
+        .onChange(of: estado.pantalla) {
             actualizarPaginaSegunEstado()
         }
-        .onChange(of: paginaHorizontal) { nuevaPagina in
+        .onChange(of: paginaHorizontal) { _, nuevaPagina in
             if nuevaPagina == 0 {
                 if estado.pantalla != .controles {
                     estado.ir(a: .controles)
@@ -820,7 +820,7 @@ struct MetricasContenedorVerticalView: View {
                     }
                 }
         )
-        .onChange(of: estado.pantalla) { nuevaPantalla in
+        .onChange(of: estado.pantalla) { _, nuevaPantalla in
             // Si la pantalla cambió por toque de botón u otra vía externa:
             if radioBlur == 0 && (nuevaPantalla == .metricas || nuevaPantalla == .mapa || nuevaPantalla == .parciales) {
                 radioBlur = 14
@@ -1571,7 +1571,7 @@ struct MapaModernoView: View {
                     }
                     #endif
                 }
-                .onChange(of: ubicacionActual?.latitude) { _ in
+                .onChange(of: ubicacionActual?.latitude) {
                     #if os(watchOS)
                     if let act = ubicacionActual, CLLocationCoordinate2DIsValid(act) {
                         withAnimation(.easeInOut(duration: 0.8)) {
