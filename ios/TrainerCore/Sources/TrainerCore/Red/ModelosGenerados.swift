@@ -3,7 +3,7 @@
 // NO EDITAR A MANO: se reescribe en cada `npm run generar:modelos`, y el CI
 // falla si el archivo commiteado no coincide con lo que el generador produce.
 //
-// Contrato 1.4.0
+// Contrato 1.5.0
 //
 // AGENTS.md §4.2: los modelos de red se generan desde el contrato, no se
 // escriben a mano. AGENTS.md §5: a partir de la primera versión en tienda,
@@ -374,47 +374,6 @@ public struct PlanDeObjetivo: Codable, Equatable, Sendable {
     ) {
         self.goalId = goalId
         self.plan = plan
-    }
-}
-
-public struct PronosticoDeCalor: Codable, Equatable, Sendable {
-    /// MET Norway
-    public let source: String
-    public let sourceUrl: String
-    public let hours: [HoraDePronostico]
-
-    enum CodingKeys: String, CodingKey {
-        case source
-        case sourceUrl = "source_url"
-        case hours
-    }
-
-    public init(
-        source: String,
-        sourceUrl: String,
-        hours: [HoraDePronostico]
-    ) {
-        self.source = source
-        self.sourceUrl = sourceUrl
-        self.hours = hours
-    }
-}
-
-public struct HoraDePronostico: Codable, Equatable, Sendable {
-    public let atMs: Int64
-    public let airTemperatureC: Double
-
-    enum CodingKeys: String, CodingKey {
-        case atMs = "at_ms"
-        case airTemperatureC = "air_temperature_c"
-    }
-
-    public init(
-        atMs: Int64,
-        airTemperatureC: Double
-    ) {
-        self.atMs = atMs
-        self.airTemperatureC = airTemperatureC
     }
 }
 

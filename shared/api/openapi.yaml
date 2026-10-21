@@ -16,7 +16,7 @@ openapi: 3.1.0
 
 info:
   title: Trainer API
-  version: 1.4.0
+  version: 1.5.0
   license:
     name: >-
       COMPLETAR. El repositorio es privado y la licencia del proyecto no está
@@ -41,6 +41,9 @@ info:
     `POST /auth/register/complete`, `social_token` como alternativa a `password`
     (va una de las dos). Aditivo para los clientes: el cuerpo de siempre, con
     `password`, sigue valiendo igual.
+    La 1.5.0 quita `POST /weather/forecast`, el pronóstico de MET Norway que
+    estaba obsoleto: la app de iPhone usa WeatherKit en el dispositivo, la de
+    Android consulta el clima por su cuenta, y ningún cliente lo llamaba.
 
     **Reglas que valen en TODA la API** (docs/API.md las explica):
 
@@ -939,42 +942,6 @@ paths:
                     items: { $ref: '#/components/schemas/PlanDeObjetivo' }
         '401': { $ref: '#/components/responses/NoAutorizado' }
 
-  /weather/forecast:
-    post:
-      tags: [plan]
-      operationId: forecastWeather
-      summary: Pronóstico horario para avisos de calor
-      deprecated: true
-      description: >-
-        Obsoleta: la app iOS usa WeatherKit en el dispositivo y ya no la llama.
-        Queda para las versiones viejas de la app; no agregar clientes nuevos.
-        El servidor reduce las coordenadas a décimas de grado antes de consultar
-        MET Norway y cachea la respuesta. No guarda la ubicación de la persona.
-        El pronóstico es informativo y debe citar la fuente.
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              type: object
-              required: [lat, lon]
-              additionalProperties: false
-              properties:
-                lat: { type: number, minimum: -90, maximum: 90 }
-                lon: { type: number, minimum: -180, maximum: 180 }
-      responses:
-        '200':
-          description: Temperaturas pronosticadas para las próximas 48 horas.
-          content:
-            application/json:
-              schema:
-                type: object
-                required: [data]
-                properties:
-                  data: { $ref: '#/components/schemas/PronosticoDeCalor' }
-        '401': { $ref: '#/components/responses/NoAutorizado' }
-        '503': { $ref: '#/components/responses/ServicioNoDisponible' }
-
   /plan/routine:
     get:
       tags: [plan]
@@ -1650,23 +1617,6 @@ components:
       properties:
         goal_id: { type: string }
         plan: { $ref: '#/components/schemas/Plan' }
-
-    PronosticoDeCalor:
-      type: object
-      required: [source, source_url, hours]
-      properties:
-        source: { type: string, description: 'MET Norway' }
-        source_url: { type: string, format: uri }
-        hours:
-          type: array
-          items: { $ref: '#/components/schemas/HoraDePronostico' }
-
-    HoraDePronostico:
-      type: object
-      required: [at_ms, air_temperature_c]
-      properties:
-        at_ms: { $ref: '#/components/schemas/EpochMs' }
-        air_temperature_c: { type: number }
 
     DiaEntrenamiento:
       type: object

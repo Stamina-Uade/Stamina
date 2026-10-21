@@ -176,7 +176,7 @@ target Trainer, agregar **HealthKit** si Xcode lo pide.
   `FondosDeTarjeta` rota 20 fotos por disciplina sin repetir en 20 días (Inicio y Plan con fotos distintas).
   Prompts para generar las 60 en `docs/PROMPTS-FONDOS.md`; se agregan como `FondoRunning01…20` en Assets.
 - **Clima nativo:** WeatherKit en el teléfono (aviso de calor en la hora real del entreno). La app ya no llama a
-  `/weather/forecast` (queda deprecado en el backend para versiones viejas). Atribución de Apple Weather en
+  `/weather/forecast`, y el backend lo quitó en el contrato 1.5.0. Atribución de Apple Weather en
   Notificaciones. **Pasos manuales en el portal:** activar WeatherKit en el App ID (Capabilities y App Services) y
   en Xcode → Signing & Capabilities; tarda ~30 min.
 - **Pasos desde Apple Salud:** al abrir la app se leen los últimos 30 días de HealthKit (iPhone + reloj, sin

@@ -463,7 +463,11 @@ describe("perfil", { skip: SIN_SERVICIOS }, () => {
     assert.equal(r.json.data.sport, "running");
     const texto = JSON.stringify(r.json);
     assert.ok(!texto.includes("argon2"), "se filtró el hash de la contraseña");
-    assert.ok(!texto.includes("password"), "se filtró algo de contraseña");
+    // (1.4.0) `has_password` es el único campo que puede nombrar la contraseña: dice si
+    // hay una, nunca cuál.
+    assert.equal(r.json.data.has_password, true);
+    const deContrasena = Object.keys(r.json.data).filter((k) => k.includes("password") && k !== "has_password");
+    assert.deepEqual(deContrasena, [], "se filtró algo de contraseña");
   });
 
   test("PATCH /v1/me es parcial: no borra lo que no se manda", async () => {
@@ -482,6 +486,20 @@ describe("perfil", { skip: SIN_SERVICIOS }, () => {
     assert.equal(r.json.data.pregnant_or_breastfeeding, false);
     const vacio = await pedir("PATCH", "/v1/me", { equipment: null }, sesion.access_token);
     assert.equal(vacio.json.data.equipment, undefined, "null vacía el campo y el campo vacío se omite");
+  });
+
+  test("🛑 un null del contrato llega null a la base: la validación no lo convierte en 0 ni en false", async () => {
+    const { sesion } = await registrar(nuevoEmail(), perfilCompleto({ pregnant_or_breastfeeding: true }));
+    const r = await pedir("PATCH", "/v1/me", { goal_date_ms: null, pregnant_or_breastfeeding: null }, sesion.access_token);
+    assert.equal(r.status, 200, JSON.stringify(r.json));
+    assert.equal(r.json.data.goal_date_ms, null, "sin fecha no es una carrera el 1 de enero de 1970");
+    // «No respondió» no es «no»: sin esta respuesta no hay objetivos calóricos (AGENTS.md §9.2).
+    assert.equal(r.json.data.pregnant_or_breastfeeding, undefined);
+    const fila = await db.unaFila<{ fecha: number | null; embarazo: boolean | null }>(
+      `select objetivo_fecha_ms as fecha, embarazo_o_lactancia as embarazo from perfiles where usuario_id = $1`,
+      [sesion.user_id]
+    );
+    assert.deepEqual(fila, { fecha: null, embarazo: null });
   });
 
   test("PATCH /v1/me valida contra el contrato: un peso imposible se rechaza", async () => {
@@ -525,8 +543,10 @@ describe("topes y rate limit", { skip: SIN_SERVICIOS }, () => {
       }
     }
     assert.ok(corto > 0, "el rate limit nunca cortó");
+    // El correo no tiene cuenta: desde el 2026-10-21 eso es `user_not_found`, no un 401.
     const otra = await pedir("POST", "/v1/auth/login", { email, password: "clave-mala-larga-1" }, undefined, "203.0.113.8");
-    assert.equal(otra.status, 401, "otra IP no puede estar limitada por el bucket de la primera");
+    assert.equal(otra.status, 404, "otra IP no puede estar limitada por el bucket de la primera");
+    assert.equal(otra.json.error.code, "user_not_found");
   });
 });
 
@@ -627,13 +647,6 @@ describe("catálogo", { skip: SIN_SERVICIOS }, () => {
 });
 
 describe("plan", { skip: SIN_SERVICIOS }, () => {
-  test("el pronóstico exige sesión y coordenadas válidas", async () => {
-    const sinSesion = await pedir("POST", "/v1/weather/forecast", { lat: -34.6, lon: -58.4 });
-    assert.equal(sinSesion.status, 401);
-    const { sesion } = await registrar();
-    const invalida = await pedir("POST", "/v1/weather/forecast", { lat: 120, lon: -58.4 }, sesion.access_token);
-    assert.equal(invalida.status, 400);
-  });
   test("dos objetivos generan planes independientes y quitarlos no borra el historial", async () => {
     const { sesion } = await registrar(nuevoEmail(), perfilCompleto());
     const token = sesion.access_token;
@@ -1112,7 +1125,10 @@ describe("cuenta: exportar y borrar (§8)", { skip: SIN_SERVICIOS }, () => {
     assert.equal(restos?.total, 0, "la cuenta y sus datos se borran físicamente en cascada");
     const me = await pedir("GET", "/v1/me", undefined, sesion.access_token);
     assert.equal(me.status, 401);
-    assert.equal((await pedir("POST", "/v1/auth/login", { email, password: PASSWORD })).status, 401);
+    // La cuenta ya no existe: el login contesta lo mismo que para un correo que nunca se registró.
+    const login = await pedir("POST", "/v1/auth/login", { email, password: PASSWORD });
+    assert.equal(login.status, 404);
+    assert.equal(login.json.error.code, "user_not_found");
     assert.equal((await pedir("POST", "/v1/auth/refresh", { refresh_token: sesion.refresh_token })).status, 401);
 
     // El correo quedó libre: la cuenta vieja no existe para ninguna lectura.

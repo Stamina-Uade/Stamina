@@ -3,7 +3,7 @@
 // NO EDITAR A MANO: se reescribe con `npm run generar:modelos` y el CI falla si
 // lo commiteado no coincide.
 //
-// contrato: Trainer API v1.4.0
+// contrato: Trainer API v1.5.0
 //
 // AGENTS.md §5: el JSON va en snake_case, los tiempos son enteros de milisegundos
 // desde epoch y todo viaja en un sobre {"data": …} o {"error": {…}}. Los nombres
@@ -240,25 +240,6 @@ data class PlanDeObjetivo(
     @SerialName("goal_id")
     val goalId: String,
     val plan: Plan,
-)
-
-/** PronosticoDeCalor */
-@Serializable
-data class PronosticoDeCalor(
-    /** MET Norway */
-    val source: String,
-    @SerialName("source_url")
-    val sourceUrl: String,
-    val hours: List<HoraDePronostico>,
-)
-
-/** HoraDePronostico */
-@Serializable
-data class HoraDePronostico(
-    @SerialName("at_ms")
-    val atMs: Long,
-    @SerialName("air_temperature_c")
-    val airTemperatureC: Double,
 )
 
 /** DiaEntrenamiento */

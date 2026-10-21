@@ -352,13 +352,6 @@
           <div class="tablas"><span class="tabla">ejercicios</span><span class="tabla">diccionario_ejercicios</span></div>
         </div>
 
-        <div class="dom" id="d-clima">
-          <div class="cab"><h5>Clima</h5><span class="badge jwt">JWT</span></div>
-          <div class="ep"><span class="m w">POST</span>/weather/forecast</div>
-          <div class="desc">Redondea la ubicación a 0,1° (unos 11 km) y le pide la temperatura de las próximas 48 h a MET Norway. Caché en memoria (128 celdas) y 6 pedidos/min.</div>
-          <div class="tablas"><span class="tabla x">api.met.no</span></div>
-        </div>
-
         <div class="dom" id="d-ver">
           <div class="cab"><h5>Versión</h5><span class="badge pub">PÚBLICO</span></div>
           <div class="ep"><span class="m">GET</span>/version?platform=&amp;build=</div>
@@ -414,9 +407,7 @@
         <h3><span class="icono"><svg viewBox="0 0 24 24"><path d="M7 17a4 4 0 010-8 5 5 0 019.6-1.5A3.5 3.5 0 0117 17H7z"/></svg></span>Servicios externos</h3>
         <div class="ext">
           <div class="e" id="x-aws"><b>AWS Secrets Manager</b><span>Una vez, al arrancar, con el rol del EC2: <span class="mono">DATABASE_URL</span>, <span class="mono">REDIS_URL</span>, <span class="mono">JWT_SECRET</span>, <span class="mono">SMTP_*</span></span></div>
-          <div class="e" id="x-smtp"><b>SMTP (nodemailer)</b><span>TLS 1.2 o más: códigos de alta y de recuperación, y el aviso de “alguien intentó registrarse”</span></div>
-          <div class="e" id="x-met"><b>MET Norway · api.met.no</b><span>Pronóstico por hora; respeta <span class="mono">Expires</span> y <span class="mono">If‑Modified‑Since</span></span></div>
-        </div>
+          <div class="e" id="x-smtp"><b>SMTP (nodemailer)</b><span>TLS 1.2 o más: códigos de alta y de recuperación, y el aviso de “alguien intentó registrarse”</span></div>        </div>
       </div>
 
     </div>
@@ -509,7 +500,7 @@
     <div class="hall"><div class="sev">MEDIA</div><b>Las bajas lógicas nunca se purgan</b><span>Las actividades (con pulso) y las comidas borradas quedan para siempre. Además, la unidad de purga describe una tarea que ya no existe.</span><span class="ref">cuenta/purgar.ts:349 · trainer-purgar.service:3</span></div>
     <div class="hall"><div class="sev m">BAJA</div><b>Si falla el SMTP, se puede saber si la cuenta existe</b><span>El aviso a una cuenta existente no se captura: da 500, mientras que la rama nueva da 503.</span><span class="ref">auth/servicio.ts:180 vs 115-119</span></div>
     <div class="hall"><div class="sev m">BAJA</div><b><code>GET /plan</code> escribe, y <code>/plans</code> calcula en serie</b><span>Un GET puede crear el ancla; <code>/plans</code> recalcula un plan completo por cada objetivo.</span><span class="ref">plan/servicio.ts:116 · plan/rutas.ts:129</span></div>
-    <div class="hall"><div class="sev m">BAJA</div><b>El avituallamiento no usa el clima</b><span>El motor siempre usa 22 °C, aunque existe <code>/weather/forecast</code>. Las constantes están marcadas como “sin verificar” y bloquean el arranque en producción.</span><span class="ref">motor/generador.ts:458,510 · tipos.ts:199</span></div>
+    <div class="hall"><div class="sev m">BAJA</div><b>El avituallamiento no usa el clima</b><span>El motor siempre usa 22 °C: el servidor no conoce el clima del lugar. Las constantes están marcadas como “sin verificar” y bloquean el arranque en producción.</span><span class="ref">motor/generador.ts:458,510 · tipos.ts:199</span></div>
     <div class="hall"><div class="sev m">BAJA</div><b>Código muerto peligroso</b><span><code>verificarPasoDeCorreo</code> acepta cualquier token sin “.”. Hoy nadie lo llama; conviene borrarlo.</span><span class="ref">infra/cripto.ts:182</span></div>
   </div>
 </section>
@@ -568,7 +559,7 @@
     const reloj = caja('c-reloj'), iphone = caja('c-iphone'), android = caja('c-android'), web = caja('c-web');
     const e1 = caja('e1'), e7 = caja('e7'), e2 = caja('e2');
     const serv = caja('servidor'), pg = caja('pg'), redis = caja('redis'), ext = caja('externos');
-    const met = caja('x-met'), aws = caja('x-aws'), smtp = caja('x-smtp');
+    const aws = caja('x-aws'), smtp = caja('x-smtp');
     const ops = caja('ops'), dom = caja('dominios');
 
     // Reloj → iPhone (WatchConnectivity)
@@ -598,7 +589,7 @@
     linea([[serv.r + 1, Math.min(yR, serv.b - 40)], [serv.r + 22, Math.min(yR, serv.b - 40)], [serv.r + 22, yR], [redis.x - 3, yR]], { color: GRIS, ancho: 2 });
 
     // → servicios externos
-    for (const x of [aws, smtp, met]) {
+    for (const x of [aws, smtp]) {
       const y0 = Math.min(x.cy, serv.b - 24);
       if (Math.abs(y0 - x.cy) < 1) linea([[serv.r + 1, x.cy], [x.x - 3, x.cy]], { color: GRIS, ancho: 2, punteada: true });
       else linea([[serv.r + 1, y0], [serv.r + 46, y0], [serv.r + 46, x.cy], [x.x - 3, x.cy]], { color: GRIS, ancho: 2, punteada: true });

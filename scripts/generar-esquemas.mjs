@@ -33,6 +33,24 @@ if (!doc?.components?.schemas) {
   process.exit(1);
 }
 
+/**
+ * `oneOf: [X, {type: null}]` como un solo esquema con `type: [T, "null"]`, si X es
+ * de un tipo simple (con su $ref resuelto). Las demás palabras de X —minLength,
+ * items, maximum— Ajv sólo las aplica a su tipo, así que el null pasa. `null` si X
+ * no tiene esa forma: ahí se queda el anyOf.
+ */
+function anulable(ramas) {
+  const otras = ramas.filter((x) => !(x && x.type === "null"));
+  if (ramas.length !== 2 || otras.length !== 1) return null;
+  let rama = otras[0];
+  if (typeof rama.$ref === "string") {
+    rama = doc.components.schemas[rama.$ref.replace("#/components/schemas/", "")];
+  }
+  const compuesta = ["$ref", "enum", "const", "oneOf", "anyOf", "allOf", "not"].some((c) => c in (rama ?? {}));
+  if (!rama || typeof rama.type !== "string" || compuesta) return null;
+  return reapuntar({ ...rama, type: [rama.type, "null"] });
+}
+
 /** Reescribe los $ref de OpenAPI a $defs, en profundidad. */
 function reapuntar(nodo) {
   if (Array.isArray(nodo)) return nodo.map(reapuntar);
@@ -42,14 +60,20 @@ function reapuntar(nodo) {
       if (k === "$ref" && typeof v === "string") {
         salida[k] = v.replace("#/components/schemas/", "#/$defs/");
       } else if (k === "oneOf" && Array.isArray(v) && v.some((x) => x && x.type === "null")) {
-        // 🛑 Un nullable del contrato (`oneOf: [X, {type: null}]`) se valida con anyOf.
-        // Fastify valida con `coerceTypes`, y con coerción `false`, `0` y `""` también
-        // "son" null: con oneOf coincidían las DOS ramas y un
-        // `pregnant_or_breastfeeding: false` legítimo daba 400. Sin coerción las ramas
-        // son disjuntas, así que anyOf dice lo mismo que el contrato. Lo agarró el test
-        // "PATCH /v1/me guarda y vacía los dos campos de la 1.1.0". Los generadores de
-        // los clientes siguen leyendo el oneOf del YAML, que no cambia.
-        salida["anyOf"] = reapuntar(v);
+        // 🛑 Un nullable del contrato (`oneOf: [X, {type: null}]`) NO se valida con
+        // oneOf ni con anyOf, porque Fastify valida con `coerceTypes` y la coerción
+        // MUTA el dato en la primera rama que lo intenta:
+        //   - con oneOf, `false`, `0` y `""` también "son" null, coincidían las DOS
+        //     ramas y un `pregnant_or_breastfeeding: false` legítimo daba 400;
+        //   - con anyOf, la rama de X convierte el null antes de llegar a la otra:
+        //     `goal_date_ms: null` se guardaba como 0 (una carrera en 1970) y
+        //     `pregnant_or_breastfeeding: null` («no respondió») como `false`.
+        // Con `type: [T, "null"]` Ajv sólo convierte si el dato no es de NINGUNO de
+        // los dos tipos, así que null queda null y false queda false. Los
+        // generadores de los clientes siguen leyendo el oneOf del YAML, que no cambia.
+        const tipado = anulable(v);
+        if (tipado !== null) Object.assign(salida, tipado);
+        else salida["anyOf"] = reapuntar(v);
       } else if (k === "examples" && Array.isArray(v)) {
         // Ajv 8 no conoce "examples" como array (es de OpenAPI). Se descarta:
         // es documentación, no validación.
