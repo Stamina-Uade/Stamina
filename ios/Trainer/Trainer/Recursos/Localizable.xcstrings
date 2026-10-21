@@ -1277,6 +1277,30 @@
         }
       }
     },
+    "common.not_set" : {
+      "comment" : "Shown instead of a value the person hasn't filled in yet (weight, height, level…).",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Not set"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sin completar"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Non renseigné"
+          }
+        }
+      }
+    },
     "common.ok" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -12415,6 +12439,30 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Compléter le profil"
+          }
+        }
+      }
+    },
+    "profile.day_off" : {
+      "comment" : "Under a weekday chip in Profile when that day has no training.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Rest"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Descanso"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Repos"
           }
         }
       }

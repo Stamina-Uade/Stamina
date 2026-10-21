@@ -24,6 +24,8 @@ struct RaizFlujoView: View {
 
     @AppStorage(ModoApariencia.clave) private var modoApariencia: ModoApariencia = ModoApariencia.predeterminado
     @AppStorage(AcentoPersonalizado.clave) private var acentoGuardado = ""
+    /// El splash del arranque (`PantallaDeArranque`): una vez por apertura.
+    @State private var mostrandoArranque = PantallaDeArranque.seMuestra
 
     var body: some View {
         ZStack {
@@ -42,6 +44,15 @@ struct RaizFlujoView: View {
                 ActualizacionRequeridaView(aviso: aviso)
                     .transition(.opacity)
                     .zIndex(1)
+            }
+            if mostrandoArranque {
+                PantallaDeArranque()
+                    .transition(.opacity)
+                    .zIndex(2)
+                    .task {
+                        try? await Task.sleep(nanoseconds: PantallaDeArranque.duracion)
+                        withAnimation(.easeOut(duration: TokensMovimiento.media)) { mostrandoArranque = false }
+                    }
             }
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)

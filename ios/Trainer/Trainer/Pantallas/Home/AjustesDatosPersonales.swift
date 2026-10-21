@@ -99,7 +99,7 @@ private struct AjustesEditorDatosPersonales: View {
         AjustesFilaDesplegable(simbolo: "calendar", titulo: Self.tituloNacimiento,
                                valor: borrador.nacimiento.map {
                                    $0.formatted(.dateTime.day().month(.abbreviated).year())
-                               } ?? "—",
+                               } ?? Textos.commonNotSet,
                                editado: borrador.nacimiento != original.nacimiento,
                                abierta: abierto == .nacimiento, alTocar: { alternar(.nacimiento) }) {
             RuedaDeNacimiento(fecha: fechaDeLaRueda, nota: notaDeEdad)
@@ -108,7 +108,7 @@ private struct AjustesEditorDatosPersonales: View {
 
     private var filaSexo: some View {
         AjustesFilaDesplegable(simbolo: "figure.stand", titulo: Self.tituloSexo,
-                               valor: borrador.sexo.map(Self.nombre(de:)) ?? "—",
+                               valor: borrador.sexo.map(Self.nombre(de:)) ?? Textos.commonNotSet,
                                editado: borrador.sexo != original.sexo,
                                abierta: abierto == .sexo, alTocar: { alternar(.sexo) }) {
             VStack(spacing: TokensEspaciado.e8) {
@@ -124,7 +124,7 @@ private struct AjustesEditorDatosPersonales: View {
 
     private var filaPeso: some View {
         AjustesFilaDesplegable(simbolo: "scalemass.fill", titulo: Textos.profileWeight,
-                               valor: borrador.pesoTexto.isEmpty ? "—" : "\(borrador.pesoTexto) \(unidadDePeso)",
+                               valor: borrador.pesoTexto.isEmpty ? Textos.commonNotSet : "\(borrador.pesoTexto) \(unidadDePeso)",
                                editado: borrador.pesoTexto != original.pesoTexto,
                                abierta: abierto == .peso, alTocar: { alternar(.peso) }) {
             VStack(alignment: .leading, spacing: TokensEspaciado.e6) {
@@ -233,14 +233,14 @@ private struct AjustesEditorDatosPersonales: View {
             .map { $0.trimmingCharacters(in: .whitespacesAndNewlines) }
             .filter { !$0.isEmpty }
             .joined(separator: " ")
-        return completo.isEmpty ? "—" : completo
+        return completo.isEmpty ? Textos.commonNotSet : completo
     }
 
     private var valorDeAltura: String {
         if esMetrico {
-            return borrador.alturaTexto.isEmpty ? "—" : "\(borrador.alturaTexto) cm"
+            return borrador.alturaTexto.isEmpty ? Textos.commonNotSet : "\(borrador.alturaTexto) cm"
         }
-        guard let pulgadas = borrador.alturaEnPulgadas else { return "—" }
+        guard let pulgadas = borrador.alturaEnPulgadas else { return Textos.commonNotSet }
         return "\(pulgadas / 12)′\(pulgadas % 12)″"
     }
 

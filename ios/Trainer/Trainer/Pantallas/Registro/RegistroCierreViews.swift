@@ -243,7 +243,7 @@ struct RegListoView: View {
         Tarjeta {
             VStack(spacing: TokensEspaciado.e9) {
                 FilaResumen(Textos.signupDoneBirth,
-                            flujo.datos.nacimiento.map { $0.formatted(.dateTime.day().month().year()) } ?? "—")
+                            flujo.datos.nacimiento.map { $0.formatted(.dateTime.day().month().year()) } ?? Textos.commonNotSet)
                 FilaResumen(Textos.signupDoneSport, deporte)
                 FilaResumen(Textos.signupDoneLevel, nivel)
                 FilaResumen(Textos.signupDoneDays, dias)
@@ -294,7 +294,7 @@ struct RegListoView: View {
         case .ciclismo: return Textos.signupSportCycling
         case .trekking: return Textos.signupSportTrekking
         case .triatlon: return Textos.signupSportTriathlon
-        case .none: return "—"
+        case .none: return Textos.commonNotSet
         }
     }
 
@@ -303,13 +303,13 @@ struct RegListoView: View {
         case .principiante: return Textos.signupLevelBeginner
         case .intermedio: return Textos.signupLevelIntermediate
         case .avanzado: return Textos.signupLevelAdvanced
-        case .none: return "—"
+        case .none: return Textos.commonNotSet
         }
     }
 
     private var dias: String {
         let elegidos = flujo.datos.diasElegidos
-        guard !elegidos.isEmpty else { return "—" }
+        guard !elegidos.isEmpty else { return Textos.commonNotSet }
         return elegidos.map(RegDiasView.abreviatura).joined(separator: ", ")
     }
 

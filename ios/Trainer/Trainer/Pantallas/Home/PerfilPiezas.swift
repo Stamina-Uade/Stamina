@@ -132,7 +132,8 @@ struct ChipDeDiaDePerfil: View {
             .aspectRatio(1, contentMode: .fit)
             .shadow(color: activo ? Paleta.acentoBrillo : Color.clear, radius: TokensEspaciado.e6)
 
-            Text(minutoDelDia.map { Formato.hora(minutoDelDia: $0) } ?? "—")
+            // Sin hora es un día de descanso: se dice, en vez de una raya.
+            Text(minutoDelDia.map { Formato.hora(minutoDelDia: $0) } ?? Textos.profileDayOff)
                 .estilo(.etiquetaSeccion.enMinusculas,
                         color: activo ? Paleta.textoSecundario : Paleta.textoTerciario)
                 .monospacedDigit()

@@ -172,11 +172,11 @@ struct PerfilView: View {
     private func valor(de dato: DatoDelCuerpo) -> String {
         switch dato {
         case .peso:
-            return estado.perfil?.weightG.map { Formato.peso(Int($0), unidades: estado.sistemaDeUnidades) } ?? "—"
+            return estado.perfil?.weightG.map { Formato.peso(Int($0), unidades: estado.sistemaDeUnidades) } ?? Textos.commonNotSet
         case .altura:
             return altura
         case .edad:
-            return edad.map(Textos.profileAgeYears) ?? "—"
+            return edad.map(Textos.profileAgeYears) ?? Textos.commonNotSet
         }
     }
 
@@ -549,7 +549,7 @@ struct PerfilView: View {
     }
 
     private var altura: String {
-        guard let mm = estado.perfil?.heightMm else { return "—" }
+        guard let mm = estado.perfil?.heightMm else { return Textos.commonNotSet }
         switch estado.sistemaDeUnidades {
         case .metrico: return "\((Double(mm) / 10).formatted(.number.precision(.fractionLength(0)))) cm"
         case .imperial:
@@ -571,7 +571,7 @@ struct PerfilView: View {
     }
 
     private var deporteYNivel: String {
-        guard let perfil = estado.perfil else { return "—" }
+        guard let perfil = estado.perfil else { return Textos.commonNotSet }
         let deporte: String? = perfil.sport
             .flatMap { DeporteDeSesion(rawValue: $0.rawValue) }
             .map { MVP.acotado($0).nombreVisible }

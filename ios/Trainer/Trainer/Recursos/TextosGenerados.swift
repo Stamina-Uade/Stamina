@@ -9,7 +9,7 @@
 // números y unidades se formatean con el locale del sistema. Esto resuelve lo
 // primero; lo segundo es de quien presenta el dato.
 //
-// 886 claves · idioma de autoría: en
+// 888 claves · idioma de autoría: en
 // =============================================================================
 
 import Foundation
@@ -180,6 +180,9 @@ enum Textos {
 
     /// Next
     static var commonNext: String { String(localized: "common.next") }
+
+    /// Not set
+    static var commonNotSet: String { String(localized: "common.not_set") }
 
     /// OK
     static var commonOk: String { String(localized: "common.ok") }
@@ -1710,6 +1713,9 @@ enum Textos {
 
     /// Complete profile
     static var profileCompleteProfile: String { String(localized: "profile.complete_profile") }
+
+    /// Rest
+    static var profileDayOff: String { String(localized: "profile.day_off") }
 
     /// Days and times
     static var profileDaysAndTimes: String { String(localized: "profile.days_and_times") }

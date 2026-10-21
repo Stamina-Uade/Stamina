@@ -17,16 +17,25 @@ import TrainerCore
 
 enum ArranqueDePrueba {
     #if DEBUG
+    /// 🛑 2026-10-21 (Iván): el esquema de Xcode tenía prendidos `-pantallaInicial
+    /// home -datosDeEjemplo`, y la app abría el Home con "Iván Benítez" aunque se
+    /// hubiera cerrado la sesión. Ahora nada de esto funciona contra el servidor
+    /// de verdad: sólo con los dobles de los tests (`-serviciosDePrueba`), que es
+    /// para lo que existe. Sin sesión, la app NUNCA entra al Home.
+    private static var conDobles: Bool {
+        ProcessInfo.processInfo.arguments.contains(ServiciosDeLaApp.argumentoDeDobles)
+    }
+
     /// La pantalla pedida por argumento, si la hay y si existe.
     static var pantalla: Pantalla? {
-        guard let slug = valor("-pantallaInicial") else { return nil }
+        guard conDobles, let slug = valor("-pantallaInicial") else { return nil }
         return Pantalla(rawValue: slug)
     }
 
     /// Un perfil completo, para ver las pantallas con contenido real en vez de
     /// campos vacíos.
     static var datos: DatosRegistro? {
-        guard ProcessInfo.processInfo.arguments.contains("-datosDeEjemplo") else { return nil }
+        guard conDobles, ProcessInfo.processInfo.arguments.contains("-datosDeEjemplo") else { return nil }
         var d = DatosRegistro()
         d.correo = "ivan@trainer.app"
         d.codigo = "A7K2Q9"
@@ -50,21 +59,21 @@ enum ArranqueDePrueba {
     /// recuperación de contraseña. Sin esto no se puede ver el botón primario
     /// **encendido**, que es la mitad de lo que hay que revisar.
     static var credencialesDeEjemplo: (correo: String, clave: String)? {
-        guard ProcessInfo.processInfo.arguments.contains("-datosDeEjemplo") else { return nil }
+        guard conDobles, ProcessInfo.processInfo.arguments.contains("-datosDeEjemplo") else { return nil }
         return (correo: "ivan@trainer.app", clave: "Trainer2026")
     }
 
     /// La pestaña del Home con la que arrancar, para revisar una pantalla sin
     /// recorrer el registro entero.
     static var pestanaHome: PestanaHome? {
-        guard let slug = valor("-pestanaHome") else { return nil }
+        guard conDobles, let slug = valor("-pestanaHome") else { return nil }
         return PestanaHome(rawValue: slug)
     }
 
     /// Si el Home arranca con la maqueta del diseño (`RepositorioProvisional`) en vez
     /// de hablar con el servidor.
     static var conDatosDeEjemplo: Bool {
-        ProcessInfo.processInfo.arguments.contains("-datosDeEjemplo")
+        conDobles && ProcessInfo.processInfo.arguments.contains("-datosDeEjemplo")
     }
 
     private static func valor(_ bandera: String) -> String? {

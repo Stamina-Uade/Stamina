@@ -78,7 +78,7 @@ private struct AjustesEditorEntrenamiento: View {
 
     private var filaNivel: some View {
         AjustesFilaDesplegable(simbolo: "chart.bar.fill", titulo: Self.tituloNivel,
-                               valor: borrador.nivel.map(AjustesPaginaEntrenamiento.nombre(de:)) ?? "—",
+                               valor: borrador.nivel.map(AjustesPaginaEntrenamiento.nombre(de:)) ?? Textos.commonNotSet,
                                editado: borrador.nivel != original.nivel,
                                abierta: abierto == .nivel, alTocar: { alternar(.nivel) }) {
             VStack(spacing: TokensEspaciado.e8) {
@@ -157,7 +157,7 @@ private struct AjustesEditorEntrenamiento: View {
     /// "Mar · Jue · Sáb", en el orden de la semana del locale.
     private var resumenDeDias: String {
         let elegidos = diasEnOrden.filter { borrador.dias[$0] != nil }
-        return elegidos.isEmpty ? "—" : elegidos.map(RegDiasView.abreviatura).joined(separator: " · ")
+        return elegidos.isEmpty ? Textos.commonNotSet : elegidos.map(RegDiasView.abreviatura).joined(separator: " · ")
     }
 
     /// El contrato guarda minutos desde la medianoche LOCAL; el `DatePicker`
