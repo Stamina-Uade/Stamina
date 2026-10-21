@@ -262,8 +262,16 @@ public struct TarjetaHeroe<Contenido: View>: View {
     public var body: some View {
         ZStack(alignment: .bottomLeading) {
             fondo
+            // Ronda 7: la foto va A COLOR y casi entera. El degradado sólo
+            // oscurece la franja de abajo, donde va el texto, para que se lea.
             LinearGradient(
-                colors: [Color.clear, Paleta.veloFoto, Color.black.opacity(0.85)],
+                stops: [
+                    .init(color: Color.black.opacity(0.15), location: 0.0),
+                    .init(color: Color.clear, location: 0.25),
+                    .init(color: Color.clear, location: 0.45),
+                    .init(color: Color.black.opacity(0.45), location: 0.72),
+                    .init(color: Color.black.opacity(0.78), location: 1.0),
+                ],
                 startPoint: .top, endPoint: .bottom)
                 .accessibilityHidden(true)
             contenido
@@ -287,7 +295,6 @@ public struct TarjetaHeroe<Contenido: View>: View {
                 Image(imagen)
                     .resizable()
                     .scaledToFill()
-                    .grayscale(1)
                     .frame(width: geo.size.width, height: geo.size.height)
                     .clipped()
             }

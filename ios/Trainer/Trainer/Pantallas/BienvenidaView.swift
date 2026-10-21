@@ -91,7 +91,6 @@ struct BienvenidaView: View {
                 Image(foto.recurso)
                     .resizable()
                     .scaledToFill()
-                    .grayscale(1)
                     .opacity(indice == actual ? 1 : 0)
                     .accessibilityLabel(foto.descripcion)
             }
@@ -104,17 +103,16 @@ struct BienvenidaView: View {
         .accessibilityElement(children: .contain)
     }
 
-    /// El velo: oscurece bastante la foto —es fondo; la protagonista es la
-    /// mascota— y la funde con el fondo abajo, donde va el pie. Abajo a la
-    /// derecha, el halo del acento.
+    /// El velo: la foto se ve A COLOR arriba (ronda 7: los fondos tienen que
+    /// dar ganas de salir) y se funde con el fondo abajo, donde va el pie.
     private var veloDeLaFoto: some View {
         ZStack {
             LinearGradient(
                 stops: [
-                    .init(color: Paleta.fondo.opacity(0.6), location: 0.0),
-                    .init(color: Paleta.fondo.opacity(0.5), location: 0.3),
-                    .init(color: Paleta.fondo.opacity(0.85), location: 0.55),
-                    .init(color: Paleta.fondo, location: 0.72),
+                    .init(color: Paleta.fondo.opacity(0.25), location: 0.0),
+                    .init(color: Paleta.fondo.opacity(0.05), location: 0.3),
+                    .init(color: Paleta.fondo.opacity(0.55), location: 0.55),
+                    .init(color: Paleta.fondo, location: 0.75),
                     .init(color: Paleta.fondo, location: 1.0),
                 ],
                 startPoint: .top, endPoint: .bottom
