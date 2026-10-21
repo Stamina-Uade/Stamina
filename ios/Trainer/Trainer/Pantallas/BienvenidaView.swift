@@ -1,12 +1,17 @@
 import SwiftUI
 import TrainerCore
+import UIKit
 
 /// `bienvenida` — carousel de 3 momentos con autoplay, que también se pasa
 /// deslizando, la marca, y las dos salidas: crear cuenta o entrar.
 ///
-/// Rediseño 2026-10 (ronda 4): lo protagoniza la mascota. Cada momento es una
-/// pose (saluda, corre, festeja con la medalla) que dice el título en un
-/// globito; las fotos en blanco y negro quedan de fondo, bien veladas.
+/// Rediseño 2026-10-20 (pedido de Iván): **sin mascota**. 🛑 No volver a la
+/// versión con `Mascota`: el 21-10 un commit (25b4461) la trajo de vuelta por
+/// partir de una copia vieja. Vuelve lo de antes —un
+/// título y un mensaje que venden la app— sobre la foto en blanco y negro. El
+/// título y el mensaje miden SIEMPRE lo mismo en los tres momentos: el título se
+/// reserva el alto del más largo de los tres, y el mensaje, exactamente dos
+/// renglones (nunca más). Así no hay un salto de línea que mueva el pie.
 ///
 /// Las fotos van **empaquetadas** y no se piden a la red. El diseño las trae de
 /// Unsplash en caliente y `design/ESPECIFICACION.md` §8.1 marca por qué eso no
@@ -15,6 +20,7 @@ import TrainerCore
 struct BienvenidaView: View {
     @EnvironmentObject private var flujo: FlujoEntrada
     @Environment(\.accessibilityReduceMotion) private var movimientoReducido
+    @Environment(\.dynamicTypeSize) private var tamanoDeLetra
 
     @State private var actual = 0
     @State private var reloj: Timer?
@@ -26,41 +32,73 @@ struct BienvenidaView: View {
 
     private struct Foto {
         let recurso: String
-        let pose: PoseDeMascota
         let titulo: String
+        let mensaje: String
         let descripcion: String
     }
 
-    /// Sin el párrafo de cada foto (`bienvenidaSlideNTexto`): el pedido es
-    /// textos ultra cortos, y el título ya lo dice la mascota.
+    /// La foto de cada momento. Se elige una vez por apertura, al azar dentro del
+    /// grupo que va con su mensaje: así se usan las 20 fotos de running y ninguna
+    /// se repite en la misma bienvenida.
+    @State private var recursos: [String] = BienvenidaView.fotosDeEstaApertura
+
+    /// Se eligen una vez por apertura de la app (un `static let` se evalúa una
+    /// sola vez), y no en cada `init` de la vista.
+    static let fotosDeEstaApertura: [String] = elegirFotos()
+
+    /// Los 20 fondos de running (`FondoRunning01…20`), repartidos por lo que dice
+    /// cada mensaje (mirando las fotos, 2026-10-21):
+    /// 1. "Tu plan, a tu ritmo": salidas tranquilas — ciudad al amanecer, playa,
+    ///    parque, ruta en el desierto, bosque, nieve, costanera.
+    /// 2. "Todo medido": esfuerzo — montaña, pista de atletismo, lluvia, noche,
+    ///    puente, escaleras del estadio, escaleras, acantilado, túnel, cuestas,
+    ///    volcán, terraza.
+    /// 3. "El día de la carrera": la 16, la única que es una carrera (ruta con
+    ///    vallas). Cuando haya más fotos de carrera, se suman acá.
+    static let gruposDeFotos: [[Int]] = [
+        [1, 6, 9, 10, 11, 12, 14],
+        [2, 3, 4, 5, 7, 8, 13, 15, 17, 18, 19, 20],
+        [16],
+    ]
+
+    /// Si una foto no está en el catálogo, la de siempre de ese lugar.
+    static let respaldos = ["BienvenidaAmanecer", "BienvenidaMontana", "BienvenidaAmanecer"]
+
+    static func elegirFotos() -> [String] {
+        gruposDeFotos.enumerated().map { indice, grupo in
+            let existentes = grupo
+                .map { "FondoRunning" + String(format: "%02d", $0) }
+                .filter { UIImage(named: $0) != nil }
+            return existentes.randomElement() ?? respaldos[indice]
+        }
+    }
+
     private var fotos: [Foto] {
         [
-            Foto(recurso: "BienvenidaAmanecer", pose: .saludo,
-                 titulo: Textos.welcomeSlide1Title, descripcion: Textos.welcomeSlide1Photo),
-            // "BienvenidaRuta" es una foto de ciclismo: el MVP es running.
-            Foto(recurso: "BienvenidaMontana", pose: .corriendo,
-                 titulo: Textos.welcomeSlide2Title, descripcion: Textos.welcomeSlide2Photo),
-            Foto(recurso: "BienvenidaAmanecer", pose: .medalla,
-                 titulo: Textos.welcomeSlide3Title, descripcion: Textos.welcomeSlide3Photo),
+            Foto(recurso: recursos[0], titulo: Textos.welcomeSlide1Title,
+                 mensaje: Textos.welcomeSlide1Text, descripcion: Textos.welcomeSlide1Photo),
+            Foto(recurso: recursos[1], titulo: Textos.welcomeSlide2Title,
+                 mensaje: Textos.welcomeSlide2Text, descripcion: Textos.welcomeSlide2Photo),
+            Foto(recurso: recursos[2], titulo: Textos.welcomeSlide3Title,
+                 mensaje: Textos.welcomeSlide3Text, descripcion: Textos.welcomeSlide3Photo),
         ]
     }
 
     var body: some View {
         // La foto va a sangre —también bajo la barra de estado, como el diseño—
-        // y la marca, la mascota y el pie se quedan DENTRO del área segura.
+        // y la marca y el pie se quedan DENTRO del área segura.
         //
         // 🪤 La foto va como FONDO y no como hermana en un ZStack. Con
         // `scaledToFill` la imagen reporta un tamaño mayor que la pantalla, y en
         // un ZStack eso se propaga: el pie recibía más ancho del que hay y se
         // cortaba por los dos lados. `background` no participa del layout.
         //
-        // 🪤 La marca va arriba y el pie mide siempre lo mismo (ver
-        // `conElAltoDelMasAlto`): la mascota se lleva el alto que sobra, así ni la
-        // marca ni el título se mueven al cambiar de foto (lo mira un test de UI).
+        // 🪤 Todo va abajo —la marca arriba del título (2026-10-21)— y el
+        // `Spacer` se lleva lo que sobra. El pie mide siempre lo mismo (ver `pie`),
+        // así ni la marca ni el título se mueven al cambiar de foto (lo mira un
+        // test de UI).
         VStack(spacing: 0) {
-            marca
-            escenario
-                .frame(maxWidth: .infinity, maxHeight: .infinity)
+            Spacer(minLength: TokensEspaciado.e20)
             pie
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
@@ -86,8 +124,7 @@ struct BienvenidaView: View {
     private var carousel: some View {
         ZStack {
             ForEach(Array(fotos.enumerated()), id: \.offset) { indice, foto in
-                // Rediseño 2026-10: foto en blanco y negro, como las tarjetas
-                // héroe del mockup. El rosa queda para lo que importa.
+                // 2026-10-21: la foto va A COLOR, sin filtro gris (pedido de Iván).
                 Image(foto.recurso)
                     .resizable()
                     .scaledToFill()
@@ -103,8 +140,9 @@ struct BienvenidaView: View {
         .accessibilityElement(children: .contain)
     }
 
-    /// El velo: la foto se ve A COLOR arriba (ronda 7: los fondos tienen que
-    /// dar ganas de salir) y se funde con el fondo abajo, donde va el pie.
+    /// El velo: la foto se ve a color arriba y se funde con el fondo abajo, donde
+    /// van la marca, el título, el mensaje y los botones. Abajo a la derecha, el
+    /// halo del acento.
     private var veloDeLaFoto: some View {
         ZStack {
             LinearGradient(
@@ -131,57 +169,47 @@ struct BienvenidaView: View {
         }
         .accessibilityElement(children: .ignore)
         .accessibilityLabel(MarcaApp.nombre)
+        .accessibilityAddTraits(.isStaticText)
         .frame(maxWidth: .infinity, alignment: .leading)
-        .padding(.horizontal, TokensEspaciado.e22)
-        .padding(.top, TokensEspaciado.e8)
-    }
-
-    /// Las tres poses, una encima de la otra: la de la foto actual se ve,
-    /// animada; las otras se funden y quedan en su primer cuadro (no cargan la
-    /// animación, ver `MascotaAnimada`). Al entrar, la nueva sube un poquito y
-    /// aparece.
-    private var escenario: some View {
-        ZStack {
-            ForEach(Array(fotos.enumerated()), id: \.offset) { indice, foto in
-                let esLaActual = indice == actual
-                Mascota(pose: foto.pose, altoMaximo: TokensEspaciado.e56 * 6, activa: esLaActual)
-                    .opacity(esLaActual ? 1 : 0)
-                    .offset(y: esLaActual || movimientoReducido ? 0 : TokensEspaciado.e16)
-            }
-        }
-        .padding(.horizontal, TokensEspaciado.e22)
-        .padding(.vertical, TokensEspaciado.e12)
-        .animation(movimientoReducido ? nil : .easeInOut(duration: TokensMovimiento.lenta),
-                   value: actual)
-        .accessibilityHidden(true)
     }
 
     private var pie: some View {
-        VStack(alignment: .leading, spacing: TokensEspaciado.e16) {
-            // El título lo dice la mascota, en un globito que apunta hacia ella.
-            // El globito NO se anima en tamaño ni posición: sólo cambia el texto,
-            // con un fundido (el test de UI mide dónde queda el título).
-            //
+        VStack(alignment: .leading, spacing: TokensEspaciado.e20) {
             // 🪤 Los títulos de las tres fotos no miden lo mismo, y el pie está
             // pegado abajo: con uno de dos renglones al lado de uno de uno, cada
-            // cambio de foto movía todo. El globito se reserva el alto del más
-            // alto de los tres —al tamaño de letra que tenga puesto la persona,
-            // sin cortar nada— dibujando los tres debajo del que se ve.
-            Bocadillo(cola: .arriba) {
+            // cambio de foto movía todo. El título se reserva el alto del más alto
+            // de los tres —al tamaño de letra que tenga puesto la persona, sin
+            // cortar nada— dibujando los tres debajo del que se ve. El mensaje
+            // ocupa SIEMPRE dos renglones: ni uno (salta) ni tres (no entra).
+            VStack(alignment: .leading, spacing: TokensEspaciado.e10) {
+                // El ícono y el nombre, arriba del título.
+                marca
+                    .padding(.bottom, TokensEspaciado.e6)
                 conElAltoDelMasAlto(fotos.map(\.titulo)) { titulo in
-                    TextoDeBocadillo(texto: titulo)
-                        .frame(maxWidth: .infinity)
+                    Text(titulo)
+                        .estilo(.display)
+                        .fixedSize(horizontal: false, vertical: true)
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                        .accessibilityAddTraits(.isHeader)
+                }
+                conElAltoDelMasAlto(fotos.map(\.mensaje)) { mensaje in
+                    Text(mensaje)
+                        .estilo(.cuerpoDestacado, color: Paleta.textoSecundario)
+                        // Con letra de accesibilidad, dos renglones cortarían el
+                        // mensaje: ahí se reservan cuatro (igual en las tres fotos).
+                        .lineLimit(tamanoDeLetra.isAccessibilitySize ? 4 : 2, reservesSpace: true)
+                        .minimumScaleFactor(0.85)
+                        .frame(maxWidth: .infinity, alignment: .leading)
                 }
             }
-            .frame(maxWidth: .infinity)
             .animation(movimientoReducido ? nil : .easeInOut(duration: TokensMovimiento.lenta),
                        value: actual)
 
             indicadores
 
             VStack(spacing: TokensEspaciado.e8) {
-                BotonPrimario(Textos.welcomeCreateAccount) { flujo.ir(a: .regCorreo) }
-                BotonTexto(Textos.welcomeHaveAccount) { flujo.ir(a: .login) }
+                BotonPrimario(Textos.welcomeCreateAccount, grande: true) { flujo.ir(a: .regCorreo) }
+                BotonTexto(Textos.welcomeHaveAccount, grande: true) { flujo.ir(a: .login) }
             }
         }
         .padding(.horizontal, TokensEspaciado.e22)
@@ -229,7 +257,8 @@ struct BienvenidaView: View {
                 .accessibilityAddTraits(indice == actual ? [.isButton, .isSelected] : .isButton)
             }
         }
-        .frame(maxWidth: .infinity)
+        // Centrado (2026-10-21).
+        .frame(maxWidth: .infinity, alignment: .center)
     }
 
     /// Deslizar pasa de foto: hacia la izquierda la siguiente, hacia la derecha la

@@ -119,6 +119,11 @@ extension EstiloTipografico {
         tamano: TokensTipografia.botonPrimarioTamano,
         peso: TokensTipografia.botonPrimarioPeso, referencia: .body)
 
+    /// Los botones de la bienvenida: un poco más grandes que el resto.
+    public static let botonGrande = EstiloTipografico(
+        tamano: TokensTipografia.botonGrandeTamano,
+        peso: TokensTipografia.botonGrandePeso, referencia: .body)
+
     public static let opcionTitulo = EstiloTipografico(
         tamano: TokensTipografia.opcionTituloTamano,
         peso: TokensTipografia.opcionTituloPeso, referencia: .body)

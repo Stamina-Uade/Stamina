@@ -3,17 +3,12 @@ import SwiftUI
 // =============================================================================
 // Los tres botones del flujo de entrada.
 //
-// 🪤 EL ESTADO DESHABILITADO — el acento, apagado, y el texto al revés.
+// 🪤 EL ESTADO DESHABILITADO (2026-10-21, pedido de Iván).
 //
-// El botón apagado es **el color de la app, bajo** (`Paleta.acentoApagado`, el
-// acento al 35 %): se lee como el mismo botón, sin encender. Eso es lo que pidió
-// Iván y es lo que hace el diseño.
-//
-// Lo que NO se copia del diseño es el texto. El diseño baja el botón entero con
-// `opacity: .35`, así que el texto oscuro queda sobre verde oscuro: **2.51:1**,
-// que no llega ni a AA grande (`design/ESPECIFICACION.md` §9.1, y §9.3 lo marca
-// como defecto). Acá el relleno se apaga y el texto **se da vuelta a claro**:
-// #F2F4F0 sobre el acento al 35 % da **7.06:1**. Se ve apagado, y se lee.
+// Apagado es **el mismo botón, con su color, a menos opacidad** (0,45, la pone
+// `EstiloPresionado` para TODOS los botones de la app): ni gris ni invisible. Se
+// lee como el botón que va a ser, todavía sin poder tocarse. VoiceOver dice por
+// qué con `motivoDeshabilitado`.
 //
 // `pendientes[estados-de-control]` de `tokens.json` dice que el diseño sólo
 // define "deshabilitado": no hay pressed ni foco. El estado presionado de acá
@@ -26,18 +21,22 @@ public struct BotonPrimario: View {
     private let habilitado: Bool
     private let cargando: Bool
     private let motivoDeshabilitado: String?
+    private let grande: Bool
     private let accion: () -> Void
 
     /// - Parameter motivoDeshabilitado: por qué no se puede tocar. Es
     ///   obligatorio para VoiceOver: un botón apagado sin explicación es un
     ///   callejón sin salida para quien no ve el mensaje de validación.
+    /// - Parameter grande: texto más grande (`botonGrande`), para la bienvenida.
     public init(
         _ titulo: String,
         habilitado: Bool = true,
         cargando: Bool = false,
         motivoDeshabilitado: String? = nil,
+        grande: Bool = false,
         accion: @escaping () -> Void
     ) {
+        self.grande = grande
         self.titulo = titulo
         self.habilitado = habilitado
         self.cargando = cargando
@@ -50,18 +49,20 @@ public struct BotonPrimario: View {
             ZStack {
                 if cargando {
                     ProgressView()
-                        .tint(habilitado ? Paleta.sobreAcento : Paleta.textoTerciario)
+                        .tint(Paleta.sobreAcento)
                 } else {
                     Text(titulo)
-                        .estilo(.botonPrimario, color: habilitado ? Paleta.sobreAcento : Paleta.textoTerciario)
+                        .estilo(grande ? .botonGrande : .botonPrimario, color: Paleta.sobreAcento)
                 }
             }
             .frame(maxWidth: .infinity)
             .frame(minHeight: TokensTamano.botonPrimario)
-            .background(habilitado ? Paleta.acento : Paleta.superficieInput)
+            // 2026-10-21 (Iván): apagado NO es gris: es el MISMO botón, rosa, con
+            // menos opacidad (la pone `EstiloPresionado` para todos los botones),
+            // así se entiende que es el mismo y que todavía no se puede tocar.
+            .background(Paleta.acento)
             // Rediseño 2026-10: la acción principal es una cápsula, como el mockup.
             .clipShape(Capsule())
-            .opacity(habilitado ? 1.0 : 0.5)
             .objetivoTactilAlto()
         }
         .buttonStyle(EstiloPresionado())
@@ -99,9 +100,12 @@ public struct BotonSecundario<Contenido: View>: View {
 public struct BotonTexto: View {
     private let titulo: String
     private let color: Color
+    private let grande: Bool
     private let accion: () -> Void
 
-    public init(_ titulo: String, color: Color = Paleta.textoAcento, accion: @escaping () -> Void) {
+    public init(_ titulo: String, color: Color = Paleta.textoAcento, grande: Bool = false,
+                accion: @escaping () -> Void) {
+        self.grande = grande
         self.titulo = titulo
         self.color = color
         self.accion = accion
@@ -110,7 +114,7 @@ public struct BotonTexto: View {
     public var body: some View {
         Button(action: accion) {
             Text(titulo)
-                .estilo(.tituloCard, color: color)
+                .estilo(grande ? .botonGrande : .tituloCard, color: color)
                 .frame(maxWidth: .infinity)
                 .objetivoTactilAlto()
         }
@@ -124,8 +128,22 @@ public struct EstiloPresionado: ButtonStyle {
     public init() {}
 
     public func makeBody(configuration: Configuration) -> some View {
-        configuration.label
-            .opacity(configuration.isPressed ? 0.72 : 1)
-            .animation(.easeOut(duration: TokensMovimiento.rapida), value: configuration.isPressed)
+        CuerpoPresionado(configuration: configuration)
+    }
+
+    /// Un `View` aparte para poder leer `isEnabled`: el `ButtonStyle` no lo ve.
+    private struct CuerpoPresionado: View {
+        let configuration: ButtonStyleConfiguration
+        @Environment(\.isEnabled) private var habilitado
+
+        var body: some View {
+            configuration.label
+                // Apagado: el mismo color, con menos opacidad (nunca 0, nunca gris).
+                .opacity(habilitado ? (configuration.isPressed ? 0.72 : 1) : Self.opacidadApagado)
+                .animation(.easeOut(duration: TokensMovimiento.rapida), value: configuration.isPressed)
+                .animation(.easeOut(duration: TokensMovimiento.rapida), value: habilitado)
+        }
+
+        static let opacidadApagado: Double = 0.45
     }
 }

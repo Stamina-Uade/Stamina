@@ -169,7 +169,7 @@ struct PantallaCierre<Contenido: View, Pie: View>: View {
 
 /// El círculo rosa con tilde de los cierres. Reemplaza al cuadrado de acento del
 /// diseño viejo: el mockup marca lo hecho con la tilde rosa.
-private struct SelloDeCierre: View {
+struct SelloDeCierre: View {
     var body: some View {
         ZStack {
             Circle()

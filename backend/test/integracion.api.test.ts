@@ -58,6 +58,7 @@ before(async () => {
         codigos.push(codigo);
       },
       async avisarIntentoDeRegistro() {},
+      async avisarVinculacion() {},
     },
     ahoraMs: () => Date.now(),
   };
@@ -228,12 +229,11 @@ describe("registro", { skip: SIN_SERVICIOS }, () => {
     assert.match(sesion.user_id, /^[0-9a-f-]{36}$/);
   });
 
-  test("🛑 anti-enumeración: registrar un correo QUE YA EXISTE devuelve lo mismo", async () => {
+  test("registrar un correo QUE YA EXISTE lo dice (decisión 2026-10-21)", async () => {
     const { email } = await registrar();
     const r = await pedir("POST", "/v1/auth/register", { email });
-    assert.equal(r.status, 202);
-    assert.deepEqual(Object.keys(r.json.data).sort(), ["expires_at_ms", "resend_after_ms"]);
-    assert.equal(r.json.error, undefined);
+    assert.equal(r.status, 409);
+    assert.equal(r.json.error.code, "email_already_registered");
   });
 
   test("un código equivocado no sirve", async () => {
@@ -296,13 +296,14 @@ describe("login y sesión", { skip: SIN_SERVICIOS }, () => {
     assert.ok(r.json.data.access_token);
   });
 
-  test("🛑 anti-enumeración: contraseña mala y cuenta inexistente dan EL MISMO error", async () => {
+  test("contraseña mala y cuenta inexistente dicen cada una lo suyo (decisión 2026-10-21)", async () => {
     const { email } = await registrar();
     const mala = await pedir("POST", "/v1/auth/login", { email, password: "otra-cosa-larga-1" });
     const inexistente = await pedir("POST", "/v1/auth/login", { email: "nadie" + nuevoEmail(), password: "otra-cosa-larga-1" });
     assert.equal(mala.status, 401);
-    assert.equal(inexistente.status, 401);
-    assert.deepEqual(mala.json, inexistente.json);
+    assert.equal(mala.json.error.code, "wrong_password");
+    assert.equal(inexistente.status, 404);
+    assert.equal(inexistente.json.error.code, "user_not_found");
   });
 
   test("refresh rota el token, y reusar el viejo con el nuevo ya usado revoca la familia", async () => {
@@ -426,10 +427,10 @@ describe("fechas sin hora (docs/API.md §5)", { skip: SIN_SERVICIOS }, () => {
 });
 
 describe("recuperación de contraseña", { skip: SIN_SERVICIOS }, () => {
-  test("🛑 anti-enumeración: una cuenta que no existe devuelve 202 igual", async () => {
+  test("pedir la recuperación de una cuenta que no existe lo dice (decisión 2026-10-21)", async () => {
     const r = await pedir("POST", "/v1/auth/password/forgot", { email: nuevoEmail() });
-    assert.equal(r.status, 202);
-    assert.deepEqual(Object.keys(r.json.data).sort(), ["expires_at_ms", "resend_after_ms"]);
+    assert.equal(r.status, 404);
+    assert.equal(r.json.error.code, "user_not_found");
   });
 
   test("🛑 cambiar la contraseña REVOCA las demás sesiones", async () => {

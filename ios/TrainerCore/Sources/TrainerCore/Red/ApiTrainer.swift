@@ -30,6 +30,15 @@ public struct SesionAbierta: Equatable, Sendable {
     }
 }
 
+/// Cómo terminó "Continuar con Google / Apple" (`POST /auth/social`).
+public enum DesenlaceSocial: Equatable, Sendable {
+    /// La identidad ya tenía cuenta: la sesión quedó abierta en el llavero.
+    case entro(SesionAbierta)
+    /// Nadie la conoce: hay que hacer el alta (nombre, apellido, correo y su
+    /// código) y terminarla con este permiso en vez de una contraseña.
+    case faltaElAlta(AltaSocialPendiente)
+}
+
 /// Los campos de `PerfilEntrada` que el contrato deja mandar en `null`.
 ///
 /// 🛑 En un `PATCH` parcial omitir es "no lo toques" (docs/API.md §7), así que un
@@ -85,6 +94,14 @@ public protocol ServicioDeCuenta: Sendable {
 
     func entrar(correo: String, clave: String) async -> Resultado<SesionAbierta>
 
+    /// `POST /auth/social` (contrato 1.4.0). `nonce` va EN CLARO.
+    func entrarConProveedor(_ proveedor: Proveedor, idToken: String, nonce: String) async -> Resultado<DesenlaceSocial>
+    /// Como `completarRegistro`, pero la credencial es el permiso de alta social.
+    /// `token` (el permiso del código) va `nil` cuando el proveedor ya verificó el
+    /// correo: en ese caso no se pide código.
+    func completarRegistroSocial(token: String?, permisoSocial: String, aceptacion: AceptacionLegal,
+                                 perfil: PerfilEntrada) async -> Resultado<SesionAbierta>
+
     func pedirCodigoDeClave(correo: String) async -> Resultado<DesafioCorreo>
     func verificarCodigoDeClave(correo: String, codigo: String) async -> Resultado<TokenDeReseteo>
     func cambiarClave(token: String, clave: String) async -> Resultado<SesionAbierta>
@@ -112,6 +129,10 @@ public extension ServicioDeCuenta {
     }
     func objetivos() async -> Resultado<[ObjetivoDeUsuario]> { .sinRed }
     func guardarObjetivos(_ objetivos: [ObjetivoDeUsuario]) async -> Resultado<[ObjetivoDeUsuario]> { .sinRed }
+    // Los dobles de prueba que no los usan no tienen que implementarlos.
+    func entrarConProveedor(_ proveedor: Proveedor, idToken: String, nonce: String) async -> Resultado<DesenlaceSocial> { .sinRed }
+    func completarRegistroSocial(token: String?, permisoSocial: String, aceptacion: AceptacionLegal,
+                                 perfil: PerfilEntrada) async -> Resultado<SesionAbierta> { .sinRed }
 }
 
 extension ServicioDeCuenta {
@@ -241,6 +262,39 @@ public final class ApiTrainer: ServicioDeCuenta, ServicioDelPlan, ServicioDeActi
     public func entrar(correo: String, clave: String) async -> Resultado<SesionAbierta> {
         let respuesta: Resultado<Sesion> = await cliente.pedir(
             .post, "/auth/login", cuerpo: PedidoLogin(email: correo, password: clave))
+        return await abrir(respuesta)
+    }
+
+    // MARK: - Google y Apple
+
+    public func entrarConProveedor(_ proveedor: Proveedor, idToken: String,
+                                   nonce: String) async -> Resultado<DesenlaceSocial> {
+        let respuesta: Resultado<EntradaSocial> = await cliente.pedir(
+            .post, "/auth/social",
+            cuerpo: PedidoSocial(provider: proveedor.claveDelContrato, idToken: idToken, nonce: nonce))
+        switch respuesta {
+        case .ok(let entrada):
+            switch entrada.status {
+            case .signedIn:
+                guard let sesion = entrada.session else { return .respuestaRara(http: 200) }
+                await renovador.establecer(sesion)
+                return .ok(.entro(SesionAbierta(usuario: sesion.userId)))
+            case .signupRequired:
+                guard let alta = entrada.signup else { return .respuestaRara(http: 200) }
+                return .ok(.faltaElAlta(alta))
+            }
+        case .rechazado(let codigo, let http): return .rechazado(codigo: codigo, http: http)
+        case .sinRed: return .sinRed
+        case .respuestaRara(let http): return .respuestaRara(http: http)
+        }
+    }
+
+    public func completarRegistroSocial(token: String?, permisoSocial: String, aceptacion: AceptacionLegal,
+                                        perfil: PerfilEntrada) async -> Resultado<SesionAbierta> {
+        let respuesta: Resultado<Sesion> = await cliente.pedir(
+            .post, "/auth/register/complete",
+            cuerpo: PedidoCompletarSocial(registrationToken: token, socialToken: permisoSocial,
+                                          profile: perfil, legal: aceptacion))
         return await abrir(respuesta)
     }
 
@@ -503,6 +557,33 @@ struct PedidoCompletar: Encodable, Sendable {
         case password
         case profile
         case legal
+    }
+}
+
+struct PedidoCompletarSocial: Encodable, Sendable {
+    /// `nil` = no viaja (el proveedor ya verificó el correo).
+    let registrationToken: String?
+    let socialToken: String
+    let profile: PerfilEntrada
+    let legal: AceptacionLegal
+
+    enum CodingKeys: String, CodingKey {
+        case registrationToken = "registration_token"
+        case socialToken = "social_token"
+        case profile
+        case legal
+    }
+}
+
+struct PedidoSocial: Encodable, Sendable {
+    let provider: String
+    let idToken: String
+    let nonce: String
+
+    enum CodingKeys: String, CodingKey {
+        case provider
+        case idToken = "id_token"
+        case nonce
     }
 }
 

@@ -99,6 +99,14 @@ extension DatosRegistro {
         !nombre.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
     }
 
+    /// Lo que pide el primer paso del alta: el nombre (el apellido es opcional,
+    /// como dice su etiqueta) y que ninguno pase el largo del contrato.
+    var identidadLista: Bool {
+        nombreListo
+            && nombre.count <= Self.largoMaximoDelNombre
+            && apellido.count <= Self.largoMaximoDelNombre
+    }
+
     var nombreCompletoListo: Bool {
         nombreListo && !apellido.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
             && nombre.count <= Self.largoMaximoDelNombre
@@ -280,7 +288,7 @@ extension DatosRegistro {
     }
 
     /// Sin espacios de sobra y dentro del largo del contrato.
-    private static func recortado(_ texto: String) -> String {
+    static func recortado(_ texto: String) -> String {
         String(texto.trimmingCharacters(in: .whitespacesAndNewlines).prefix(largoMaximoDelNombre))
     }
 }

@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
+<!-- Ícono de Stamina (el serval, 2026-10-21). La cara entera va dentro de la zona
+     visible del ícono adaptativo (72 de 108 dp), sobre el color de su borde. -->
 <adaptive-icon xmlns:android="http://schemas.android.com/apk/res/android">
-    <background android:drawable="@drawable/ic_launcher_background" />
-    <foreground android:drawable="@drawable/ic_launcher_foreground" />
-    <monochrome android:drawable="@drawable/ic_launcher_foreground" />
+    <background android:drawable="@mipmap/ic_launcher_fondo_stamina" />
+    <foreground android:drawable="@mipmap/ic_launcher_foreground_stamina" />
 </adaptive-icon>

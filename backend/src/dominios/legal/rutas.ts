@@ -8,25 +8,12 @@
  * quien programa. Cuantos menos campos con significado tenga, menos chances de que
  * una corrección de redacción rompa la pantalla.
  */
-import type { FastifyInstance } from "fastify";
-import { cargar, versionLegal, borradores } from "./textos.js";
+import type { FastifyInstance, FastifyRequest } from "fastify";
+import { cargar, versionLegal, borradores, type ContenidoLegal, type IdiomaLegal } from "./textos.js";
 
-interface Punto {
-  titulo: string;
-  cuerpo: string;
-}
-
-interface AvisoCrudo {
-  titulo: string;
-  resumen: string;
-  puntos?: Punto[];
-  secciones?: Punto[];
-  aceptacion: string;
-}
-
-function aBloque(crudo: AvisoCrudo) {
-  // `puntos` en el aviso, `secciones` en los términos: los dos son lo mismo para
-  // el teléfono, así que el nombre distinto del archivo se aplana acá y no allá.
+function aBloque(crudo: ContenidoLegal) {
+  // `puntos` en el aviso, `secciones` en los términos y la privacidad: los tres
+  // son lo mismo para el teléfono, así que se aplanan acá y no allá.
   const partes = crudo.puntos ?? crudo.secciones ?? [];
   return {
     title: crudo.titulo,
@@ -36,18 +23,33 @@ function aBloque(crudo: AvisoCrudo) {
   };
 }
 
+/**
+ * En qué idioma van los textos: el primero de `Accept-Language`. Castellano y
+ * francés si los pide; cualquier otro, inglés (el idioma por defecto de la app).
+ */
+export function idiomaLegal(req: Pick<FastifyRequest, "headers">): IdiomaLegal {
+  const header = req.headers["accept-language"];
+  const primero = (Array.isArray(header) ? header[0] : header)?.split(",")[0]?.trim().toLowerCase() ?? "";
+  if (primero.startsWith("es")) return "es";
+  if (primero.startsWith("fr")) return "fr";
+  return "en";
+}
+
 export async function rutasLegales(app: FastifyInstance): Promise<void> {
-  app.get("/legal", async () => {
-    const archivo = cargar().textos as unknown as Record<string, AvisoCrudo>;
+  app.get("/legal", async (req) => {
+    const idioma = idiomaLegal(req);
+    const textos = cargar().textos;
     return {
       data: {
         version: versionLegal(),
-        // Se manda tal como está: en desarrollo la app puede mostrar que el texto
-        // todavía no lo revisó nadie. En producción el proceso no arranca con esto
-        // en `false`, así que nunca llega un `false` a una persona real.
+        language: idioma,
+        // Se manda tal como está: en desarrollo y staging la app muestra que el
+        // texto todavía no lo revisó nadie. En producción el proceso no arranca
+        // con esto en `false`, así que nunca llega un `false` a una persona real.
         reviewed: borradores().length === 0,
-        health_notice: aBloque(archivo.aviso_de_salud as AvisoCrudo),
-        terms: aBloque(archivo.terminos as AvisoCrudo),
+        health_notice: aBloque(textos.aviso_de_salud![idioma]),
+        terms: aBloque(textos.terminos![idioma]),
+        privacy: aBloque(textos.privacidad![idioma]),
       },
     };
   });

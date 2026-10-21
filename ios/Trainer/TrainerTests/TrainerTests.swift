@@ -303,6 +303,32 @@ struct FlujoTests {
         #expect(flujo.claveNuevaLista)
     }
 
+    @Test("La contraseña segura del iPhone llena las dos y la confirmación se oculta")
+    func contrasenaSugerida() {
+        let flujo = flujo()
+        // El autocompletado llena las dos de una vez, en cualquier orden.
+        flujo.claveDeRegistroRepetida = "Xk9-pQr2-mW7z"
+        flujo.claveDeRegistro = "Xk9-pQr2-mW7z"
+        #expect(flujo.claveSugeridaPorElSistema)
+        #expect(flujo.claveDeRegistroLista)
+
+        // Si después se cambia la primera, hay que volver a confirmarla.
+        flujo.claveDeRegistro = "Xk9-pQr2-mW7zA"
+        #expect(!flujo.claveSugeridaPorElSistema)
+        #expect(flujo.claveDeRegistroRepetida.isEmpty)
+    }
+
+    @Test("Tipear la confirmación letra por letra no cuenta como sugerida")
+    func contrasenaTipeada() {
+        let flujo = flujo()
+        flujo.claveDeRegistro = "Trainer2026x"
+        for largo in 1..."Trainer2026x".count {
+            flujo.claveDeRegistroRepetida = String("Trainer2026x".prefix(largo))
+        }
+        #expect(!flujo.claveSugeridaPorElSistema)
+        #expect(flujo.claveDeRegistroLista)
+    }
+
     @Test("Volver dentro del registro retrocede UN paso, no deshace la historia")
     func volverEnElRegistro() {
         let flujo = flujo()
@@ -332,7 +358,7 @@ struct FlujoTests {
         let flujo = flujo()
         flujo.ir(a: .regCorreo)
         flujo.ir(a: .regCodigo)
-        flujo.ir(a: .regClave)
+        flujo.ir(a: .regAviso)
 
         flujo.volver()
         flujo.volver()
@@ -343,10 +369,10 @@ struct FlujoTests {
     @Test("Del primer paso de perfil no se vuelve: la cuenta ya existe")
     func delPerfilNoSeVuelveAlAlta() {
         let flujo = flujo()
-        flujo.ir(a: .regNombre)
-        #expect(Pantalla.regNombre.cabecera == .soloAvance, "barra de avance, sin flecha")
+        flujo.ir(a: .regNacimiento)
+        #expect(Pantalla.regNacimiento.cabecera == .soloAvance, "barra de avance, sin flecha")
         flujo.volver()
-        #expect(flujo.pantalla == .regNombre)
+        #expect(flujo.pantalla == .regNacimiento)
     }
 
     @Test("Los términos vuelven al aviso")
@@ -358,14 +384,15 @@ struct FlujoTests {
         #expect(flujo.pantalla == .regAviso)
     }
 
-    @Test("Son QUINCE pasos: los 13 del diseño más la contraseña y el aviso de salud")
+    @Test("Son TRECE pasos: datos+contraseña, código, aviso y los diez de perfil")
     func pasosDelRegistro() {
-        #expect(Pantalla.pasosDelRegistro.count == 15)
+        #expect(Pantalla.pasosDelRegistro.count == 13)
         #expect(Pantalla.pasosDelRegistro.first == .regCorreo)
-        #expect(Pantalla.regClave.numeroDePaso == 3)
-        #expect(Pantalla.regAviso.numeroDePaso == 4)
-        #expect(Pantalla.regNombre.numeroDePaso == 5, "la barra NO se reinicia al crear la cuenta")
-        #expect(Pantalla.regObjetivo.numeroDePaso == 11)
+        #expect(Pantalla.regClave.numeroDePaso == nil, "la contraseña va con el correo")
+        #expect(Pantalla.regNombre.numeroDePaso == nil, "el nombre va con el correo")
+        #expect(Pantalla.regAviso.numeroDePaso == 3)
+        #expect(Pantalla.regNacimiento.numeroDePaso == 4, "la barra NO se reinicia al crear la cuenta")
+        #expect(Pantalla.regObjetivo.numeroDePaso == 9)
         #expect(Pantalla.pasosDelRegistro.last == .regListo)
         #expect(Pantalla.pasosDePerfil.count == 11)
         // Las de afuera del registro no cuentan para la barra de avance.
@@ -397,13 +424,15 @@ struct FlujoContraElServidorTests {
     /// crear la cuenta.
     private func llegarAlAviso(_ flujo: FlujoEntrada) async {
         flujo.ir(a: .regCorreo)
+        flujo.datos.nombre = "Persona"
+        flujo.datos.apellido = "Ejemplo"
         flujo.datos.correo = " persona@ejemplo.com "
+        // La contraseña va en el mismo paso que el correo (2026-10-21).
+        flujo.claveDeRegistro = "Trainer2026x"
+        flujo.claveDeRegistroRepetida = "Trainer2026x"
         await flujo.pedirCodigoDeRegistro()
         flujo.datos.codigo = "A7K2Q9"
         await flujo.verificarCodigoDeRegistro()
-        flujo.claveDeRegistro = "Trainer2026x"
-        flujo.claveDeRegistroRepetida = "Trainer2026x"
-        flujo.seguirConLaClave()
         await flujo.cargarLegalesSiFaltan()
         flujo.aceptoElAviso = true
     }
@@ -474,12 +503,13 @@ struct FlujoContraElServidorTests {
         #expect(flujo.pantalla == .regAviso)
         await flujo.crearCuenta()
 
-        #expect(flujo.pantalla == .regNombre)
+        #expect(flujo.pantalla == .regNacimiento)
         #expect(await doble.pedidos == ["pedirCodigoDeRegistro:persona@ejemplo.com",
                                         "verificarCodigoDeRegistro", "textosLegales", "completarRegistro"])
         #expect(await doble.altas == [ServicioDePrueba.Alta(token: "permiso-alta", clave: "Trainer2026x",
-                                                            version: "1.0.0", perfil: PerfilEntrada())],
-                "el perfil viaja vacío: lo guardan los once pasos después")
+                                                            version: "1.0.0",
+                                                            perfil: PerfilEntrada(firstName: "Persona", lastName: "Ejemplo"))],
+                "el nombre viaja con el alta; lo demás lo guardan los pasos de perfil")
         #expect(flujo.claveDeRegistro.isEmpty, "la contraseña se suelta apenas se usa")
     }
 
@@ -492,7 +522,7 @@ struct FlujoContraElServidorTests {
 
         await flujo.crearCuenta()
 
-        #expect(flujo.pantalla == .regClave)
+        #expect(flujo.pantalla == .regCorreo, "la contraseña se elige con el correo")
         #expect(flujo.errorVisible == Textos.errorWeakPassword)
     }
 
@@ -515,7 +545,7 @@ struct FlujoContraElServidorTests {
         flujo.aceptoElAviso = true
         await flujo.crearCuenta()
         #expect(await doble.altas.map(\.version) == ["1.0.0", "1.1.0"])
-        #expect(flujo.pantalla == .regNombre)
+        #expect(flujo.pantalla == .regNacimiento)
     }
 
     @Test("Si el pedido de alta se corta, la salida es entrar, no volver al correo")
@@ -628,7 +658,7 @@ struct FlujoContraElServidorTests {
         #expect(flujo.ofrecerLogin, "la cuenta pudo crearse del otro lado")
 
         await flujo.crearCuenta()
-        #expect(flujo.pantalla == .regNombre, "reintentar con el mismo permiso sigue valiendo")
+        #expect(flujo.pantalla == .regNacimiento, "reintentar con el mismo permiso sigue valiendo")
         #expect(await doble.altas.map(\.token) == ["permiso-alta", "permiso-alta"])
     }
 
@@ -953,8 +983,7 @@ struct FlujoContraElServidorTests {
         await llegarAlAviso(flujo)
         #expect(flujo.aceptoElAviso)
 
-        flujo.volver()  // aviso → contraseña
-        flujo.volver()  // contraseña → código
+        flujo.volver()  // aviso → código (la contraseña va con el correo)
         flujo.volver()  // código → correo
         #expect(!flujo.datos.correo.isEmpty, "adentro del alta, volver no borra")
         flujo.volver()  // correo → bienvenida
@@ -1012,8 +1041,7 @@ struct FlujoContraElServidorTests {
         await llegarAlAviso(flujo)
         #expect(flujo.aceptoElAviso)
 
-        flujo.volver()  // aviso → contraseña
-        flujo.volver()  // contraseña → código
+        flujo.volver()  // aviso → código (la contraseña va con el correo)
         await flujo.pedirCodigoDeRegistro()  // "Reenviar": el permiso de antes deja de valer
 
         #expect(!flujo.aceptoElAviso, "lo aceptado con otro permiso no vale para éste")

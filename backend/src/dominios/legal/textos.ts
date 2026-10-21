@@ -30,13 +30,23 @@ import { fileURLToPath } from "node:url";
 
 export type EstadoLegal = "borrador" | "revisado";
 
-interface TextoLegal {
+/** Los idiomas en que está cada texto (2026-10-21). */
+export const IDIOMAS_LEGALES = ["es", "en", "fr"] as const;
+export type IdiomaLegal = (typeof IDIOMAS_LEGALES)[number];
+
+export interface ContenidoLegal {
+  titulo: string;
+  resumen: string;
+  puntos?: { titulo: string; cuerpo: string }[];
+  secciones?: { titulo: string; cuerpo: string }[];
+  aceptacion: string;
+}
+
+type TextoLegal = {
   estado: EstadoLegal;
   revisado_por: string | null;
   revisado_en: string | null;
-  titulo: string;
-  aceptacion: string;
-}
+} & Record<IdiomaLegal, ContenidoLegal>;
 
 interface Archivo {
   _meta: { version: string; fecha: string };

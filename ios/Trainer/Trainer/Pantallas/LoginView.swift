@@ -1,17 +1,15 @@
 import SwiftUI
 import TrainerCore
 
-/// `login` — correo y contraseña contra `POST /auth/login`, con las dos
-/// alternativas de proveedor.
+/// `login` — correo y contraseña contra `POST /auth/login`, o Google / Apple
+/// contra `POST /auth/social` (contrato 1.4.0).
 ///
-/// 🪤 Google y Apple están **diseñados y no implementados**: el contrato v1 no
-/// tiene endpoint de OAuth (`shared/api/openapi.yaml` sólo trae `/auth/login`).
-/// El botón dice la verdad en vez de fingir: avisa que todavía no está. Un botón
-/// que no hace nada es peor que uno que explica por qué — y uno que dice "algo
-/// salió mal" miente, porque no salió nada.
+/// Con un proveedor, si la cuenta ya existe se entra; si es nueva, sigue el alta
+/// de siempre con nombre, apellido y correo ya escritos (ver
+/// `FlujoEntrada.entrarCon`). Los dos botones son un par limpio —mismo fondo, borde
+/// fino, logo y texto centrados— como la referencia que mandó Iván.
 struct LoginView: View {
     @EnvironmentObject private var flujo: FlujoEntrada
-    @State private var avisoDeProveedor = false
 
     var body: some View {
         VStack(spacing: 0) {
@@ -37,9 +35,12 @@ struct LoginView: View {
                                 CampoTexto(etiqueta: Textos.commonEmailLabel,
                                            marcador: Textos.commonEmailPlaceholder,
                                            texto: $flujo.loginCorreo,
-                                           contenido: .correo, teclado: .correo)
+                                           contenido: .correo, teclado: .correo,
+                                           conError: flujo.correoRechazado || flujo.error(de: .correo) != nil)
                                 if flujo.correoRechazado {
                                     PistaDeCorreoRechazado()
+                                } else {
+                                    ErrorDeCampo(flujo.error(de: .correo))
                                 }
                             }
                             .muestraElCorreoRechazado(flujo.correoRechazado, desplazando: desplazamiento)
@@ -48,7 +49,10 @@ struct LoginView: View {
                         CampoTexto(etiqueta: Textos.loginPasswordLabel,
                                    marcador: Textos.commonPasswordPlaceholder,
                                    texto: $flujo.loginClave,
-                                   contenido: .claveActual, seguro: true)
+                                   contenido: .claveActual, seguro: true,
+                                   conError: flujo.error(de: .clave) != nil)
+                        ErrorDeCampo(flujo.error(de: .clave))
+                            .padding(.top, -TokensEspaciado.e6)
 
                         HStack {
                             Spacer()
@@ -68,7 +72,7 @@ struct LoginView: View {
                         // vista. Apagado sigue siendo el color de la app.
                         BotonPrimario(Textos.loginSignIn,
                                       habilitado: flujo.loginListo && !flujo.enCurso,
-                                      cargando: flujo.enCurso,
+                                      cargando: flujo.enCurso && flujo.conectandoCon == nil,
                                       motivoDeshabilitado: Textos.commonCompleteToContinue) {
                             Task { await flujo.entrar() }
                         }
@@ -77,43 +81,51 @@ struct LoginView: View {
 
                     separador
 
-                    VStack(spacing: TokensEspaciado.e10) {
-                        BotonProveedor(.google, titulo: Textos.loginGoogle) {
-                            avisoDeProveedor = true
+                    // El grupo alinea los textos: "Continuar…" empieza en el mismo
+                    // pixel en los dos botones.
+                    GrupoDeProveedores {
+                        BotonProveedor(.google, titulo: Textos.loginGoogle,
+                                       cargando: flujo.conectandoCon == .google) {
+                            Task { await flujo.entrarCon(.google) }
                         }
-                        BotonProveedor(.apple, titulo: Textos.loginApple) {
-                            avisoDeProveedor = true
-                        }
-                        if avisoDeProveedor {
-                            AvisoSuave(Textos.loginSocialUnavailable)
+                        BotonProveedor(.apple, titulo: Textos.loginApple,
+                                       cargando: flujo.conectandoCon == .apple) {
+                            Task { await flujo.entrarCon(.apple) }
                         }
                     }
+                    .disabled(flujo.enCurso)
+
+                    // 2026-10-21: va DENTRO del scroll, debajo de Google y Apple, y
+                    // no pegado al pie. Pegado al pie subía con el teclado y se
+                    // chocaba con los botones de "Continuar con…".
+                    HStack(spacing: TokensEspaciado.e4) {
+                        Text(Textos.loginNoAccount)
+                            .estilo(.cuerpoSecundario, color: Paleta.textoTerciario)
+                        Button { flujo.ir(a: .regCorreo) } label: {
+                            Text(Textos.loginSignUp)
+                                .estilo(.cuerpoSecundario, color: Paleta.acento)
+                                .padding(.vertical, TokensEspaciado.e4)
+                                .contentShape(Rectangle())
+                        }
+                        .buttonStyle(.plain)
+                    }
+                    .frame(maxWidth: .infinity, alignment: .center)
+                    .padding(.top, TokensEspaciado.e8)
                 }
                 .padding(.horizontal, TokensEspaciado.e22)
                 .padding(.top, TokensEspaciado.e12)
+                .padding(.bottom, TokensEspaciado.e34)
             }
             .scrollDismissesKeyboardCompat()
-
-            VStack(spacing: TokensEspaciado.e12) {
-                HStack(spacing: TokensEspaciado.e4) {
-                    Text(Textos.loginNoAccount)
-                        .estilo(.cuerpoSecundario, color: Paleta.textoTerciario)
-                    Button { flujo.ir(a: .regCorreo) } label: {
-                        Text(Textos.loginSignUp)
-                            .estilo(.cuerpoSecundario, color: Paleta.acento)
-                            .padding(.vertical, TokensEspaciado.e4)
-                            .contentShape(Rectangle())
-                    }
-                    .buttonStyle(.plain)
-                }
-            }
-            .padding(.horizontal, TokensEspaciado.e22)
-            .padding(.bottom, TokensEspaciado.e34)
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
         .background(Paleta.fondo)
         // Un error viejo no tiene que quedar pegado a lo que se está corrigiendo.
-        .onChange(of: flujo.loginClave) { _ in flujo.errorVisible = nil }
+        .onChange(of: flujo.loginClave) { _ in
+            flujo.errorVisible = nil
+            flujo.corrigiendo(.clave)
+        }
+        .onChange(of: flujo.loginCorreo) { _ in flujo.corrigiendo(.correo) }
     }
 
     private var separador: some View {

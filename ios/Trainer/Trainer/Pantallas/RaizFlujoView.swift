@@ -118,8 +118,9 @@ struct RaizFlujoView: View {
 
             switch flujo.pantalla.cabecera {
             case .volverYAvance, .soloAvance:
-                BarraAvanceSegmentada(paso: flujo.pantalla.numeroDePaso ?? 1,
-                                      total: Pantalla.pasosDelRegistro.count,
+                // Con Google o Apple el alta no tiene contraseña: un paso menos.
+                BarraAvanceSegmentada(paso: flujo.numeroDelPasoActual ?? 1,
+                                      total: flujo.pasosDelAlta.count,
                                       descripcion: Textos.commonSignupProgress)
             case .soloVolver, .ninguna:
                 Spacer()

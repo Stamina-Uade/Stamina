@@ -198,8 +198,8 @@ struct RegDiasView: View {
 /// No guarda nada: cada paso anterior ya guardó lo suyo. Lo que se ve acá es un
 /// espejo de eso, no un último pedido que pueda fallar.
 ///
-/// Rediseño 2026-10 (ronda 4): en vez del sello con tilde, festeja la mascota
-/// con la medalla y dice el título en un globito. El párrafo largo
+/// Rediseño 2026-10: el sello con tilde y el título (la mascota ya no aparece en
+/// el acceso ni en el alta, pedido de Iván del 20-10). El párrafo largo
 /// (`regListoTexto`) se cambió por una línea. Arma su propio andamio —el de
 /// `PantallaCierre` dibuja el sello— con el mismo pie fijo de los pasos.
 struct RegListoView: View {
@@ -209,9 +209,15 @@ struct RegListoView: View {
         VStack(spacing: 0) {
             ScrollView {
                 VStack(spacing: TokensEspaciado.e16) {
-                    MascotaConBocadillo(pose: .medalla,
-                                        texto: Textos.signupDoneTitle(nombre),
-                                        altoMaximo: TokensEspaciado.e56 * 4)
+                    // 2026-10-20: el alta va sin mascota (pedido de Iván); vuelve
+                    // el sello del cierre, con el título debajo.
+                    SelloDeCierre()
+
+                    Text(Textos.signupDoneTitle(nombre))
+                        .estilo(.display)
+                        .multilineTextAlignment(.center)
+                        .fixedSize(horizontal: false, vertical: true)
+                        .accessibilityAddTraits(.isHeader)
 
                     Text(Textos.signupDoneProfileComplete)
                         .estilo(.cuerpoDestacado, color: Paleta.textoSecundario)

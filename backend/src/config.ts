@@ -95,6 +95,21 @@ export interface Config {
   readonly smtp: ConfigSmtp | null;
   /** Versión desplegada. La pone el despliegue; en local queda "dev". */
   readonly version: string;
+  /**
+   * Los client id que se aceptan como `aud` de un id_token de Google o Apple
+   * (`POST /auth/social`). No son secretos: van dentro de la app. Lista vacía = ese
+   * proveedor contesta `provider_not_configured`.
+   *
+   * - GOOGLE_CLIENT_IDS: el client id de iOS (y el de Android/web si los hay), separados por coma.
+   * - APPLE_CLIENT_IDS: el bundle id de la app. Por defecto, el de Stamina.
+   */
+  readonly proveedores: { readonly google: readonly string[]; readonly apple: readonly string[] };
+}
+
+function lista(nombre: string, porDefecto: readonly string[]): string[] {
+  const v = leer(nombre);
+  if (v === undefined) return [...porDefecto];
+  return v.split(",").map((x) => x.trim()).filter((x) => x.length > 0);
 }
 
 export function cargarConfig(): Config {
@@ -194,5 +209,9 @@ export function cargarConfig(): Config {
     mailFrom: leer("MAIL_FROM") ?? "no-responder@example.invalid",
     smtp,
     version: leer("TRAINER_VERSION") ?? "dev",
+    proveedores: {
+      google: lista("GOOGLE_CLIENT_IDS", []),
+      apple: lista("APPLE_CLIENT_IDS", ["com.tecladus.Trainer"]),
+    },
   };
 }

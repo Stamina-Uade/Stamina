@@ -45,12 +45,21 @@ export async function rutasAuth(app: FastifyInstance, ctx: Contexto): Promise<vo
 
   app.post("/auth/register/complete", { schema: { body: cuerpo("registerComplete") } }, async (req, res) => {
     const b = req.body as {
-      registration_token: string;
-      password: string;
+      registration_token?: string;
+      password?: string;
+      social_token?: string;
       profile: Record<string, unknown>;
       legal: { version: string; accepted: boolean };
     };
-    const { sesion, usuarioId } = await auth.registroCompletar(b.registration_token, b.password, b.legal);
+    // Una de las dos credenciales, nunca las dos ni ninguna (contrato 1.4.0).
+    if ((b.password === undefined) === (b.social_token === undefined)) {
+      throw new ErrorApi("bad_request", "Send exactly one of password or social_token");
+    }
+    if (b.password !== undefined && b.registration_token === undefined) {
+      throw new ErrorApi("invalid_registration_token", "Registration token is required");
+    }
+    const credencial = b.password !== undefined ? { password: b.password } : { socialToken: b.social_token as string };
+    const { sesion, usuarioId } = await auth.registroCompletar(b.registration_token, credencial, b.legal);
     // El perfil se guarda en la misma operación: una cuenta sin perfil no le
     // sirve al motor del plan (AGENTS.md §9.1).
     await perfiles.guardar(usuarioId, b.profile, ctx.ahoraMs());
@@ -62,6 +71,12 @@ export async function rutasAuth(app: FastifyInstance, ctx: Contexto): Promise<vo
   app.post("/auth/login", { config: ESTRICTO, schema: { body: cuerpo("login") } }, async (req) => {
     const b = req.body as { email: string; password: string };
     return { data: await auth.login(b.email, b.password) };
+  });
+
+  // ------------------------------------------------------- Google y Apple --
+  app.post("/auth/social", { config: ESTRICTO, schema: { body: cuerpo("socialSignIn") } }, async (req) => {
+    const b = req.body as { provider: "google" | "apple"; id_token: string; nonce: string };
+    return { data: await auth.entrarConProveedor(b.provider, b.id_token, b.nonce) };
   });
 
   app.post("/auth/refresh", { schema: { body: cuerpo("refresh") } }, async (req) => {

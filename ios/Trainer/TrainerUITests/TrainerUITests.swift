@@ -45,8 +45,8 @@ final class FlujoDeEntradaUITests: XCTestCase {
 
     func testCadaPantallaTieneComoMuchoUnaFlechaDeVolver() {
         let conFlecha = ["login", "claveCorreo", "claveCodigo", "claveNueva",
-                         "regCorreo", "regCodigo", "regClave", "regAviso", "regTerminos",
-                         "regNacimiento", "regSexo",
+                         "regCorreo", "regCodigo", "regAviso", "regTerminos",
+                         "regSexo",
                          "regCuerpo", "regDeporte", "regNivel", "regObjetivo", "regSalud",
                          "regMedicion", "regDias"]
         for pantalla in conFlecha {
@@ -58,11 +58,13 @@ final class FlujoDeEntradaUITests: XCTestCase {
         }
     }
 
-    /// `regNombre` está acá a propósito: es el primer paso con la cuenta ya creada,
+    /// `regNacimiento` está acá a propósito: es el primer paso con la cuenta ya
+    /// creada (desde 2026-10-21, que el nombre y la contraseña van con el correo),
     /// y atrás sólo hay pasos que mandarían un permiso consumido (decisión 0008).
-    /// Lleva la barra de avance y no la flecha.
+    /// Lleva la barra de avance y no la flecha. `regNombre` y `regClave` ya no son
+    /// pasos del alta.
     func testLasPantallasDeEntradaYDeCierreNoTienenFlecha() {
-        for pantalla in ["bienvenida", "claveLista", "regListo", "regNombre"] {
+        for pantalla in ["bienvenida", "claveLista", "regListo", "regNacimiento", "regNombre"] {
             let app = abrir(pantalla)
             XCTAssertEqual(app.buttons.matching(identifier: "Volver").count, 0,
                            "«\(pantalla)» no debería tener flecha de volver")
@@ -87,14 +89,15 @@ final class FlujoDeEntradaUITests: XCTestCase {
             ("regDias", "Martes"),
             ("claveNueva", "Nueva contraseña"),
             ("claveCorreo", "Correo electrónico"),
-            ("regClave", "Nueva contraseña"),
             // Sin servidor el texto legal no baja: lo que tiene que estar es el
             // estado de la pantalla, cargando o sin texto, y nunca un hueco.
             ("regAviso", "Aviso de salud"),
         ]
         for (pantalla, texto) in esperado {
             let app = abrir(pantalla)
-            XCTAssertTrue(app.staticTexts[texto].waitForExistence(timeout: 5),
+            // `descendants` y no `staticTexts`: la etiqueta de un campo (etiqueta
+            // flotante, 2026-10-21) es el nombre del campo, no un texto suelto.
+            XCTAssertTrue(app.descendants(matching: .any)[texto].firstMatch.waitForExistence(timeout: 5),
                           "«\(pantalla)» debería mostrar «\(texto)» en su contenido")
             app.terminate()
         }
@@ -112,7 +115,7 @@ final class FlujoDeEntradaUITests: XCTestCase {
 
     func testLaFlechaRetrocedeUnPasoDelRegistro() {
         let app = abrir("regCuerpo")                     // paso 8
-        XCTAssertTrue(app.staticTexts["Peso (kg)"].waitForExistence(timeout: 5))
+        XCTAssertTrue(app.descendants(matching: .any)["Peso (kg)"].firstMatch.waitForExistence(timeout: 5))
 
         app.buttons["Volver"].tap()                      // -> paso 7, sexo
         XCTAssertTrue(app.staticTexts["Femenino"].waitForExistence(timeout: 5),
@@ -165,18 +168,17 @@ final class FlujoDeEntradaUITests: XCTestCase {
     /// de uno de uno—, cada cambio de foto movía todo lo de arriba: la marca y el
     /// título.
     ///
-    /// Se mira en los dos idiomas a propósito. En español, en el ancho del iPhone
-    /// 16 Pro, las tres fotos miden hoy lo mismo; en inglés "Get ready for race
-    /// day" entra en un renglón. Mirando sólo el español, el test pasaría también
-    /// sin el arreglo.
+    /// Se mira en los dos idiomas a propósito: los títulos de uno y otro idioma no
+    /// se cortan en el mismo lugar, y mirando uno solo el test podría pasar sin el
+    /// arreglo.
     func testLaBienvenidaNoSaltaEntreFotos() {
         let casos = [
             (idioma: "es", region: "es_AR", irALaFoto: "Ver la foto %d de 3",
-             titulo1: "Entrená y comé según la carga del día",
-             titulo3: "Preparate para el día de la carrera"),
+             titulo1: "Tu plan de running, a tu ritmo",
+             titulo3: "Llegá entero al día de la carrera"),
             (idioma: "en", region: "en_US", irALaFoto: "Show photo %d of 3",
-             titulo1: "Train and eat for the day's load",
-             titulo3: "Get ready for race day"),
+             titulo1: "Your running plan, at your pace",
+             titulo3: "Show up strong on race day"),
         ]
         for caso in casos {
             let app = XCUIApplication()
@@ -293,6 +295,18 @@ final class FlujoDeEntradaUITests: XCTestCase {
             XCTAssertTrue(correo.waitForExistence(timeout: 5))
             XCTAssertFalse(boton.isEnabled, "«\(caso.pantalla)»: sin nada escrito, el botón no se prende")
 
+            if caso.pantalla == "regCorreo" {
+                // Desde 2026-10-21 el alta pide todo junto: nombre, apellido,
+                // correo, contraseña y su confirmación.
+                for (campo, texto) in [("Nombre", "Iván"), ("Apellido (opcional)", "Karkoszka")] {
+                    app.textFields[campo].tap()
+                    app.textFields[campo].typeText(texto)
+                }
+                for campo in ["Contraseña", "Repetir contraseña"] {
+                    app.secureTextFields[campo].tap()
+                    app.secureTextFields[campo].typeText("Trainer2026x")
+                }
+            }
             correo.tap()
             correo.typeText("ivan")
             if caso.pantalla == "login" {
@@ -342,6 +356,14 @@ final class FlujoDeEntradaUITests: XCTestCase {
 
         let correo = app.textFields["Correo electrónico"]
         XCTAssertTrue(correo.waitForExistence(timeout: 5))
+        for (campo, texto) in [("Nombre", "Iván"), ("Apellido (opcional)", "Karkoszka")] {
+            app.textFields[campo].tap()
+            app.textFields[campo].typeText(texto)
+        }
+        for campo in ["Contraseña", "Repetir contraseña"] {
+            app.secureTextFields[campo].tap()
+            app.secureTextFields[campo].typeText("Trainer2026x")
+        }
         correo.tap()
         correo.typeText("ivan")
         app.buttons["Enviarme el código"].tap()

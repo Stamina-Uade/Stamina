@@ -24,7 +24,7 @@ import PackageDescription
 
 let package = Package(
     name: "TrainerCore",
-    defaultLocalization: "es",
+    defaultLocalization: "en",
     platforms: [
         .iOS(.v16),
         .watchOS(.v9),

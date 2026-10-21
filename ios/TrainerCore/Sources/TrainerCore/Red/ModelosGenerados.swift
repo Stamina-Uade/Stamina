@@ -3,7 +3,7 @@
 // NO EDITAR A MANO: se reescribe en cada `npm run generar:modelos`, y el CI
 // falla si el archivo commiteado no coincide con lo que el generador produce.
 //
-// Contrato 1.3.0
+// Contrato 1.4.0
 //
 // AGENTS.md §4.2: los modelos de red se generan desde el contrato, no se
 // escriben a mano. AGENTS.md §5: a partir de la primera versión en tienda,
@@ -232,6 +232,56 @@ public struct Sesion: Codable, Equatable, Sendable {
     }
 }
 
+/// Lo que contesta `POST /auth/social`. Trae `session` o `signup`, según `status`.
+public struct EntradaSocial: Codable, Equatable, Sendable {
+    public enum Status: String, Codable, CaseIterable, Sendable {
+        case signedIn = "signed_in"
+        case signupRequired = "signup_required"
+    }
+
+    public let status: Status
+    public let session: Sesion?
+    public let signup: AltaSocialPendiente?
+
+    public init(
+        status: Status,
+        session: Sesion? = nil,
+        signup: AltaSocialPendiente? = nil
+    ) {
+        self.status = status
+        self.session = session
+        self.signup = signup
+    }
+}
+
+/// El permiso para terminar un alta que empezó con Google o Apple. `email` es el que dio el proveedor (puede ser un relay privado de Apple, o faltar). Si `email_verified` es `true`, ése es el correo de la cuenta y no se pide código; si no, la persona valida un correo con el código como siempre.
+public struct AltaSocialPendiente: Codable, Equatable, Sendable {
+    public let signupToken: String
+    public let expiresAtMs: Int64
+    /// Si el proveedor verificó `email`. Con `true` el alta no pide el código al correo y el campo no se puede cambiar.
+    public let emailVerified: Bool?
+    public let email: String?
+
+    enum CodingKeys: String, CodingKey {
+        case signupToken = "signup_token"
+        case expiresAtMs = "expires_at_ms"
+        case emailVerified = "email_verified"
+        case email
+    }
+
+    public init(
+        signupToken: String,
+        expiresAtMs: Int64,
+        emailVerified: Bool? = nil,
+        email: String? = nil
+    ) {
+        self.signupToken = signupToken
+        self.expiresAtMs = expiresAtMs
+        self.emailVerified = emailVerified
+        self.email = email
+    }
+}
+
 /// Para el cálculo de sudoración y de metabolismo basal, no para nada más. Incluye "prefiero no decirlo" como el diseño (`reg-sexo`).
 public enum SexoBiologico: String, Codable, CaseIterable, Sendable {
     case femenino = "femenino"
@@ -390,29 +440,45 @@ public struct DiaEntrenamiento: Codable, Equatable, Sendable {
 
 /// El aviso de salud y los términos, tal como se muestran. La estructura es deliberadamente tonta —título, resumen y una lista de bloques— porque el texto lo edita quien lo revise, no quien programa: cuantos menos campos con significado, menos chances de que un cambio de redacción rompa la pantalla.
 public struct TextosLegales: Codable, Equatable, Sendable {
+    public enum Language: String, Codable, CaseIterable, Sendable {
+        case es = "es"
+        case en = "en"
+        case fr = "fr"
+    }
+
     public let version: String
     /// `false` mientras el texto sea un borrador que no revisó nadie con formación legal. El servidor **no arranca en producción** con esto en `false`; el campo existe para que se vea en desarrollo.
     public let reviewed: Bool?
     public let healthNotice: BloqueLegal
     public let terms: BloqueLegal
+    /// (1.4.0) La política de privacidad. Opcional para que un cliente nuevo lea la respuesta de un servidor anterior.
+    public let privacy: BloqueLegal?
+    /// (1.4.0) En qué idioma vinieron los textos, según `Accept-Language`: es, fr, o en para cualquier otro.
+    public let language: Language?
 
     enum CodingKeys: String, CodingKey {
         case version
         case reviewed
         case healthNotice = "health_notice"
         case terms
+        case privacy
+        case language
     }
 
     public init(
         version: String,
         reviewed: Bool? = nil,
         healthNotice: BloqueLegal,
-        terms: BloqueLegal
+        terms: BloqueLegal,
+        privacy: BloqueLegal? = nil,
+        language: Language? = nil
     ) {
         self.version = version
         self.reviewed = reviewed
         self.healthNotice = healthNotice
         self.terms = terms
+        self.privacy = privacy
+        self.language = language
     }
 }
 

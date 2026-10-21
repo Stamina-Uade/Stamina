@@ -37,6 +37,17 @@ export const CODIGOS = {
   // le va a pedir que acepte otra vez el mismo texto viejo.
   legal_not_accepted: 400,
   legal_version_stale: 409,
+  // Continuar con Google / Apple (contrato 1.4.0).
+  // 2026-10-21 (decisión de Iván): el login, el alta y la recuperación dicen
+  // QUÉ pasó en vez de un error genérico. Es a sabiendas: deja saber si un correo
+  // tiene cuenta. Lo frena el rate limit estricto de esas rutas (8/min por IP).
+  user_not_found: 404,
+  wrong_password: 401,
+  password_not_set: 409,
+  email_already_registered: 409,
+  invalid_provider_token: 401,
+  provider_not_configured: 503,
+  invalid_signup_token: 401,
 } as const;
 
 export type CodigoError = keyof typeof CODIGOS;

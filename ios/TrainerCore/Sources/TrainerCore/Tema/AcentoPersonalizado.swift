@@ -62,16 +62,16 @@ public enum AcentoPersonalizado {
     /// cercano es Azul), lejísimos del rojo de error, y se lee 11:1 sobre negro.
     /// Índigo y turquesa caían entre Violeta y Azul, y entre Cian y Menta.
     public static let opciones: [OpcionDeAcento] = [
-        OpcionDeAcento(id: "rosa", nombre: String(localized: "settings.color.pink", defaultValue: "Rosa Stamina", bundle: .main, comment: "Nombre de un color de acento"), rojo: 1.0, verde: 0.137, azul: 0.655),
-        OpcionDeAcento(id: "fucsia", nombre: String(localized: "settings.color.fuchsia", defaultValue: "Fucsia", bundle: .main, comment: "Nombre de un color de acento"), rojo: 0.851, verde: 0.275, azul: 0.937),
-        OpcionDeAcento(id: "violeta", nombre: String(localized: "settings.color.violet", defaultValue: "Violeta", bundle: .main, comment: "Nombre de un color de acento"), rojo: 0.545, verde: 0.361, azul: 0.965),
-        OpcionDeAcento(id: "lavanda", nombre: String(localized: "settings.color.lavender", defaultValue: "Lavanda", bundle: .main, comment: "Nombre de un color de acento"), rojo: 0.769, verde: 0.710, azul: 0.992),
-        OpcionDeAcento(id: "azul", nombre: String(localized: "settings.color.blue", defaultValue: "Azul", bundle: .main, comment: "Nombre de un color de acento"), rojo: 0.231, verde: 0.510, azul: 0.965),
-        OpcionDeAcento(id: "cian", nombre: String(localized: "settings.color.cyan", defaultValue: "Cian", bundle: .main, comment: "Nombre de un color de acento"), rojo: 0.133, verde: 0.827, azul: 0.933),
-        OpcionDeAcento(id: "menta", nombre: String(localized: "settings.color.mint", defaultValue: "Menta", bundle: .main, comment: "Nombre de un color de acento"), rojo: 0.204, verde: 0.827, azul: 0.600),
-        OpcionDeAcento(id: "lima", nombre: String(localized: "settings.color.lime", defaultValue: "Verde lima", bundle: .main, comment: "Nombre de un color de acento"), rojo: 0.518, verde: 0.800, azul: 0.086),
-        OpcionDeAcento(id: "amarillo", nombre: String(localized: "settings.color.yellow", defaultValue: "Amarillo", bundle: .main, comment: "Nombre de un color de acento"), rojo: 0.980, verde: 0.800, azul: 0.082),
-        OpcionDeAcento(id: "naranja", nombre: String(localized: "settings.color.orange", defaultValue: "Naranja", bundle: .main, comment: "Nombre de un color de acento"), rojo: 0.976, verde: 0.451, azul: 0.086),
+        OpcionDeAcento(id: "rosa", nombre: String(localized: "settings.color.pink", defaultValue: "Stamina Pink", bundle: .main, comment: "Nombre de un color de acento"), rojo: 1.0, verde: 0.137, azul: 0.655),
+        OpcionDeAcento(id: "fucsia", nombre: String(localized: "settings.color.fuchsia", defaultValue: "Fuchsia", bundle: .main, comment: "Nombre de un color de acento"), rojo: 0.851, verde: 0.275, azul: 0.937),
+        OpcionDeAcento(id: "violeta", nombre: String(localized: "settings.color.violet", defaultValue: "Violet", bundle: .main, comment: "Nombre de un color de acento"), rojo: 0.545, verde: 0.361, azul: 0.965),
+        OpcionDeAcento(id: "lavanda", nombre: String(localized: "settings.color.lavender", defaultValue: "Lavender", bundle: .main, comment: "Nombre de un color de acento"), rojo: 0.769, verde: 0.710, azul: 0.992),
+        OpcionDeAcento(id: "azul", nombre: String(localized: "settings.color.blue", defaultValue: "Blue", bundle: .main, comment: "Nombre de un color de acento"), rojo: 0.231, verde: 0.510, azul: 0.965),
+        OpcionDeAcento(id: "cian", nombre: String(localized: "settings.color.cyan", defaultValue: "Cyan", bundle: .main, comment: "Nombre de un color de acento"), rojo: 0.133, verde: 0.827, azul: 0.933),
+        OpcionDeAcento(id: "menta", nombre: String(localized: "settings.color.mint", defaultValue: "Mint", bundle: .main, comment: "Nombre de un color de acento"), rojo: 0.204, verde: 0.827, azul: 0.600),
+        OpcionDeAcento(id: "lima", nombre: String(localized: "settings.color.lime", defaultValue: "Lime green", bundle: .main, comment: "Nombre de un color de acento"), rojo: 0.518, verde: 0.800, azul: 0.086),
+        OpcionDeAcento(id: "amarillo", nombre: String(localized: "settings.color.yellow", defaultValue: "Yellow", bundle: .main, comment: "Nombre de un color de acento"), rojo: 0.980, verde: 0.800, azul: 0.082),
+        OpcionDeAcento(id: "naranja", nombre: String(localized: "settings.color.orange", defaultValue: "Orange", bundle: .main, comment: "Nombre de un color de acento"), rojo: 0.976, verde: 0.451, azul: 0.086),
         OpcionDeAcento(id: "coral", nombre: String(localized: "settings.color.coral", defaultValue: "Coral", bundle: .main, comment: "Nombre de un color de acento"), rojo: 1.0, verde: 0.420, azul: 0.420),
     ]
 
@@ -124,6 +124,12 @@ public enum AcentoPersonalizado {
         let l = luminancia(r, g, b)
         let casiNegro = luminancia(0.0431, 0.0471, 0.0392)
         return contraste(l, casiNegro) >= contraste(l, 1.0)
+    }
+
+    /// `true` si el blanco encima da al menos 3:1: alcanza para el texto de los
+    /// botones, que va en negrita (texto grande para WCAG).
+    public static func textoBlancoEncima(_ r: Double, _ g: Double, _ b: Double) -> Bool {
+        contraste(luminancia(r, g, b), 1.0) >= 3.0
     }
 
     /// Contraste del color contra el fondo negro de la app. Ajustes avisa si da

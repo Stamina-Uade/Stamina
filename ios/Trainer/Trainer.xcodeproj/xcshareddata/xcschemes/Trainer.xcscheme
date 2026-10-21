@@ -51,6 +51,11 @@
             ReferencedContainer = "container:Trainer.xcodeproj">
          </BuildableReference>
       </BuildableProductRunnable>
+      <CommandLineArguments>
+         <CommandLineArgument argument = "-pantallaInicial home" isEnabled = "YES"></CommandLineArgument>
+         <CommandLineArgument argument = "-datosDeEjemplo" isEnabled = "YES"></CommandLineArgument>
+         <CommandLineArgument argument = "-pestanaHome inicio" isEnabled = "YES"></CommandLineArgument>
+      </CommandLineArguments>
    </LaunchAction>
    <ProfileAction buildConfiguration = "Release" shouldUseLaunchSchemeArgsEnv = "YES" savedToolIdentifier = "" useCustomWorkingDirectory = "NO" debugDocumentVersioning = "YES">
       <BuildableProductRunnable runnableDebuggingMode = "0">

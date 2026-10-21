@@ -38,12 +38,15 @@ export async function rutasCuenta(app: FastifyInstance, ctx: Contexto): Promise<
       const usuarioId = usuarioDe(req);
       const { password } = req.body as { password: string };
       const hash = await repo.hashDePassword(usuarioId);
-      if (hash === null) {
+      if (hash === undefined) {
         // La cuenta ya no está. Se gasta lo mismo que en la rama buena (§12).
         await verificarDummy(password);
         throw new ErrorApi("invalid_credentials", "Password is not valid");
       }
-      if (!(await verificarPassword(password, hash))) {
+      // Una cuenta que nació con Google o Apple no tiene contraseña que pedir: la
+      // sesión abierta es la prueba. Sin esto, esas cuentas no se podían borrar
+      // (y la App Store exige poder borrarlas).
+      if (hash !== null && !(await verificarPassword(password, hash))) {
         throw new ErrorApi("invalid_credentials", "Password is not valid");
       }
       await repo.borrar(usuarioId, ctx.ahoraMs());

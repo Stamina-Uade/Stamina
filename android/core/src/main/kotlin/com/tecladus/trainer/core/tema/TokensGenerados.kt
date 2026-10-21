@@ -38,12 +38,20 @@ object TokensColor {
     val datosSerie2: Color = Color(0xFF440099)
     /** procedencia: reloj */
     val datosSerie3: Color = Color(0xFF8C52FF)
-    /** procedencia: app · rgba(255,140,120,.9). Unico rol de estado con color propio. */
-    val estadoError: Color = Color(0xE6FF8C78)
+    /** procedencia: app · 2026-10-21: el segundo tramo del medidor de la contrasena (amarillo). */
+    val estadoAdvertencia: Color = Color(0xFFFFCC00)
+    /** procedencia: app · 2026-10-21 (Ivan): los textos que se tocan (terminos, privacidad) van en celeste, no en el rosa del acento. Sobre el fondo negro da 10.6:1. */
+    val estadoEnlace: Color = Color(0xFF5AC8FA)
+    /** procedencia: app · El celeste para el tema claro: #5AC8FA sobre blanco no llega a 4.5:1; este da 5.6:1. */
+    val estadoEnlaceClaro: Color = Color(0xFF0070A8)
+    /** procedencia: app · 2026-10-21 (Ivan): rojo fuerte, #FF0000. Antes rgba(255,140,120,.9). Sobre el fondo negro da 5.25:1. */
+    val estadoError: Color = Color(0xFFFF0000)
     /** procedencia: home reloj */
-    val estadoErrorBorde: Color = Color(0x66FF8C78)
+    val estadoErrorBorde: Color = Color(0x66FF0000)
     /** procedencia: home reloj */
-    val estadoErrorFondo: Color = Color(0x24FF8C78)
+    val estadoErrorFondo: Color = Color(0x24FF0000)
+    /** procedencia: app · 2026-10-21: el tercer tramo del medidor de la contrasena (verde). El acento sigue haciendo de 'hecho' en el resto de la app. */
+    val estadoExito: Color = Color(0xFF34C759)
     /** procedencia: app home reloj · Pantone 802 C. Expuesto como variable CSS --ac / --ac-rgb y como parametro 'accent' del tablero. Ver parametros_del_tablero.accent. */
     val marcaAcento: Color = Color(0xFFFF23A7)
     /** procedencia: app · Relleno del boton primario DESHABILITADO. */
@@ -63,15 +71,27 @@ object TokensColor {
     /** procedencia: app home */
     val marcaSobreAcento: Color = Color(0xFF0B0C0A)
     /** procedencia: app */
+    val proveedorAppleBordeOscuro: Color = Color(0xFF8E918F)
+    /** procedencia: app */
     val proveedorAppleFondo: Color = Color(0xFF000000)
+    /** procedencia: app */
+    val proveedorAppleFondoOscuro: Color = Color(0xFF131314)
     /** procedencia: app */
     val proveedorAppleTexto: Color = Color(0xFFFFFFFF)
     /** procedencia: app */
+    val proveedorAppleTextoOscuro: Color = Color(0xFFFFFFFF)
+    /** procedencia: app */
     val proveedorGoogleBorde: Color = Color(0xFF747775)
+    /** procedencia: app */
+    val proveedorGoogleBordeOscuro: Color = Color(0xFF8E918F)
     /** procedencia: app */
     val proveedorGoogleFondo: Color = Color(0xFFFFFFFF)
     /** procedencia: app */
+    val proveedorGoogleFondoOscuro: Color = Color(0xFF131314)
+    /** procedencia: app */
     val proveedorGoogleTexto: Color = Color(0xFF1F1F1F)
+    /** procedencia: app */
+    val proveedorGoogleTextoOscuro: Color = Color(0xFFE3E3E3)
     /** procedencia: reloj */
     val relojAcentoSuave: Color = Color(0x1F44D62C)
     /** procedencia: reloj */
@@ -206,7 +226,9 @@ object TokensTipografia {
     val campoTextoTamano: TextUnit = 15.sp
     val campoTextoPeso: FontWeight = FontWeight(400)
     val botonPrimarioTamano: TextUnit = 14.5.sp
-    val botonPrimarioPeso: FontWeight = FontWeight(600)
+    val botonPrimarioPeso: FontWeight = FontWeight(700)
+    val botonGrandeTamano: TextUnit = 17.sp
+    val botonGrandePeso: FontWeight = FontWeight(700)
     val opcionTituloTamano: TextUnit = 14.sp
     val opcionTituloPeso: FontWeight = FontWeight(600)
     val cuerpoDestacadoTamano: TextUnit = 13.5.sp

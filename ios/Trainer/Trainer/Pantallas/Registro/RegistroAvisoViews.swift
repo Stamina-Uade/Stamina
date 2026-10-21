@@ -46,6 +46,12 @@ struct RegAvisoView: View {
                 BotonTexto(Textos.legalViewTerms) { flujo.ir(a: .regTerminos) }
             }
         } pie: {
+            if flujo.ofrecerRenovarSocial, let proveedor = flujo.proveedorDelAlta {
+                // El permiso de Google/Apple venció: se renueva sin perder el código.
+                BotonTexto(Textos.signupSocialRetry(proveedor == .google ? "Google" : "Apple")) {
+                    Task { await flujo.renovarPermisoSocial() }
+                }
+            }
             if flujo.ofrecerEmpezarDeNuevo {
                 // El permiso venció sin usarse: hace falta otro código.
                 BotonTexto(Textos.legalStartOver) { flujo.empezarElAltaDeNuevo() }
@@ -149,5 +155,125 @@ struct SeccionesLegales: View {
                 .estilo(.cuerpo, color: Paleta.textoSecundario)
                 .fixedSize(horizontal: false, vertical: true)
         }
+    }
+}
+
+// MARK: - Términos y privacidad, desde el pie del registro
+
+/// Qué texto legal se abre desde un enlace.
+enum DocumentoLegal: String, Identifiable {
+    case terminos, privacidad
+    var id: String { rawValue }
+
+    /// Los enlaces del catálogo son `stamina-legal://terminos` y
+    /// `stamina-legal://privacidad` (`signup.email.legal_links`).
+    static let esquema = "stamina-legal"
+
+    init?(url: URL) {
+        guard url.scheme == Self.esquema, let host = url.host,
+              let documento = DocumentoLegal(rawValue: host) else { return nil }
+        self = documento
+    }
+}
+
+/// Una nota con enlaces en markdown (`[términos](stamina-legal://terminos)`):
+/// el texto en gris y lo que se toca en celeste (2026-10-21, Iván: celeste y no
+/// el rosa del acento).
+struct TextoConEnlacesLegales: View {
+    private let markdown: String
+    private let abrir: (DocumentoLegal) -> Void
+
+    init(_ markdown: String, abrir: @escaping (DocumentoLegal) -> Void) {
+        self.markdown = markdown
+        self.abrir = abrir
+    }
+
+    var body: some View {
+        Text(atribuido)
+            .estilo(.notaLegal, color: Paleta.textoTerciario)
+            .tint(Paleta.enlace)
+            .multilineTextAlignment(.center)
+            .fixedSize(horizontal: false, vertical: true)
+            .frame(maxWidth: .infinity)
+            .environment(\.openURL, OpenURLAction { url in
+                guard let documento = DocumentoLegal(url: url) else { return .systemAction }
+                abrir(documento)
+                return .handled
+            })
+    }
+
+    private var atribuido: AttributedString {
+        let opciones = AttributedString.MarkdownParsingOptions(interpretedSyntax: .inlineOnlyPreservingWhitespace)
+        var texto = (try? AttributedString(markdown: markdown, options: opciones)) ?? AttributedString(markdown)
+        // El color va en el tramo: el `foregroundStyle` de la vista no pinta enlaces.
+        let enlaces = texto.runs.filter { $0.link != nil }.map(\.range)
+        for rango in enlaces {
+            texto[rango].foregroundColor = Paleta.enlace
+            texto[rango].font = Font.system(size: TokensTipografia.notaLegalTamano, weight: .semibold)
+        }
+        return texto
+    }
+}
+
+/// Los términos o la política de privacidad completos, en una hoja que se cierra
+/// y vuelve al registro tal como estaba. Bajan de `GET /legal`, en el idioma del
+/// teléfono.
+struct HojaLegal: View {
+    @EnvironmentObject private var flujo: FlujoEntrada
+    @Environment(\.dismiss) private var cerrar
+    let documento: DocumentoLegal
+
+    private var bloque: BloqueLegal? {
+        switch documento {
+        case .terminos: return flujo.legales?.terms
+        case .privacidad: return flujo.legales?.privacy
+        }
+    }
+
+    private var tituloDeRespaldo: String {
+        documento == .terminos ? Textos.legalTermsTitle : Textos.legalPrivacyTitle
+    }
+
+    var body: some View {
+        NavigationStack {
+            ScrollView {
+                VStack(alignment: .leading, spacing: TokensEspaciado.e16) {
+                    if let bloque {
+                        Text(bloque.title)
+                            .estilo(.tituloPantalla)
+                            .fixedSize(horizontal: false, vertical: true)
+                            .accessibilityAddTraits(.isHeader)
+                        Text(bloque.summary)
+                            .estilo(.cuerpo, color: Paleta.textoSecundario)
+                            .fixedSize(horizontal: false, vertical: true)
+                        SeccionesLegales(secciones: bloque.sections, enTarjetas: false)
+                    } else if flujo.falloLegales || flujo.legales != nil {
+                        // Falló la carga, o el servidor es anterior a la 1.4.0 y no
+                        // manda la privacidad.
+                        Text(Textos.legalNoText)
+                            .estilo(.cuerpo, color: Paleta.textoSecundario)
+                        BotonTexto(Textos.legalRetry) { Task { await flujo.cargarLegales() } }
+                    } else {
+                        HStack(spacing: TokensEspaciado.e8) {
+                            ProgressView()
+                            Text(Textos.legalLoading)
+                                .estilo(.cuerpo, color: Paleta.textoSecundario)
+                        }
+                    }
+                }
+                .frame(maxWidth: .infinity, alignment: .leading)
+                .padding(TokensEspaciado.e20)
+            }
+            .background(Paleta.fondo.ignoresSafeArea())
+            .navigationTitle(tituloDeRespaldo)
+            .navigationBarTitleDisplayMode(.inline)
+            .toolbar {
+                ToolbarItem(placement: .confirmationAction) {
+                    Button(Textos.commonClose) { cerrar() }
+                        .foregroundStyle(Paleta.enlace)
+                }
+            }
+        }
+        .task { await flujo.cargarLegalesSiFaltan() }
     }
 }

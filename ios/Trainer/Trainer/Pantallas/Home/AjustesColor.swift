@@ -129,7 +129,7 @@ struct AjustesSelectorDeColor: View {
             elegir(opcion)
         } label: {
             AjustesCirculoDeColor(color: opcion.color, elegido: elegida,
-                                  tildeOscuro: AcentoPersonalizado.textoOscuroEncima(
+                                  tildeOscuro: !AcentoPersonalizado.textoBlancoEncima(
                                       opcion.rojo, opcion.verde, opcion.azul))
                 .frame(maxWidth: .infinity)
                 .contentShape(Rectangle())
@@ -172,7 +172,7 @@ struct AjustesSelectorDeColor: View {
 
     private func confirmacion(_ guardado: String) -> some View {
         let c = AcentoPersonalizado.componentesOPredeterminado(de: guardado)
-        let encima = AcentoPersonalizado.textoOscuroEncima(c.0, c.1, c.2)
+        let encima = !AcentoPersonalizado.textoBlancoEncima(c.0, c.1, c.2)
             ? TokensColor.marcaSobreAcento : Color.white
         return HStack(spacing: TokensEspaciado.e10) {
             Button {
@@ -290,7 +290,7 @@ struct AjustesVistaPreviaDeColor: View {
 
     /// Texto en casi-negro o en blanco: el que más se lee encima del color.
     private var encima: Color {
-        AcentoPersonalizado.textoOscuroEncima(componentes.0, componentes.1, componentes.2)
+        !AcentoPersonalizado.textoBlancoEncima(componentes.0, componentes.1, componentes.2)
             ? TokensColor.marcaSobreAcento : Color.white
     }
 

@@ -23,12 +23,20 @@ public enum TokensColor {
     public static let datosSerie2 = Color(.sRGB, red: 0.2667, green: 0.0000, blue: 0.6000, opacity: 1)
     /// procedencia: reloj
     public static let datosSerie3 = Color(.sRGB, red: 0.5490, green: 0.3216, blue: 1.0000, opacity: 1)
-    /// procedencia: app · rgba(255,140,120,.9). Unico rol de estado con color propio.
-    public static let estadoError = Color(.sRGB, red: 1.0000, green: 0.5490, blue: 0.4706, opacity: 0.9)
+    /// procedencia: app · 2026-10-21: el segundo tramo del medidor de la contrasena (amarillo).
+    public static let estadoAdvertencia = Color(.sRGB, red: 1.0000, green: 0.8000, blue: 0.0000, opacity: 1)
+    /// procedencia: app · 2026-10-21 (Ivan): los textos que se tocan (terminos, privacidad) van en celeste, no en el rosa del acento. Sobre el fondo negro da 10.6:1.
+    public static let estadoEnlace = Color(.sRGB, red: 0.3529, green: 0.7843, blue: 0.9804, opacity: 1)
+    /// procedencia: app · El celeste para el tema claro: #5AC8FA sobre blanco no llega a 4.5:1; este da 5.6:1.
+    public static let estadoEnlaceClaro = Color(.sRGB, red: 0.0000, green: 0.4392, blue: 0.6588, opacity: 1)
+    /// procedencia: app · 2026-10-21 (Ivan): rojo fuerte, #FF0000. Antes rgba(255,140,120,.9). Sobre el fondo negro da 5.25:1.
+    public static let estadoError = Color(.sRGB, red: 1.0000, green: 0.0000, blue: 0.0000, opacity: 1)
     /// procedencia: home reloj
-    public static let estadoErrorBorde = Color(.sRGB, red: 1.0000, green: 0.5490, blue: 0.4706, opacity: 0.4)
+    public static let estadoErrorBorde = Color(.sRGB, red: 1.0000, green: 0.0000, blue: 0.0000, opacity: 0.4)
     /// procedencia: home reloj
-    public static let estadoErrorFondo = Color(.sRGB, red: 1.0000, green: 0.5490, blue: 0.4706, opacity: 0.14)
+    public static let estadoErrorFondo = Color(.sRGB, red: 1.0000, green: 0.0000, blue: 0.0000, opacity: 0.14)
+    /// procedencia: app · 2026-10-21: el tercer tramo del medidor de la contrasena (verde). El acento sigue haciendo de 'hecho' en el resto de la app.
+    public static let estadoExito = Color(.sRGB, red: 0.2039, green: 0.7804, blue: 0.3490, opacity: 1)
     /// procedencia: app home reloj · Pantone 802 C. Expuesto como variable CSS --ac / --ac-rgb y como parametro 'accent' del tablero. Ver parametros_del_tablero.accent.
     public static let marcaAcento = Color(.sRGB, red: 1.0000, green: 0.1373, blue: 0.6549, opacity: 1)
     /// procedencia: app · Relleno del boton primario DESHABILITADO.
@@ -48,15 +56,27 @@ public enum TokensColor {
     /// procedencia: app home
     public static let marcaSobreAcento = Color(.sRGB, red: 0.0431, green: 0.0471, blue: 0.0392, opacity: 1)
     /// procedencia: app
+    public static let proveedorAppleBordeOscuro = Color(.sRGB, red: 0.5569, green: 0.5686, blue: 0.5608, opacity: 1)
+    /// procedencia: app
     public static let proveedorAppleFondo = Color(.sRGB, red: 0.0000, green: 0.0000, blue: 0.0000, opacity: 1)
+    /// procedencia: app
+    public static let proveedorAppleFondoOscuro = Color(.sRGB, red: 0.0745, green: 0.0745, blue: 0.0784, opacity: 1)
     /// procedencia: app
     public static let proveedorAppleTexto = Color(.sRGB, red: 1.0000, green: 1.0000, blue: 1.0000, opacity: 1)
     /// procedencia: app
+    public static let proveedorAppleTextoOscuro = Color(.sRGB, red: 1.0000, green: 1.0000, blue: 1.0000, opacity: 1)
+    /// procedencia: app
     public static let proveedorGoogleBorde = Color(.sRGB, red: 0.4549, green: 0.4667, blue: 0.4588, opacity: 1)
+    /// procedencia: app
+    public static let proveedorGoogleBordeOscuro = Color(.sRGB, red: 0.5569, green: 0.5686, blue: 0.5608, opacity: 1)
     /// procedencia: app
     public static let proveedorGoogleFondo = Color(.sRGB, red: 1.0000, green: 1.0000, blue: 1.0000, opacity: 1)
     /// procedencia: app
+    public static let proveedorGoogleFondoOscuro = Color(.sRGB, red: 0.0745, green: 0.0745, blue: 0.0784, opacity: 1)
+    /// procedencia: app
     public static let proveedorGoogleTexto = Color(.sRGB, red: 0.1216, green: 0.1216, blue: 0.1216, opacity: 1)
+    /// procedencia: app
+    public static let proveedorGoogleTextoOscuro = Color(.sRGB, red: 0.8902, green: 0.8902, blue: 0.8902, opacity: 1)
     /// procedencia: reloj
     public static let relojAcentoSuave = Color(.sRGB, red: 0.2667, green: 0.8392, blue: 0.1725, opacity: 0.12)
     /// procedencia: reloj
@@ -191,7 +211,9 @@ public enum TokensTipografia {
     public static let campoTextoTamano: CGFloat = 15
     public static let campoTextoPeso: Font.Weight = .regular
     public static let botonPrimarioTamano: CGFloat = 14.5
-    public static let botonPrimarioPeso: Font.Weight = .semibold
+    public static let botonPrimarioPeso: Font.Weight = .bold
+    public static let botonGrandeTamano: CGFloat = 17
+    public static let botonGrandePeso: Font.Weight = .bold
     public static let opcionTituloTamano: CGFloat = 14
     public static let opcionTituloPeso: Font.Weight = .semibold
     public static let cuerpoDestacadoTamano: CGFloat = 13.5

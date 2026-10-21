@@ -121,6 +121,13 @@ public enum Paleta {
     }()
 
     #if canImport(UIKit) && !os(watchOS)
+    /// El rosa de fábrica (el del catálogo de Xcode), en componentes sRGB.
+    private static var componentesDelCatalogo: (Double, Double, Double)? {
+        var r: CGFloat = 0, g: CGFloat = 0, b: CGFloat = 0, a: CGFloat = 0
+        guard acentoUIDelCatalogo.getRed(&r, green: &g, blue: &b, alpha: &a) else { return nil }
+        return (Double(r), Double(g), Double(b))
+    }
+
     private static var acentoUIDelCatalogo: UIColor {
         UIColor(named: TokensAcento.nombreEnAssets) ?? UIColor(TokensAcento.respaldo)
     }
@@ -142,12 +149,18 @@ public enum Paleta {
     /// 🎨 2026-10: con el color elegible, ya no alcanza un valor fijo. En el
     /// teléfono se elige midiendo (`AcentoPersonalizado.textoOscuroEncima`):
     /// casi-negro sobre colores claros, blanco sobre oscuros.
+    ///
+    /// 2026-10-21 (Iván): sobre el rosa va BLANCO. Se elige blanco siempre que dé
+    /// al menos 3:1 —el texto de los botones va en negrita, y en negrita ≥14 pt
+    /// es "texto grande" para WCAG, que pide 3:1—; el rosa da 3,47:1. Sobre un
+    /// color claro (lima, amarillo, lavanda) sigue yendo el casi-negro.
     public static let sobreAcento: Color = {
         #if canImport(UIKit) && !os(watchOS)
         let casiNegro = UIColor(TokensColor.marcaSobreAcento)
         return Color(uiColor: UIColor { _ in
-            guard let c = AcentoPersonalizado.componentesActuales else { return casiNegro }
-            return AcentoPersonalizado.textoOscuroEncima(c.0, c.1, c.2) ? casiNegro : UIColor.white
+            let c = AcentoPersonalizado.componentesActuales ?? componentesDelCatalogo
+            guard let c else { return UIColor.white }
+            return AcentoPersonalizado.textoBlancoEncima(c.0, c.1, c.2) ? UIColor.white : casiNegro
         })
         #else
         return TokensColor.marcaSobreAcento
@@ -205,6 +218,13 @@ public enum Paleta {
     // ---- estado ----
 
     public static let error = TokensColor.estadoError
+    /// El medidor de la contraseña: rojo, amarillo, verde (2026-10-21). Se llaman
+    /// `…Medidor` porque `exito` ya existe y es el acento ("hecho" en toda la app).
+    public static let amarilloMedidor = TokensColor.estadoAdvertencia
+    public static let verdeMedidor = TokensColor.estadoExito
+    /// 2026-10-21 (Iván): lo que se toca dentro de un texto (términos,
+    /// privacidad) va en celeste, no en el rosa del acento.
+    public static let enlace = dinamico(claro: TokensColor.estadoEnlaceClaro, oscuro: TokensColor.estadoEnlace)
     /// Ronda 5: el rojo de una acción DESTRUCTIVA (cerrar sesión, borrar). Más
     /// intenso que `error` (que es un salmón para avisos): es el rojo del sistema.
     public static let peligro = Color(red: 1.0, green: 0.231, blue: 0.188)

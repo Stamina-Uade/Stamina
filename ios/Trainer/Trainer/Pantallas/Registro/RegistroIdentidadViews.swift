@@ -12,55 +12,127 @@ import TrainerCore
 // `RegistroAvisoViews.swift`.
 // =============================================================================
 
-/// `reg-correo` · paso 1 de 15 · `POST /auth/register`
+/// `reg-correo` · paso 1 de 13 · `POST /auth/register`
+///
+/// Nombre, apellido, correo, contraseña y su confirmación, todo junto.
+///
+/// También es el primer paso de un alta que empezó con Google o Apple: llega con
+/// nombre, apellido y correo ya escritos, y la persona los revisa.
 struct RegCorreoView: View {
     @EnvironmentObject private var flujo: FlujoEntrada
+    /// Los términos o la privacidad, abiertos desde el pie.
+    @State private var documento: DocumentoLegal?
 
     var body: some View {
         PantallaPaso(titulo: Textos.signupEmailTitle, texto: Textos.signupEmailBody) {
             ScrollViewReader { desplazamiento in
                 VStack(alignment: .leading, spacing: TokensEspaciado.e8) {
-                    CampoTexto(etiqueta: Textos.signupNameLabel,
-                               marcador: Textos.signupNamePlaceholder,
-                               texto: $flujo.datos.nombre, contenido: .nombre)
-                        .disabled(flujo.enCurso)
-                    CampoTexto(etiqueta: Textos.signupLastNameLabel,
-                               marcador: Textos.signupLastNamePlaceholder,
-                               texto: $flujo.datos.apellido, contenido: .apellido)
-                        .disabled(flujo.enCurso)
-                    if flujo.datos.nombreCompletoListo {
+                    // Vino de "Continuar con Google / Apple": los datos ya están
+                    // escritos. Si el proveedor verificó el correo, no hay código.
+                    if let proveedor = flujo.proveedorDelAlta {
+                        let nombre = proveedor == .google ? "Google" : "Apple"
+                        AvisoSuave(flujo.correoValidadoPorProveedor
+                                   ? Textos.signupSocialBannerVerified(nombre, nombre)
+                                   : Textos.signupSocialBanner(nombre))
+                            .padding(.bottom, TokensEspaciado.e4)
+                    }
+                    // Nombre y apellido en la misma fila, mitad y mitad (2026-10-21).
+                    HStack(alignment: .top, spacing: TokensEspaciado.e10) {
+                        VStack(alignment: .leading, spacing: TokensEspaciado.e6) {
+                            CampoTexto(etiqueta: Textos.signupNameLabel,
+                                       marcador: Textos.signupNamePlaceholder,
+                                       texto: $flujo.datos.nombre, contenido: .nombre,
+                                       conError: flujo.error(de: .nombre) != nil)
+                            ErrorDeCampo(flujo.error(de: .nombre))
+                        }
+                        .frame(maxWidth: .infinity)
+                        CampoTexto(etiqueta: Textos.signupLastNameLabel,
+                                   marcador: Textos.signupLastNamePlaceholder,
+                                   texto: $flujo.datos.apellido, contenido: .apellido)
+                            .frame(maxWidth: .infinity)
+                    }
+                    .disabled(flujo.enCurso)
                     CampoTexto(etiqueta: Textos.commonEmailLabel,
                                marcador: Textos.commonEmailPlaceholder,
                                texto: $flujo.datos.correo,
-                               contenido: .correo, teclado: .correo)
-                        .disabled(flujo.enCurso)
-                    }
+                               contenido: .correo, teclado: .correo,
+                               conError: flujo.correoRechazado || flujo.error(de: .correo) != nil)
+                        // El correo que verificó Google/Apple no se cambia: otro
+                        // correo habría que validarlo con código.
+                        .disabled(flujo.enCurso || flujo.correoValidadoPorProveedor)
                     // Mientras se escribe no se juzga: el error aparece al tocar el
                     // botón (`FlujoEntrada.correoRechazado`).
                     if flujo.correoRechazado {
                         PistaDeCorreoRechazado()
+                    } else {
+                        ErrorDeCampo(flujo.error(de: .correo))
+                    }
+
+                    // 2026-10-21: la contraseña va en el MISMO paso que el correo.
+                    // Con Google o Apple no hay contraseña.
+                    if flujo.proveedorDelAlta == nil {
+                        CampoTexto(etiqueta: Textos.loginPasswordLabel,
+                                   texto: $flujo.claveDeRegistro,
+                                   contenido: .claveNueva, seguro: true,
+                                   conError: flujo.error(de: .clave) != nil)
+                            .disabled(flujo.enCurso)
+                        ErrorDeCampo(flujo.error(de: .clave))
+                        // La contraseña segura del iPhone llena las dos: la
+                        // confirmación sobra (y SwiftUI la dibujaba vacía).
+                        if !flujo.claveSugeridaPorElSistema {
+                            CampoTexto(etiqueta: Textos.passwordResetNewRepeatLabel,
+                                       texto: $flujo.claveDeRegistroRepetida,
+                                       contenido: .claveNueva, seguro: true, conOjo: false,
+                                       conError: flujo.error(de: .claveRepetida) != nil)
+                                .disabled(flujo.enCurso)
+                            ErrorDeCampo(flujo.error(de: .claveRepetida))
+                        }
+                        // Que coincidan no se anuncia (2026-10-21): sólo el error.
+                        MedidorDeClave(cumplidas: flujo.reglasDeClaveDeRegistroCumplidas,
+                                       reglas: flujo.reglasDeClave(flujo.claveDeRegistro))
                     }
                 }
                 .muestraElCorreoRechazado(flujo.correoRechazado, desplazando: desplazamiento)
+                .onChange(of: flujo.datos.nombre) { _ in flujo.corrigiendo(.nombre) }
+                .onChange(of: flujo.datos.correo) { _ in flujo.corrigiendo(.correo) }
+                .onChange(of: flujo.claveDeRegistro) { _ in flujo.corrigiendo(.clave) }
+                .onChange(of: flujo.claveDeRegistroRepetida) { _ in flujo.corrigiendo(.claveRepetida) }
             }
         } pie: {
-            Text(Textos.signupEmailLegal)
-                .estilo(.notaLegal, color: Paleta.textoTerciario)
-                .multilineTextAlignment(.center)
-                .fixedSize(horizontal: false, vertical: true)
+            // "Términos y condiciones" y "Política de privacidad" se tocan, en celeste.
+            TextoConEnlacesLegales(Textos.signupEmailLegalLinks) { documento = $0 }
 
-            // Se prende con algo escrito: si no parece un correo, lo dice el toque.
-            BotonPrimario(Textos.signupEmailSend,
-                          habilitado: flujo.datos.nombreCompletoListo && !flujo.datos.correo.isEmpty && !flujo.enCurso,
-                          cargando: flujo.enCurso,
-                          motivoDeshabilitado: Textos.commonCompleteToContinue) {
-                Task { await flujo.pedirCodigoDeRegistro() }
+            if flujo.correoValidadoPorProveedor {
+                // Google/Apple ya validaron el correo: sin código, al aviso.
+                BotonPrimario(Textos.commonContinue,
+                              habilitado: flujo.datos.identidadLista && !flujo.enCurso,
+                              motivoDeshabilitado: Textos.commonCompleteToContinue) {
+                    flujo.seguirConDatosDelProveedor()
+                }
+            } else {
+                // Se prende con algo escrito: si no parece un correo, lo dice el toque.
+                BotonPrimario(Textos.signupEmailSend,
+                              // Con Google/Apple (correo no verificado) no hay contraseña.
+                              // Se prende con todo escrito; qué falla lo dice el
+                              // toque, debajo de cada campo (2026-10-21).
+                              habilitado: !flujo.datos.nombre.isEmpty && !flujo.datos.correo.isEmpty
+                                  && (flujo.proveedorDelAlta != nil
+                                      || (!flujo.claveDeRegistro.isEmpty
+                                          && (flujo.claveSugeridaPorElSistema
+                                              || !flujo.claveDeRegistroRepetida.isEmpty)))
+                                  && !flujo.enCurso,
+                              cargando: flujo.enCurso,
+                              motivoDeshabilitado: Textos.commonCompleteToContinue) {
+                    Task { await flujo.pedirCodigoDeRegistro() }
+                }
             }
         }
+        .sheet(item: $documento) { HojaLegal(documento: $0).environmentObject(flujo) }
+        .task { await flujo.cargarLegalesSiFaltan() }
     }
 }
 
-/// `reg-codigo` · paso 2 de 15 · `POST /auth/register/verify`
+/// `reg-codigo` · paso 2 de 13 · `POST /auth/register/verify`
 struct RegCodigoView: View {
     @EnvironmentObject private var flujo: FlujoEntrada
 
@@ -70,7 +142,7 @@ struct RegCodigoView: View {
                                                   ? Textos.commonEmailPlaceholder
                                                   : flujo.datos.correo)) {
             VStack(spacing: TokensEspaciado.e14) {
-                CampoCodigo(codigo: $flujo.datos.codigo)
+                CampoCodigo(codigo: $flujo.datos.codigo, marcador: Textos.commonCodeLabel)
                     .disabled(flujo.enCurso)
 
                 FilaDeReenvio(pedidos: flujo.pedidosDeCodigo,
@@ -117,15 +189,14 @@ struct RegClaveView: View {
                 CampoTexto(etiqueta: Textos.passwordResetNewRepeatLabel,
                            marcador: Textos.commonPasswordPlaceholder,
                            texto: $flujo.claveDeRegistroRepetida,
-                           contenido: .claveNueva, seguro: true)
+                           contenido: .claveNueva, seguro: true, conOjo: false)
 
                 MedidorDeClave(cumplidas: flujo.reglasDeClaveDeRegistroCumplidas,
                                reglas: flujo.reglasDeClave(flujo.claveDeRegistro))
 
-                if !flujo.claveDeRegistroRepetida.isEmpty {
-                    PistaDeCampo(estado: flujo.claveDeRegistroCoincide
-                                 ? .correcto(Textos.passwordResetNewMatch)
-                                 : .error(Textos.passwordResetNewNoMatch))
+                // Sólo el error: que coincidan no se anuncia (2026-10-21).
+                if !flujo.claveDeRegistroRepetida.isEmpty && !flujo.claveDeRegistroCoincide {
+                    PistaDeCampo(estado: .error(Textos.fieldPasswordNoMatch))
                 }
             }
         } pie: {

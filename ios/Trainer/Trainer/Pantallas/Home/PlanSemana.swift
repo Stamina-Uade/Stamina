@@ -201,6 +201,6 @@ struct PlanProgresoDeLaSemana: View {
                         accion: @escaping () -> Void) -> some View {
         BotonCircular(simbolo, etiqueta: etiqueta, accion: accion)
             .disabled(!habilitada)
-            .opacity(habilitada ? 1 : 0.35)
+            // La opacidad de apagado la pone `EstiloPresionado` (0,45), igual en toda la app.
     }
 }

@@ -10,6 +10,8 @@
 	<string>Stamina</string>
 	<key>CFBundleName</key>
 	<string>Stamina</string>
+	<key>GoogleClientID</key>
+	<string>488400815610-i41pir3h755msb013eehkgdh005r8iag.apps.googleusercontent.com</string>
 	<key>NSHealthShareUsageDescription</key>
 	<string>Leemos tus pasos diarios de Salud para mostrarlos en tu calendario y guardarlos en tu historial de Stamina.</string>
 	<key>NSHealthUpdateUsageDescription</key>

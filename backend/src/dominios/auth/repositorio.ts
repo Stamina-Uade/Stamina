@@ -10,7 +10,8 @@ import type { Db } from "../../infra/db.js";
 export interface UsuarioFila {
   id: string;
   email: string;
-  password_hash: string;
+  /** `null` en una cuenta que nació con Google o Apple y nunca eligió contraseña. */
+  password_hash: string | null;
   creado_en_ms: number;
   actualizado_en_ms: number;
 }
@@ -41,7 +42,7 @@ export function crearRepo(db: Db) {
       );
     },
 
-    async crearUsuario(email: string, passwordHash: string, ahoraMs: number): Promise<UsuarioFila> {
+    async crearUsuario(email: string, passwordHash: string | null, ahoraMs: number): Promise<UsuarioFila> {
       const fila = await db.unaFila<UsuarioFila>(
         `insert into usuarios (email, password_hash, creado_en_ms, actualizado_en_ms)
               values ($1, $2, $3, $3)
@@ -50,6 +51,44 @@ export function crearRepo(db: Db) {
       );
       if (fila === null) throw new Error("crearUsuario: insert sin filas");
       return fila;
+    },
+
+    // ------------------------------------------------ identidades sociales --
+    async buscarUsuarioPorIdentidad(proveedor: string, sujeto: string): Promise<UsuarioFila | null> {
+      return db.unaFila<UsuarioFila>(
+        `select u.id, u.email, u.password_hash, u.creado_en_ms, u.actualizado_en_ms
+           from identidades_sociales i
+           join usuarios u on u.id = i.usuario_id
+          where i.proveedor = $1 and i.sujeto = $2`,
+        [proveedor, sujeto]
+      );
+    },
+
+    /**
+     * Vincula una identidad de Google o Apple a una cuenta. Si esa identidad ya
+     * estaba vinculada (dos pedidos a la vez), no hace nada: gana el índice único.
+     */
+    /** `true` si la vinculó; `false` si esa identidad ya estaba vinculada (a ésta u otra cuenta). */
+    async vincularIdentidad(
+      usuarioId: string, proveedor: string, sujeto: string, email: string | null, ahoraMs: number
+    ): Promise<boolean> {
+      const fila = await db.unaFila<{ id: string }>(
+        `insert into identidades_sociales (usuario_id, proveedor, sujeto, email, creado_en_ms)
+              values ($1, $2, $3, $4, $5)
+         on conflict (proveedor, sujeto) do nothing
+         returning id`,
+        [usuarioId, proveedor, sujeto, email, ahoraMs]
+      );
+      return fila !== null;
+    },
+
+    /** Si la cuenta ya tiene una identidad de ese proveedor (otra persona de Google, por ejemplo). */
+    async tieneIdentidadDe(usuarioId: string, proveedor: string): Promise<boolean> {
+      const fila = await db.unaFila<{ uno: number }>(
+        `select 1 as uno from identidades_sociales where usuario_id = $1 and proveedor = $2`,
+        [usuarioId, proveedor]
+      );
+      return fila !== null;
     },
 
     async cambiarPassword(usuarioId: string, passwordHash: string, ahoraMs: number): Promise<void> {

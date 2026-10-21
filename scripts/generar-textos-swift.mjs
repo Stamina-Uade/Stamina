@@ -118,7 +118,7 @@ function parametros(valor) {
 }
 
   const catalogo = JSON.parse(readFileSync(entrada, "utf8"));
-  const idiomaFuente = catalogo.sourceLanguage ?? "es";
+  const idiomaFuente = catalogo.sourceLanguage ?? "en";
   const todas = Object.keys(catalogo.strings ?? {}).sort();
   /**
    * 🪤 Las claves que no pueden ser una propiedad de Swift se saltean.

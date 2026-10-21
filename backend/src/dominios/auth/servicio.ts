@@ -24,13 +24,25 @@ import {
   refreshSucesor,
   verificarDummy,
   verificarPassword,
+  firmarAltaSocial,
+  leerAltaSocial,
 } from "../../infra/cripto.js";
+import {
+  crearVerificadorDeProveedores,
+  proveedorEsDuenoDelCorreo,
+  type NombreDeProveedor,
+} from "../../infra/proveedores.js";
 import { crearRepo, type RepoAuth, type SesionFila } from "./repositorio.js";
 
 const VIDA_CODIGO_MS = 15 * 60 * 1000; // 15 min, como el diseño (`reg-codigo`)
 const REENVIO_MS = 60 * 1000; //           60 s, como el diseño
 const VIDA_TOKEN_PASO_MS = 10 * 60 * 1000;
 const MAX_INTENTOS_CODIGO = 3;
+/**
+ * Cuánto vive el permiso de alta social. Más que el del correo: en el medio la
+ * persona revisa sus datos, espera el código y lee el aviso de salud.
+ */
+const VIDA_ALTA_SOCIAL_MS = 30 * 60 * 1000;
 
 /**
  * Cuánto después de canjear un refresh se acepta volver a presentarlo como REINTENTO
@@ -69,8 +81,19 @@ function clavePaso(token: string): string {
   return `auth:paso:${hashearToken(token)}`;
 }
 
+/** Lo que contesta `POST /auth/social`. */
+export type DesenlaceSocial =
+  | { status: "signed_in"; session: Sesion }
+  | {
+      status: "signup_required";
+      signup: { signup_token: string; expires_at_ms: number; email: string | null; email_verified: boolean };
+    };
+
 export function crearServicioAuth(ctx: Contexto) {
   const repo: RepoAuth = crearRepo(ctx.db);
+  const proveedores = ctx.proveedores ?? crearVerificadorDeProveedores({
+    clientIds: ctx.config.proveedores ?? { google: [], apple: [] },
+  });
 
   async function abrirSesion(usuarioId: string, familiaId: string | null): Promise<Sesion> {
     const ahora = ctx.ahoraMs();
@@ -161,8 +184,9 @@ export function crearServicioAuth(ctx: Contexto) {
 
     // ------------------------------------------------------------ registro --
     /**
-     * 🛑 Responde lo mismo exista o no la cuenta, y gasta lo mismo en las dos
-     * ramas. Si ya existe, al dueño le llega un aviso; a quien preguntó, nada.
+     * Si el correo ya tiene cuenta, lo dice (`email_already_registered`): la app
+     * ofrece entrar o recuperar la contraseña. Decisión de Iván, 2026-10-21: antes
+     * contestaba lo mismo exista o no, para no revelar qué correos tienen cuenta.
      */
     async registroInicio(emailCrudo: string, nombre?: string, apellido?: string) {
       const email = normalizarEmail(emailCrudo);
@@ -173,14 +197,7 @@ export function crearServicioAuth(ctx: Contexto) {
       }
       const existente = await repo.buscarUsuarioPorEmail(email);
       if (existente !== null) {
-        // Un pedido repetido al mismo correo no debe convertirse en una cola de
-        // mensajes. La clave sólo guarda un hash del correo y vence en Redis.
-        const aviso = `auth:aviso-registro:${hashearToken(email)}`;
-        if (await ctx.cache.ponerSiAusente(aviso, "1", Math.ceil(REENVIO_MS / 1000))) {
-          await ctx.correo.avisarIntentoDeRegistro(email);
-        }
-        const ahora = ctx.ahoraMs();
-        return { expires_at_ms: ahora + VIDA_CODIGO_MS, resend_after_ms: ahora + REENVIO_MS };
+        throw new ErrorApi("email_already_registered", "An account with this email already exists");
       }
       const nombreCompleto = nombre && apellido ? `${nombre.trim()} ${apellido.trim()}` : undefined;
       return emitirCodigo(email, "registro", nombreCompleto);
@@ -195,12 +212,34 @@ export function crearServicioAuth(ctx: Contexto) {
       return { registration_token: r.token, expires_at_ms: r.expires_at_ms };
     },
 
+    /**
+     * Crea la cuenta. Lleva una de dos credenciales: la `password` del alta común o
+     * el `socialToken` de `POST /auth/social`, que vincula la identidad de Google o
+     * Apple y deja la cuenta sin contraseña.
+     */
     async registroCompletar(
-      registrationToken: string,
-      password: string,
+      /**
+       * El permiso del código del correo. Obligatorio con contraseña. Con
+       * Google/Apple sólo hace falta si el proveedor NO verificó el correo: si lo
+       * verificó, la cuenta se crea con ese correo sin pedir código.
+       */
+      registrationToken: string | undefined,
+      credencial: { password: string } | { socialToken: string },
       legal: { version: string; accepted: boolean },
     ): Promise<{ sesion: Sesion; usuarioId: string }> {
-      exigirPasswordValida(password);
+      const ahoraAlta = ctx.ahoraMs();
+      let altaSocial: Awaited<ReturnType<typeof leerAltaSocial>> = null;
+      if ("password" in credencial) {
+        exigirPasswordValida(credencial.password);
+      } else {
+        // 🛑 Se lee ANTES de consumir el permiso del correo: un permiso social
+        // vencido no tiene que gastar el código que la persona acaba de validar.
+        altaSocial = await leerAltaSocial(ctx.config, credencial.socialToken, ahoraAlta);
+        if (altaSocial === null) throw new ErrorApi("invalid_signup_token", "Signup token is not valid");
+        if (await repo.buscarUsuarioPorIdentidad(altaSocial.proveedor, altaSocial.sujeto) !== null) {
+          throw new ErrorApi("conflict", "Account already exists");
+        }
+      }
 
       // 🛑 Se comprueba ANTES de crear nada. Si la persona no aceptó, o aceptó una
       // versión que no es la vigente, no hay cuenta: una cuenta creada sin
@@ -218,9 +257,18 @@ export function crearServicioAuth(ctx: Contexto) {
       }
 
       const ahora = ctx.ahoraMs();
-      const emailDePaso = await emailDePasoDeCorreo(ctx.config, registrationToken, "registro", ahora);
-      if (emailDePaso === null || await ctx.cache.consumir(clavePaso(registrationToken)) !== "1") {
-        throw new ErrorApi("invalid_registration_token", "Registration token is not valid");
+      let emailDePaso: string | null;
+      if (registrationToken === undefined) {
+        // Sin código: sólo vale con un correo que Google o Apple ya verificaron.
+        if (altaSocial === null || altaSocial.email === null || !altaSocial.emailVerificado) {
+          throw new ErrorApi("invalid_registration_token", "Registration token is required");
+        }
+        emailDePaso = normalizarEmail(altaSocial.email);
+      } else {
+        emailDePaso = await emailDePasoDeCorreo(ctx.config, registrationToken, "registro", ahora);
+        if (emailDePaso === null || await ctx.cache.consumir(clavePaso(registrationToken)) !== "1") {
+          throw new ErrorApi("invalid_registration_token", "Registration token is not valid");
+        }
       }
       if (ctx.config.registroPermitido !== null && emailDePaso !== ctx.config.registroPermitido) {
         throw new ErrorApi("invalid_registration_token", "Registration token is not valid");
@@ -231,8 +279,21 @@ export function crearServicioAuth(ctx: Contexto) {
       const yaExiste = await repo.buscarUsuarioPorEmail(emailDePaso);
       if (yaExiste !== null) throw new ErrorApi("conflict", "Account already exists");
 
-      const usuario = await repo.crearUsuario(emailDePaso, await hashearPassword(password), ahora);
-      await repo.guardarAceptacionLegal(usuario.id, vigente, ahora);
+      const hash = "password" in credencial ? await hashearPassword(credencial.password) : null;
+      // 🛑 En UNA transacción: la cuenta, su identidad social y la constancia legal
+      // nacen juntas o no nace nada. Sin esto, dos altas a la vez con el mismo
+      // permiso social creaban dos cuentas, y la segunda quedaba sin contraseña y
+      // sin identidad: una cuenta a la que no se puede entrar.
+      const usuario = await ctx.db.enTransaccion(async (tx) => {
+        const r = crearRepo(tx);
+        const creado = await r.crearUsuario(emailDePaso, hash, ahora);
+        if (altaSocial !== null &&
+            !(await r.vincularIdentidad(creado.id, altaSocial.proveedor, altaSocial.sujeto, altaSocial.email, ahora))) {
+          throw new ErrorApi("conflict", "Account already exists");
+        }
+        await r.guardarAceptacionLegal(creado.id, vigente, ahora);
+        return creado;
+      });
       return { sesion: await abrirSesion(usuario.id, null), usuarioId: usuario.id };
     },
 
@@ -241,17 +302,91 @@ export function crearServicioAuth(ctx: Contexto) {
       const email = normalizarEmail(emailCrudo);
       const usuario = await repo.buscarUsuarioPorEmail(email);
 
-      // 🛑 La rama "no existe" hace el MISMO trabajo que la otra: si no, el tiempo
-      // de respuesta enumera las cuentas aunque el JSON sea idéntico.
+      // 2026-10-21 (decisión de Iván): cada caso con su código, para que la app
+      // diga "El usuario no existe" o "La contraseña no coincide".
       if (usuario === null) {
         await verificarDummy(password);
-        throw new ErrorApi("invalid_credentials", "Email or password is not valid");
+        throw new ErrorApi("user_not_found", "There is no account with this email");
       }
-
+      // Una cuenta que nació con Google o Apple no tiene contraseña.
+      if (usuario.password_hash === null) {
+        await verificarDummy(password);
+        throw new ErrorApi("password_not_set", "This account signs in with Google or Apple");
+      }
       if (!(await verificarPassword(password, usuario.password_hash))) {
-        throw new ErrorApi("invalid_credentials", "Email or password is not valid");
+        throw new ErrorApi("wrong_password", "The password does not match");
       }
       return abrirSesion(usuario.id, null);
+    },
+
+    // -------------------------------------------------- Google y Apple --
+    /**
+     * `POST /auth/social`. Tres desenlaces:
+     *
+     * 1. La identidad ya está vinculada → se abre la sesión.
+     * 2. No está vinculada, pero el proveedor VERIFICÓ un correo que ya tiene
+     *    cuenta → se vincula a esa cuenta y se abre la sesión. Es la misma persona:
+     *    el proveedor ya comprobó que el correo es suyo.
+     * 3. Nadie la conoce → `signup_required` con un permiso de alta. El teléfono
+     *    sigue con el alta de siempre (nombre, apellido, correo y su código): la
+     *    cuenta se crea recién en `register/complete`, con ese permiso en vez de
+     *    una contraseña.
+     */
+    async entrarConProveedor(proveedor: NombreDeProveedor, idToken: string, nonce: string): Promise<DesenlaceSocial> {
+      if (!proveedores.configurado(proveedor)) {
+        throw new ErrorApi("provider_not_configured", `Sign in with ${proveedor} is not configured`);
+      }
+      const identidad = await proveedores.verificar(proveedor, idToken, nonce);
+      if (identidad === null) throw new ErrorApi("invalid_provider_token", "Provider token is not valid");
+
+      // 🛑 Cada id_token sirve UNA vez. El nonce de Google viaja en claro adentro
+      // del token, así que no alcanza contra alguien que se lo robó: lo que lo
+      // frena es que el servidor recuerde los que ya aceptó, hasta que vencen.
+      const ttlS = Math.max(60, Math.ceil((identidad.venceMs - ctx.ahoraMs()) / 1000) + 60);
+      if (!(await ctx.cache.ponerSiAusente(`auth:idtoken:${hashearToken(idToken)}`, "1", ttlS))) {
+        throw new ErrorApi("invalid_provider_token", "Provider token was already used");
+      }
+
+      const vinculado = await repo.buscarUsuarioPorIdentidad(proveedor, identidad.sujeto);
+      if (vinculado !== null) return { status: "signed_in", session: await abrirSesion(vinculado.id, null) };
+
+      // Se vincula a una cuenta existente sólo si el proveedor es el DUEÑO de ese
+      // correo, y si esa cuenta no tiene ya otra persona del mismo proveedor.
+      if (identidad.email !== null && proveedorEsDuenoDelCorreo(identidad)) {
+        const porCorreo = await repo.buscarUsuarioPorEmail(identidad.email);
+        if (porCorreo !== null && !(await repo.tieneIdentidadDe(porCorreo.id, proveedor))) {
+          await repo.vincularIdentidad(porCorreo.id, proveedor, identidad.sujeto, identidad.email, ctx.ahoraMs());
+          // Que el dueño se entere: una forma nueva de entrar a su cuenta no puede
+          // aparecer en silencio. Si el correo falla, igual entra.
+          try { await ctx.correo.avisarVinculacion(identidad.email, proveedor); } catch { /* no bloquea */ }
+          return { status: "signed_in", session: await abrirSesion(porCorreo.id, null) };
+        }
+      }
+
+      // Un correo verificado que ya tiene cuenta, pero del que el proveedor no es
+      // dueño (un Google creado con un @hotmail): no se vincula solo y tampoco se
+      // puede crear otra cuenta con ese correo. Que entre con su contraseña.
+      if (identidad.email !== null && identidad.emailVerificado &&
+          await repo.buscarUsuarioPorEmail(identidad.email) !== null) {
+        throw new ErrorApi("conflict", "An account with this email already exists");
+      }
+
+      const ahora = ctx.ahoraMs();
+      const token = await firmarAltaSocial(
+        ctx.config,
+        { proveedor, sujeto: identidad.sujeto, email: identidad.email, emailVerificado: identidad.emailVerificado },
+        ahora,
+        VIDA_ALTA_SOCIAL_MS,
+      );
+      return {
+        status: "signup_required",
+        signup: {
+          signup_token: token,
+          expires_at_ms: ahora + VIDA_ALTA_SOCIAL_MS,
+          email: identidad.email,
+          email_verified: identidad.emailVerificado,
+        },
+      };
     },
 
     // ------------------------------------------------------------- refresh --
@@ -356,9 +491,7 @@ export function crearServicioAuth(ctx: Contexto) {
       const email = normalizarEmail(emailCrudo);
       const usuario = await repo.buscarUsuarioPorEmail(email);
       if (usuario === null) {
-        // Misma respuesta y mismo costo que si existiera.
-        const ahora = ctx.ahoraMs();
-        return { expires_at_ms: ahora + VIDA_CODIGO_MS, resend_after_ms: ahora + REENVIO_MS };
+        throw new ErrorApi("user_not_found", "There is no account with this email");
       }
       return emitirCodigo(email, "recuperacion");
     },

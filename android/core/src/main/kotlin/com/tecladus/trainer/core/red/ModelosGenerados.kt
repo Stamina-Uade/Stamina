@@ -3,7 +3,7 @@
 // NO EDITAR A MANO: se reescribe con `npm run generar:modelos` y el CI falla si
 // lo commiteado no coincide.
 //
-// contrato: Trainer API v1.3.0
+// contrato: Trainer API v1.4.0
 //
 // AGENTS.md §5: el JSON va en snake_case, los tiempos son enteros de milisegundos
 // desde epoch y todo viaja en un sobre {"data": …} o {"error": {…}}. Los nombres
@@ -121,6 +121,27 @@ data class Sesion(
     val refreshExpiresAtMs: Long,
     @SerialName("user_id")
     val userId: String,
+)
+
+/** Lo que contesta `POST /auth/social`. Trae `session` o `signup`, según `status`. */
+@Serializable
+data class EntradaSocial(
+    val status: String,
+    val session: Sesion? = null,
+    val signup: AltaSocialPendiente? = null,
+)
+
+/** El permiso para terminar un alta que empezó con Google o Apple. `email` es el que dio el proveedor (puede ser un relay privado de Apple, o faltar). Si `email_verified` es `true`, ése es el correo de la cuenta y no se pide código; si no, la persona valida un correo con el código como siempre. */
+@Serializable
+data class AltaSocialPendiente(
+    @SerialName("signup_token")
+    val signupToken: String,
+    @SerialName("expires_at_ms")
+    val expiresAtMs: Long,
+    /** Si el proveedor verificó `email`. Con `true` el alta no pide el código al correo y el campo no se puede cambiar. */
+    @SerialName("email_verified")
+    val emailVerified: Boolean? = null,
+    val email: String? = null,
 )
 
 /** Para el cálculo de sudoración y de metabolismo basal, no para nada más. Incluye "prefiero no decirlo" como el diseño (`reg-sexo`). */
@@ -259,6 +280,10 @@ data class TextosLegales(
     @SerialName("health_notice")
     val healthNotice: BloqueLegal,
     val terms: BloqueLegal,
+    /** (1.4.0) La política de privacidad. Opcional para que un cliente nuevo lea la respuesta de un servidor anterior. */
+    val privacy: BloqueLegal? = null,
+    /** (1.4.0) En qué idioma vinieron los textos, según `Accept-Language`: es, fr, o en para cualquier otro. */
+    val language: String? = null,
 )
 
 /** Un bloque del texto. Un título corto y un párrafo. */

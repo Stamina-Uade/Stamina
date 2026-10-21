@@ -12,12 +12,16 @@ import type { ComidaFila } from "../nutricion/repositorio.js";
 
 export function crearRepoCuenta(db: Db) {
   return {
-    async hashDePassword(usuarioId: string): Promise<string | null> {
-      const f = await db.unaFila<{ password_hash: string }>(
+    /**
+     * `undefined` = la cuenta no existe; `null` = existe y no tiene contraseña
+     * (nació con Google o Apple).
+     */
+    async hashDePassword(usuarioId: string): Promise<string | null | undefined> {
+      const f = await db.unaFila<{ password_hash: string | null }>(
         `select password_hash from usuarios where id = $1`,
         [usuarioId]
       );
-      return f?.password_hash ?? null;
+      return f === null ? undefined : f.password_hash;
     },
 
     /** Borra la cuenta y sus datos dependientes en una sola transacción de PostgreSQL. */

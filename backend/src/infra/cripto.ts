@@ -211,3 +211,64 @@ export async function emailDePasoDeCorreo(
     return null;
   }
 }
+
+// ------------------------------------------------------------ alta social --
+
+/** Lo que el permiso de alta social recuerda del proveedor. */
+export interface AltaSocial {
+  proveedor: "google" | "apple";
+  sujeto: string;
+  /** El correo que dio el proveedor, si dio uno. */
+  email: string | null;
+  /**
+   * Si el proveedor lo verificó. Con `true` el alta NO pide el código al correo:
+   * Google o Apple ya comprobaron que la persona tiene acceso a esa casilla.
+   */
+  emailVerificado: boolean;
+}
+
+/**
+ * El permiso que devuelve `POST /auth/social` cuando la persona de Google o Apple
+ * todavía no tiene cuenta. Recuerda QUIÉN es en el proveedor (`sub`) para que el
+ * alta, al terminar, vincule esa identidad a la cuenta nueva sin volver a pedirle
+ * que entre con el proveedor. No abre nada por sí solo: el alta sigue pidiendo el
+ * código del correo.
+ */
+export async function firmarAltaSocial(
+  config: Pick<Config, "jwtSecret">,
+  alta: AltaSocial,
+  ahoraMs: number,
+  vidaMs: number
+): Promise<string> {
+  const emitido = Math.floor(ahoraMs / 1000);
+  return new SignJWT({ prv: alta.proveedor, eml: alta.email, evf: alta.emailVerificado })
+    .setProtectedHeader({ alg: ALG })
+    .setSubject(alta.sujeto)
+    .setJti(generarTokenOpaco())
+    .setIssuedAt(emitido)
+    .setExpirationTime(Math.floor((ahoraMs + vidaMs) / 1000))
+    .setIssuer("trainer")
+    .setAudience("trainer-social-signup")
+    .sign(config.jwtSecret);
+}
+
+export async function leerAltaSocial(
+  config: Pick<Config, "jwtSecret">,
+  token: string,
+  ahoraMs: number
+): Promise<AltaSocial | null> {
+  try {
+    const { payload } = await jwtVerify(token, config.jwtSecret, {
+      algorithms: [ALG], issuer: "trainer", audience: "trainer-social-signup",
+      currentDate: new Date(ahoraMs),
+    });
+    const prv = payload["prv"];
+    const eml = payload["eml"];
+    if (typeof payload.sub !== "string" || payload.sub.length === 0) return null;
+    if (prv !== "google" && prv !== "apple") return null;
+    const email = typeof eml === "string" ? eml : null;
+    return { proveedor: prv, sujeto: payload.sub, email, emailVerificado: email !== null && payload["evf"] === true };
+  } catch {
+    return null;
+  }
+}

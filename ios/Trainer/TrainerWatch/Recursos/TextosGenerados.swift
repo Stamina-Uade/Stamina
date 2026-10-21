@@ -9,7 +9,7 @@
 // números y unidades se formatean con el locale del sistema. Esto resuelve lo
 // primero; lo segundo es de quien presenta el dato.
 //
-// 209 claves · idioma de autoría: es
+// 209 claves · idioma de autoría: en
 // =============================================================================
 
 import Foundation
@@ -18,350 +18,350 @@ import Foundation
 /// clave deja de ser un bug de producción y pasa a ser un error de compilación.
 enum TextosReloj {
 
-    /// Hecho
+    /// Done
     static var alertDone: String { String(localized: "alert.done") }
 
-    /// Gel + 300 ml con sales
+    /// Gel + 300 ml with electrolytes
     static var alertGel: String { String(localized: "alert.gel") }
 
-    /// Vas 300 mg de sodio. Quedan 40 min de esfuerzo en Z2.
+    /// You're at 300 mg of sodium. 40 min of Z2 effort left.
     static var alertGelDetail: String { String(localized: "alert.gel.detail") }
 
-    /// Hidratación
+    /// Hydration
     static var alertHydration: String { String(localized: "alert.hydration") }
 
-    /// Minuto %lld
+    /// Minute %lld
     static func alertMinute(_ arg1: Int) -> String {
         String(format: String(localized: "alert.minute"), arg1)
     }
 
-    /// Sin agua encima
+    /// No water on me
     static var alertNoWater: String { String(localized: "alert.no_water") }
 
-    /// Listo
+    /// Done
     static var alertReady: String { String(localized: "alert.ready") }
 
-    /// Recordar en 5 min
+    /// Remind me in 5 min
     static var alertRemindLater: String { String(localized: "alert.remind_later") }
 
-    /// Tocá para continuar
+    /// Tap to continue
     static var alertTapToContinue: String { String(localized: "alert.tap_to_continue") }
 
-    /// Tomá 200 ml
+    /// Drink 200 ml
     static var alertWater: String { String(localized: "alert.water") }
 
-    /// Vas %1$@ de %2$@. Con 26° perdés más de lo que sentís.
+    /// You're at %1$@ of %2$@. At 26° you lose more than you feel.
     static func alertWaterDetail(_ arg1: String, _ arg2: String) -> String {
         String(format: String(localized: "alert.water.detail"), arg1, arg2)
     }
 
-    /// Todavía no hay avisos programados para esta salida.
+    /// There are no scheduled alerts for this workout yet.
     static var alertsEmpty: String { String(localized: "alerts.empty") }
 
-    /// Lo que pasó
+    /// Done
     static var alertsPast: String { String(localized: "alerts.past") }
 
-    /// Avisos
+    /// Alerts
     static var alertsTitle: String { String(localized: "alerts.title") }
 
-    /// Lo que viene
+    /// Coming up
     static var alertsUpcoming: String { String(localized: "alerts.upcoming") }
 
-    /// Volver
+    /// Back
     static var commonBack: String { String(localized: "common.back") }
 
-    /// Cancelar
+    /// Cancel
     static var commonCancel: String { String(localized: "common.cancel") }
 
-    /// Completado
+    /// Completed
     static var commonCompleted: String { String(localized: "common.completed") }
 
-    /// Continuar
+    /// Continue
     static var commonContinue: String { String(localized: "common.continue") }
 
-    /// %1$lld de %2$lld
+    /// %1$lld of %2$lld
     static func commonCountOf(_ arg1: Int, _ arg2: Int) -> String {
         String(format: String(localized: "common.count_of"), arg1, arg2)
     }
 
-    /// Descartar
+    /// Discard
     static var commonDiscard: String { String(localized: "common.discard") }
 
-    /// ¿Seguro que quieres descartar estos datos?
+    /// Are you sure you want to discard this data?
     static var commonDiscardConfirmation: String { String(localized: "common.discard_confirmation") }
 
-    /// Finalizar
+    /// Finish
     static var commonFinish: String { String(localized: "common.finish") }
 
-    /// Regresar
+    /// Back
     static var commonGoBack: String { String(localized: "common.go_back") }
 
     /// No
     static var commonNo: String { String(localized: "common.no") }
 
-    /// Iniciar
+    /// Start
     static var commonStart: String { String(localized: "common.start") }
 
-    /// Deshacer
+    /// Undo
     static var commonUndo: String { String(localized: "common.undo") }
 
-    /// Sí
+    /// Yes
     static var commonYes: String { String(localized: "common.yes") }
 
-    /// Finalizar
+    /// Finish
     static var controlsFinish: String { String(localized: "controls.finish") }
 
-    /// Vuelta
+    /// Lap
     static var controlsLap: String { String(localized: "controls.lap") }
 
-    /// Bloquear
+    /// Lock
     static var controlsLock: String { String(localized: "controls.lock") }
 
-    /// Pausar
+    /// Pause
     static var controlsPause: String { String(localized: "controls.pause") }
 
-    /// Reanudar
+    /// Resume
     static var controlsResume: String { String(localized: "controls.resume") }
 
-    /// Ajustes
+    /// Settings
     static var controlsSettings: String { String(localized: "controls.settings") }
 
-    /// Controles
+    /// Controls
     static var controlsTitle: String { String(localized: "controls.title") }
 
-    /// Pasar a Bicicleta
+    /// Switch to cycling
     static var controlsTriathlonToCycling: String { String(localized: "controls.triathlon.to_cycling") }
 
-    /// Pasar a Carrera
+    /// Switch to running
     static var controlsTriathlonToRunning: String { String(localized: "controls.triathlon.to_running") }
 
-    /// El entrenamiento está pausado. Guardalo o seguí entrenando.
+    /// The workout is paused. Save it or keep training.
     static var finishDetail: String { String(localized: "finish.detail") }
 
-    /// Reanudar
+    /// Resume
     static var finishResume: String { String(localized: "finish.resume") }
 
-    /// Guardar
+    /// Save
     static var finishSave: String { String(localized: "finish.save") }
 
-    /// ¿Finalizar?
+    /// Finish?
     static var finishTitle: String { String(localized: "finish.title") }
 
-    /// Tocá para cerrar
+    /// Tap to dismiss
     static var fuelAlertDismiss: String { String(localized: "fuel.alert.dismiss") }
 
-    /// Tomá un gel
+    /// Take a gel
     static var fuelAlertGel: String { String(localized: "fuel.alert.gel") }
 
-    /// Considerá las sales
+    /// Consider salt tablets
     static var fuelAlertSalts: String { String(localized: "fuel.alert.salts") }
 
-    /// Tomá agua
+    /// Drink water
     static var fuelAlertWater: String { String(localized: "fuel.alert.water") }
 
-    /// Avisos de nutrición e hidratación
+    /// Fuel and hydration alerts
     static var fuelEnable: String { String(localized: "fuel.enable") }
 
-    /// Energía para continuar
+    /// Energy to keep going
     static var fuelFullscreenGelSubtitle: String { String(localized: "fuel.fullscreen.gel.subtitle") }
 
-    /// ¡Tomá un gel!
+    /// Take a gel!
     static var fuelFullscreenGelTitle: String { String(localized: "fuel.fullscreen.gel.title") }
 
-    /// Electrolitos para tu ritmo
+    /// Electrolytes for your pace
     static var fuelFullscreenSaltsSubtitle: String { String(localized: "fuel.fullscreen.salts.subtitle") }
 
-    /// ¡Tomá sales!
+    /// Take salts!
     static var fuelFullscreenSaltsTitle: String { String(localized: "fuel.fullscreen.salts.title") }
 
-    /// Momento de hidratarte
+    /// Time to hydrate
     static var fuelFullscreenWaterSubtitle: String { String(localized: "fuel.fullscreen.water.subtitle") }
 
-    /// ¡Tomá agua!
+    /// Drink water!
     static var fuelFullscreenWaterTitle: String { String(localized: "fuel.fullscreen.water.title") }
 
-    /// Geles
+    /// Gels
     static var fuelGels: String { String(localized: "fuel.gels") }
 
-    /// Geles
+    /// Gels
     static var fuelPromptGels: String { String(localized: "fuel.prompt.gels") }
 
-    /// ¿Llevás hidratación o geles?
+    /// Carrying water or gels?
     static var fuelPromptQuestion: String { String(localized: "fuel.prompt.question") }
 
-    /// Sales
+    /// Salts
     static var fuelPromptSalts: String { String(localized: "fuel.prompt.salts") }
 
-    /// Tocá para saltear
+    /// Tap to skip
     static var fuelPromptTapToSkip: String { String(localized: "fuel.prompt.tap_to_skip") }
 
-    /// ¿QUÉ LLEVÁS?
+    /// WHAT ARE YOU CARRYING?
     static var fuelPromptTitle: String { String(localized: "fuel.prompt.title") }
 
-    /// Agua
+    /// Water
     static var fuelPromptWater: String { String(localized: "fuel.prompt.water") }
 
-    /// Sales
+    /// Salt tablets
     static var fuelSalts: String { String(localized: "fuel.salts") }
 
-    /// Lo que llevás
+    /// What you carry
     static var fuelTitle: String { String(localized: "fuel.title") }
 
-    /// Agua (ml)
+    /// Water (ml)
     static var fuelWater: String { String(localized: "fuel.water") }
 
-    /// Terminaste todas las series de hoy.
+    /// You completed all sets today.
     static var goalAllSetsDone: String { String(localized: "goal.all_sets_done") }
 
-    /// ¡Objetivo completado!
+    /// Goal completed!
     static var goalCompleted: String { String(localized: "goal.completed") }
 
-    /// Continuar entrenamiento
+    /// Continue workout
     static var goalContinueWorkout: String { String(localized: "goal.continue_workout") }
 
-    /// Finalizar objetivo de hoy
+    /// Finish today's goal
     static var goalFinishToday: String { String(localized: "goal.finish_today") }
 
-    /// ¡Objetivo alcanzado!
+    /// Goal reached!
     static var goalReached: String { String(localized: "goal.reached") }
 
-    /// + Serie
+    /// + Set
     static var gymAddSet: String { String(localized: "gym.add_set") }
 
-    /// ¿Seguro que quieres descartar estos datos?
+    /// Are you sure you want to discard this data?
     static var gymDiscardConfirmation: String { String(localized: "gym.discard.confirmation") }
 
     /// reps
     static var gymReps: String { String(localized: "gym.reps") }
 
-    /// Serie
+    /// Set
     static var gymSet: String { String(localized: "gym.set") }
 
-    /// Serie hecha
+    /// Set done
     static var gymSetDone: String { String(localized: "gym.set_done") }
 
-    /// Serie %1$lld de %2$lld
+    /// Set %1$lld of %2$lld
     static func gymSetProgress(_ arg1: Int, _ arg2: Int) -> String {
         String(format: String(localized: "gym.set_progress"), arg1, arg2)
     }
 
-    /// Descartar
+    /// Discard
     static var gymSummaryDiscard: String { String(localized: "gym.summary.discard") }
 
-    /// Ejercicios
+    /// Exercises
     static var gymSummaryExercises: String { String(localized: "gym.summary.exercises") }
 
-    /// Regresar
+    /// Return
     static var gymSummaryGoBack: String { String(localized: "gym.summary.go_back") }
 
-    /// Repeticiones
+    /// Repetitions
     static var gymSummaryReps: String { String(localized: "gym.summary.reps") }
 
-    /// Guardar
+    /// Save
     static var gymSummarySave: String { String(localized: "gym.summary.save") }
 
-    /// Series registradas
+    /// Sets logged
     static var gymSummarySetsLogged: String { String(localized: "gym.summary.sets_logged") }
 
-    /// Entrenamiento finalizado
+    /// Workout completed
     static var gymSummaryTitle: String { String(localized: "gym.summary.title") }
 
-    /// Volumen total
+    /// Total volume
     static var gymSummaryTotalVolume: String { String(localized: "gym.summary.total_volume") }
 
-    /// Técnica
+    /// Technique
     static var gymTechnique: String { String(localized: "gym.technique") }
 
-    /// Técnica y movimiento
+    /// Technique & movement
     static var gymTechniqueMovement: String { String(localized: "gym.technique_movement") }
 
-    /// Movimiento continuo · Controlá la respiración
+    /// Keep moving · Control your breathing
     static var gymTimerCue: String { String(localized: "gym.timer.cue") }
 
-    /// Desmarcar serie
+    /// Unmark set
     static var gymUnmarkSet: String { String(localized: "gym.unmark_set") }
 
-    /// Unidades de distancia
+    /// Distance units
     static var homeSettingsDistanceUnits: String { String(localized: "home.settings.distance_units") }
 
     /// Imperial · mi
     static var homeSettingsImperial: String { String(localized: "home.settings.imperial") }
 
-    /// Métrico · km
+    /// Metric · km
     static var homeSettingsMetric: String { String(localized: "home.settings.metric") }
 
-    /// Ajustes
+    /// Settings
     static var homeSettingsTitle: String { String(localized: "home.settings.title") }
 
-    /// Serie %lld
+    /// Set %lld
     static func intervalsSetNumber(_ arg1: Int) -> String {
         String(format: String(localized: "intervals.set_number"), arg1)
     }
 
-    /// SERIES
+    /// SETS
     static var intervalsTitle: String { String(localized: "intervals.title") }
 
-    /// Error al iniciar sesión
+    /// Login Error
     static var loginErrorTitle: String { String(localized: "login.error.title") }
 
-    /// El recorrido llega con el GPS.
+    /// The route arrives with GPS.
     static var mapNoGps: String { String(localized: "map.no_gps") }
 
-    /// Recorrido
+    /// Route
     static var mapTitle: String { String(localized: "map.title") }
 
-    /// Tu ubicación
+    /// Your location
     static var mapYourLocation: String { String(localized: "map.your_location") }
 
-    /// promedio
+    /// average
     static var metricsAverage: String { String(localized: "metrics.average") }
 
-    /// pulso
+    /// heart rate
     static var metricsHeartRate: String { String(localized: "metrics.heart_rate") }
 
     /// km
     static var metricsKm: String { String(localized: "metrics.km") }
 
-    /// parcial
+    /// lap
     static var metricsLap: String { String(localized: "metrics.lap") }
 
-    /// Pantalla bloqueada · apretá dos veces el botón lateral
+    /// Screen locked · press the side button twice
     static var metricsLocked: String { String(localized: "metrics.locked") }
 
-    /// ritmo
+    /// pace
     static var metricsPace: String { String(localized: "metrics.pace") }
 
-    /// En pausa
+    /// Paused
     static var metricsPaused: String { String(localized: "metrics.paused") }
 
-    /// En curso
+    /// Running
     static var metricsRunning: String { String(localized: "metrics.running") }
 
-    /// Música
+    /// Music
     static var musicPlaceholder: String { String(localized: "music.placeholder") }
 
-    /// Buen día, hoy es día de entreno. Hoy a las %1$@ toca hacer %2$@.
+    /// Good morning, today is a workout day. Today at %1$@: %2$@.
     static func notificationReminderMorningBody(_ arg1: String, _ arg2: String) -> String {
         String(format: String(localized: "notification.reminder.morning.body"), arg1, arg2)
     }
 
-    /// Entrenamiento de hoy
+    /// Today's workout
     static var notificationReminderMorningTitle: String { String(localized: "notification.reminder.morning.title") }
 
-    /// Tu entrenamiento de %1$@ es en este momento. ¡A darlo todo!
+    /// Your %1$@ workout is starting now. Let's go!
     static func notificationReminderTimeBody(_ arg1: String) -> String {
         String(format: String(localized: "notification.reminder.time.body"), arg1)
     }
 
-    /// ¡Hora de entrenar!
+    /// Time to train!
     static var notificationReminderTimeTitle: String { String(localized: "notification.reminder.time.title") }
 
-    /// Hiciste %1$@ durante %2$@ y recorriste %3$@. ¡Gran trabajo!
+    /// You completed %1$@ for %2$@ and covered %3$@. Great work!
     static func notificationWorkoutBody(_ arg1: String, _ arg2: String, _ arg3: String) -> String {
         String(format: String(localized: "notification.workout.body"), arg1, arg2, arg3)
     }
 
-    /// ciclismo
+    /// a bike ride
     static var notificationWorkoutCycling: String { String(localized: "notification.workout.cycling") }
 
     /// %@ km
@@ -369,100 +369,100 @@ enum TextosReloj {
         String(format: String(localized: "notification.workout.distance"), arg1)
     }
 
-    /// trekking
+    /// a hike
     static var notificationWorkoutHiking: String { String(localized: "notification.workout.hiking") }
 
-    /// un entrenamiento
+    /// a workout
     static var notificationWorkoutOther: String { String(localized: "notification.workout.other") }
 
-    /// running
+    /// a run
     static var notificationWorkoutRunning: String { String(localized: "notification.workout.running") }
 
-    /// fuerza
+    /// a strength workout
     static var notificationWorkoutStrength: String { String(localized: "notification.workout.strength") }
 
-    /// natación
+    /// a swim
     static var notificationWorkoutSwimming: String { String(localized: "notification.workout.swimming") }
 
-    /// ¡Entrenamiento completado!
+    /// Workout complete!
     static var notificationWorkoutTitle: String { String(localized: "notification.workout.title") }
 
-    /// Continuar sin iPhone
+    /// Continue without iPhone
     static var phoneMissingContinueWithout: String { String(localized: "phone.missing.continue_without") }
 
-    /// Asegúrate de que tu teléfono esté cerca y de que hayas iniciado sesión en Stamina.
+    /// Make sure your phone is nearby and that you have logged into Stamina.
     static var phoneMissingDetail: String { String(localized: "phone.missing.detail") }
 
-    /// Asegúrate de que tu iPhone esté cerca y con Bluetooth encendido.
+    /// Make sure your iPhone is nearby with Bluetooth turned on.
     static var phoneMissingDisconnected: String { String(localized: "phone.missing.disconnected") }
 
-    /// Volver a intentar
+    /// Try Again
     static var phoneMissingRetry: String { String(localized: "phone.missing.retry") }
 
-    /// Inicia sesión en Stamina desde tu iPhone para continuar.
+    /// Log into Stamina on your iPhone to continue.
     static var phoneMissingSignedOut: String { String(localized: "phone.missing.signed_out") }
 
-    /// Sin teléfono cerca
+    /// Phone not nearby
     static var phoneMissingTitle: String { String(localized: "phone.missing.title") }
 
-    /// Hoy no hay rutina
+    /// No routine today
     static var routineNone: String { String(localized: "routine.none") }
 
-    /// Es un día de descanso. Disfrutalo.
+    /// It's a rest day. Enjoy it.
     static var routineNoneDetail: String { String(localized: "routine.none.detail") }
 
-    /// Rutina de hoy
+    /// Today's routine
     static var routineTitle: String { String(localized: "routine.title") }
 
-    /// Tu sesión ha expirado. Por favor, inicia sesión nuevamente para continuar.
+    /// Your session has expired. Please log in again to continue.
     static var sessionExpiredMessage: String { String(localized: "session.expired.message") }
 
-    /// Sesión expirada
+    /// Session Expired
     static var sessionExpiredTitle: String { String(localized: "session.expired.title") }
 
-    /// Alertas
+    /// Alerts
     static var settingsAlertsSection: String { String(localized: "settings.alerts.section") }
 
-    /// Alertas de entrenamiento
+    /// Workout alerts
     static var settingsAlertsWorkout: String { String(localized: "settings.alerts.workout") }
 
-    /// Vueltas y parciales
+    /// Laps and splits
     static var settingsAudioLapsSplits: String { String(localized: "settings.audio.laps_splits") }
 
-    /// Inicio, fin y pausa
+    /// Start, finish and pause
     static var settingsAudioStartFinishPause: String { String(localized: "settings.audio.start_finish_pause") }
 
-    /// Avisos de entrenamiento
+    /// Workout alerts
     static var settingsAudioWorkoutAlerts: String { String(localized: "settings.audio.workout_alerts") }
 
-    /// Pausa automática
+    /// Auto pause
     static var settingsAutoPause: String { String(localized: "settings.auto_pause") }
 
-    /// Avisos de sales y geles
+    /// Salt and gel alerts
     static var settingsFuelAlerts: String { String(localized: "settings.fuel_alerts") }
 
-    /// Guía de la rutina
+    /// Routine guidance
     static var settingsRoutine: String { String(localized: "settings.routine") }
 
-    /// Sólo para esta salida
+    /// For this session only
     static var settingsThisSessionOnly: String { String(localized: "settings.this_session_only") }
 
-    /// Ajustes
+    /// Settings
     static var settingsTitle: String { String(localized: "settings.title") }
 
-    /// Sistema imperial
+    /// Imperial system
     static var settingsUnitsImperial: String { String(localized: "settings.units.imperial") }
 
-    /// Sistema métrico
+    /// Metric system
     static var settingsUnitsMetric: String { String(localized: "settings.units.metric") }
 
-    /// Unidades
+    /// Units
     static var settingsUnitsTitle: String { String(localized: "settings.units.title") }
 
-    /// Error en el registro
+    /// Registration Error
     static var signupErrorTitle: String { String(localized: "signup.error.title") }
 
-    /// Sin kilómetros completados aún
+    /// No kilometers completed yet
     static var splitsEmpty: String { String(localized: "splits.empty") }
 
     /// KM %lld
@@ -470,57 +470,57 @@ enum TextosReloj {
         String(format: String(localized: "splits.km_number"), arg1)
     }
 
-    /// KILÓMETROS
+    /// KILOMETERS
     static var splitsTitle: String { String(localized: "splits.title") }
 
-    /// Bicicleta
+    /// Cycling
     static var sportCycling: String { String(localized: "sport.cycling") }
 
-    /// Gimnasio
+    /// Gym
     static var sportGym: String { String(localized: "sport.gym") }
 
-    /// Carrera
+    /// Running
     static var sportRunning: String { String(localized: "sport.running") }
 
-    /// Inicio
+    /// Start
     static var startBegin: String { String(localized: "start.begin") }
 
-    /// Elegí un deporte
+    /// Choose a sport
     static var startChooseSport: String { String(localized: "start.choose_sport") }
 
-    /// %lld ejercicios
+    /// %lld exercises
     static func startExercisesCount(_ arg1: Int) -> String {
         String(format: String(localized: "start.exercises_count"), arg1)
     }
 
-    /// %lld geles
+    /// %lld gels
     static func startGelsCount(_ arg1: Int) -> String {
         String(format: String(localized: "start.gels_count"), arg1)
     }
 
-    /// Completado · %@
+    /// Completed · %@
     static func startGoalCompletedDistance(_ arg1: String) -> String {
         String(format: String(localized: "start.goal.completed_distance"), arg1)
     }
 
-    /// Gimnasio
+    /// Gym
     static var startGym: String { String(localized: "start.gym") }
 
-    /// %lld series
+    /// %lld sets
     static func startGymSetsCount(_ arg1: Int) -> String {
         String(format: String(localized: "start.gym.sets_count"), arg1)
     }
 
-    /// Gimnasio y rutina de hoy
+    /// Gym & today's routine
     static var startGymRoutine: String { String(localized: "start.gym_routine") }
 
-    /// No compartir
+    /// Not sharing
     static var startLocationOff: String { String(localized: "start.location.off") }
 
-    /// Compartiendo
+    /// Sharing location
     static var startLocationOn: String { String(localized: "start.location.on") }
 
-    /// Compartir ubicación
+    /// Share location
     static var startLocationShare: String { String(localized: "start.location.share") }
 
     /// %lld min
@@ -528,156 +528,156 @@ enum TextosReloj {
         String(format: String(localized: "start.minutes"), arg1)
     }
 
-    /// No hay una sesión planificada para hoy
+    /// No workout planned for today
     static var startNoPlan: String { String(localized: "start.no_plan") }
 
-    /// Bicicleta interior
+    /// Indoor cycling
     static var startOptionBikeIndoor: String { String(localized: "start.option.bike_indoor") }
 
-    /// Bicicleta exterior
+    /// Outdoor cycling
     static var startOptionBikeOutdoor: String { String(localized: "start.option.bike_outdoor") }
 
-    /// Carrera interior
+    /// Indoor run
     static var startOptionRunIndoor: String { String(localized: "start.option.run_indoor") }
 
-    /// Carrera exterior
+    /// Outdoor run
     static var startOptionRunOutdoor: String { String(localized: "start.option.run_outdoor") }
 
-    /// Natación piscina
+    /// Pool swim
     static var startOptionSwimPool: String { String(localized: "start.option.swim_pool") }
 
-    /// Triatlón completo
+    /// Full triathlon
     static var startOptionTriathlon: String { String(localized: "start.option.triathlon") }
 
-    /// Caminata interior
+    /// Indoor walk
     static var startOptionWalkIndoor: String { String(localized: "start.option.walk_indoor") }
 
-    /// Caminata exterior
+    /// Outdoor walk
     static var startOptionWalkOutdoor: String { String(localized: "start.option.walk_outdoor") }
 
-    /// Registrar
+    /// Record
     static var startRecord: String { String(localized: "start.record") }
 
-    /// Guía de la rutina
+    /// Routine guidance
     static var startRoutine: String { String(localized: "start.routine") }
 
-    /// Bicicleta
+    /// Bike
     static var startSportBike: String { String(localized: "start.sport.bike") }
 
-    /// Ciclismo (exterior)
+    /// Outdoor Cycling
     static var startSportBikeOutdoor: String { String(localized: "start.sport.bike_outdoor") }
 
-    /// Carrera
+    /// Run
     static var startSportRun: String { String(localized: "start.sport.run") }
 
-    /// Carrera (exterior)
+    /// Outdoor Run
     static var startSportRunOutdoor: String { String(localized: "start.sport.run_outdoor") }
 
-    /// Trekking
+    /// Hike
     static var startSportTrek: String { String(localized: "start.sport.trek") }
 
-    /// Trekking (exterior)
+    /// Outdoor Trekking
     static var startSportTrekOutdoor: String { String(localized: "start.sport.trek_outdoor") }
 
-    /// Empezar entrenamiento
+    /// Start workout
     static var startStartWorkout: String { String(localized: "start.start_workout") }
 
-    /// Empezar
+    /// Start
     static var startTitle: String { String(localized: "start.title") }
 
-    /// Hoy te toca
+    /// Today’s workout
     static var startToday: String { String(localized: "start.today") }
 
-    /// Objetivo de hoy
+    /// Today's Goal
     static var startTodayGoal: String { String(localized: "start.today_goal") }
 
-    /// Cerrar y reanudar
+    /// Close and resume
     static var stationaryClose: String { String(localized: "stationary.close") }
 
-    /// No se puede guardar esta actividad porque no se detectan cambios en la ubicación.
+    /// This activity cannot be saved because no location changes were detected.
     static var stationaryDetail: String { String(localized: "stationary.detail") }
 
-    /// Descartar
+    /// Discard
     static var stationaryDiscard: String { String(localized: "stationary.discard") }
 
-    /// Reanudar
+    /// Resume
     static var stationaryResume: String { String(localized: "stationary.resume") }
 
-    /// Sin movimiento
+    /// No movement
     static var stationaryTitle: String { String(localized: "stationary.title") }
 
-    /// CALORÍAS ACTIVAS
+    /// ACTIVE CALORIES
     static var summaryActiveCalories: String { String(localized: "summary.active_calories") }
 
-    /// VELOCIDAD PROMEDIO
+    /// AVERAGE SPEED
     static var summaryAverageSpeed: String { String(localized: "summary.average_speed") }
 
-    /// Distancia
+    /// Distance
     static var summaryDistance: String { String(localized: "summary.distance") }
 
-    /// Listo
+    /// Done
     static var summaryDone: String { String(localized: "summary.done") }
 
-    /// Duración
+    /// Duration
     static var summaryDuration: String { String(localized: "summary.duration") }
 
-    /// DESNIVEL ACUMULADO
+    /// ELEVATION GAIN
     static var summaryElevationGain: String { String(localized: "summary.elevation_gain") }
 
-    /// Vuelta %lld
+    /// Lap %lld
     static func summaryLapsItem(_ arg1: Int) -> String {
         String(format: String(localized: "summary.laps.item"), arg1)
     }
 
-    /// VUELTAS
+    /// LAPS
     static var summaryLapsTitle: String { String(localized: "summary.laps.title") }
 
-    /// Ritmo
+    /// Pace
     static var summaryPace: String { String(localized: "summary.pace") }
 
-    /// TIEMPO EN PAUSA
+    /// PAUSED TIME
     static var summaryPausedTime: String { String(localized: "summary.paused_time") }
 
-    /// Guardar
+    /// Save
     static var summarySave: String { String(localized: "summary.save") }
 
-    /// Pausa posterior: %@
+    /// Post pause: %@
     static func summarySegmentsPauseAfter(_ arg1: String) -> String {
         String(format: String(localized: "summary.segments.pause_after"), arg1)
     }
 
-    /// TRAMOS Y PAUSAS
+    /// SPLITS AND PAUSES
     static var summarySegmentsTitle: String { String(localized: "summary.segments.title") }
 
-    /// Zona %lld
+    /// Zone %lld
     static func summarySegmentsZone(_ arg1: Int) -> String {
         String(format: String(localized: "summary.segments.zone"), arg1)
     }
 
-    /// Terminaste
+    /// You're done
     static var summaryTitle: String { String(localized: "summary.title") }
 
-    /// Sin sincronizar
+    /// Unsynced
     static var syncUnsynced: String { String(localized: "sync.unsynced") }
 
-    /// Abrí Stamina en el iPhone para vincular tu cuenta al reloj.
+    /// Open Stamina on your iPhone to link your account to the watch.
     static var workoutOpenOnPhone: String { String(localized: "workout.open_on_phone") }
 
-    /// PROMEDIO
+    /// AVERAGE
     static var workoutPaceAverage: String { String(localized: "workout.pace.average") }
 
-    /// ACTUAL
+    /// CURRENT
     static var workoutPaceCurrent: String { String(localized: "workout.pace.current") }
 
-    /// Permití ubicación y Salud para registrar esta salida.
+    /// Allow location and Health access to record this workout.
     static var workoutPermissionDenied: String { String(localized: "workout.permission_denied") }
 
-    /// Autopausado
+    /// Auto-paused
     static var workoutStatusAutoPaused: String { String(localized: "workout.status.auto_paused") }
 
-    /// EN CURSO
+    /// IN PROGRESS
     static var workoutStatusInProgress: String { String(localized: "workout.status.in_progress") }
 
-    /// Pausado
+    /// Paused
     static var workoutStatusPaused: String { String(localized: "workout.status.paused") }
 }

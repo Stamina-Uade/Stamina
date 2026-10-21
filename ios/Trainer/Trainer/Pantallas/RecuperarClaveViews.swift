@@ -23,16 +23,20 @@ struct ClaveCorreoView: View {
                     CampoTexto(etiqueta: Textos.commonEmailLabel,
                                marcador: Textos.commonEmailPlaceholder,
                                texto: $flujo.recuperacionCorreo,
-                               contenido: .correo, teclado: .correo)
+                               contenido: .correo, teclado: .correo,
+                               conError: flujo.correoRechazado || flujo.error(de: .correo) != nil)
                         .disabled(flujo.enCurso)
 
                     // Mientras se escribe no se juzga: el error aparece al tocar el
                     // botón (`FlujoEntrada.correoRechazado`).
                     if flujo.correoRechazado {
                         PistaDeCorreoRechazado()
+                    } else {
+                        ErrorDeCampo(flujo.error(de: .correo))
                     }
                 }
                 .muestraElCorreoRechazado(flujo.correoRechazado, desplazando: desplazamiento)
+                .onChange(of: flujo.recuperacionCorreo) { _ in flujo.corrigiendo(.correo) }
             }
         } pie: {
             Text(Textos.passwordResetEmailAntiEnumeration)
@@ -64,7 +68,7 @@ struct ClaveCodigoView: View {
         PantallaPaso(titulo: Textos.passwordResetCodeTitle,
                      texto: Textos.passwordResetCodeBody(flujo.correoDelDesafio)) {
             VStack(spacing: TokensEspaciado.e14) {
-                CampoCodigo(codigo: $flujo.recuperacionCodigo)
+                CampoCodigo(codigo: $flujo.recuperacionCodigo, marcador: Textos.commonCodeLabel)
                     .disabled(flujo.enCurso)
 
                 FilaDeReenvio(pedidos: flujo.pedidosDeCodigo,
@@ -93,26 +97,32 @@ struct ClaveNuevaView: View {
                 CampoTexto(etiqueta: Textos.passwordResetNewLabel,
                            marcador: Textos.commonPasswordPlaceholder,
                            texto: $flujo.claveNueva,
-                           contenido: .claveNueva, seguro: true)
+                           contenido: .claveNueva, seguro: true,
+                           conError: flujo.error(de: .clave) != nil)
+                ErrorDeCampo(flujo.error(de: .clave))
 
-                CampoTexto(etiqueta: Textos.passwordResetNewRepeatLabel,
-                           marcador: Textos.commonPasswordPlaceholder,
-                           texto: $flujo.claveNuevaRepetida,
-                           contenido: .claveNueva, seguro: true)
+                // La contraseña segura del iPhone llena las dos: no se repite.
+                if !flujo.claveNuevaSugeridaPorElSistema {
+                    CampoTexto(etiqueta: Textos.passwordResetNewRepeatLabel,
+                               marcador: Textos.commonPasswordPlaceholder,
+                               texto: $flujo.claveNuevaRepetida,
+                               contenido: .claveNueva, seguro: true, conOjo: false,
+                               conError: flujo.error(de: .claveRepetida) != nil)
+                    ErrorDeCampo(flujo.error(de: .claveRepetida))
+                }
 
+                // Que coincidan no se anuncia (2026-10-21): sólo el error, al tocar.
                 MedidorDeClave(cumplidas: flujo.reglasDeClaveNuevaCumplidas,
                                reglas: flujo.reglasDeClave(flujo.claveNueva))
-
-                if !flujo.claveNuevaRepetida.isEmpty {
-                    PistaDeCampo(estado: flujo.claveNuevaCoincide
-                                 ? .correcto(Textos.passwordResetNewMatch)
-                                 : .error(Textos.passwordResetNewNoMatch))
-                }
             }
             .disabled(flujo.enCurso)
+            .onChange(of: flujo.claveNueva) { _ in flujo.corrigiendo(.clave) }
+            .onChange(of: flujo.claveNuevaRepetida) { _ in flujo.corrigiendo(.claveRepetida) }
         } pie: {
             BotonPrimario(Textos.passwordResetNewSave,
-                          habilitado: flujo.claveNuevaLista && !flujo.enCurso,
+                          habilitado: !flujo.claveNueva.isEmpty
+                              && (flujo.claveNuevaSugeridaPorElSistema || !flujo.claveNuevaRepetida.isEmpty)
+                              && !flujo.enCurso,
                           cargando: flujo.enCurso,
                           motivoDeshabilitado: Textos.commonCompleteToContinue) {
                 Task { await flujo.guardarClaveNueva() }
@@ -162,6 +172,22 @@ struct PistaDeCampo: View {
     }
 }
 
+/// El error de un campo, debajo de él y en rojo (2026-10-21: en vez de una
+/// alerta). VoiceOver lo anuncia al aparecer. Sin error no ocupa lugar.
+struct ErrorDeCampo: View {
+    let mensaje: String?
+
+    init(_ mensaje: String?) { self.mensaje = mensaje }
+
+    var body: some View {
+        if let mensaje {
+            PistaDeCampo(estado: .error(mensaje))
+                .transition(.opacity)
+                .onAppear { UIAccessibility.post(notification: .announcement, argument: mensaje) }
+        }
+    }
+}
+
 /// El "no parece un correo", debajo del campo. Aparece recién al tocar el botón.
 struct PistaDeCorreoRechazado: View {
     static let ancla = "correo-rechazado"
@@ -198,12 +224,18 @@ struct MedidorDeClave: View {
     let cumplidas: Int
     let reglas: [FlujoEntrada.ReglaDeClave]
 
+    static let colores: [Color] = [Paleta.error, Paleta.amarilloMedidor, Paleta.verdeMedidor]
+
     var body: some View {
         VStack(alignment: .leading, spacing: TokensEspaciado.e6) {
             HStack(spacing: TokensEspaciado.e5) {
+                // 2026-10-21: cada tramo tiene su color —rojo, amarillo, verde—, así
+                // la barra "escala" a verde a medida que se cumplen las reglas. El
+                // estado también lo dicen la lista de reglas y VoiceOver: no sólo
+                // el color (AGENTS.md §10.1).
                 ForEach(0..<3, id: \.self) { i in
                     Capsule()
-                        .fill(i < cumplidas ? Paleta.acento : Paleta.superficieControl)
+                        .fill(i < cumplidas ? Self.colores[i] : Paleta.superficieControl)
                         .frame(height: TokensEspaciado.e4)
                 }
             }
@@ -216,7 +248,7 @@ struct MedidorDeClave: View {
                     // color, que es lo que §10.1 prohíbe.
                     Image(systemName: regla.cumple ? "checkmark.circle.fill" : "circle")
                         .font(.system(size: TokensTipografia.labelCampoTamano))
-                        .foregroundStyle(regla.cumple ? Paleta.acento : Paleta.textoTerciario)
+                        .foregroundStyle(regla.cumple ? Paleta.verdeMedidor : Paleta.textoTerciario)
                     Text(regla.texto)
                         .estilo(.labelCampo,
                                 color: regla.cumple ? Paleta.textoCuerpo : Paleta.textoTerciario)

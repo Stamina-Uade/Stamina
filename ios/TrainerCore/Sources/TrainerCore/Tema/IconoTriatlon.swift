@@ -17,7 +17,7 @@ public struct IconoTriatlon: View {
                                                   lineCap: .round, lineJoin: .round))
         }
         .aspectRatio(1, contentMode: .fit)
-        .accessibilityLabel(String(localized: "sport.triathlon", defaultValue: "Triatlón", bundle: .main,
+        .accessibilityLabel(String(localized: "sport.triathlon", defaultValue: "Triathlon", bundle: .main,
                                    comment: "VoiceOver: ícono del triatlón (TrainerCore)"))
     }
 }

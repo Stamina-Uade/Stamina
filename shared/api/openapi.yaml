@@ -16,7 +16,7 @@ openapi: 3.1.0
 
 info:
   title: Trainer API
-  version: 1.3.0
+  version: 1.4.0
   license:
     name: >-
       COMPLETAR. El repositorio es privado y la licencia del proyecto no está
@@ -37,6 +37,10 @@ info:
     vale lo mismo que `null` ("sin fecha"). Sólo afloja una validación de entrada.
     La 1.3.0 agrega los pasos diarios (`GET` y `PUT /me/steps`) y la clave
     opcional `steps` en la exportación. Aditivo: nada anterior cambia de forma.
+    La 1.4.0 agrega "Continuar con Google / Apple" (`POST /auth/social`) y, en
+    `POST /auth/register/complete`, `social_token` como alternativa a `password`
+    (va una de las dos). Aditivo para los clientes: el cuerpo de siempre, con
+    `password`, sigue valiendo igual.
 
     **Reglas que valen en TODA la API** (docs/API.md las explica):
 
@@ -190,10 +194,10 @@ paths:
       operationId: registerStart
       summary: Paso 1 del registro — pedir el código al correo
       description: |
-        **Anti-enumeración (AGENTS.md §12): responde SIEMPRE 202, exista o no la
-        cuenta**, y el servidor gasta el mismo tiempo en las dos ramas. Si el
-        correo ya tiene cuenta, se le manda un aviso de que alguien intentó
-        registrarse con su dirección, no un código.
+        Desde la 1.4.0 (decisión de Iván, 2026-10-21) **dice si el correo ya
+        tiene cuenta**: `email_already_registered` (409), para que la app ofrezca
+        entrar o recuperar la contraseña. Es a sabiendas: deja saber qué correos
+        tienen cuenta, y lo frena el rate limit estricto.
 
         Rate limit por PATH, nunca por un parámetro del cliente (AGENTS.md §12).
       security: []
@@ -285,11 +289,25 @@ paths:
           application/json:
             schema:
               type: object
-              required: [registration_token, password, profile, legal]
+              required: [profile, legal]
               additionalProperties: false
+              description: >-
+                Lleva UNA de dos credenciales: `password` (el alta de siempre) o
+                `social_token` (el `signup_token` de `POST /auth/social`, que
+                vincula la cuenta con Google o Apple y la deja sin contraseña).
+                Las dos juntas, o ninguna, es `bad_request`. Un `social_token`
+                vencido o adulterado es `invalid_signup_token` (401) y NO consume
+                el `registration_token`.
+
+                `registration_token` (el permiso del código del correo) es
+                obligatorio con `password`. Con `social_token` sólo hace falta si
+                el proveedor NO verificó el correo (`email_verified: false` en
+                `AltaSocialPendiente`): si lo verificó, la cuenta se crea con ese
+                correo y no se pide código.
               properties:
                 registration_token: { type: string }
                 password: { $ref: '#/components/schemas/Password' }
+                social_token: { type: string, minLength: 1, maxLength: 4096 }
                 profile: { $ref: '#/components/schemas/PerfilEntrada' }
                 legal: { $ref: '#/components/schemas/AceptacionLegal' }
       responses:
@@ -305,16 +323,64 @@ paths:
         '400': { $ref: '#/components/responses/PedidoInvalido' }
         '429': { $ref: '#/components/responses/DemasiadosPedidos' }
 
+  /auth/social:
+    post:
+      tags: [auth]
+      operationId: socialSignIn
+      summary: Continuar con Google o con Apple
+      description: |
+        El teléfono hace el inicio de sesión con el proveedor y manda el `id_token`
+        que recibió, con el `nonce` EN CLARO que generó para ese intento (a Apple se
+        le pasa su SHA-256 en hex; a Google, el claro). El servidor verifica firma,
+        emisor, audiencia, vencimiento y nonce.
+
+        - `signed_in`: la identidad ya estaba vinculada, o el proveedor verificó un
+          correo que ya tiene cuenta (se vincula). Viene `session`.
+        - `signup_required`: nadie la conoce. Viene `signup` con un permiso de alta
+          de 30 minutos. El teléfono pide nombre y apellido y, si el proveedor ya
+          verificó el correo (`email_verified`), NO pide código: va derecho al aviso
+          y manda `social_token` sin `registration_token`. Si no lo verificó, pasa
+          por el código del correo como cualquier alta.
+
+        Errores: `invalid_provider_token` (401), `provider_not_configured` (503),
+        `conflict` (409): ese correo ya tiene una cuenta y el proveedor no es dueño
+        del correo, así que no se vincula solo — hay que entrar con la contraseña.
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [provider, id_token, nonce]
+              additionalProperties: false
+              properties:
+                provider: { type: string, enum: [google, apple] }
+                id_token: { type: string, minLength: 1, maxLength: 8192 }
+                nonce: { type: string, minLength: 16, maxLength: 128 }
+      responses:
+        '200':
+          description: Entró, o hace falta completar el alta.
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [data]
+                properties:
+                  data: { $ref: '#/components/schemas/EntradaSocial' }
+        '400': { $ref: '#/components/responses/PedidoInvalido' }
+        '429': { $ref: '#/components/responses/DemasiadosPedidos' }
+
   /auth/login:
     post:
       tags: [auth]
       operationId: login
       summary: Entrar
       description: |
-        **Anti-enumeración con verificación dummy (AGENTS.md §12):** si el correo
-        no existe, el servidor igual verifica un hash de descarte, para que el
-        TIEMPO de respuesta tampoco delate qué cuentas existen. Un solo código de
-        error, `invalid_credentials`, para las dos ramas.
+        Desde la 1.4.0 (decisión de Iván, 2026-10-21) cada caso tiene su código,
+        para que la app diga qué pasó: `user_not_found` (404, no hay cuenta con
+        ese correo), `wrong_password` (401) y `password_not_set` (409, la cuenta
+        nació con Google o Apple y no tiene contraseña). Rate limit estricto.
       security: []
       requestBody:
         required: true
@@ -412,8 +478,8 @@ paths:
       operationId: passwordForgot
       summary: Recuperar contraseña — pedir el código
       description: >-
-        Mismo trato anti-enumeración que el registro: **siempre 202**, exista o no
-        la cuenta, y con el mismo costo de tiempo.
+        Desde la 1.4.0 (decisión de Iván, 2026-10-21): si no hay cuenta con ese
+        correo contesta `user_not_found` (404). Si la hay, 202 y se manda el código.
       security: []
       requestBody:
         required: true
@@ -1493,6 +1559,36 @@ components:
         refresh_expires_at_ms: { $ref: '#/components/schemas/EpochMs' }
         user_id: { $ref: '#/components/schemas/Id' }
 
+    EntradaSocial:
+      type: object
+      required: [status]
+      description: Lo que contesta `POST /auth/social`. Trae `session` o `signup`, según `status`.
+      properties:
+        status: { type: string, enum: [signed_in, signup_required] }
+        session: { $ref: '#/components/schemas/Sesion' }
+        signup: { $ref: '#/components/schemas/AltaSocialPendiente' }
+
+    AltaSocialPendiente:
+      type: object
+      required: [signup_token, expires_at_ms]
+      description: >-
+        El permiso para terminar un alta que empezó con Google o Apple. `email` es
+        el que dio el proveedor (puede ser un relay privado de Apple, o faltar).
+        Si `email_verified` es `true`, ése es el correo de la cuenta y no se pide
+        código; si no, la persona valida un correo con el código como siempre.
+      properties:
+        signup_token: { type: string }
+        expires_at_ms: { $ref: '#/components/schemas/EpochMs' }
+        email_verified:
+          type: boolean
+          description: >-
+            Si el proveedor verificó `email`. Con `true` el alta no pide el código
+            al correo y el campo no se puede cambiar.
+        email:
+          oneOf:
+            - { type: string }
+            - type: 'null'
+
     # ---- perfil ----
     SexoBiologico:
       type: string
@@ -1608,6 +1704,17 @@ components:
             `false`; el campo existe para que se vea en desarrollo.
         health_notice: { $ref: '#/components/schemas/BloqueLegal' }
         terms: { $ref: '#/components/schemas/BloqueLegal' }
+        privacy:
+          $ref: '#/components/schemas/BloqueLegal'
+          description: >-
+            (1.4.0) La política de privacidad. Opcional para que un cliente nuevo
+            lea la respuesta de un servidor anterior.
+        language:
+          type: string
+          enum: [es, en, fr]
+          description: >-
+            (1.4.0) En qué idioma vinieron los textos, según `Accept-Language`:
+            es, fr, o en para cualquier otro.
 
     SeccionLegal:
       type: object
