@@ -784,6 +784,10 @@ paths:
         **AGENTS.md §8: borrar es una feature, no un favor.** Pide la contraseña otra
         vez: un access token robado no alcanza para borrarle la cuenta a nadie.
 
+        (1.4.0) Una cuenta que nació con Google o Apple no tiene contraseña
+        (`Perfil.has_password` es `false`): manda el cuerpo vacío `{}` y la sesión
+        abierta es la prueba. Con contraseña, mandarla es obligatorio (401 si falta).
+
         La cuenta y sus datos dependientes se borran físicamente en el acto por
         cascada; sus sesiones dejan de existir y el correo queda libre para volver
         a registrarse. No hay plazo de retención de 30 días en la base activa.
@@ -796,7 +800,6 @@ paths:
           application/json:
             schema:
               type: object
-              required: [password]
               additionalProperties: false
               properties:
                 password: { type: string, minLength: 1, maxLength: 200 }
@@ -1860,6 +1863,11 @@ components:
       properties:
         id: { $ref: '#/components/schemas/Id' }
         email: { $ref: '#/components/schemas/Email' }
+        has_password:
+          type: boolean
+          description: >-
+            (1.4.0) `false` si la cuenta nació con Google o Apple y nunca eligió
+            contraseña. Decide si borrar la cuenta pide la contraseña.
         first_name: { type: string }
         last_name: { type: string }
         birthdate_ms: { $ref: '#/components/schemas/EpochMs' }

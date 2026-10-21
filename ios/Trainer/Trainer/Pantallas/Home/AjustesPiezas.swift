@@ -17,6 +17,7 @@ import TrainerCore
 enum PaginaDeAjustes: String, Hashable {
     case datosPersonales, entrenamiento
     case aspecto, notificaciones, unidades, objetivos
+    case borrarCuenta
 }
 
 /// Lo que sobrevive a que el color re-cree el Home (`RaizHomeView` usa

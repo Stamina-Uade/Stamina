@@ -9,7 +9,7 @@
 // números y unidades se formatean con el locale del sistema. Esto resuelve lo
 // primero; lo segundo es de quien presenta el dato.
 //
-// 872 claves · idioma de autoría: en
+// 882 claves · idioma de autoría: en
 // =============================================================================
 
 import Foundation
@@ -1938,6 +1938,36 @@ enum Textos {
 
     /// Yellow
     static var settingsColorYellow: String { String(localized: "settings.color.yellow") }
+
+    /// Delete account
+    static var settingsDeleteAccount: String { String(localized: "settings.delete_account") }
+
+    /// Delete for good
+    static var settingsDeleteAccountAlertConfirm: String { String(localized: "settings.delete_account.alert_confirm") }
+
+    /// Everything is deleted right away and can't be recovered.
+    static var settingsDeleteAccountAlertMessage: String { String(localized: "settings.delete_account.alert_message") }
+
+    /// Delete your account for good?
+    static var settingsDeleteAccountAlertTitle: String { String(localized: "settings.delete_account.alert_title") }
+
+    /// Your account and everything we keep about you are deleted for good: profile, plan, workouts, runs, gym sets an
+    static var settingsDeleteAccountBody: String { String(localized: "settings.delete_account.body") }
+
+    /// Delete my account
+    static var settingsDeleteAccountConfirmButton: String { String(localized: "settings.delete_account.confirm_button") }
+
+    /// We no longer keep anything of yours. If you signed in with Apple, you can remove Stamina in iPhone Settings › 
+    static var settingsDeleteAccountDoneBody: String { String(localized: "settings.delete_account.done_body") }
+
+    /// Your account was deleted
+    static var settingsDeleteAccountDoneTitle: String { String(localized: "settings.delete_account.done_title") }
+
+    /// To confirm it's you, enter your password.
+    static var settingsDeleteAccountPasswordHint: String { String(localized: "settings.delete_account.password_hint") }
+
+    /// Your account signs in with Google or Apple, so no password is needed.
+    static var settingsDeleteAccountSocialHint: String { String(localized: "settings.delete_account.social_hint") }
 
     /// Add goal
     static var settingsGoalsAdd: String { String(localized: "settings.goals.add") }

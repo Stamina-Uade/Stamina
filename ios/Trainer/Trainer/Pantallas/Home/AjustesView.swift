@@ -145,6 +145,8 @@ struct AjustesView: View {
         case .objetivos:
             AjustesPaginaObjetivos(objetivos: $objetivosEnEdicion, guardando: guardandoObjetivos,
                                    alGuardar: guardarObjetivos, volver: volver)
+        case .borrarCuenta:
+            AjustesPaginaBorrarCuenta(volver: volver)
         }
     }
 
@@ -213,6 +215,13 @@ struct AjustesView: View {
                             simboloFinal: nil) {
                     Haptico.toque()
                     confirmandoCierre = true
+                }
+                AjustesDivisorDeFila()
+                // App Store 5.1.1(v): la cuenta se borra desde la app.
+                AjustesFila(simbolo: "trash.fill",
+                            titulo: Textos.settingsDeleteAccount,
+                            tono: .peligro) {
+                    ir(a: .borrarCuenta)
                 }
             }
 

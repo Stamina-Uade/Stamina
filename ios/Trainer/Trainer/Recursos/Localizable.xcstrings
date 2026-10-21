@@ -14089,6 +14089,246 @@
         }
       }
     },
+    "settings.delete_account" : {
+      "comment" : "Settings → Delete account.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Delete account"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Borrar cuenta"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Supprimer le compte"
+          }
+        }
+      }
+    },
+    "settings.delete_account.alert_confirm" : {
+      "comment" : "Settings → Delete account.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Delete for good"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Borrar para siempre"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Supprimer définitivement"
+          }
+        }
+      }
+    },
+    "settings.delete_account.alert_message" : {
+      "comment" : "Settings → Delete account.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Everything is deleted right away and can't be recovered."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Se borra todo en el acto y no se puede recuperar."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tout est supprimé immédiatement et ne peut pas être récupéré."
+          }
+        }
+      }
+    },
+    "settings.delete_account.alert_title" : {
+      "comment" : "Settings → Delete account.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Delete your account for good?"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "¿Borrar tu cuenta para siempre?"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Supprimer ton compte définitivement ?"
+          }
+        }
+      }
+    },
+    "settings.delete_account.body" : {
+      "comment" : "Settings → Delete account.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Your account and everything we keep about you are deleted for good: profile, plan, workouts, runs, gym sets and the record of what you accepted. This can't be undone. Nothing in Apple Health is touched."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Se borran para siempre tu cuenta y todo lo que guardamos de vos: perfil, plan, entrenamientos, salidas, series del gimnasio y la constancia de lo que aceptaste. No se puede deshacer. Lo que está en Apple Salud no se toca."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ton compte et tout ce que nous gardons sur toi sont supprimés définitivement : profil, plan, entraînements, sorties, séries de salle et la trace de ce que tu as accepté. C'est irréversible. Rien n'est touché dans Santé d'Apple."
+          }
+        }
+      }
+    },
+    "settings.delete_account.confirm_button" : {
+      "comment" : "Settings → Delete account.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Delete my account"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Borrar mi cuenta"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Supprimer mon compte"
+          }
+        }
+      }
+    },
+    "settings.delete_account.done_body" : {
+      "comment" : "Settings → Delete account.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "We no longer keep anything of yours. If you signed in with Apple, you can remove Stamina in iPhone Settings › your name › Sign in with Apple."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ya no guardamos nada tuyo. Si entrabas con Apple, podés quitar Stamina en Ajustes del iPhone › tu nombre › Iniciar sesión con Apple."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Nous ne gardons plus rien de toi. Si tu te connectais avec Apple, tu peux retirer Stamina dans Réglages de l'iPhone › ton nom › Se connecter avec Apple."
+          }
+        }
+      }
+    },
+    "settings.delete_account.done_title" : {
+      "comment" : "Settings → Delete account.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Your account was deleted"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tu cuenta se borró"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ton compte a été supprimé"
+          }
+        }
+      }
+    },
+    "settings.delete_account.password_hint" : {
+      "comment" : "Settings → Delete account.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "To confirm it's you, enter your password."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Para confirmar que sos vos, escribí tu contraseña."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Pour confirmer que c'est bien toi, saisis ton mot de passe."
+          }
+        }
+      }
+    },
+    "settings.delete_account.social_hint" : {
+      "comment" : "Settings → Delete account.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Your account signs in with Google or Apple, so no password is needed."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tu cuenta entra con Google o Apple, así que no hace falta contraseña."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ton compte se connecte avec Google ou Apple : aucun mot de passe n'est nécessaire."
+          }
+        }
+      }
+    },
     "settings.goals.add" : {
       "comment" : "A button that adds a new goal.",
       "extractionState" : "manual",

@@ -32,6 +32,8 @@ export interface PerfilFila {
   embarazo_o_lactancia: boolean | null;
   creado_en_ms: number;
   actualizado_en_ms: number;
+  /** Si la cuenta tiene contraseña (las que nacieron con Google o Apple, no). */
+  tiene_contrasena?: boolean;
 }
 
 /** Del nombre en la API (snake_case, contrato) a la columna. */
@@ -68,7 +70,8 @@ export function crearRepoPerfil(db: Db) {
                 p.objetivo_fecha_ms, p.dias_entrenamiento, p.zona_horaria,
                 p.sistema_unidades, p.descargo_medico_aceptado_en_ms,
                 p.equipamiento, p.embarazo_o_lactancia,
-                coalesce(p.actualizado_en_ms, u.actualizado_en_ms) as actualizado_en_ms
+                coalesce(p.actualizado_en_ms, u.actualizado_en_ms) as actualizado_en_ms,
+                (u.password_hash is not null) as tiene_contrasena
            from usuarios u
            left join perfiles p on p.usuario_id = u.id
           -- filtro por dueño en la misma query; borrar cuenta hace DELETE físico

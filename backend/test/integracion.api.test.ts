@@ -1084,6 +1084,13 @@ describe("cuenta: exportar y borrar (§8)", { skip: SIN_SERVICIOS }, () => {
     await pedir("PUT", "/v1/me/steps", {
       days: [{ date: new Date(Date.now() - DIA_MS).toISOString().slice(0, 10), steps: 1_000, source: "manual" }],
     }, sesion.access_token);
+    // Con contraseña, mandarla es obligatorio: el cuerpo vacío es para Google/Apple.
+    const sinClave = await pedir("POST", "/v1/me/delete", {}, sesion.access_token);
+    assert.equal(sinClave.status, 401);
+    assert.equal(sinClave.json.error.code, "invalid_credentials");
+    const perfilAntes = await pedir("GET", "/v1/me", undefined, sesion.access_token);
+    assert.equal(perfilAntes.json.data.has_password, true);
+
     const mala = await pedir("POST", "/v1/me/delete", { password: "No-es-la-clave-1" }, sesion.access_token);
     assert.equal(mala.status, 401);
     assert.equal(mala.json.error.code, "invalid_credentials");

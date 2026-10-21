@@ -121,6 +121,10 @@ public protocol ServicioDeCuenta: Sendable {
     /// en vuelo. El aviso al servidor sigue por detrás.
     func cerrarSesion() async
     func cierres() async -> AsyncStream<MotivoDeCierre>
+
+    /// `POST /me/delete`. `clave` va `nil` si la cuenta no tiene contraseña
+    /// (nació con Google o Apple: `Perfil.hasPassword == false`).
+    func borrarCuenta(clave: String?) async -> Resultado<SinCuerpo>
 }
 
 public extension ServicioDeCuenta {
@@ -133,6 +137,7 @@ public extension ServicioDeCuenta {
     func entrarConProveedor(_ proveedor: Proveedor, idToken: String, nonce: String) async -> Resultado<DesenlaceSocial> { .sinRed }
     func completarRegistroSocial(token: String?, permisoSocial: String, aceptacion: AceptacionLegal,
                                  perfil: PerfilEntrada) async -> Resultado<SesionAbierta> { .sinRed }
+    func borrarCuenta(clave: String?) async -> Resultado<SinCuerpo> { .sinRed }
 }
 
 extension ServicioDeCuenta {
@@ -492,6 +497,10 @@ public final class ApiTrainer: ServicioDeCuenta, ServicioDelPlan, ServicioDeActi
         await renovador.cerrarSesion()
     }
 
+    public func borrarCuenta(clave: String?) async -> Resultado<SinCuerpo> {
+        await renovador.pedir(.post, "/me/delete", cuerpo: PedidoBorrarCuenta(password: clave))
+    }
+
     public func cierres() async -> AsyncStream<MotivoDeCierre> {
         await renovador.cierres()
     }
@@ -509,6 +518,11 @@ public final class ApiTrainer: ServicioDeCuenta, ServicioDelPlan, ServicioDeActi
 // Escritos a mano porque en el contrato están adentro de cada operación, sin
 // nombre, y el generador sólo emite esquemas con nombre. Son los mismos que
 // `ApiTrainer.kt`.
+
+/// Sin contraseña viaja `{}`: el `Encodable` sintetizado omite el opcional nulo.
+struct PedidoBorrarCuenta: Encodable, Sendable {
+    let password: String?
+}
 
 struct PedidoConCorreo: Encodable, Sendable {
     let email: String

@@ -42,6 +42,8 @@ export function perfilAApi(f: PerfilFila): Record<string, unknown> {
   // Estos dos sí pueden ser null a propósito: "está y vale nada".
   salida["goal_date_ms"] = f.objetivo_fecha_ms;
   salida["medical_disclaimer_accepted_at_ms"] = f.descargo_medico_aceptado_en_ms;
+  // (1.4.0) Para que la app sepa si pedir la contraseña al borrar la cuenta.
+  if (typeof f.tiene_contrasena === "boolean") salida["has_password"] = f.tiene_contrasena;
   return salida;
 }
 

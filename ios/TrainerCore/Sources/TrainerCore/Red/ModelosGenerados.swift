@@ -632,6 +632,8 @@ public struct Perfil: Codable, Equatable, Sendable {
 
     public let id: String
     public let email: String
+    /// (1.4.0) `false` si la cuenta nació con Google o Apple y nunca eligió contraseña. Decide si borrar la cuenta pide la contraseña.
+    public let hasPassword: Bool?
     public let firstName: String?
     public let lastName: String?
     public let birthdateMs: Int64?
@@ -654,6 +656,7 @@ public struct Perfil: Codable, Equatable, Sendable {
     enum CodingKeys: String, CodingKey {
         case id
         case email
+        case hasPassword = "has_password"
         case firstName = "first_name"
         case lastName = "last_name"
         case birthdateMs = "birthdate_ms"
@@ -677,6 +680,7 @@ public struct Perfil: Codable, Equatable, Sendable {
     public init(
         id: String,
         email: String,
+        hasPassword: Bool? = nil,
         firstName: String? = nil,
         lastName: String? = nil,
         birthdateMs: Int64? = nil,
@@ -698,6 +702,7 @@ public struct Perfil: Codable, Equatable, Sendable {
     ) {
         self.id = id
         self.email = email
+        self.hasPassword = hasPassword
         self.firstName = firstName
         self.lastName = lastName
         self.birthdateMs = birthdateMs

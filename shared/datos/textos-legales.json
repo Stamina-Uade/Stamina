@@ -9,10 +9,10 @@
     "_lo_que_hay_que_revisar": [
       "Que un abogado lea los tres textos en los tres idiomas antes de publicar.",
       "El domicilio: los textos dicen 'con domicilio en la Republica Argentina'. La Ley 25.326 y la de Defensa del Consumidor piden identificar al responsable; conviene poner el domicilio completo.",
-      "La jurisdiccion para los que no son consumidores: se puso 'tribunales ordinarios de la Ciudad Autonoma de Buenos Aires'.",
       "Inscribir la base de datos en el Registro Nacional de Bases de Datos de la AAIP (Ley 25.326, art. 21).",
-      "Que support@stamina.com.ar reciba correo (por ejemplo, Cloudflare Email Routing a tu Gmail).",
-      "Los textos dicen que la baja de la cuenta se pide por correo 'o desde la app cuando la opcion este disponible': la App Store exige poder borrar la cuenta desde la app (5.1.1(v))."
+      "Jurisdiccion: decision de Ivan (2026-10-21), los tribunales del domicilio del usuario. Confirmarlo con el abogado.",
+      "support@stamina.com.ar: la regla de reenvio a karkoszkaivan@gmail.com ya existe en Cloudflare; faltan los registros MX/DKIM/SPF de Email Routing (los agrega Ivan).",
+      "Borrar la cuenta desde la app: hecho (Ajustes > Borrar cuenta). Falta revocar el token de Sign in with Apple al borrar (necesita una clave .p8 de Apple en el servidor)."
     ],
     "_como_se_cambia": "1) Edita el texto en los tres idiomas. 2) SUBI la version (es lo que se guarda cuando alguien acepta). 3) Cuando lo revise un abogado, poné 'estado' en 'revisado' y llena 'revisado_por' y 'revisado_en'.",
     "_que_pasa_mientras_no_se_revisen": "EL BACKEND SE NIEGA A ARRANCAR EN PRODUCCION mientras quede un texto en 'borrador'. En staging y desarrollo arranca con un aviso, y la app muestra el cartel de 'no revisado'."
@@ -186,7 +186,7 @@
           },
           {
             "titulo": "16. Suspensión y baja",
-            "cuerpo": "Podés dejar de usar Stamina y pedir la baja de tu cuenta cuando quieras, escribiendo a support@stamina.com.ar o desde la app cuando la opción esté disponible; al darte de baja borramos tus datos como explica la política de privacidad. Podemos suspender o cerrar una cuenta que incumpla estos términos o ponga en riesgo a la persona, a otras personas o al servicio, avisándote salvo que la urgencia o la ley lo impidan."
+            "cuerpo": "Podés dejar de usar Stamina y pedir la baja de tu cuenta cuando quieras, desde la app (Ajustes › Borrar cuenta) o escribiendo a support@stamina.com.ar; al darte de baja borramos tus datos como explica la política de privacidad. Podemos suspender o cerrar una cuenta que incumpla estos términos o ponga en riesgo a la persona, a otras personas o al servicio, avisándote salvo que la urgencia o la ley lo impidan."
           },
           {
             "titulo": "17. Cambios a estos términos",
@@ -202,7 +202,7 @@
           },
           {
             "titulo": "20. Ley aplicable y jurisdicción",
-            "cuerpo": "Estos términos se rigen por las leyes de la República Argentina. Si sos consumidor, podés reclamar ante los tribunales de tu domicilio. En los demás casos son competentes los tribunales ordinarios de la Ciudad Autónoma de Buenos Aires."
+            "cuerpo": "Estos términos se rigen por las leyes de la República Argentina. Cualquier conflicto se resuelve ante los tribunales ordinarios competentes del domicilio del usuario, como prevé la Ley 24.240 de Defensa del Consumidor."
           },
           {
             "titulo": "21. Contacto",
@@ -277,7 +277,7 @@
           },
           {
             "titulo": "16. Suspension and closing your account",
-            "cuerpo": "You can stop using Stamina and ask us to close your account at any time by writing to support@stamina.com.ar, or from the app once the option is available; when you close it we delete your data as explained in the privacy policy. We may suspend or close an account that breaks these terms or puts the person, other people or the service at risk, notifying you unless urgency or the law prevents it."
+            "cuerpo": "You can stop using Stamina and ask us to close your account at any time from the app (Settings › Delete account) or by writing to support@stamina.com.ar; when you close it we delete your data as explained in the privacy policy. We may suspend or close an account that breaks these terms or puts the person, other people or the service at risk, notifying you unless urgency or the law prevents it."
           },
           {
             "titulo": "17. Changes to these terms",
@@ -293,7 +293,7 @@
           },
           {
             "titulo": "20. Governing law and jurisdiction",
-            "cuerpo": "These terms are governed by the laws of the Argentine Republic. If you are a consumer, you can bring a claim before the courts of your place of residence. In all other cases, the ordinary courts of the Autonomous City of Buenos Aires have jurisdiction."
+            "cuerpo": "These terms are governed by the laws of the Argentine Republic. Any dispute will be resolved before the competent ordinary courts of the user's place of residence, as provided by Argentine Consumer Protection Law 24,240."
           },
           {
             "titulo": "21. Contact",
@@ -368,7 +368,7 @@
           },
           {
             "titulo": "16. Suspension et fermeture du compte",
-            "cuerpo": "Tu peux arrêter d'utiliser Stamina et demander la fermeture de ton compte à tout moment en écrivant à support@stamina.com.ar, ou depuis l'application lorsque l'option sera disponible ; à la fermeture, nous supprimons tes données comme l'explique la politique de confidentialité. Nous pouvons suspendre ou fermer un compte qui enfreint ces conditions ou qui met en danger la personne, d'autres personnes ou le service, en te prévenant sauf si l'urgence ou la loi l'empêche."
+            "cuerpo": "Tu peux arrêter d'utiliser Stamina et demander la fermeture de ton compte à tout moment depuis l'application (Réglages › Supprimer le compte) ou en écrivant à support@stamina.com.ar ; à la fermeture, nous supprimons tes données comme l'explique la politique de confidentialité. Nous pouvons suspendre ou fermer un compte qui enfreint ces conditions ou qui met en danger la personne, d'autres personnes ou le service, en te prévenant sauf si l'urgence ou la loi l'empêche."
           },
           {
             "titulo": "17. Modifications de ces conditions",
@@ -384,7 +384,7 @@
           },
           {
             "titulo": "20. Droit applicable et juridiction",
-            "cuerpo": "Ces conditions sont régies par les lois de la République argentine. Si tu es consommateur, tu peux saisir les tribunaux de ton lieu de résidence. Dans les autres cas, les tribunaux ordinaires de la Ville autonome de Buenos Aires sont compétents."
+            "cuerpo": "Ces conditions sont régies par les lois de la République argentine. Tout litige sera tranché par les tribunaux ordinaires compétents du lieu de résidence de l'utilisateur, comme le prévoit la loi argentine 24.240 de protection des consommateurs."
           },
           {
             "titulo": "21. Contact",

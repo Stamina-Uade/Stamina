@@ -358,6 +358,9 @@ data class PerfilEntrada(
 data class Perfil(
     val id: String,
     val email: String,
+    /** (1.4.0) `false` si la cuenta nació con Google o Apple y nunca eligió contraseña. Decide si borrar la cuenta pide la contraseña. */
+    @SerialName("has_password")
+    val hasPassword: Boolean? = null,
     @SerialName("first_name")
     val firstName: String? = null,
     @SerialName("last_name")

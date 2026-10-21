@@ -1165,6 +1165,32 @@ final class FlujoEntrada: ObservableObject {
         irALaBienvenida()
     }
 
+    /// Si borrar la cuenta pide la contraseña. Sin perfil cargado se pide: el
+    /// servidor la exige a toda cuenta que la tenga.
+    var cuentaConContrasena: Bool { perfil?.hasPassword ?? true }
+
+    /// `POST /me/delete` (App Store 5.1.1(v): borrar la cuenta desde la app).
+    /// Si sale bien se cierra la sesión, se vuelve a la bienvenida y se avisa.
+    /// La contraseña incorrecta vuelve como `false` para mostrarla debajo del campo.
+    func borrarCuenta(clave: String?) async -> ResultadoDeBorrarCuenta {
+        let respuesta = await servicio.borrarCuenta(clave: cuentaConContrasena ? clave : nil)
+        switch respuesta {
+        case .ok:
+            await cerrarSesion()
+            mostrarAlertaError(titulo: Textos.settingsDeleteAccountDoneTitle,
+                               mensaje: Textos.settingsDeleteAccountDoneBody)
+            return .borrada
+        case .rechazado(let codigo, _) where codigo == "invalid_credentials":
+            return .claveIncorrecta
+        default:
+            return .fallo(TraductorDeErrores.texto(respuesta))
+        }
+    }
+
+    enum ResultadoDeBorrarCuenta: Equatable {
+        case borrada, claveIncorrecta, fallo(String)
+    }
+
     /// `GET /me`. Si no hay sesión o no hay red, el Home sigue con lo que tiene: un
     /// cierre de sesión de verdad llega por `escucharCierres()`, no por acá.
     func cargarPerfil() async {
