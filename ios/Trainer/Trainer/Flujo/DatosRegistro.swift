@@ -48,21 +48,14 @@ struct DatosRegistro: Equatable {
     var objetivosAdicionales: [Objetivo] = []
     var fechaObjetivo: Date?
 
-    var descargoAceptado = false
-    var medicion: Medicion?
 
     /// Día ISO (1 = lunes) → minuto del día. El diseño arranca con tres días, y
     /// se ven en pantalla con su hora antes de que alguien toque "Continuar".
     var dias: [Int: Int] = [2: 18 * 60 + 30, 4: 18 * 60 + 30, 6: 7 * 60]
 
-    /// Qué usa la persona para medir. `reg-medicion`.
-    ///
-    /// ⚠️ **Este dato no tiene lugar en el contrato v1** (B-006). `PerfilEntrada`
-    /// no lo declara, así que el paso se completa, el valor **no se manda**, y la
-    /// pantalla lo dice. Es lo mismo que hace Android.
-    enum Medicion: String, CaseIterable, Equatable {
-        case gps, garmin, apple, manual
-    }
+    // B-006: "¿Con qué mides tus salidas?" (GPS, reloj, a mano) no tenía lugar en
+    // el contrato v1 y la respuesta no se guardaba. El paso se sacó del alta el
+    // 2026-10-22; si vuelve, primero hace falta el campo en `PerfilEntrada`.
 
     /// Dónde se para la rueda mientras no hay nada elegido: la fecha que dibuja el
     /// diseño. Es SÓLO una posición: no se guarda ni deja seguir.
@@ -127,6 +120,23 @@ extension DatosRegistro {
 
     var cuerpoCompleto: Bool { pesoEnGramos != nil && alturaEnMilimetros != nil }
 
+    /// La edad mínima de los términos y condiciones.
+    static let edadMinima = 18
+
+    /// Con 18 años o más, contados en el calendario de la persona.
+    func tieneEdadMinima(hoy: Date = Date(), calendario: Calendar = .autoupdatingCurrent) -> Bool {
+        guard let nacimiento,
+              let limite = calendario.date(byAdding: .year, value: -Self.edadMinima, to: hoy) else { return false }
+        return calendario.startOfDay(for: nacimiento) <= calendario.startOfDay(for: limite)
+    }
+
+    /// Si el objetivo principal es una carrera: entonces hace falta la fecha.
+    /// "Volver a entrenar sin lesiones" no tiene fecha ni calendario.
+    var objetivoPideFecha: Bool {
+        guard let objetivo else { return false }
+        return objetivo != .volverSinLesiones
+    }
+
     var diasElegidos: [Int] { dias.keys.sorted() }
 
     var hayAlgunDia: Bool { !dias.isEmpty }
@@ -159,18 +169,13 @@ extension DatosRegistro {
     /// Si ese paso de perfil puede seguir. Es lo que habilita "Continuar".
     func puedeSeguir(en paso: Pantalla) -> Bool {
         switch paso {
-        case .regNombre: return nombreListo
-        case .regNacimiento: return nacimiento != nil
+        case .regNacimiento: return tieneEdadMinima()
         case .regSexo: return sexo != nil
         case .regCuerpo: return cuerpoCompleto
         case .regDeporte: return deporte != nil
         case .regNivel: return nivel != nil
-        case .regObjetivo: return objetivo != nil
-        case .regSalud: return descargoAceptado
-        // "Ahora no" del diseño: se puede seguir sin elegir nada.
-        case .regMedicion: return true
+        case .regObjetivo: return objetivo != nil && (!objetivoPideFecha || fechaObjetivo != nil)
         case .regDias: return hayAlgunDia
-        case .regListo: return true
         default: return false
         }
     }
@@ -179,8 +184,7 @@ extension DatosRegistro {
 // MARK: - Lo que cada paso manda a `PATCH /me`
 
 extension DatosRegistro {
-    /// Lo que ESE paso guarda, y nada más. `nil` es "este paso no guarda nada": el
-    /// resumen, y la medición, que no tiene campo (B-006).
+    /// Lo que ESE paso guarda, y nada más. `nil` es "este paso no guarda nada".
     ///
     /// Manda sólo lo suyo por dos motivos. Uno: `PerfilEntrada` tiene todo
     /// opcional y los opcionales en `nil` no viajan, así que un pedido chico no
@@ -188,12 +192,6 @@ extension DatosRegistro {
     /// paso 9, y se ve dónde.
     func loQueGuarda(en paso: Pantalla, zonaHoraria: TimeZone) -> PerfilEntrada? {
         switch paso {
-        case .regNombre:
-            let apellidoLimpio = DatosRegistro.recortado(apellido)
-            // El apellido vacío no viaja como `""` —el contrato pide minLength 1—
-            // sino como `null` explícito: ver `camposEnNull(en:)`.
-            return PerfilEntrada(firstName: DatosRegistro.recortado(nombre),
-                                 lastName: apellidoLimpio.isEmpty ? nil : apellidoLimpio)
         case .regNacimiento:
             // Sin fecha elegida no viaja nada: `puedeSeguir` ya no deja llegar acá.
             return nacimiento.map {
@@ -209,18 +207,15 @@ extension DatosRegistro {
         case .regNivel:
             return nivel.map { PerfilEntrada(level: $0) }
         case .regObjetivo:
-            // 🛑 La fecha viaja SIEMPRE, también sin fecha: el diseño deja seguir
-            // sin ella y el contrato modela ese `null` a propósito ("está y vale
-            // nada"). Sin el `null`, "sin fecha" no borraría una que ya estaba.
+            // 🛑 La fecha viaja SIEMPRE, también sin fecha: "volver a entrenar sin
+            // lesiones" no tiene, y el contrato modela ese `null` a propósito ("está
+            // y vale nada"). Sin el `null`, no se borraría una que ya estaba.
             guard let objetivo else { return nil }
+            let fecha = objetivoPideFecha ? fechaObjetivo : nil
             return PerfilEntrada(goal: objetivo,
-                                 goalDateMs: fechaObjetivo.map {
+                                 goalDateMs: fecha.map {
                                      DatosRegistro.fechaDelCalendarioEnMs($0, zona: zonaHoraria)
                                  })
-        case .regSalud:
-            return descargoAceptado ? PerfilEntrada(medicalDisclaimerAccepted: true) : nil
-        case .regMedicion:
-            return nil
         case .regDias:
             // La zona va CON los días y no antes: un "18:30" sin zona no es una hora,
             // y el aviso de preparación se dispara con las dos cosas.
@@ -234,14 +229,12 @@ extension DatosRegistro {
     /// Los campos que ese paso manda como `null` EXPLÍCITO.
     ///
     /// 🛑 Es la diferencia entre "no lo toques" y "borralo": en un PATCH parcial
-    /// una clave ausente deja el valor viejo. Hoy son dos, el apellido y la fecha
-    /// de la carrera — los mismos que `BorradorDePerfil.camposEnNull` de Android.
+    /// una clave ausente deja el valor viejo. En el alta queda uno, la fecha de la
+    /// carrera — el mismo que `BorradorDePerfil.camposEnNull` de Android.
     func camposEnNull(en paso: Pantalla) -> Set<CampoAnulable> {
         switch paso {
-        case .regNombre:
-            return DatosRegistro.recortado(apellido).isEmpty ? [.apellido] : []
         case .regObjetivo:
-            return fechaObjetivo == nil ? [.fechaDelObjetivo] : []
+            return (objetivoPideFecha ? fechaObjetivo : nil) == nil ? [.fechaDelObjetivo] : []
         default:
             return []
         }

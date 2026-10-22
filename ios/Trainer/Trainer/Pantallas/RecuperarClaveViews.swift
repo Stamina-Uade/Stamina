@@ -2,14 +2,13 @@ import SwiftUI
 import TrainerCore
 
 // =============================================================================
-// Las cuatro pantallas de recuperación de contraseña: pedir el correo, verificar
-// el código, elegir la clave nueva y confirmar. Son los tres endpoints del
-// contrato —`/auth/password/forgot`, `/verify` y `/reset`— más la confirmación.
+// Las tres pantallas de recuperación de contraseña: pedir el correo, verificar
+// el código y elegir la clave nueva. Son los tres endpoints del contrato
+// —`/auth/password/forgot`, `/verify` y `/reset`—. Al guardar no hay pantalla
+// de cierre: una alerta pregunta por las otras sesiones y se entra al Inicio.
 //
-// 🛑 El texto anti-enumeración de `clave-correo` **no es decorativo**: el
-// servidor responde igual exista o no la cuenta (AGENTS.md §12), y la pantalla
-// tiene que decirlo. Si dijera "te mandamos el código" a secas, quien pruebe
-// correos ajenos aprendería cuáles existen mirando la diferencia.
+// Desde la 1.4.0 el servidor dice si el correo no tiene cuenta (decisión de
+// Iván): ya no hace falta el pie "el mensaje se envía aunque no esté registrado".
 // =============================================================================
 
 /// `clave-correo`
@@ -18,35 +17,15 @@ struct ClaveCorreoView: View {
 
     var body: some View {
         PantallaPaso(titulo: Textos.passwordResetEmailTitle, texto: Textos.passwordResetEmailBody) {
-            ScrollViewReader { desplazamiento in
-                VStack(alignment: .leading, spacing: TokensEspaciado.e8) {
-                    CampoTexto(etiqueta: Textos.commonEmailLabel,
-                               marcador: Textos.commonEmailPlaceholder,
-                               texto: $flujo.recuperacionCorreo,
-                               contenido: .correo, teclado: .correo,
-                               conError: flujo.correoRechazado || flujo.error(de: .correo) != nil)
-                        .disabled(flujo.enCurso)
-
-                    // Mientras se escribe no se juzga: el error aparece al tocar el
-                    // botón (`FlujoEntrada.correoRechazado`).
-                    if flujo.correoRechazado {
-                        PistaDeCorreoRechazado()
-                    } else {
-                        ErrorDeCampo(flujo.error(de: .correo))
-                    }
-                }
-                .muestraElCorreoRechazado(flujo.correoRechazado, desplazando: desplazamiento)
-                .onChange(of: flujo.recuperacionCorreo) { _ in flujo.corrigiendo(.correo) }
-            }
+            CampoTexto(etiqueta: Textos.commonEmailLabel,
+                       marcador: Textos.commonEmailPlaceholder,
+                       texto: $flujo.recuperacionCorreo,
+                       contenido: .correo, teclado: .correo)
+                .disabled(flujo.enCurso)
         } pie: {
-            Text(Textos.passwordResetEmailAntiEnumeration)
-                .estilo(.notaLegal, color: Paleta.textoTerciario)
-                .multilineTextAlignment(.center)
-                .fixedSize(horizontal: false, vertical: true)
-
-            // Se prende con algo escrito: si no parece un correo, lo dice el toque.
+            // Se habilita con un correo válido (2026-10-22).
             BotonPrimario(Textos.passwordResetEmailSend,
-                          habilitado: !flujo.recuperacionCorreo.isEmpty && !flujo.enCurso,
+                          habilitado: DatosRegistro.pareceCorreo(flujo.recuperacionCorreo) && !flujo.enCurso,
                           cargando: flujo.enCurso,
                           motivoDeshabilitado: Textos.commonCompleteToContinue) {
                 Task { await flujo.pedirCodigoDeClave() }
@@ -69,16 +48,19 @@ struct ClaveCodigoView: View {
                      texto: Textos.passwordResetCodeBody(flujo.correoDelDesafio)) {
             VStack(spacing: TokensEspaciado.e14) {
                 CampoCodigo(codigo: $flujo.recuperacionCodigo, marcador: Textos.commonCodeLabel)
-                    .disabled(flujo.enCurso)
+                    .disabled(flujo.enCurso || flujo.codigoAgotado)
 
-                FilaDeReenvio(pedidos: flujo.pedidosDeCodigo,
-                              habilitada: !flujo.enCurso,
-                              cambiarCorreo: { flujo.volver() },
-                              reenviar: { Task { await flujo.pedirCodigoDeClave() } })
+                // Con el código vencido o agotado no se reenvía: se vuelve al
+                // principio. Para cambiar el correo está la flecha de arriba.
+                if !flujo.codigoAgotado {
+                    FilaDeReenvio(enviado: flujo.envioDelCodigo,
+                                  habilitada: !flujo.enCurso,
+                                  reenviar: { Task { await flujo.pedirCodigoDeClave() } })
+                }
             }
         } pie: {
             BotonPrimario(Textos.passwordResetCodeVerify,
-                          habilitado: listo && !flujo.enCurso,
+                          habilitado: listo && !flujo.enCurso && !flujo.codigoAgotado,
                           cargando: flujo.enCurso,
                           motivoDeshabilitado: Textos.commonCompleteToContinue) {
                 Task { await flujo.verificarCodigoDeClave() }
@@ -88,20 +70,22 @@ struct ClaveCodigoView: View {
 }
 
 /// `clave-nueva`
+///
+/// Sin texto debajo del título: los requisitos están en la lista. Al guardar no
+/// hay pantalla final: una alerta pregunta por las otras sesiones y se entra.
 struct ClaveNuevaView: View {
     @EnvironmentObject private var flujo: FlujoEntrada
 
     var body: some View {
-        PantallaPaso(titulo: Textos.passwordResetNewTitle, texto: Textos.passwordResetNewBody) {
+        PantallaPaso(titulo: Textos.passwordResetNewTitle) {
             VStack(alignment: .leading, spacing: TokensEspaciado.e13) {
                 CampoTexto(etiqueta: Textos.passwordResetNewLabel,
                            marcador: Textos.commonPasswordPlaceholder,
                            texto: $flujo.claveNueva,
-                           contenido: .claveNueva, seguro: true,
-                           conError: flujo.error(de: .clave) != nil)
-                ErrorDeCampo(flujo.error(de: .clave))
+                           contenido: .claveNueva, seguro: true)
 
-                // La contraseña segura del iPhone llena las dos: no se repite.
+                // La contraseña segura del iPhone llena las dos: no se repite. El
+                // ojo va sólo en la primera.
                 if !flujo.claveNuevaSugeridaPorElSistema {
                     CampoTexto(etiqueta: Textos.passwordResetNewRepeatLabel,
                                marcador: Textos.commonPasswordPlaceholder,
@@ -111,46 +95,21 @@ struct ClaveNuevaView: View {
                     ErrorDeCampo(flujo.error(de: .claveRepetida))
                 }
 
-                // Que coincidan no se anuncia (2026-10-21): sólo el error, al tocar.
                 MedidorDeClave(cumplidas: flujo.reglasDeClaveNuevaCumplidas,
                                reglas: flujo.reglasDeClave(flujo.claveNueva))
             }
             .disabled(flujo.enCurso)
-            .onChange(of: flujo.claveNueva) { _ in flujo.corrigiendo(.clave) }
+            .onChange(of: flujo.claveNueva) { _ in flujo.corrigiendo(.claveRepetida) }
             .onChange(of: flujo.claveNuevaRepetida) { _ in flujo.corrigiendo(.claveRepetida) }
         } pie: {
+            // Se habilita con las tres reglas; si las dos no coinciden, lo dice el
+            // rojo debajo de "Repetir contraseña" al tocar.
             BotonPrimario(Textos.passwordResetNewSave,
-                          habilitado: !flujo.claveNueva.isEmpty
-                              && (flujo.claveNuevaSugeridaPorElSistema || !flujo.claveNuevaRepetida.isEmpty)
-                              && !flujo.enCurso,
+                          habilitado: flujo.puedeGuardarClaveNueva && !flujo.enCurso,
                           cargando: flujo.enCurso,
                           motivoDeshabilitado: Textos.commonCompleteToContinue) {
                 Task { await flujo.guardarClaveNueva() }
             }
-        }
-    }
-}
-
-/// `clave-lista`
-///
-/// 🛑 El diseño manda al login desde acá. Se entra derecho: el servidor devolvió
-/// una sesión nueva junto con la contraseña cambiada, y pedirle a alguien que
-/// tipee la contraseña que eligió treinta segundos antes es un trámite sin
-/// sentido. Es el mismo desvío que Android (`FlujoDeClave.kt`).
-struct ClaveListaView: View {
-    @EnvironmentObject private var flujo: FlujoEntrada
-
-    var body: some View {
-        PantallaCierre(titulo: Textos.passwordResetDoneTitle, texto: Textos.passwordResetDoneBody) {
-            Tarjeta {
-                VStack(spacing: TokensEspaciado.e9) {
-                    FilaResumen(Textos.passwordResetDoneAccount, flujo.correoDelDesafio)
-                    FilaResumen(Textos.passwordResetDoneChanged,
-                                Date.now.formatted(date: .abbreviated, time: .shortened))
-                }
-            }
-        } pie: {
-            BotonPrimario(Textos.passwordResetDoneGoHome) { flujo.entrarConLaClaveNueva() }
         }
     }
 }
@@ -184,37 +143,6 @@ struct ErrorDeCampo: View {
             PistaDeCampo(estado: .error(mensaje))
                 .transition(.opacity)
                 .onAppear { UIAccessibility.post(notification: .announcement, argument: mensaje) }
-        }
-    }
-}
-
-/// El "no parece un correo", debajo del campo. Aparece recién al tocar el botón.
-struct PistaDeCorreoRechazado: View {
-    static let ancla = "correo-rechazado"
-
-    var body: some View {
-        PistaDeCampo(estado: .error(Textos.signupEmailInvalid))
-            .id(Self.ancla)
-    }
-}
-
-extension View {
-    /// Cuando se rechaza el correo, lo deja a la vista y VoiceOver lo anuncia.
-    ///
-    /// 🪤 Con el teclado arriba el pie de la pantalla sube, y si el campo quedó al
-    /// borde de lo que se ve, el renglón nuevo queda tapado y el toque parece no
-    /// hacer nada: se desplaza lo justo para mostrarlo, y nada si ya se ve. El foco
-    /// de VoiceOver, en cambio, se queda en el botón que se acaba de tocar: sin el
-    /// anuncio el toque no diría nada. Antes lo explicaba el botón apagado.
-    func muestraElCorreoRechazado(_ rechazado: Bool,
-                                  desplazando desplazamiento: ScrollViewProxy) -> some View {
-        onChange(of: rechazado) { ahora in
-            guard ahora else { return }
-            UIAccessibility.post(notification: .announcement, argument: Textos.signupEmailInvalid)
-            // Recién en la vuelta siguiente el renglón nuevo tiene lugar en pantalla.
-            DispatchQueue.main.async {
-                desplazamiento.scrollTo(PistaDeCorreoRechazado.ancla)
-            }
         }
     }
 }
@@ -259,67 +187,49 @@ struct MedidorDeClave: View {
     }
 }
 
-/// "Cambiar correo · Reenviar en 0:42".
+/// "Reenviar en 0:42", y después "Reenviar código".
 ///
-/// El contador es real y arranca cuando el SERVIDOR aceptó el pedido anterior, no
+/// La cuenta arranca cuando el SERVIDOR aceptó el pedido anterior (`enviado`), no
 /// cuando se dibujó la fila: antes de los 60 segundos contesta
-/// `code_resend_too_soon`. Tocar "Reenviar" pide el código de verdad; si el
-/// servidor lo acepta, `pedidos` cambia y la cuenta vuelve a empezar.
+/// `code_resend_too_soon`. Se calcula desde esa hora en cada segundo —no se
+/// descuenta de a uno—, así que sigue corriendo con la app en segundo plano: al
+/// volver muestra lo que de verdad falta.
 struct FilaDeReenvio: View {
-    /// Cambia cada vez que el servidor aceptó un pedido de código.
-    let pedidos: Int
+    /// Cuándo el servidor aceptó el último pedido de código.
+    let enviado: Date?
     let habilitada: Bool
-    let cambiarCorreo: () -> Void
     let reenviar: () -> Void
 
     /// `REENVIO_MS` de `backend/src/dominios/auth/servicio.ts`: el mismo número que
     /// `SEGUNDOS_PARA_REENVIAR` de Android, y lo que dice el contrato.
     static let segundosParaReenviar = 60
 
-    @State private var restantes = FilaDeReenvio.segundosParaReenviar
-    @State private var reloj: Timer?
+    /// Los segundos que faltan para poder reenviar, a esta hora.
+    static func restantes(desde enviado: Date?, ahora: Date) -> Int {
+        guard let enviado else { return 0 }
+        let pasados = Int(ahora.timeIntervalSince(enviado).rounded(.down))
+        return max(0, segundosParaReenviar - pasados)
+    }
 
     var body: some View {
-        HStack {
-            Button(action: cambiarCorreo) {
-                Text(Textos.commonChangeEmail)
-                    .estilo(.cuerpoSecundario, color: Paleta.textoTerciario)
-                    .objetivoTactilAlto()
-            }
-
-            Spacer()
-
-            if restantes > 0 {
-                Text(Textos.commonResendIn(relojMmss))
-                    .estilo(.cuerpoSecundario, color: Paleta.textoTerciario)
-                    .monospacedDigit()
-            } else {
-                Button(action: reenviar) {
-                    Text(Textos.commonResendCode)
-                        .estilo(.cuerpoSecundario, color: Paleta.acento)
-                        .objetivoTactilAlto()
+        TimelineView(.periodic(from: enviado ?? .now, by: 1)) { contexto in
+            let restantes = Self.restantes(desde: enviado, ahora: contexto.date)
+            HStack {
+                Spacer()
+                if restantes > 0 {
+                    Text(Textos.commonResendIn(String(format: "%d:%02d", restantes / 60, restantes % 60)))
+                        .estilo(.cuerpoSecundario, color: Paleta.textoTerciario)
+                        .monospacedDigit()
+                } else {
+                    Button(action: reenviar) {
+                        Text(Textos.commonResendCode)
+                            .estilo(.cuerpoSecundario, color: Paleta.acento)
+                            .objetivoTactilAlto()
+                    }
                 }
+                Spacer()
             }
         }
         .disabled(!habilitada)
-        .onAppear(perform: arrancar)
-        .onDisappear { reloj?.invalidate(); reloj = nil }
-        .onChange(of: pedidos) { _ in
-            restantes = Self.segundosParaReenviar
-            arrancar()
-        }
-    }
-
-    private var relojMmss: String {
-        String(format: "%d:%02d", restantes / 60, restantes % 60)
-    }
-
-    private func arrancar() {
-        reloj?.invalidate()
-        reloj = Timer.scheduledTimer(withTimeInterval: 1, repeats: true) { _ in
-            Task { @MainActor in
-                if restantes > 0 { restantes -= 1 } else { reloj?.invalidate() }
-            }
-        }
     }
 }

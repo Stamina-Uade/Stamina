@@ -37,40 +37,19 @@ struct BienvenidaView: View {
         let descripcion: String
     }
 
-    /// La foto de cada momento. Se elige una vez por apertura, al azar dentro del
-    /// grupo que va con su mensaje: así se usan las 20 fotos de running y ninguna
-    /// se repite en la misma bienvenida.
-    @State private var recursos: [String] = BienvenidaView.fotosDeEstaApertura
-
-    /// Se eligen una vez por apertura de la app (un `static let` se evalúa una
-    /// sola vez), y no en cada `init` de la vista.
-    static let fotosDeEstaApertura: [String] = elegirFotos()
-
-    /// Los 20 fondos de running (`FondoRunning01…20`), repartidos por lo que dice
-    /// cada mensaje (mirando las fotos, 2026-10-21):
-    /// 1. "Tu plan, a tu ritmo": salidas tranquilas — ciudad al amanecer, playa,
-    ///    parque, ruta en el desierto, bosque, nieve, costanera.
-    /// 2. "Todo medido": esfuerzo — montaña, pista de atletismo, lluvia, noche,
-    ///    puente, escaleras del estadio, escaleras, acantilado, túnel, cuestas,
-    ///    volcán, terraza.
-    /// 3. "El día de la carrera": la 16, la única que es una carrera (ruta con
-    ///    vallas). Cuando haya más fotos de carrera, se suman acá.
-    static let gruposDeFotos: [[Int]] = [
-        [1, 6, 9, 10, 11, 12, 14],
-        [2, 3, 4, 5, 7, 8, 13, 15, 17, 18, 19, 20],
-        [16],
-    ]
+    /// La foto de cada momento (2026-10-22, Iván): fija, una por frase.
+    /// 1. "Tu plan de running, a tu ritmo": la corredora en la calle al atardecer.
+    /// 2. "Sal a correr con todo medido": la pista de atletismo.
+    /// 3. "Llega entero al día de la carrera": la llegada con dorsal.
+    /// Las otras 17 `FondoRunning` siguen en el catálogo: las usan las tarjetas
+    /// de Inicio y Plan (`FondosDeTarjeta`).
+    static let fotosFijas = ["FondoRunning01", "FondoRunning09", "FondoRunning20"]
 
     /// Si una foto no está en el catálogo, la de siempre de ese lugar.
     static let respaldos = ["BienvenidaAmanecer", "BienvenidaMontana", "BienvenidaAmanecer"]
 
-    static func elegirFotos() -> [String] {
-        gruposDeFotos.enumerated().map { indice, grupo in
-            let existentes = grupo
-                .map { "FondoRunning" + String(format: "%02d", $0) }
-                .filter { UIImage(named: $0) != nil }
-            return existentes.randomElement() ?? respaldos[indice]
-        }
+    private let recursos: [String] = zip(fotosFijas, respaldos).map { foto, respaldo in
+        UIImage(named: foto) != nil ? foto : respaldo
     }
 
     private var fotos: [Foto] {

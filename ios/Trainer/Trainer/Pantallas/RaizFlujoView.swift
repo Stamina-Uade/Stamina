@@ -71,40 +71,34 @@ struct RaizFlujoView: View {
         // se cierra encima de lo que se esté viendo.
         .task { await flujo.consultarPuertaDeVersion() }
         .task { await flujo.escucharCierres() }
-        .alert(Textos.versionRecommendedTitle,
-               isPresented: recomendacionVisible,
-               presenting: flujo.actualizacionRecomendada) { aviso in
-            if let tienda = aviso.tienda {
-                Button(Textos.versionUpdate) {
-                    flujo.recomendacionDescartada = true
-                    abrirEnlace(tienda)
-                }
-            }
-            Button(Textos.versionNotNow, role: .cancel) {
+        // Las alertas van con `alertaApilada` (TrainerCore): iguales a las del
+        // sistema, con los botones apilados y cancelar abajo, y sin el color de
+        // la app — se dibujan en su propia ventana, que no hereda el `.tint` de
+        // arriba.
+        .alertaApilada(Textos.versionRecommendedTitle,
+                       isPresented: recomendacionVisible,
+                       mensaje: flujo.actualizacionRecomendada?.texto(generico: Textos.versionRecommendedBody),
+                       botones: botonesDeLaRecomendacion)
+        .alertaApilada(Textos.sessionExpiredTitle, isPresented: $flujo.alertaSesionExpirada,
+                       mensaje: Textos.sessionExpiredMessage,
+                       botones: [BotonDeAlerta(Textos.commonOk, rol: .cancelar) {
+                           flujo.irAlLoginDesdeSesionExpirada()
+                       }])
+        .alertaApilada(item: $flujo.alerta) { $0 }
+    }
+
+    private var botonesDeLaRecomendacion: [BotonDeAlerta] {
+        var botones: [BotonDeAlerta] = []
+        if let tienda = flujo.actualizacionRecomendada?.tienda {
+            botones.append(BotonDeAlerta(Textos.versionUpdate) {
                 flujo.recomendacionDescartada = true
-            }
-        } message: { aviso in
-            Text(aviso.texto(generico: Textos.versionRecommendedBody))
+                abrirEnlace(tienda)
+            })
         }
-        .alert(Textos.sessionExpiredTitle, isPresented: $flujo.alertaSesionExpirada) {
-            Button(Textos.commonDone, role: .cancel) {
-                flujo.irAlLoginDesdeSesionExpirada()
-            }
-        } message: {
-            Text(Textos.sessionExpiredMessage)
-        }
-        .alert(flujo.alertaError?.titulo ?? Textos.commonDone,
-               isPresented: Binding(
-                   get: { flujo.alertaError != nil },
-                   set: { if !$0 { flujo.alertaError = nil } }
-               ),
-               presenting: flujo.alertaError) { alerta in
-            Button(alerta.boton, role: .cancel) {
-                flujo.alertaError = nil
-            }
-        } message: { alerta in
-            Text(alerta.mensaje)
-        }
+        botones.append(BotonDeAlerta(Textos.versionNotNow, rol: .cancelar) {
+            flujo.recomendacionDescartada = true
+        })
+        return botones
     }
 
     /// La recomendación se muestra una vez por arranque: "Ahora no" es ahora no,
@@ -150,31 +144,23 @@ struct RaizFlujoView: View {
     private var contenido: some View {
         switch flujo.pantalla {
         case .bienvenida:    BienvenidaView()
-        case .problema:      ProblemaView()
-        case .previewPlan:   PreviewPlanView()
 
         case .login:         LoginView()
         case .claveCorreo:   ClaveCorreoView()
         case .claveCodigo:   ClaveCodigoView()
         case .claveNueva:    ClaveNuevaView()
-        case .claveLista:    ClaveListaView()
 
         case .regCorreo:     RegCorreoView()
         case .regCodigo:     RegCodigoView()
-        case .regClave:      RegClaveView()
-        case .regAviso:      RegAvisoView()
-        case .regTerminos:   RegTerminosView()
-        case .regNombre:     RegNombreView()
+        case .regAntesDeEmpezar: RegAntesDeEmpezarView()
         case .regNacimiento: RegNacimientoView()
         case .regSexo:       RegSexoView()
         case .regCuerpo:     RegCuerpoView()
         case .regDeporte:    RegDeporteView()
         case .regNivel:      RegNivelView()
         case .regObjetivo:   RegObjetivoView()
-        case .regSalud:      RegSaludView()
-        case .regMedicion:   RegMedicionView()
         case .regDias:       RegDiasView()
-        case .regListo:      RegListoView()
+        case .regApto:       RegAptoView()
 
         case .home:
             RaizHomeView(nombreCompleto: nombreParaElHome,

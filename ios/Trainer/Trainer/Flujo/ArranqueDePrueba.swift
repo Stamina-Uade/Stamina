@@ -50,8 +50,6 @@ enum ArranqueDePrueba {
         d.deporte = .running
         d.nivel = .intermedio
         d.objetivo = .mediaMaraton
-        d.descargoAceptado = true
-        d.medicion = .gps
         return d
     }
 

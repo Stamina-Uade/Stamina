@@ -2,7 +2,7 @@ import SwiftUI
 import TrainerCore
 
 // =============================================================================
-// Pasos 9 a 11: deporte, nivel y objetivo. Cada uno guarda lo suyo con
+// Pasos 7 a 9: deporte, nivel y objetivo. Cada uno guarda lo suyo con
 // `PATCH /me` al tocar "Continuar" (decisión 0008).
 //
 // Los 7 objetivos son una **lista cerrada** y eso no es pereza de diseño: es lo
@@ -12,7 +12,7 @@ import TrainerCore
 // MVP sólo running: deporte y objetivos se filtran con `MVP` (TrainerCore).
 // =============================================================================
 
-/// `reg-deporte` · paso 9 de 15
+/// `reg-deporte` · paso 7 de 11
 struct RegDeporteView: View {
     @EnvironmentObject private var flujo: FlujoEntrada
 
@@ -63,7 +63,7 @@ struct RegDeporteView: View {
     }
 }
 
-/// `reg-nivel` · paso 10 de 15
+/// `reg-nivel` · paso 8 de 11
 struct RegNivelView: View {
     @EnvironmentObject private var flujo: FlujoEntrada
 
@@ -93,11 +93,11 @@ struct RegNivelView: View {
     }
 }
 
-/// `reg-objetivo` · paso 11 de 15
+/// `reg-objetivo` · paso 9 de 11
 ///
-/// La fecha es **opcional a propósito**: el diseño deja seguir sin carrera
-/// elegida y el contrato lo permite (`goal_date_ms` acepta `null`, y sin fecha se
-/// manda ese `null` para borrar una que ya estuviera).
+/// 2026-10-22: si el objetivo principal es una carrera, "Continuar" pide la
+/// fecha. Si es "Volver a entrenar sin lesiones", no hay calendario y se sigue
+/// derecho (viaja `goal_date_ms: null`, que borra una fecha que ya estuviera).
 struct RegObjetivoView: View {
     @EnvironmentObject private var flujo: FlujoEntrada
 
@@ -110,8 +110,8 @@ struct RegObjetivoView: View {
             (.trailMontana, Textos.signupGoalMountainTrail, Textos.signupGoalMountainTrailDetail),
             (.triatlonOlimpico, Textos.signupGoalOlympicTriathlon,
              Textos.signupGoalOlympicTriathlonDetail),
-            (.volverSinLesiones, Textos.signupGoalInjuryFree,
-             Textos.signupGoalInjuryFreeDetail),
+            // Sin nada a la derecha: no tiene distancia.
+            (.volverSinLesiones, Textos.signupGoalInjuryFree, ""),
         ]
         // MVP sólo running: el triatlón queda escondido (ver `MVP`).
         return todos.filter { MVP.permite($0.0) }
@@ -145,34 +145,34 @@ struct RegObjetivoView: View {
                     }
                 }
 
-                CalendarioMes(seleccionada: $flujo.datos.fechaObjetivo,
-                              etiquetaMesAnterior: Textos.signupGoalPreviousMonth,
-                              etiquetaMesSiguiente: Textos.signupGoalNextMonth)
+                // Sin carrera (volver a entrenar sin lesiones) no hay fecha que elegir.
+                if flujo.datos.objetivo != .volverSinLesiones {
+                    CalendarioMes(seleccionada: $flujo.datos.fechaObjetivo,
+                                  etiquetaMesAnterior: Textos.signupGoalPreviousMonth,
+                                  etiquetaMesSiguiente: Textos.signupGoalNextMonth)
 
-                lineaDeFechaVista
+                    lineaDeFechaVista
+                }
             }
             .disabled(flujo.enCurso)
         } pie: {
-            PieDePerfil(habilitado: flujo.datos.objetivo != nil)
+            PieDePerfil(habilitado: flujo.datos.puedeSeguir(en: .regObjetivo),
+                        motivoDeshabilitado: flujo.datos.objetivo == nil
+                            ? Textos.commonCompleteToContinue : Textos.signupGoalMustChooseDate)
         }
     }
 
-    /// Con fecha elegida, la píldora rosa con tilde del mockup; sin fecha, la
-    /// línea apagada que dice que se puede seguir igual.
+    /// Con fecha elegida, la píldora rosa con tilde del mockup; sin fecha, nada.
     @ViewBuilder
     private var lineaDeFechaVista: some View {
-        if flujo.datos.fechaObjetivo == nil {
-            Text(lineaDeFecha)
-                .estilo(.labelCampo, color: Paleta.textoTerciario)
-                .fixedSize(horizontal: false, vertical: true)
-        } else {
+        if let fecha = flujo.datos.fechaObjetivo {
             HStack(alignment: .top, spacing: TokensEspaciado.e6) {
                 Image(systemName: "checkmark")
                     .font(.system(size: TokensTipografia.chipTamano, weight: .heavy))
                     .foregroundStyle(Paleta.acento)
                     .padding(.top, TokensEspaciado.e2)
                     .accessibilityHidden(true)
-                Text(lineaDeFecha)
+                Text(lineaDeFecha(fecha))
                     .estilo(.chip, color: Paleta.textoPrimario)
                     .fixedSize(horizontal: false, vertical: true)
             }
@@ -188,8 +188,7 @@ struct RegObjetivoView: View {
         }
     }
 
-    private var lineaDeFecha: String {
-        guard let fecha = flujo.datos.fechaObjetivo else { return Textos.signupGoalNoDate }
+    private func lineaDeFecha(_ fecha: Date) -> String {
         let dias = Calendar.autoupdatingCurrent
             .dateComponents([.day], from: Date(), to: fecha).day ?? 0
         let semanas = max(0, Int((Double(dias) / 7).rounded()))

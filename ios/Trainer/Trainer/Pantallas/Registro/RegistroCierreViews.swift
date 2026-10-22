@@ -2,80 +2,19 @@ import SwiftUI
 import TrainerCore
 
 // =============================================================================
-// Pasos 12 a 15: salud, medición, días y resumen.
+// Pasos 10 y 11: días y horarios, y el apto físico.
 //
-// 🛑 `reg-salud` es el descargo médico y no es un trámite. AGENTS.md §8 y §9.2
-// tratan los datos de salud como la categoría más sensible del producto, y esta
-// pantalla es donde la app dice, con todas las letras, que no reemplaza una
-// consulta. El tono nunca es punitivo (§9.2). Se pisa con el aviso del paso 4
-// (B-007), y eso sigue abierto.
+// 2026-10-22: se sacaron "¿Con qué mides tus salidas?" (no se guardaba: B-006,
+// ver `DatosRegistro`), "Antes de arrancar" (el descargo pasó a la segunda
+// casilla de "Antes de empezar") y "Todo listo" (el último paso entra derecho
+// al Inicio).
 // =============================================================================
 
-/// `reg-salud` · paso 12 de 15 · guarda `medical_disclaimer_accepted`
-struct RegSaludView: View {
-    @EnvironmentObject private var flujo: FlujoEntrada
-
-    var body: some View {
-        PantallaPaso(titulo: Textos.signupHealthTitle, texto: Textos.signupHealthBody) {
-            VStack(spacing: TokensEspaciado.e14) {
-                AvisoAtencion(titulo: Textos.signupHealthStopAndConsult) {
-                    VStack(alignment: .leading, spacing: TokensEspaciado.e8) {
-                        ItemAtencion(Textos.signupHealthSymptom1)
-                        ItemAtencion(Textos.signupHealthSymptom2)
-                        ItemAtencion(Textos.signupHealthSymptom3)
-                    }
-                }
-
-                Casilla(texto: Textos.signupHealthAccept, marcada: $flujo.datos.descargoAceptado)
-                    .disabled(flujo.enCurso)
-            }
-        } pie: {
-            PieDePerfil(habilitado: flujo.datos.descargoAceptado,
-                        motivoDeshabilitado: Textos.signupHealthMustAccept)
-        }
-    }
-}
-
-/// `reg-medicion` · paso 13 de 15 · 🛑 no guarda nada (B-006)
+/// `reg-dias` · paso 10 de 11 · guarda `training_days` y `timezone`
 ///
-/// `PerfilEntrada` del contrato v1 no tiene dónde guardar esto: el paso se
-/// completa, el valor no se manda, y **la pantalla lo dice**. Un paso que pregunta
-/// y tira la respuesta sin avisar es peor que no preguntarla: quien elige "Garmin"
-/// y después no ve su reloj conectado merece saber por qué. Es lo mismo que hace
-/// Android (`perf_medicion_hueco`).
-struct RegMedicionView: View {
-    @EnvironmentObject private var flujo: FlujoEntrada
-
-    private var opciones: [(DatosRegistro.Medicion, String, String)] {
-        [
-            (.gps, Textos.signupTrackingGps, Textos.signupTrackingGpsDetail),
-            (.garmin, Textos.signupTrackingGarmin, Textos.signupTrackingGarminDetail),
-            (.apple, Textos.signupTrackingApple, Textos.signupTrackingAppleDetail),
-            (.manual, Textos.signupTrackingManual, Textos.signupTrackingManualDetail),
-        ]
-    }
-
-    var body: some View {
-        PantallaPaso(titulo: Textos.signupTrackingTitle, texto: Textos.signupTrackingBody) {
-            VStack(spacing: TokensEspaciado.e10) {
-                ForEach(opciones, id: \.0) { valor, titulo, detalle in
-                    FilaOpcion(titulo: titulo, detalle: detalle,
-                               elegida: flujo.datos.medicion == valor) {
-                        flujo.datos.medicion = valor
-                    }
-                }
-                AvisoSuave(Textos.signupTrackingNotSaved)
-            }
-        } pie: {
-            PieDePerfil(ahoraNo: {
-                flujo.datos.medicion = nil
-                Task { await flujo.guardarYSeguir() }
-            })
-        }
-    }
-}
-
-/// `reg-dias` · paso 14 de 15 · guarda `training_days` y `timezone`
+/// Debajo de los días, la "Notificación para prepararte" (prendida, 30 minutos
+/// antes, de entrada). Se guarda en el teléfono (`AvisoDePreparacion`), el mismo
+/// lugar que usa Ajustes.
 ///
 /// 🪤 DIVERGENCIA — el diseño ofrece **7 horarios fijos** en un `<select>`.
 /// Acá va el selector de hora del sistema: el contrato guarda `minute_of_day`
@@ -83,6 +22,8 @@ struct RegMedicionView: View {
 /// 24 horas sale del locale en vez de estar escrito (AGENTS.md §10).
 struct RegDiasView: View {
     @EnvironmentObject private var flujo: FlujoEntrada
+    @AppStorage(AvisoDePreparacion.claveEncendido) private var avisoEncendido = true
+    @AppStorage(AvisoDePreparacion.claveMinutos) private var minutosDeAviso = AvisoDePreparacion.minutosPorDefecto
 
     /// Días ISO: 1 = lunes. El orden de la fila arranca donde el locale diga.
     private var diasEnOrden: [Int] {
@@ -110,15 +51,38 @@ struct RegDiasView: View {
                     }
                 }
 
-                AvisoSuave(flujo.datos.hayAlgunDia
-                           ? Textos.signupDaysAlert(flujo.datos.dias.count)
-                           : Textos.signupDaysNoDays)
+                avisoDePreparacion
             }
             .disabled(flujo.enCurso)
         } pie: {
             PieDePerfil(habilitado: flujo.datos.hayAlgunDia,
                         motivoDeshabilitado: Textos.signupDaysNoDays)
         }
+    }
+
+    /// "Notificación para prepararte" con su interruptor y, prendida, cuánto antes.
+    private var avisoDePreparacion: some View {
+        VStack(spacing: TokensEspaciado.e8) {
+            Toggle(isOn: $avisoEncendido.animation(.easeInOut(duration: TokensMovimiento.rapida))) {
+                Text(Textos.notificationsPrepTitle)
+                    .estilo(.tituloCard)
+            }
+            .tint(Paleta.interruptorActivo)
+            .frame(minHeight: TokensTamano.objetivoTactilMinimo)
+
+            if avisoEncendido {
+                Divider().background(Paleta.divisor)
+                FilaDeMinutosDeAviso(minutos: $minutosDeAviso)
+            }
+        }
+        .padding(.vertical, TokensEspaciado.e8)
+        .padding(.horizontal, TokensEspaciado.e16)
+        .background(Paleta.superficie)
+        .clipShape(RoundedRectangle(cornerRadius: TokensRadio.card, style: .continuous))
+        .overlay(
+            RoundedRectangle(cornerRadius: TokensRadio.card, style: .continuous)
+                .strokeBorder(Paleta.bordeSuperficie, lineWidth: TokensEspaciado.e1)
+        )
     }
 
     private func filaDeHora(_ iso: Int) -> some View {
@@ -193,136 +157,15 @@ struct RegDiasView: View {
     }
 }
 
-/// `reg-listo` · paso 15 de 15
+/// `reg-apto` · paso 11 de 11 · opcional, sólo en el teléfono
 ///
-/// No guarda nada: cada paso anterior ya guardó lo suyo. Lo que se ve acá es un
-/// espejo de eso, no un último pedido que pueda fallar.
-///
-/// Rediseño 2026-10: el sello con tilde y el título (la mascota ya no aparece en
-/// el acceso ni en el alta, pedido de Iván del 20-10). El párrafo largo
-/// (`regListoTexto`) se cambió por una línea. Arma su propio andamio —el de
-/// `PantallaCierre` dibuja el sello— con el mismo pie fijo de los pasos.
-struct RegListoView: View {
+/// La misma pantalla del apto de Perfil (`AptoFisicoView`): archivo, vencimiento
+/// y declaración. "Guardar" y "Lo subo después" entran derecho al Inicio, sin
+/// pantalla final; la primera vez aparece el tour, como siempre.
+struct RegAptoView: View {
     @EnvironmentObject private var flujo: FlujoEntrada
 
     var body: some View {
-        VStack(spacing: 0) {
-            ScrollView {
-                VStack(spacing: TokensEspaciado.e16) {
-                    // 2026-10-20: el alta va sin mascota (pedido de Iván); vuelve
-                    // el sello del cierre, con el título debajo.
-                    SelloDeCierre()
-
-                    Text(Textos.signupDoneTitle(nombre))
-                        .estilo(.display)
-                        .multilineTextAlignment(.center)
-                        .fixedSize(horizontal: false, vertical: true)
-                        .accessibilityAddTraits(.isHeader)
-
-                    Text(Textos.signupDoneProfileComplete)
-                        .estilo(.cuerpoDestacado, color: Paleta.textoSecundario)
-                        .multilineTextAlignment(.center)
-                        .fixedSize(horizontal: false, vertical: true)
-
-                    resumen
-                }
-                .frame(maxWidth: .infinity)
-                .padding(.horizontal, TokensEspaciado.e22)
-                .padding(.top, TokensEspaciado.e26)
-                .padding(.bottom, TokensEspaciado.e20)
-            }
-
-            pie
-        }
-        .frame(maxWidth: .infinity, maxHeight: .infinity)
-        .background(fondo)
-        .onAppear { Haptico.exito() }
-    }
-
-    private var resumen: some View {
-        Tarjeta {
-            VStack(spacing: TokensEspaciado.e9) {
-                FilaResumen(Textos.signupDoneBirth,
-                            flujo.datos.nacimiento.map { $0.formatted(.dateTime.day().month().year()) } ?? Textos.commonNotSet)
-                FilaResumen(Textos.signupDoneSport, deporte)
-                FilaResumen(Textos.signupDoneLevel, nivel)
-                FilaResumen(Textos.signupDoneDays, dias)
-                FilaResumen(Textos.signupDoneGoal, objetivo)
-            }
-        }
-    }
-
-    /// El mismo pie fijo de `PantallaCierre`: la cápsula, con un fundido arriba
-    /// para que el resumen que scrollea se pierda debajo.
-    private var pie: some View {
-        VStack(spacing: TokensEspaciado.e10) {
-            BotonPrimario(Textos.signupDoneGoHome) { flujo.terminarRegistro() }
-        }
-        .padding(.horizontal, TokensEspaciado.e22)
-        .padding(.bottom, TokensEspaciado.e34)
-        .padding(.top, TokensEspaciado.e12)
-        .background(alignment: .top) {
-            LinearGradient(colors: [Paleta.fondo.opacity(0), Paleta.fondo],
-                           startPoint: .top, endPoint: .bottom)
-                .frame(height: TokensEspaciado.e20)
-                .offset(y: -TokensEspaciado.e20)
-                .allowsHitTesting(false)
-                .accessibilityHidden(true)
-        }
-    }
-
-    /// El halo del acento arriba, como los otros cierres: es un final, no un paso.
-    private var fondo: some View {
-        ZStack {
-            Paleta.fondo
-            RadialGradient(colors: [Paleta.acentoProfundo, Color.clear],
-                           center: .top, startRadius: 0,
-                           endRadius: TokensEspaciado.e56 * 5)
-        }
-        .ignoresSafeArea()
-        .accessibilityHidden(true)
-    }
-
-    private var nombre: String {
-        let n = flujo.datos.nombre.trimmingCharacters(in: .whitespaces)
-        return n.isEmpty ? Textos.signupNamePlaceholder : n
-    }
-
-    private var deporte: String {
-        switch flujo.datos.deporte {
-        case .running: return Textos.signupSportRunning
-        case .ciclismo: return Textos.signupSportCycling
-        case .trekking: return Textos.signupSportTrekking
-        case .triatlon: return Textos.signupSportTriathlon
-        case .none: return Textos.commonNotSet
-        }
-    }
-
-    private var nivel: String {
-        switch flujo.datos.nivel {
-        case .principiante: return Textos.signupLevelBeginner
-        case .intermedio: return Textos.signupLevelIntermediate
-        case .avanzado: return Textos.signupLevelAdvanced
-        case .none: return Textos.commonNotSet
-        }
-    }
-
-    private var dias: String {
-        let elegidos = flujo.datos.diasElegidos
-        guard !elegidos.isEmpty else { return Textos.commonNotSet }
-        return elegidos.map(RegDiasView.abreviatura).joined(separator: ", ")
-    }
-
-    private var objetivo: String {
-        switch flujo.datos.objetivo {
-        case .c5k: return Textos.signupGoalC5k
-        case .c10k: return Textos.signupGoalC10k
-        case .mediaMaraton: return Textos.signupGoalHalfMarathon
-        case .maraton: return Textos.signupGoalMarathon
-        case .trailMontana: return Textos.signupGoalMountainTrail
-        case .triatlonOlimpico: return Textos.signupGoalOlympicTriathlon
-        case .volverSinLesiones: return Textos.signupGoalInjuryFree
-        case .none: return Textos.signupDoneBasePlan
-        }
+        AptoFisicoView(enElAlta: true) { flujo.terminarRegistro() }
     }
 }

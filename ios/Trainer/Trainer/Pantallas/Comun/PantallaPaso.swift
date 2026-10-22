@@ -107,23 +107,26 @@ struct PieDePaso<Contenido: View>: View {
     }
 }
 
-/// Pantalla de cierre de un flujo: `clave-lista` y `reg-listo`. El diseño las
-/// dibuja distinto —cuadrado de acento arriba, título más grande— porque son un
+/// Pantalla de cierre de un flujo (hoy, la actualización obligatoria). El diseño
+/// los dibuja distinto —una imagen arriba, título más grande— porque son un
 /// final, no un paso más.
-struct PantallaCierre<Contenido: View, Pie: View>: View {
+struct PantallaCierre<Sello: View, Contenido: View, Pie: View>: View {
     private let titulo: String
     private let texto: String
+    private let sello: Sello
     private let contenido: Contenido
     private let pie: Pie
 
     init(
         titulo: String,
         texto: String,
+        @ViewBuilder sello: () -> Sello,
         @ViewBuilder contenido: () -> Contenido = { EmptyView() },
         @ViewBuilder pie: () -> Pie
     ) {
         self.titulo = titulo
         self.texto = texto
+        self.sello = sello()
         self.contenido = contenido()
         self.pie = pie()
     }
@@ -132,7 +135,7 @@ struct PantallaCierre<Contenido: View, Pie: View>: View {
         VStack(spacing: 0) {
             ScrollView {
                 VStack(alignment: .leading, spacing: TokensEspaciado.e16) {
-                    SelloDeCierre()
+                    sello
 
                     Text(titulo)
                         .estilo(.display)
@@ -167,43 +170,18 @@ struct PantallaCierre<Contenido: View, Pie: View>: View {
     }
 }
 
-/// El círculo rosa con tilde de los cierres. Reemplaza al cuadrado de acento del
-/// diseño viejo: el mockup marca lo hecho con la tilde rosa.
-struct SelloDeCierre: View {
-    var body: some View {
-        ZStack {
-            Circle()
-                .fill(Paleta.acento)
-                .shadow(color: Paleta.acentoBrillo, radius: TokensEspaciado.e20)
-            Image(systemName: "checkmark")
-                .font(.system(size: TokensTipografia.displayTamano * 0.7, weight: .heavy))
-                .foregroundStyle(Paleta.sobreAcento)
-        }
-        .frame(width: TokensEspaciado.e56, height: TokensEspaciado.e56)
-        .accessibilityHidden(true)
-    }
-}
-
-/// El pie de los pasos de perfil (decisión 0008): el error del guardado,
-/// "Continuar" —que guarda ESE paso con `PATCH /me` antes de avanzar— y la salida
-/// "Completar después".
-///
-/// El error va acá y no con el contenido: el contenido scrollea, y un error que
-/// queda tres pantallazos arriba del botón que lo produjo no lo lee nadie.
+/// El pie de los pasos de perfil (decisión 0008): "Continuar" —que guarda ESE
+/// paso con `PATCH /me` antes de avanzar— y, desde Deporte, la salida
+/// "Completar después". Si el guardado falla, lo dice una alerta.
 struct PieDePerfil: View {
     @EnvironmentObject private var flujo: FlujoEntrada
     private let habilitado: Bool
     private let motivoDeshabilitado: String
-    private let ahoraNo: (() -> Void)?
 
-    /// - Parameter ahoraNo: el "Ahora no" de `reg-medicion`, el único paso que el
-    ///   diseño deja saltear sin elegir.
     init(habilitado: Bool = true,
-         motivoDeshabilitado: String = Textos.commonCompleteToContinue,
-         ahoraNo: (() -> Void)? = nil) {
+         motivoDeshabilitado: String = Textos.commonCompleteToContinue) {
         self.habilitado = habilitado
         self.motivoDeshabilitado = motivoDeshabilitado
-        self.ahoraNo = ahoraNo
     }
 
     var body: some View {
@@ -213,11 +191,6 @@ struct PieDePerfil: View {
                           cargando: flujo.enCurso,
                           motivoDeshabilitado: motivoDeshabilitado) {
                 Task { await flujo.guardarYSeguir() }
-            }
-
-            if let ahoraNo {
-                BotonTexto(Textos.signupTrackingNotNow, color: Paleta.textoSecundario, accion: ahoraNo)
-                    .disabled(flujo.enCurso)
             }
 
             if flujo.pantalla.ofreceCompletarDespues {

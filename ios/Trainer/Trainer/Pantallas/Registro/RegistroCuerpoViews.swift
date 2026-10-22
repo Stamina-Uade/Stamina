@@ -2,7 +2,7 @@ import SwiftUI
 import TrainerCore
 
 // =============================================================================
-// Pasos 6 a 8: nacimiento, sexo biológico y cuerpo. Cada uno guarda lo suyo con
+// Pasos 4 a 6: nacimiento, sexo biológico y cuerpo. Cada uno guarda lo suyo con
 // `PATCH /me` al tocar "Continuar" (decisión 0008).
 //
 // Los tres piden datos que el motor necesita para calcular, y los tres explican
@@ -10,17 +10,20 @@ import TrainerCore
 // para estimar sudoración es lo que hace que la gente abandone el registro.
 // =============================================================================
 
-/// `reg-nacimiento` · paso 6 de 15
+/// `reg-nacimiento` · paso 4 de 11
+///
+/// "Continuar" se habilita con 18 años o más —la edad mínima de los términos—,
+/// sin ningún mensaje en pantalla (VoiceOver dice por qué está apagado).
 struct RegNacimientoView: View {
     @EnvironmentObject private var flujo: FlujoEntrada
 
     var body: some View {
         PantallaPaso(titulo: Textos.signupBirthTitle(saludo),
                      texto: Textos.signupBirthBody) {
-            RuedaDeNacimiento(fecha: fechaDeLaRueda, nota: notaDeFormato)
+            RuedaDeNacimiento(fecha: fechaDeLaRueda)
                 .disabled(flujo.enCurso)
         } pie: {
-            PieDePerfil(habilitado: flujo.datos.nacimiento != nil,
+            PieDePerfil(habilitado: flujo.datos.tieneEdadMinima(),
                         motivoDeshabilitado: Textos.signupBirthMustChoose)
         }
     }
@@ -37,30 +40,9 @@ struct RegNacimientoView: View {
         let nombre = flujo.datos.nombre.trimmingCharacters(in: .whitespaces)
         return Textos.signupBirthGreeting(nombre.isEmpty ? Textos.signupNamePlaceholder : nombre)
     }
-
-    /// El diseño anuncia en qué orden vienen las columnas según el idioma. Acá el
-    /// orden lo pone el `DatePicker` del sistema, y la nota se arma leyendo el
-    /// formato real del locale en vez de suponerlo.
-    private var notaDeFormato: String {
-        let locale = Locale.autoupdatingCurrent
-        let patron = DateFormatter.dateFormat(fromTemplate: "yMd", options: 0, locale: locale) ?? "dMy"
-        let orden = patron
-            .lowercased()
-            .compactMap { caracter -> String? in
-                switch caracter {
-                case "d": return Textos.signupBirthDay
-                case "m": return Textos.signupBirthMonth
-                case "y": return Textos.signupBirthYear
-                default: return nil
-                }
-            }
-        var vistos: [String] = []
-        for parte in orden where !vistos.contains(parte) { vistos.append(parte) }
-        return Textos.signupBirthFormat(locale.identifier, vistos.joined(separator: " · "))
-    }
 }
 
-/// `reg-sexo` · paso 7 de 15
+/// `reg-sexo` · paso 5 de 11
 ///
 /// Arranca sin nada elegido: ver `DatosRegistro.sexo`.
 struct RegSexoView: View {
@@ -69,17 +51,14 @@ struct RegSexoView: View {
     private struct Opcion {
         let valor: SexoBiologico
         let titulo: String
-        let detalle: String
     }
 
+    /// Sin texto debajo de cada opción (2026-10-22).
     private var opciones: [Opcion] {
         [
-            Opcion(valor: .femenino, titulo: Textos.signupSexFemale,
-                   detalle: Textos.signupSexFemaleDetail),
-            Opcion(valor: .masculino, titulo: Textos.signupSexMale,
-                   detalle: Textos.signupSexMaleDetail),
-            Opcion(valor: .sinDeclarar, titulo: Textos.signupSexUndisclosed,
-                   detalle: Textos.signupSexUndisclosedDetail),
+            Opcion(valor: .femenino, titulo: Textos.signupSexFemale),
+            Opcion(valor: .masculino, titulo: Textos.signupSexMale),
+            Opcion(valor: .sinDeclarar, titulo: Textos.signupSexUndisclosed),
         ]
     }
 
@@ -87,7 +66,7 @@ struct RegSexoView: View {
         PantallaPaso(titulo: Textos.signupSexTitle, texto: Textos.signupSexBody) {
             VStack(spacing: TokensEspaciado.e10) {
                 ForEach(opciones, id: \.valor) { opcion in
-                    FilaOpcion(titulo: opcion.titulo, detalle: opcion.detalle,
+                    FilaOpcion(titulo: opcion.titulo,
                                elegida: flujo.datos.sexo == opcion.valor) {
                         flujo.datos.sexo = opcion.valor
                     }
@@ -100,7 +79,7 @@ struct RegSexoView: View {
     }
 }
 
-/// `reg-cuerpo` · paso 8 de 15
+/// `reg-cuerpo` · paso 6 de 11
 ///
 /// Se escribe en kg y cm; el contrato guarda **gramos y milímetros enteros**
 /// (AGENTS.md §5). La conversión vive en `DatosRegistro`, no acá.
