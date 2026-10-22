@@ -290,16 +290,15 @@ final class FlujoDeEntradaUITests: XCTestCase {
             XCTAssertFalse(boton.isEnabled, "«\(caso.pantalla)»: sin nada escrito, el botón no se prende")
 
             if caso.pantalla == "regCorreo" {
-                // El alta pide todo junto: nombre, apellido, correo, contraseña y
-                // su confirmación.
-                for (campo, texto) in [("Nombre", "Iván"), ("Apellido (opcional)", "Karkoszka")] {
-                    app.textFields[campo].tap()
-                    app.textFields[campo].typeText(texto)
-                }
-                for campo in ["Contraseña", "Repetir contraseña"] {
-                    app.secureTextFields[campo].tap()
-                    app.secureTextFields[campo].typeText("Trainer2026x")
-                }
+                // En el alta el botón además pide la contraseña con sus tres reglas, y
+                // el simulador no la deja tipear entera (la sugerencia de contraseña
+                // segura se come las teclas). Acá se mira que espere; que se prenda
+                // con todo bien lo prueba `CorreoAlTocarTests.altaNoMandaUnCorreoInvalido`.
+                correo.tap()
+                correo.typeText("ivan")
+                XCTAssertFalse(boton.isEnabled, "«regCorreo»: con un correo que no es uno, no se prende")
+                app.terminate()
+                continue
             }
             if caso.pantalla == "login" {
                 let clave = app.secureTextFields["Contraseña"]
@@ -330,6 +329,9 @@ final class FlujoDeEntradaUITests: XCTestCase {
         app.launchArguments = [
             "-pantallaInicial", "home", "-pestanaHome", pestana,
             "-datosDeEjemplo", "-AppleLanguages", "(es)", "-AppleLocale", "es_AR",
+            // El tour de la primera vez tapa el Home: con la app recién instalada
+            // aparecía en cada arranque y ningún elemento de abajo se podía tocar.
+            "-tour_visto", "YES",
         ] + Self.sinServidor
         app.launch()
         return app
