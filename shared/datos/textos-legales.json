@@ -1,7 +1,7 @@
 {
   "_meta": {
-    "version": "1.0.0",
-    "fecha": "2026-10-21",
+    "version": "1.1.0",
+    "fecha": "2026-10-22",
     "_ESTADO": "🛑 BORRADOR. NINGUN TEXTO DE ESTE ARCHIVO FUE REVISADO POR UNA PERSONA CON FORMACION LEGAL.",
     "_que_es_esto": "El aviso de salud, los terminos y condiciones (con las reglas de uso) y la politica de privacidad, en castellano, ingles y frances. Estan aca y NO en el catalogo de la app por dos motivos: (1) hay que poder cambiarlos sin publicar una version nueva en la tienda, y (2) lo que se guarda cuando alguien acepta es la VERSION de este archivo, y eso solo sirve si la version vive con el texto.",
     "_idiomas": "es, en y fr. El servidor elige por Accept-Language: es* -> es, fr* -> fr, cualquier otro -> en (el idioma por defecto de la app). Los tres idiomas de un texto tienen que tener la MISMA cantidad de secciones: lo controla un test.",
@@ -24,32 +24,32 @@
       "revisado_por": null,
       "revisado_en": null,
       "es": {
-        "titulo": "Antes de empezar, leé esto",
-        "resumen": "Stamina te arma un plan de running y te da estimaciones a partir de los datos que cargás. No es un profesional de la salud y no te conoce.",
+        "titulo": "Antes de empezar, lee esto",
+        "resumen": "Stamina te arma un plan de running y te da estimaciones a partir de los datos que cargas. No es un profesional de la salud y no te conoce.",
         "puntos": [
           {
-            "titulo": "Consultá a un profesional",
-            "cuerpo": "Antes de empezar un plan nuevo, hacete un control médico y hablá con tu médico o médica. Es especialmente importante si tenés una condición cardíaca, respiratoria, metabólica o articular, presión alta, diabetes, si tomás alguna medicación, si volvés de una lesión o si hace mucho que no entrenás. Si vas a cambiar cómo comés o cómo te hidratás, consultá también con un nutricionista."
+            "titulo": "Consulta a un profesional",
+            "cuerpo": "Antes de empezar un plan nuevo, hazte un control médico y habla con tu médico o médica. Es especialmente importante si tienes una condición cardíaca, respiratoria, metabólica o articular, presión alta, diabetes, si tomas alguna medicación, si vuelves de una lesión o si hace mucho que no entrenas. Si vas a cambiar cómo comes o cómo te hidratas, consulta también con un nutricionista."
           },
           {
             "titulo": "No es un diagnóstico ni un tratamiento",
             "cuerpo": "Stamina no diagnostica, no trata, no cura ni previene ninguna enfermedad, y no es un dispositivo médico. Los ritmos, zonas, distancias, cantidades de agua, sales y geles y cualquier otro número que muestra son ESTIMACIONES calculadas con fórmulas generales a partir de tu peso, tu altura, tu nivel y el clima. Tu cuerpo puede necesitar otra cosa."
           },
           {
-            "titulo": "Si algo te pasa, pará",
-            "cuerpo": "Dolor u opresión en el pecho, mareo, desmayo, falta de aire que no cede, palpitaciones fuertes, visión borrosa, confusión o un dolor que no es normal: parás en el momento y buscás ayuda. Ningún entrenamiento vale eso. Ante una emergencia, llamá al número de emergencias de tu zona (en Argentina, 107 o 911). La app no avisa a nadie por vos."
+            "titulo": "Si algo te pasa, para",
+            "cuerpo": "Dolor u opresión en el pecho, mareo, desmayo, falta de aire que no cede, palpitaciones fuertes, visión borrosa, confusión o un dolor que no es normal: paras en el momento y buscas ayuda. Ningún entrenamiento vale eso. Ante una emergencia, llama al número de emergencias de tu zona (en Argentina, 107 o 911). La app no avisa a nadie por ti."
           },
           {
             "titulo": "Calor, frío y entorno",
-            "cuerpo": "Los avisos de calor y de hidratación son orientativos y dependen de un pronóstico que puede fallar. Con calor, humedad o frío extremo, bajá la intensidad o no salgas. Cuando corras en la calle, mirá el tránsito y no la pantalla."
+            "cuerpo": "Los avisos de calor y de hidratación son orientativos y dependen de un pronóstico que puede fallar. Con calor, humedad o frío extremo, baja la intensidad o no salgas. Cuando corras en la calle, mira el tránsito y no la pantalla."
           },
           {
             "titulo": "Para quién no es todavía",
-            "cuerpo": "Stamina es para personas mayores de 18 años. No está pensada para usarse durante el embarazo o la lactancia, ni ante un trastorno de la conducta alimentaria o una condición de salud que requiera seguimiento: en esos casos seguí solamente las indicaciones de tu profesional."
+            "cuerpo": "Stamina es para personas mayores de 18 años. No está pensada para usarse durante el embarazo o la lactancia, ni ante un trastorno de la conducta alimentaria o una condición de salud que requiera seguimiento: en esos casos sigue solamente las indicaciones de tu profesional."
           },
           {
-            "titulo": "Vos decidís",
-            "cuerpo": "El plan es una sugerencia. Cómo, cuándo y cuánto entrenás lo decidís vos, y sos responsable de esa decisión. Si el plan te pide algo que no te cierra o que te duele, no lo hagas."
+            "titulo": "Tú decides",
+            "cuerpo": "El plan es una sugerencia. Cómo, cuándo y cuánto entrenas lo decides tú, y eres responsable de esa decisión. Si el plan te pide algo que no te cierra o que te duele, no lo hagas."
           }
         ],
         "aceptacion": "Leí el aviso, entiendo que Stamina no reemplaza a un profesional de la salud y voy a consultar antes de empezar o si algo me hace ruido."
@@ -123,15 +123,15 @@
       "revisado_en": null,
       "es": {
         "titulo": "Términos y condiciones y reglas de uso",
-        "resumen": "En pocas palabras: Stamina es una app de entrenamiento, no un servicio médico. Tus datos son tuyos y no los vendemos. Usala con cuidado, sin lastimarte ni lastimar a nadie, y respetando estas reglas.",
+        "resumen": "En pocas palabras: Stamina es una app de entrenamiento, no un servicio médico. Tus datos son tuyos y no los vendemos. Úsala con cuidado, sin lastimarte ni lastimar a nadie, y respetando estas reglas.",
         "secciones": [
           {
             "titulo": "1. Quiénes somos",
-            "cuerpo": "Stamina es un proyecto desarrollado por un equipo de estudiantes de la UADE (Universidad Argentina de la Empresa), en la República Argentina, como parte de su formación académica (\"Stamina\", \"nosotros\"). Para cualquier consulta, reclamo o pedido sobre tus datos, escribinos a support@stamina.com.ar."
+            "cuerpo": "Stamina es un proyecto desarrollado por un equipo de estudiantes de la UADE (Universidad Argentina de la Empresa), en la República Argentina, como parte de su formación académica (\"Stamina\", \"nosotros\"). Para cualquier consulta, reclamo o pedido sobre tus datos, escríbenos a support@stamina.com.ar."
           },
           {
             "titulo": "2. Aceptación",
-            "cuerpo": "Estos términos, junto con el aviso de salud y la política de privacidad, son el acuerdo entre vos y Stamina. Al crear una cuenta o usar la app los aceptás. Si no estás de acuerdo, no uses la app. Guardamos qué versión aceptaste y cuándo."
+            "cuerpo": "Estos términos, junto con el aviso de salud y la política de privacidad, son el acuerdo entre tú y Stamina. Al crear una cuenta o usar la app los aceptas. Si no estás de acuerdo, no uses la app. Guardamos qué versión aceptaste y cuándo."
           },
           {
             "titulo": "3. Qué es Stamina y qué no",
@@ -139,31 +139,31 @@
           },
           {
             "titulo": "4. Edad mínima",
-            "cuerpo": "Para crear una cuenta tenés que tener al menos 18 años y capacidad para aceptar estos términos. Si descubrimos que una cuenta es de una persona menor, podemos cerrarla y borrar sus datos."
+            "cuerpo": "Para crear una cuenta tienes que tener al menos 18 años y capacidad para aceptar estos términos. Si descubrimos que una cuenta es de una persona menor, podemos cerrarla y borrar sus datos."
           },
           {
             "titulo": "5. Tu cuenta",
-            "cuerpo": "Tenés que darnos datos reales y mantenerlos al día. La cuenta es personal: una por persona y no se presta, vende ni transfiere. Sos responsable de cuidar tu contraseña y el acceso a tu teléfono, y de lo que pase en tu cuenta. Si entrás con Google o con Apple, también se aplican sus condiciones, y el acceso depende de esa cuenta. Si creés que alguien entró a tu cuenta, cambiá la contraseña y avisanos."
+            "cuerpo": "Tienes que darnos datos reales y mantenerlos al día. La cuenta es personal: una por persona y no se presta, vende ni transfiere. Eres responsable de cuidar tu contraseña y el acceso a tu teléfono, y de lo que pase en tu cuenta. Si entras con Google o con Apple, también se aplican sus condiciones, y el acceso depende de esa cuenta. Si crees que alguien entró a tu cuenta, cambia la contraseña y avísanos."
           },
           {
             "titulo": "6. Reglas de uso: lo que no se puede hacer",
-            "cuerpo": "No podés: (a) usar Stamina para dañarte, para llevar tu cuerpo más allá de lo razonable o para promover trastornos alimentarios o el sobreentrenamiento; (b) presionar o inducir a otra persona a hacerlo; (c) entrar o intentar entrar a cuentas, datos o sistemas que no son tuyos; (d) copiar, descompilar, hacer ingeniería inversa, extraer datos en forma automatizada (scraping) o revender la app o sus contenidos; (e) sobrecargar, atacar o interferir con los servidores, saltear los límites de uso o las medidas de seguridad; (f) usar bots, scripts o cuentas falsas; (g) hacerte pasar por otra persona; (h) cargar datos o archivos ilegales, ajenos o que infrinjan derechos de terceros; (i) usar la app con fines comerciales sin nuestro permiso por escrito; (j) usar la app para cualquier fin ilegal."
+            "cuerpo": "No puedes: (a) usar Stamina para dañarte, para llevar tu cuerpo más allá de lo razonable o para promover trastornos alimentarios o el sobreentrenamiento; (b) presionar o inducir a otra persona a hacerlo; (c) entrar o intentar entrar a cuentas, datos o sistemas que no son tuyos; (d) copiar, descompilar, hacer ingeniería inversa, extraer datos en forma automatizada (scraping) o revender la app o sus contenidos; (e) sobrecargar, atacar o interferir con los servidores, saltear los límites de uso o las medidas de seguridad; (f) usar bots, scripts o cuentas falsas; (g) hacerte pasar por otra persona; (h) cargar datos o archivos ilegales, ajenos o que infrinjan derechos de terceros; (i) usar la app con fines comerciales sin nuestro permiso por escrito; (j) usar la app para cualquier fin ilegal."
           },
           {
             "titulo": "7. Seguridad al entrenar",
-            "cuerpo": "Corré en lugares seguros y respetá las normas de tránsito. No mires la pantalla al cruzar ni en situaciones de riesgo. Llevá agua e identificación, avisá a alguien por dónde vas y adaptá el entrenamiento al clima. Los recorridos, ritmos y distancias que muestra la app no garantizan que un lugar sea seguro ni apto para correr."
+            "cuerpo": "Corre en lugares seguros y respeta las normas de tránsito. No mires la pantalla al cruzar ni en situaciones de riesgo. Lleva agua e identificación, avisa a alguien por dónde vas y adapta el entrenamiento al clima. Los recorridos, ritmos y distancias que muestra la app no garantizan que un lugar sea seguro ni apto para correr."
           },
           {
             "titulo": "8. Tu responsabilidad y los riesgos del ejercicio",
-            "cuerpo": "La actividad física tiene riesgos: lesiones, caídas, golpes de calor, deshidratación y, en casos raros, problemas graves de salud. Al usar Stamina aceptás que entrenás por tu cuenta y bajo tu responsabilidad, que consultaste o vas a consultar a un profesional, y que vas a parar si te sentís mal. Seguir o no seguir el plan es siempre tu decisión."
+            "cuerpo": "La actividad física tiene riesgos: lesiones, caídas, golpes de calor, deshidratación y, en casos raros, problemas graves de salud. Al usar Stamina aceptas que entrenas por tu cuenta y bajo tu responsabilidad, que consultaste o vas a consultar a un profesional, y que vas a parar si te sientes mal. Seguir o no seguir el plan es siempre tu decisión."
           },
           {
             "titulo": "9. Mediciones y estimaciones",
             "cuerpo": "La distancia, el ritmo, el recorrido, la frecuencia cardíaca, los pasos y el clima vienen del GPS y los sensores de tus dispositivos, de Apple Salud y de Apple Weather, y pueden tener errores o faltar. Las cantidades de agua, sales y geles, las zonas y el plan son estimaciones generales. No garantizamos que sean exactas ni que sirvan para un fin determinado."
           },
           {
-            "titulo": "10. Tus datos y lo que cargás",
-            "cuerpo": "Los datos que cargás o que la app registra son tuyos. Nos das permiso para guardarlos y procesarlos solamente para prestarte el servicio, como explica la política de privacidad. No los vendemos ni los usamos para publicidad. El apto físico que cargues se guarda solamente en tu teléfono."
+            "titulo": "10. Tus datos y lo que cargas",
+            "cuerpo": "Los datos que cargas o que la app registra son tuyos. Nos das permiso para guardarlos y procesarlos solamente para prestarte el servicio, como explica la política de privacidad. No los vendemos ni los usamos para publicidad. El apto físico que cargues se guarda solamente en tu teléfono."
           },
           {
             "titulo": "11. Servicios de terceros",
@@ -187,7 +187,7 @@
           },
           {
             "titulo": "16. Suspensión y baja",
-            "cuerpo": "Podés dejar de usar Stamina y pedir la baja de tu cuenta cuando quieras, desde la app (Ajustes › Borrar cuenta) o escribiendo a support@stamina.com.ar; al darte de baja borramos tus datos como explica la política de privacidad. Podemos suspender o cerrar una cuenta que incumpla estos términos o ponga en riesgo a la persona, a otras personas o al servicio, avisándote salvo que la urgencia o la ley lo impidan."
+            "cuerpo": "Puedes dejar de usar Stamina y pedir la baja de tu cuenta cuando quieras, desde la app (Ajustes › Borrar cuenta) o escribiendo a support@stamina.com.ar; al darte de baja borramos tus datos como explica la política de privacidad. Podemos suspender o cerrar una cuenta que incumpla estos términos o ponga en riesgo a la persona, a otras personas o al servicio, avisándote salvo que la urgencia o la ley lo impidan."
           },
           {
             "titulo": "17. Cambios a estos términos",
@@ -195,11 +195,11 @@
           },
           {
             "titulo": "18. Tus derechos como consumidor",
-            "cuerpo": "Si sos consumidor, tenés los derechos que te reconoce la Ley 24.240 de Defensa del Consumidor y las normas que la complementan. Podés hacer reclamos ante nosotros o ante la autoridad de defensa del consumidor de tu jurisdicción."
+            "cuerpo": "Si eres consumidor, tienes los derechos que te reconoce la Ley 24.240 de Defensa del Consumidor y las normas que la complementan. Puedes hacer reclamos ante nosotros o ante la autoridad de defensa del consumidor de tu jurisdicción."
           },
           {
             "titulo": "19. Condiciones para la App Store",
-            "cuerpo": "Si bajaste la app de la App Store: este acuerdo es entre vos y Stamina, no con Apple. Apple no es responsable por la app ni por su contenido, no tiene obligación de darte mantenimiento ni soporte, y no responde por reclamos relacionados con la app (de producto, de cumplimiento legal o de propiedad intelectual de terceros); en la medida que la ley lo permita, la única obligación de Apple ante una falla de garantía es devolverte el precio pagado, si lo hubo. Tenés que cumplir los términos de terceros que correspondan y no podés usar la app en países sujetos a embargo ni si figurás en listas de personas restringidas. Apple y sus subsidiarias son terceros beneficiarios de este acuerdo y pueden hacerlo valer."
+            "cuerpo": "Si bajaste la app de la App Store: este acuerdo es entre tú y Stamina, no con Apple. Apple no es responsable por la app ni por su contenido, no tiene obligación de darte mantenimiento ni soporte, y no responde por reclamos relacionados con la app (de producto, de cumplimiento legal o de propiedad intelectual de terceros); en la medida que la ley lo permita, la única obligación de Apple ante una falla de garantía es devolverte el precio pagado, si lo hubo. Tienes que cumplir los términos de terceros que correspondan y no puedes usar la app en países sujetos a embargo ni si figuras en listas de personas restringidas. Apple y sus subsidiarias son terceros beneficiarios de este acuerdo y pueden hacerlo valer."
           },
           {
             "titulo": "20. Ley aplicable y jurisdicción",
@@ -207,7 +207,7 @@
           },
           {
             "titulo": "21. Contacto",
-            "cuerpo": "Para consultas, reclamos o cualquier tema sobre estos términos, escribinos a support@stamina.com.ar. Te respondemos lo antes posible."
+            "cuerpo": "Para consultas, reclamos o cualquier tema sobre estos términos, escríbenos a support@stamina.com.ar. Te respondemos lo antes posible."
           }
         ],
         "aceptacion": "Acepto los términos y condiciones y las reglas de uso."
@@ -401,31 +401,31 @@
       "revisado_en": null,
       "es": {
         "titulo": "Política de privacidad",
-        "resumen": "Qué datos guardamos, para qué, con quién los compartimos y cómo podés verlos, corregirlos o borrarlos. No vendemos tus datos ni los usamos para publicidad.",
+        "resumen": "Qué datos guardamos, para qué, con quién los compartimos y cómo puedes verlos, corregirlos o borrarlos. No vendemos tus datos ni los usamos para publicidad.",
         "secciones": [
           {
             "titulo": "1. Responsable",
-            "cuerpo": "El responsable de tus datos personales es el equipo de Stamina, un grupo de estudiantes de la UADE (Universidad Argentina de la Empresa), en la República Argentina. Podés contactarnos por cualquier tema de privacidad en support@stamina.com.ar."
+            "cuerpo": "El responsable de tus datos personales es el equipo de Stamina, un grupo de estudiantes de la UADE (Universidad Argentina de la Empresa), en la República Argentina. Puedes contactarnos por cualquier tema de privacidad en support@stamina.com.ar."
           },
           {
             "titulo": "2. Qué datos guardamos",
-            "cuerpo": "Cuenta: nombre, apellido, correo y tu contraseña cifrada con un algoritmo irreversible (nunca la guardamos en claro). Si entrás con Google o con Apple, el identificador que nos da ese proveedor y el correo que comparte, nunca tu contraseña de esa cuenta. Perfil: fecha de nacimiento, sexo biológico, peso, altura, deporte, nivel, objetivos, fechas de carrera, días de entrenamiento, zona horaria y unidades. Entrenamiento: tus salidas (fecha, duración, distancia, ritmo, recorrido GPS y, si usás el Apple Watch, la frecuencia cardíaca), tus series de gimnasio y tus pasos diarios. Constancias: qué versión del aviso de salud y de estos textos aceptaste y cuándo. Técnicos: registros de corta duración (fecha, ruta pedida, dirección IP y versión de la app) para seguridad y para evitar abusos, sin datos de salud."
+            "cuerpo": "Cuenta: nombre, apellido, correo y tu contraseña cifrada con un algoritmo irreversible (nunca la guardamos en claro). Si entras con Google o con Apple, el identificador que nos da ese proveedor y el correo que comparte, nunca tu contraseña de esa cuenta. Perfil: fecha de nacimiento, sexo biológico, peso, altura, deporte, nivel, objetivos, fechas de carrera, días de entrenamiento, zona horaria y unidades. Entrenamiento: tus salidas (fecha, duración, distancia, ritmo, recorrido GPS y, si usas el Apple Watch, la frecuencia cardíaca), tus series de gimnasio y tus pasos diarios. Constancias: qué versión del aviso de salud y de estos textos aceptaste y cuándo. Técnicos: registros de corta duración (fecha, ruta pedida, dirección IP y versión de la app) para seguridad y para evitar abusos, sin datos de salud."
           },
           {
             "titulo": "3. Lo que no guardamos en nuestros servidores",
-            "cuerpo": "El apto físico (archivo, vencimiento y declaración) queda solamente en tu teléfono, protegido. Tu ubicación se usa únicamente mientras registrás una salida o para pedir el clima de tu zona; no la seguimos en segundo plano fuera de un entrenamiento. No usamos herramientas de publicidad ni de seguimiento de terceros."
+            "cuerpo": "El apto físico (archivo, vencimiento y declaración) queda solamente en tu teléfono, protegido. Tu ubicación se usa únicamente mientras registras una salida o para pedir el clima de tu zona; no la seguimos en segundo plano fuera de un entrenamiento. No usamos herramientas de publicidad ni de seguimiento de terceros."
           },
           {
             "titulo": "4. Para qué usamos tus datos",
-            "cuerpo": "Para crear y mantener tu cuenta; armar y ajustar tu plan; registrar y mostrarte tus salidas, tu historial y tus estadísticas; darte estimaciones de hidratación y avisos según el clima; mandarte los correos necesarios del servicio (códigos de verificación y avisos de seguridad); proteger el servicio y prevenir fraudes o abusos; y cumplir obligaciones legales. No tomamos decisiones con efectos legales sobre vos de forma automatizada."
+            "cuerpo": "Para crear y mantener tu cuenta; armar y ajustar tu plan; registrar y mostrarte tus salidas, tu historial y tus estadísticas; darte estimaciones de hidratación y avisos según el clima; mandarte los correos necesarios del servicio (códigos de verificación y avisos de seguridad); proteger el servicio y prevenir fraudes o abusos; y cumplir obligaciones legales. No tomamos decisiones con efectos legales sobre ti de forma automatizada."
           },
           {
             "titulo": "5. Datos de salud y consentimiento",
-            "cuerpo": "El peso, la altura, el sexo biológico, la frecuencia cardíaca y la actividad física son datos de salud, que la ley considera sensibles. Los tratamos solamente con tu consentimiento expreso, que das al crear la cuenta y al cargar cada dato, y solamente para prestarte el servicio. Podés retirar ese consentimiento cuando quieras borrando el dato o la cuenta. Los datos de salud no aparecen en nuestros registros técnicos."
+            "cuerpo": "El peso, la altura, el sexo biológico, la frecuencia cardíaca y la actividad física son datos de salud, que la ley considera sensibles. Los tratamos solamente con tu consentimiento expreso, que das al crear la cuenta y al cargar cada dato, y solamente para prestarte el servicio. Puedes retirar ese consentimiento cuando quieras borrando el dato o la cuenta. Los datos de salud no aparecen en nuestros registros técnicos."
           },
           {
             "titulo": "6. Apple Salud (HealthKit)",
-            "cuerpo": "Si nos das permiso, leemos de Apple Salud tus pasos diarios y, desde el Apple Watch, los datos de tus entrenamientos, y guardamos tus entrenamientos en Salud. Esos datos se usan solamente para las funciones de Stamina: no los usamos para publicidad ni marketing, no los vendemos y no los compartimos con terceros. Podés quitar el permiso cuando quieras desde la app Salud o desde Ajustes del iPhone."
+            "cuerpo": "Si nos das permiso, leemos de Apple Salud tus pasos diarios y, desde el Apple Watch, los datos de tus entrenamientos, y guardamos tus entrenamientos en Salud. Esos datos se usan solamente para las funciones de Stamina: no los usamos para publicidad ni marketing, no los vendemos y no los compartimos con terceros. Puedes quitar el permiso cuando quieras desde la app Salud o desde Ajustes del iPhone."
           },
           {
             "titulo": "7. Con quién los compartimos",
@@ -437,7 +437,7 @@
           },
           {
             "titulo": "9. Cuánto tiempo los guardamos",
-            "cuerpo": "Mientras tengas la cuenta. Si pedís la baja, borramos tu cuenta y todos sus datos de nuestra base; las copias de seguridad, si las hay, se sobrescriben en un plazo limitado. Los códigos de verificación duran 15 minutos y los registros técnicos se conservan por un tiempo limitado, solamente para seguridad. Podemos conservar la constancia de aceptación de estos textos mientras sea necesaria para defendernos ante un reclamo."
+            "cuerpo": "Mientras tengas la cuenta. Si pides borrarla, a los 30 días borramos tu cuenta y todos sus datos de nuestra base; hasta entonces puedes recuperarla iniciando sesión. Las copias de seguridad, si las hay, se sobrescriben en un plazo limitado. También puedes desactivar la cuenta: tus datos quedan guardados y vuelves a usarla iniciando sesión. Los códigos de verificación duran 15 minutos y los registros técnicos se conservan por un tiempo limitado, solamente para seguridad. Podemos conservar la constancia de aceptación de estos textos mientras sea necesaria para defendernos ante un reclamo."
           },
           {
             "titulo": "10. Seguridad",
@@ -445,11 +445,11 @@
           },
           {
             "titulo": "11. Tus derechos",
-            "cuerpo": "Podés pedir el acceso a tus datos, su rectificación, actualización o supresión, una copia en un formato reutilizable, y retirar tu consentimiento, escribiendo a support@stamina.com.ar desde el correo de tu cuenta. Respondemos los pedidos de acceso en un plazo máximo de 10 días corridos y los de rectificación o supresión en 5 días hábiles, como fija la Ley 25.326. El titular de los datos personales tiene la facultad de ejercer el derecho de acceso a los mismos en forma gratuita a intervalos no inferiores a seis meses, salvo que se acredite un interés legítimo al efecto conforme lo establecido en el artículo 14, inciso 3 de la Ley N° 25.326. La Agencia de Acceso a la Información Pública, en su carácter de Órgano de Control de la Ley N° 25.326, tiene la atribución de atender las denuncias y reclamos que interpongan quienes resulten afectados en sus derechos por incumplimiento de las normas vigentes en materia de protección de datos personales. Si vivís en la Unión Europea o en otro país con su propia ley de protección de datos, también tenés los derechos que esa ley te da y podés reclamar ante tu autoridad local."
+            "cuerpo": "Puedes pedir el acceso a tus datos, su rectificación, actualización o supresión, una copia en un formato reutilizable, y retirar tu consentimiento, escribiendo a support@stamina.com.ar desde el correo de tu cuenta. Respondemos los pedidos de acceso en un plazo máximo de 10 días corridos y los de rectificación o supresión en 5 días hábiles, como fija la Ley 25.326. El titular de los datos personales tiene la facultad de ejercer el derecho de acceso a los mismos en forma gratuita a intervalos no inferiores a seis meses, salvo que se acredite un interés legítimo al efecto conforme lo establecido en el artículo 14, inciso 3 de la Ley N° 25.326. La Agencia de Acceso a la Información Pública, en su carácter de Órgano de Control de la Ley N° 25.326, tiene la atribución de atender las denuncias y reclamos que interpongan quienes resulten afectados en sus derechos por incumplimiento de las normas vigentes en materia de protección de datos personales. Si vives en la Unión Europea o en otro país con su propia ley de protección de datos, también tienes los derechos que esa ley te da y puedes reclamar ante tu autoridad local."
           },
           {
             "titulo": "12. Permisos del teléfono",
-            "cuerpo": "La app puede pedirte acceso a la ubicación (para registrar el recorrido y el clima), a Apple Salud, a las notificaciones y a tus archivos o fotos (solamente si cargás el apto físico). Cada permiso es opcional, y podés darlo o quitarlo cuando quieras desde Ajustes del iPhone; sin algunos, ciertas funciones no van a andar."
+            "cuerpo": "La app puede pedirte acceso a la ubicación (para registrar el recorrido y el clima), a Apple Salud, a las notificaciones y a tus archivos o fotos (solamente si cargas el apto físico). Cada permiso es opcional, y puedes darlo o quitarlo cuando quieras desde Ajustes del iPhone; sin algunos, ciertas funciones no van a andar."
           },
           {
             "titulo": "13. Menores",
@@ -461,7 +461,7 @@
           },
           {
             "titulo": "15. Contacto",
-            "cuerpo": "Para cualquier consulta sobre tu privacidad o para ejercer tus derechos, escribinos a support@stamina.com.ar."
+            "cuerpo": "Para cualquier consulta sobre tu privacidad o para ejercer tus derechos, escríbenos a support@stamina.com.ar."
           }
         ],
         "aceptacion": "Leí la política de privacidad y presto mi consentimiento expreso para el tratamiento de mis datos, incluidos los de salud, en los términos que describe."
@@ -504,7 +504,7 @@
           },
           {
             "titulo": "9. How long we keep it",
-            "cuerpo": "For as long as you have an account. If you ask us to close it, we delete your account and all its data from our database; backups, if any, are overwritten within a limited period. Verification codes last 15 minutes and technical logs are kept for a limited time, only for security. We may keep the record of your acceptance of these texts for as long as we need it to defend ourselves against a claim."
+            "cuerpo": "For as long as you have an account. If you ask us to delete it, we delete your account and all its data from our database after 30 days; until then you can recover it by signing in. Backups, if any, are overwritten within a limited period. You can also deactivate your account: your data stays stored and you can come back by signing in. Verification codes last 15 minutes and technical logs are kept for a limited time, only for security. We may keep the record of your acceptance of these texts for as long as we need it to defend ourselves against a claim."
           },
           {
             "titulo": "10. Security",
@@ -571,7 +571,7 @@
           },
           {
             "titulo": "9. Durée de conservation",
-            "cuerpo": "Tant que tu as un compte. Si tu demandes sa fermeture, nous supprimons ton compte et toutes ses données de notre base ; les sauvegardes, s'il y en a, sont écrasées dans un délai limité. Les codes de vérification durent 15 minutes et les journaux techniques sont conservés pendant une durée limitée, uniquement pour la sécurité. Nous pouvons conserver la preuve de ton acceptation de ces textes aussi longtemps que nécessaire pour nous défendre en cas de réclamation."
+            "cuerpo": "Tant que tu as un compte. Si tu demandes sa suppression, nous supprimons ton compte et toutes ses données de notre base au bout de 30 jours ; d'ici là, tu peux le récupérer en te connectant. Les sauvegardes, s'il y en a, sont écrasées dans un délai limité. Tu peux aussi désactiver ton compte : tes données restent conservées et tu peux revenir en te connectant. Les codes de vérification durent 15 minutes et les journaux techniques sont conservés pendant une durée limitée, uniquement pour la sécurité. Nous pouvons conserver la preuve de ton acceptation de ces textes aussi longtemps que nécessaire pour nous défendre en cas de réclamation."
           },
           {
             "titulo": "10. Sécurité",
