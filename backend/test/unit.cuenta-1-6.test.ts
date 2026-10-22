@@ -17,7 +17,9 @@ import type { Contexto } from "../src/contexto.js";
 import type { Db } from "../src/infra/db.js";
 import type { FastifyRequest } from "fastify";
 import { idiomaDeCorreo } from "../src/infra/idioma.js";
-import { correoDeCambioDePassword } from "../src/infra/plantillas-correo.js";
+import {
+  correoDeCambioDePassword, correoDeCodigo, correoDeIntentoDeRegistro, correoDeVinculacion,
+} from "../src/infra/plantillas-correo.js";
 
 describe("el sobre de error con details (1.6.0)", () => {
   test("los códigos nuevos están registrados con su status", () => {
@@ -333,5 +335,31 @@ describe("cambiar la contraseña avisa siempre, en el idioma del pedido (1.6.0)"
     const fr = correoDeCambioDePassword({ destino: "a@b.co", idioma: "fr", ahoraMs: 0 });
     assert.ok(fr.texto.includes("Tu as changé le mot de passe de ton compte Stamina. Si ce n'était pas toi, écris-nous."), fr.texto);
     assert.ok(!/\bvous\b/i.test(fr.texto + fr.html), "en francés se tutea");
+  });
+});
+
+describe("los correos en español van de tú (1.6.0)", () => {
+  // Las formas del voseo que tenían los correos, y las que podrían volver.
+  // Con \p{L} y no \b: para \b la "á" final no es letra, y «Ingresá» pasaría.
+  const VOSEO = /(?<!\p{L})(vos|sos|podés|tenés|querés|sabés|entrás|ingresá|tocá|entrá|cambiá|escribinos|escribí|revisá)(?!\p{L})/iu;
+
+  test("ningún correo en español vosea", () => {
+    const correos = [
+      correoDeCodigo({ codigo: "K7P4XM", proposito: "registro", destino: "a@b.co", nombre: "Emma", ahoraMs: 0, vidaMin: 15 }),
+      correoDeCodigo({ codigo: "K7P4XM", proposito: "recuperacion", destino: "a@b.co", nombre: null, ahoraMs: 0, vidaMin: 15 }),
+      correoDeIntentoDeRegistro({ destino: "a@b.co", ahoraMs: 0 }),
+      correoDeVinculacion({ destino: "a@b.co", proveedor: "google", ahoraMs: 0 }),
+      correoDeVinculacion({ destino: "a@b.co", proveedor: "apple", ahoraMs: 0 }),
+      correoDeCambioDePassword({ destino: "a@b.co", idioma: "es", ahoraMs: 0 }),
+    ];
+    for (const c of correos) {
+      for (const parte of [c.asunto, c.texto, c.html]) {
+        const m = VOSEO.exec(parte);
+        assert.equal(m, null, `voseo en «${m?.[0]}»: ${c.asunto}`);
+      }
+    }
+    assert.ok(correos[0]!.texto.includes("Ingresa este código"));
+    assert.ok(correos[0]!.texto.includes("Si no fuiste tú, puedes ignorar"));
+    assert.ok(correos[3]!.asunto.startsWith("Ahora entras a Stamina"));
   });
 });

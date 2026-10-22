@@ -12,6 +12,11 @@
  *   - siempre una versión en texto plano al lado (la usan los lectores de
  *     pantalla, los relojes y los filtros de spam)
  *
+ * Los textos en español van de "tú" (contrato 1.6.0, decisión de Iván del
+ * 2026-10-22: la app entera pasó del voseo al tuteo), el inglés es neutro y el
+ * francés tutea. Sin emojis, y sin nombrar otras marcas que Google y Apple donde
+ * hacen falta (la vinculación).
+ *
  * 🛑 Todo lo que viene de afuera (el nombre) se ESCAPA. Un nombre como
  * `<a href=…>` no puede convertirse en un enlace dentro de un correo nuestro.
  */
@@ -90,7 +95,7 @@ interface Piezas {
     codigo?: string;
     filas: Fila[];
   };
-  /** Letra chica: si no fuiste vos, etc. */
+  /** Letra chica: si no fuiste tú, etc. */
   notas: string[];
   /** La nota que se destaca en rosa (la de seguridad). */
   alerta?: string;
@@ -210,8 +215,8 @@ export function correoDeCodigo(opciones: {
     saludo: opciones.nombre === null ? "¡Hola!" : `Hola ${opciones.nombre},`,
     parrafos: [
       esAlta
-        ? "Ya casi está. Ingresá este código en la app para validar tu correo y crear tu cuenta de <strong>Stamina</strong>."
-        : "Recibimos un pedido para cambiar la contraseña de tu cuenta de <strong>Stamina</strong>. Ingresá este código en la app para seguir.",
+        ? "Ya casi está. Ingresa este código en la app para validar tu correo y crear tu cuenta de <strong>Stamina</strong>."
+        : "Recibimos un pedido para cambiar la contraseña de tu cuenta de <strong>Stamina</strong>. Ingresa este código en la app para seguir.",
     ],
     recuadro: {
       titulo: esAlta ? "Tu código de verificación" : "Tu código para cambiar la contraseña",
@@ -224,8 +229,8 @@ export function correoDeCodigo(opciones: {
     },
     notas: [
       esAlta
-        ? "Si no fuiste vos, podés ignorar este mensaje: sin el código no se crea ninguna cuenta."
-        : "Si no fuiste vos, podés ignorar este mensaje: tu contraseña sigue siendo la misma.",
+        ? "Si no fuiste tú, puedes ignorar este mensaje: sin el código no se crea ninguna cuenta."
+        : "Si no fuiste tú, puedes ignorar este mensaje: tu contraseña sigue siendo la misma.",
     ],
     alerta: "Nunca te vamos a pedir este código por teléfono, chat ni redes. No se lo pases a nadie.",
   };
@@ -245,7 +250,7 @@ export function correoDeIntentoDeRegistro(opciones: { destino: string; ahoraMs: 
     previa: "Alguien intentó crear una cuenta de Stamina con tu correo.",
     saludo: "¡Hola!",
     parrafos: [
-      "Alguien intentó crear una cuenta de <strong>Stamina</strong> con esta dirección, pero ya tenés una.",
+      "Alguien intentó crear una cuenta de <strong>Stamina</strong> con esta dirección, pero ya tienes una.",
     ],
     recuadro: {
       titulo: "Intento de registro",
@@ -255,8 +260,8 @@ export function correoDeIntentoDeRegistro(opciones: { destino: string; ahoraMs: 
       ],
     },
     notas: [
-      "Si fuiste vos, entrá con tu contraseña, con Google o con Apple. Si te la olvidaste, tocá «¿Olvidaste tu contraseña?» en la app.",
-      "Si no fuiste vos, no hace falta que hagas nada: tu cuenta sigue igual.",
+      "Si fuiste tú, entra con tu contraseña, con Google o con Apple. Si la olvidaste, toca «¿Olvidaste tu contraseña?» en la app.",
+      "Si no fuiste tú, no hace falta que hagas nada: tu cuenta sigue igual.",
     ],
   };
   return { asunto: "Intento de registro en Stamina", html: armarHtml(piezas), texto: armarTexto(piezas) };
@@ -267,7 +272,7 @@ export function correoDeVinculacion(opciones: { destino: string; proveedor: "goo
 } {
   const nombre = opciones.proveedor === "google" ? "Google" : "Apple";
   const piezas: Piezas = {
-    previa: `Ahora podés entrar a Stamina con ${nombre}.`,
+    previa: `Ahora puedes entrar a Stamina con ${nombre}.`,
     saludo: "¡Hola!",
     parrafos: [
       `Tu cuenta de <strong>Stamina</strong> ahora también se puede abrir con «Continuar con ${nombre}».`,
@@ -280,10 +285,10 @@ export function correoDeVinculacion(opciones: { destino: string; proveedor: "goo
         { etiqueta: "Fecha", valor: fechaLegible(opciones.ahoraMs) },
       ],
     },
-    notas: ["Si fuiste vos, no hace falta que hagas nada."],
-    alerta: "Si no fuiste vos, cambiá ya la contraseña de tu cuenta de " + nombre + " y la de Stamina desde «¿Olvidaste tu contraseña?».",
+    notas: ["Si fuiste tú, no hace falta que hagas nada."],
+    alerta: "Si no fuiste tú, cambia ya la contraseña de tu cuenta de " + nombre + " y la de Stamina desde «¿Olvidaste tu contraseña?».",
   };
-  return { asunto: `Ahora entrás a Stamina con ${nombre}`, html: armarHtml(piezas), texto: armarTexto(piezas) };
+  return { asunto: `Ahora entras a Stamina con ${nombre}`, html: armarHtml(piezas), texto: armarTexto(piezas) };
 }
 
 /**
