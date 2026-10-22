@@ -3,7 +3,7 @@
 // NO EDITAR A MANO: se reescribe con `npm run generar:modelos` y el CI falla si
 // lo commiteado no coincide.
 //
-// contrato: Trainer API v1.5.0
+// contrato: Trainer API v1.6.0
 //
 // AGENTS.md §5: el JSON va en snake_case, los tiempos son enteros de milisegundos
 // desde epoch y todo viaja en un sobre {"data": …} o {"error": {…}}. Los nombres
@@ -1114,6 +1114,23 @@ data class DetalleDeError(
     val code: String,
     /** Para el log del desarrollador y como respaldo. **El cliente no lo muestra tal cual**: muestra su propia traducción del `code`. Nunca lleva datos de salud ni de identidad (AGENTS.md §8). */
     val message: String,
+    val details: DatosDelError? = null,
+)
+
+/** 1.6.0. Lo que algunos códigos necesitan además del `code` para que la app */
+@Serializable
+data class DatosDelError(
+    val provider: String? = null,
+    val email: String? = null,
+    @SerialName("link_token")
+    val linkToken: String? = null,
+    @SerialName("requires_password")
+    val requiresPassword: Boolean? = null,
+    @SerialName("reactivation_token")
+    val reactivationToken: String? = null,
+    /** Días enteros que faltan para el borrado, redondeados para arriba. */
+    @SerialName("days_remaining")
+    val daysRemaining: Int? = null,
 )
 
 /** Parte de Plan. No tiene nombre en el contrato. */

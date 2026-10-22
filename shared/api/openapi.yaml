@@ -16,7 +16,7 @@ openapi: 3.1.0
 
 info:
   title: Trainer API
-  version: 1.5.0
+  version: 1.6.0
   license:
     name: >-
       COMPLETAR. El repositorio es privado y la licencia del proyecto no está
@@ -44,6 +44,19 @@ info:
     La 1.5.0 quita `POST /weather/forecast`, el pronóstico de MET Norway que
     estaba obsoleto: la app de iPhone usa WeatherKit en el dispositivo, la de
     Android consulta el clima por su cuenta, y ningún cliente lo llamaba.
+    La 1.6.0 (cambios de "Entrar y registrarse", decisión de Iván del
+    2026-10-22) agrega: `details` opcional en el sobre de error; el tope de
+    intentos de contraseña por correo (`too_many_attempts`); el código propio
+    de un código de correo agotado (`code_attempts_exceeded`); el proveedor en
+    `password_not_set`; vincular Google o Apple a una cuenta con contraseña
+    (`account_link_available` y `POST /auth/social/link`); desactivar la cuenta
+    (`POST /me/deactivate`), el borrado con 30 días de gracia en
+    `POST /me/delete`, y volver a una cuenta desactivada o por borrarse
+    (`account_deactivated`, `account_pending_deletion` y `POST /auth/reactivate`);
+    y cerrar las otras sesiones (`POST /auth/logout/others`). Cambiar la
+    contraseña ya NO revoca las otras sesiones. `weak_password` queda sólo para
+    las tres reglas visibles. Aditivo para la forma: ningún campo existente
+    cambió; un cliente viejo ve los códigos nuevos como un error que no conoce.
 
     **Reglas que valen en TODA la API** (docs/API.md las explica):
 
@@ -239,6 +252,13 @@ paths:
       description: |
         Devuelve un **token de registro** de vida corta, que es lo único que
         habilita el paso 3. No es un token de sesión y no sirve para nada más.
+
+        Errores (1.6.0): `invalid_code` (400) es un código equivocado; a los
+        **5** equivocados el código queda invalidado y contesta
+        `code_attempts_exceeded` (400), que es otro código que
+        `code_expired` (400, pasaron los 15 minutos). Después de cualquiera de
+        los dos hay que pedir un código nuevo, que siempre es distinto del
+        anterior. Pedir un código nuevo invalida el anterior.
       security: []
       requestBody:
         required: true
@@ -346,8 +366,22 @@ paths:
           por el código del correo como cualquier alta.
 
         Errores: `invalid_provider_token` (401), `provider_not_configured` (503),
-        `conflict` (409): ese correo ya tiene una cuenta y el proveedor no es dueño
-        del correo, así que no se vincula solo — hay que entrar con la contraseña.
+        `conflict` (409): ese correo ya tiene una cuenta y no se puede vincular
+        (por ejemplo, ya tiene otra identidad de ese proveedor).
+
+        1.6.0 — **vincular**: si ese correo ya tiene una cuenta CON contraseña y
+        la identidad no está vinculada, contesta `account_link_available` (409)
+        con `details.link_token`, `details.email`, `details.provider` y
+        `details.requires_password`. La app pregunta si se vincula y, si sí,
+        llama a `POST /auth/social/link`. `requires_password` es `false` sólo si
+        el proveedor es dueño del correo (Apple, o Google con un Gmail o un
+        dominio de Workspace) y lo verificó; si no, el vínculo pide la
+        contraseña de la cuenta. Una cuenta SIN contraseña (nació con el otro
+        proveedor) se sigue vinculando sola si el proveedor es dueño del correo.
+
+        Con la identidad ya vinculada, una cuenta desactivada o por borrarse
+        contesta `account_deactivated` o `account_pending_deletion`, igual que
+        `POST /auth/login`.
       security: []
       requestBody:
         required: true
@@ -372,6 +406,94 @@ paths:
                 properties:
                   data: { $ref: '#/components/schemas/EntradaSocial' }
         '400': { $ref: '#/components/responses/PedidoInvalido' }
+        '409':
+          description: >-
+            `account_link_available` (con `details`) o `conflict`.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Error' }
+        '429': { $ref: '#/components/responses/DemasiadosPedidos' }
+
+  /auth/social/link:
+    post:
+      tags: [auth]
+      operationId: socialLink
+      summary: Vincular Google o Apple a una cuenta que ya existe
+      description: |
+        1.6.0. Canjea el `link_token` de un `account_link_available` (vive 10
+        minutos, sirve una vez). Si ese permiso dice `requires_password`, hay
+        que mandar la contraseña de la cuenta: equivocada es `wrong_password` y
+        cuenta para el tope de intentos de ese correo (`too_many_attempts`).
+        Con éxito la identidad queda vinculada —desde ahí la cuenta entra con
+        su contraseña o con el proveedor—, al dueño le llega un correo avisando
+        y vuelve la sesión.
+
+        Errores: `invalid_link_token` (401, vencido, usado o adulterado),
+        `wrong_password` (401), `too_many_attempts` (429), `conflict` (409, la
+        cuenta ya tiene otra identidad de ese proveedor), y
+        `account_deactivated` / `account_pending_deletion` (403) si la cuenta no
+        está activa: el vínculo queda hecho y se puede reactivar.
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [link_token]
+              additionalProperties: false
+              properties:
+                link_token: { type: string, minLength: 1, maxLength: 4096 }
+                password: { type: string, minLength: 1, maxLength: 200 }
+      responses:
+        '200':
+          description: Vinculada y sesión abierta.
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [data]
+                properties:
+                  data: { $ref: '#/components/schemas/Sesion' }
+        '400': { $ref: '#/components/responses/PedidoInvalido' }
+        '401': { $ref: '#/components/responses/NoAutorizado' }
+        '429': { $ref: '#/components/responses/DemasiadosPedidos' }
+
+  /auth/reactivate:
+    post:
+      tags: [auth]
+      operationId: reactivateAccount
+      summary: Volver a una cuenta desactivada o por borrarse
+      description: |
+        1.6.0. Canjea el `details.reactivation_token` de un
+        `account_deactivated` o un `account_pending_deletion` (vive 10 minutos,
+        sirve una vez). La cuenta vuelve a estar activa —si estaba por
+        borrarse, el borrado se cancela y no se pierde nada— y vuelve la sesión.
+
+        Errores: `invalid_reactivation_token` (401).
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [reactivation_token]
+              additionalProperties: false
+              properties:
+                reactivation_token: { type: string, minLength: 1, maxLength: 4096 }
+      responses:
+        '200':
+          description: Cuenta activa y sesión abierta.
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [data]
+                properties:
+                  data: { $ref: '#/components/schemas/Sesion' }
+        '400': { $ref: '#/components/responses/PedidoInvalido' }
+        '401': { $ref: '#/components/responses/NoAutorizado' }
         '429': { $ref: '#/components/responses/DemasiadosPedidos' }
 
   /auth/login:
@@ -384,6 +506,23 @@ paths:
         para que la app diga qué pasó: `user_not_found` (404, no hay cuenta con
         ese correo), `wrong_password` (401) y `password_not_set` (409, la cuenta
         nació con Google o Apple y no tiene contraseña). Rate limit estricto.
+
+        1.6.0:
+        - `password_not_set` trae `details.provider` (`google` o `apple`): con
+          cuál se creó la cuenta.
+        - **Tope por correo**: 5 contraseñas equivocadas seguidas bloquean ESE
+          correo (normalizado) 15 minutos, desde cualquier teléfono o IP:
+          `too_many_attempts` (429) con `Retry-After`. Se reinicia al entrar bien
+          o al cambiar la contraseña. Además hay un tope de intentos fallidos por
+          IP, entre todos los correos, que contesta `rate_limited` (429). Mientras
+          el correo está bloqueado la respuesta tarda lo mismo que una
+          verificación de contraseña.
+        - Con la contraseña correcta, una cuenta desactivada contesta
+          `account_deactivated` (403) y una por borrarse
+          `account_pending_deletion` (403, con `details.days_remaining`). Las dos
+          traen `details.reactivation_token` para `POST /auth/reactivate`. Con
+          la contraseña equivocada contesta `wrong_password`, como siempre: el
+          estado de la cuenta no se le dice a quien no la sabe.
       security: []
       requestBody:
         required: true
@@ -475,6 +614,21 @@ paths:
         '204': { description: Sesión cerrada. Sin cuerpo. }
         '401': { $ref: '#/components/responses/NoAutorizado' }
 
+  /auth/logout/others:
+    post:
+      tags: [auth]
+      operationId: logoutOthers
+      summary: Cerrar las otras sesiones
+      description: |
+        1.6.0. Revoca todas las sesiones de la persona **menos la que hace el
+        pedido** (su cadena de refresh entera sigue viva). Es lo que ofrece la app
+        después de cambiar la contraseña, que ya no las cierra sola.
+
+        Idempotente: sin otras sesiones abiertas devuelve 204 igual.
+      responses:
+        '204': { description: Otras sesiones cerradas. Sin cuerpo. }
+        '401': { $ref: '#/components/responses/NoAutorizado' }
+
   /auth/password/forgot:
     post:
       tags: [auth]
@@ -512,6 +666,10 @@ paths:
       tags: [auth]
       operationId: passwordVerify
       summary: Recuperar contraseña — verificar el código
+      description: >-
+        Los mismos errores que `/auth/register/verify` (1.6.0): `invalid_code`,
+        `code_expired` (15 minutos) y `code_attempts_exceeded` (5 códigos
+        equivocados: el código queda invalidado y hay que pedir otro).
       security: []
       requestBody:
         required: true
@@ -542,9 +700,19 @@ paths:
       tags: [auth]
       operationId: passwordReset
       summary: Recuperar contraseña — poner la nueva
-      description: >-
-        **Cambiar la contraseña revoca todas las demás sesiones** (AGENTS.md §12).
-        La respuesta trae una sesión nueva, así que el cliente no queda afuera.
+      description: |
+        Pone la contraseña nueva y devuelve una sesión nueva, así que el cliente
+        entra derecho.
+
+        1.6.0: **ya no revoca las otras sesiones**. La app pregunta y, si la
+        persona quiere, llama a `POST /auth/logout/others` con la sesión nueva.
+        Siempre se manda un correo avisando que la contraseña cambió, en el
+        idioma del pedido. Cambiarla reinicia el tope de intentos de ese correo.
+        Si la cuenta está desactivada o por borrarse, la contraseña se cambia
+        igual y contesta `account_deactivated` / `account_pending_deletion`
+        (403) con su `reactivation_token`, como el login.
+
+        `weak_password` (400) es sólo no cumplir las reglas de `Password`.
       security: []
       requestBody:
         required: true
@@ -791,9 +959,13 @@ paths:
         (`Perfil.has_password` es `false`): manda el cuerpo vacío `{}` y la sesión
         abierta es la prueba. Con contraseña, mandarla es obligatorio (401 si falta).
 
-        La cuenta y sus datos dependientes se borran físicamente en el acto por
-        cascada; sus sesiones dejan de existir y el correo queda libre para volver
-        a registrarse. No hay plazo de retención de 30 días en la base activa.
+        1.6.0 — **30 días de gracia**: la cuenta queda marcada para borrarse a
+        los 30 días y se cierran todas sus sesiones. Mientras tanto no se puede
+        usar ni crear otra con ese correo, y si la persona inicia sesión recibe
+        `account_pending_deletion` con los días que faltan y puede recuperarla
+        (`POST /auth/reactivate`) sin perder nada. Pasado el plazo, la tarea
+        programada (`npm run purgar`) borra la cuenta y sus datos dependientes
+        físicamente, por cascada, y el correo queda libre.
 
         Es un POST y no un DELETE con cuerpo a propósito: el `HttpURLConnection` de
         Java no manda cuerpo en un DELETE, y la contraseña tiene que viajar.
@@ -807,8 +979,26 @@ paths:
               properties:
                 password: { type: string, minLength: 1, maxLength: 200 }
       responses:
-        '204': { description: Cuenta borrada. Sin cuerpo. }
+        '204': { description: Cuenta marcada para borrarse en 30 días. Sin cuerpo. }
         '400': { $ref: '#/components/responses/PedidoInvalido' }
+        '401': { $ref: '#/components/responses/NoAutorizado' }
+        '429': { $ref: '#/components/responses/DemasiadosPedidos' }
+
+  /me/deactivate:
+    post:
+      tags: [cuenta]
+      operationId: deactivateMe
+      summary: Desactivar mi cuenta
+      description: |
+        1.6.0. La cuenta queda desactivada: se cierran todas sus sesiones y los
+        datos quedan guardados. Mientras está desactivada no se puede usar (y no
+        recibe correos de la app). Para volver se inicia sesión: el login contesta
+        `account_deactivated` con un `reactivation_token` para
+        `POST /auth/reactivate`. No pide contraseña: no borra nada.
+
+        Idempotente: desactivar una cuenta ya desactivada devuelve 204.
+      responses:
+        '204': { description: Cuenta desactivada. Sin cuerpo. }
         '401': { $ref: '#/components/responses/NoAutorizado' }
         '429': { $ref: '#/components/responses/DemasiadosPedidos' }
 
@@ -1395,9 +1585,10 @@ components:
 
         Esas tres son las reglas que la app MUESTRA mientras alguien escribe
         (`design/origen/Trainer App.dc.html`, pantalla `fpNew`: tres barras y tres
-        puntitos). El servidor además rechaza, sin anticiparlo, las que están en su
-        lista de contraseñas conocidas y las que tienen menos de cuatro caracteres
-        distintos; las dos devuelven `weak_password`.
+        puntitos). Desde la 1.6.0 son las ÚNICAS: el servidor ya no rechaza por
+        "fácil de adivinar" (lista de conocidas o pocos caracteres distintos), y
+        `weak_password` quiere decir sólo que no se cumple alguna de las tres (o
+        que pasa los 200 caracteres).
 
         Se guarda con argon2id, nunca en claro y nunca en un log.
 
@@ -2436,6 +2627,29 @@ components:
             Para el log del desarrollador y como respaldo. **El cliente no lo
             muestra tal cual**: muestra su propia traducción del `code`.
             Nunca lleva datos de salud ni de identidad (AGENTS.md §8).
+        details: { $ref: '#/components/schemas/DatosDelError' }
+
+    DatosDelError:
+      type: object
+      additionalProperties: false
+      description: |
+        1.6.0. Lo que algunos códigos necesitan además del `code` para que la app
+        pueda seguir. Sólo viaja lo que corresponde a ese código, y sólo a quien
+        ya demostró ser la persona (contraseña correcta o token del proveedor):
+        - `password_not_set`: `provider`.
+        - `account_link_available`: `link_token`, `email`, `provider` y `requires_password`.
+        - `account_deactivated`: `reactivation_token`.
+        - `account_pending_deletion`: `reactivation_token`, `days_remaining`.
+      properties:
+        provider: { type: string, enum: [google, apple] }
+        email: { $ref: '#/components/schemas/Email' }
+        link_token: { type: string }
+        requires_password: { type: boolean }
+        reactivation_token: { type: string }
+        days_remaining:
+          type: integer
+          minimum: 0
+          description: Días enteros que faltan para el borrado, redondeados para arriba.
 
   responses:
     PedidoInvalido:
