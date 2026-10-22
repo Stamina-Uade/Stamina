@@ -205,7 +205,8 @@ enum TraduccionDelServidor {
     // MARK: - Rutina
 
     static func rutina(_ rutina: RutinaDelDia) -> RutinaDelHome? {
-        RutinaDelHome(ejercicios: rutina.exercises.map(ejercicio), planificada: rutina.planned)
+        RutinaDelHome(ejercicios: rutina.exercises.map(ejercicio), planificada: rutina.planned,
+                      diaMs: rutina.dateMs)
     }
 
     private static func ejercicio(_ ejercicio: EjercicioDeRutina) -> EjercicioDeGimnasio {

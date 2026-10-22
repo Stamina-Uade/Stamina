@@ -13,12 +13,10 @@ struct SinDatosView: View {
     var body: some View {
         VStack(alignment: .leading, spacing: TokensEspaciado.e12) {
             if actualizando {
-                HStack(spacing: TokensEspaciado.e8) {
-                    ProgressView()
-                        .tint(Paleta.acento)
-                    Text(Textos.homeDataLoading)
-                        .estilo(.cuerpoSecundario, color: Paleta.textoSecundario)
-                }
+                // Cargando: sólo la ruedita (2026-10-22).
+                ProgressView()
+                    .tint(Paleta.acento)
+                    .frame(maxWidth: .infinity)
             } else {
                 HStack(alignment: .top, spacing: TokensEspaciado.e10) {
                     Image(systemName: simbolo)

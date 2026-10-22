@@ -107,19 +107,19 @@ struct CalendarioDeHitosView: View {
                 unidades: unidades
             )
         }
-        .alert(Textos.milestonesStepsLog, isPresented: $mostrandoEditorPasos) {
-            TextField(Textos.milestonesStepsCount, text: $textoPasosInput)
-                .keyboardType(.numberPad)
-            Button(Textos.commonSave) {
-                if let cant = Int(textoPasosInput.trimmingCharacters(in: .whitespacesAndNewlines)) {
-                    almacen.guardarPasos(cant, para: fechaSeleccionada)
-                    Task { await sincronizadorDePasos.subirPendientes() }
-                }
-            }
-            Button(Textos.commonCancel, role: .cancel) {}
-        } message: {
-            Text(Textos.milestonesStepsPrompt)
-        }
+        .alertaApilada(Textos.milestonesStepsLog, isPresented: $mostrandoEditorPasos,
+                       mensaje: Textos.milestonesStepsPrompt,
+                       campo: CampoDeAlerta(Textos.milestonesStepsCount, texto: $textoPasosInput,
+                                            teclado: .numero),
+                       botones: [
+                           BotonDeAlerta(Textos.commonSave) {
+                               if let cant = Int(textoPasosInput.trimmingCharacters(in: .whitespacesAndNewlines)) {
+                                   almacen.guardarPasos(cant, para: fechaSeleccionada)
+                                   Task { await sincronizadorDePasos.subirPendientes() }
+                               }
+                           },
+                           BotonDeAlerta(Textos.commonCancel, rol: .cancelar),
+                       ])
     }
 
     // MARK: - Encabezado

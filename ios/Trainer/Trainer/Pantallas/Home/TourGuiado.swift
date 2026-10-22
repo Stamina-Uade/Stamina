@@ -47,21 +47,23 @@ struct PasoDelTour {
     let pestana: PestanaHome?
     let animacion: AnimacionDeMascota
     let lugar: LugarDeLaMascota
-    let texto: String
+    /// La frase del globo. Es una plantilla: donde dice `%@` va el botón del
+    /// rayo dibujado en chiquito (`TextoConRayo`), en lugar del emoji ⚡.
+    let texto: (String) -> String
 
     /// En el orden de la barra, y un cierre.
     static var todos: [PasoDelTour] {
         [
             PasoDelTour(pestana: .inicio, animacion: .saludando, lugar: .abajoALaDerecha,
-                        texto: Textos.tourPageHomeBubble),
+                        texto: { _ in Textos.tourPageHomeBubble }),
             PasoDelTour(pestana: .plan, animacion: .senalandoArriba, lugar: .abajoALaDerecha,
-                        texto: Textos.tourCoachPlanBubble),
+                        texto: { _ in Textos.tourCoachPlanBubble }),
             PasoDelTour(pestana: nil, animacion: .senalandoAbajo, lugar: .sobreElRayo,
                         texto: Textos.tourCoachWorkoutBubble),
             PasoDelTour(pestana: .historial, animacion: .senalandoCostado, lugar: .abajoALaIzquierda,
-                        texto: Textos.tourPageHistoryBubble),
+                        texto: { _ in Textos.tourPageHistoryBubble }),
             PasoDelTour(pestana: .perfil, animacion: .parpadeoOrejas, lugar: .abajoALaIzquierda,
-                        texto: Textos.tourPageProfileBubble),
+                        texto: { _ in Textos.tourPageProfileBubble }),
             PasoDelTour(pestana: .inicio, animacion: .pulgarArriba, lugar: .abajoALaDerecha,
                         texto: Textos.tourCoachDoneBubble),
         ]
@@ -299,10 +301,11 @@ struct TourGuiado: View {
             Text(verbatim: "\(indice + 1)/\(pasos.count)")
                 .estilo(.etiquetaSeccion, color: Paleta.textoAcento)
                 .accessibilityLabel(Textos.tourPageOf(indice + 1, pasos.count))
-            Text(paso.texto)
+            TextoConRayo.texto(paso.texto, alto: TokensTipografia.tituloCardTamano * 1.15)
                 .estilo(.tituloCard)
                 .fixedSize(horizontal: false, vertical: true)
                 .frame(maxWidth: .infinity, alignment: .leading)
+                .accessibilityLabel(TextoConRayo.etiqueta(paso.texto))
                 .accessibilityAddTraits(.isHeader)
             botones
         }

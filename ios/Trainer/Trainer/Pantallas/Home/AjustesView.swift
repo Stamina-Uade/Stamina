@@ -25,7 +25,8 @@ struct AjustesView: View {
 
     @AppStorage(ModoApariencia.clave) private var modoApariencia: ModoApariencia = ModoApariencia.predeterminado
     @AppStorage("ajuste_notif_manana") private var notificacionManana = true
-    @AppStorage("ajuste_notif_recordatorio_antes") private var notificacionPrevio = true
+    @AppStorage(AvisoDePreparacion.claveEncendido) private var notificacionPrevio = true
+    @AppStorage(AvisoDePreparacion.claveMinutos) private var minutosDelAvisoPrevio = AvisoDePreparacion.minutosPorDefecto
     @AppStorage("ajuste_notif_calor") private var notificacionCalor = true
 
     /// La página abierta; `nil` es la raíz.
@@ -40,6 +41,8 @@ struct AjustesView: View {
     @State private var guardandoObjetivos = false
     @State private var errorDeObjetivos = false
     @State private var confirmandoCierre = false
+    @State private var confirmandoDesactivar = false
+    @State private var errorAlDesactivar: String?
 
     /// "Ver tour" la pone en `false`: `RaizHomeView` la escucha con
     /// `@AppStorage` y vuelve a mostrar el recorrido de bienvenida.
@@ -60,6 +63,7 @@ struct AjustesView: View {
         .onAppear { reabrirPagina() }
         .onChange(of: notificacionManana) { _ in estado.reprogramarRecordatorios() }
         .onChange(of: notificacionPrevio) { _ in estado.reprogramarRecordatorios() }
+        .onChange(of: minutosDelAvisoPrevio) { _ in estado.reprogramarRecordatorios() }
         .onChange(of: notificacionCalor) { _ in estado.reprogramarRecordatorios() }
         .task {
             await flujo.cargarObjetivos()
@@ -69,27 +73,33 @@ struct AjustesView: View {
                 return f >= inicioDeHoyMs
             }
         }
-        .alert(Textos.settingsUnits, isPresented: $errorDeUnidades) {
-            Button(Textos.commonDone, role: .cancel) {}
-        } message: {
-            Text(flujo.errorVisible ?? Textos.settingsUnitsDetail)
-        }
-        .alert(Textos.settingsGoalsSaveFailed, isPresented: $errorDeObjetivos) {
-            Button(Textos.commonDone, role: .cancel) {}
-        } message: {
-            Text(flujo.errorVisible ?? Textos.settingsGoalsSaveFailedMessage)
-        }
-        .alert(Self.tituloDeCierre, isPresented: $confirmandoCierre) {
-            Button(Textos.commonCancel, role: .cancel) {}
-            Button(Textos.settingsSignOut, role: .destructive) {
-                // El llavero se borra antes de salir, sin esperar a la red: sin señal
-                // las credenciales se van igual, y `POST /auth/logout` sale por detrás
-                // (`FlujoEntrada.cerrarSesion`).
-                Task { await flujo.cerrarSesion() }
-            }
-        } message: {
-            Text(Self.mensajeDeCierre)
-        }
+        .alertaApilada(Textos.settingsUnits, isPresented: $errorDeUnidades,
+                       mensaje: flujo.errorVisible ?? Textos.settingsUnitsDetail,
+                       botones: [BotonDeAlerta(Textos.commonOk, rol: .cancelar)])
+        .alertaApilada(Textos.settingsGoalsSaveFailed, isPresented: $errorDeObjetivos,
+                       mensaje: flujo.errorVisible ?? Textos.settingsGoalsSaveFailedMessage,
+                       botones: [BotonDeAlerta(Textos.commonOk, rol: .cancelar)])
+        .alertaApilada(Self.tituloDeCierre, isPresented: $confirmandoCierre,
+                       mensaje: Self.mensajeDeCierre,
+                       botones: [
+                           BotonDeAlerta(Textos.settingsSignOut, rol: .destructivo) {
+                               // El llavero se borra antes de salir, sin esperar a la red:
+                               // sin señal las credenciales se van igual, y
+                               // `POST /auth/logout` sale por detrás (`FlujoEntrada.cerrarSesion`).
+                               Task { await flujo.cerrarSesion() }
+                           },
+                           BotonDeAlerta(Textos.commonCancel, rol: .cancelar),
+                       ])
+        .alertaApilada(Textos.settingsDeactivateAccountAlertTitle, isPresented: $confirmandoDesactivar,
+                       mensaje: Textos.settingsDeactivateAccountAlertMessage,
+                       botones: [
+                           BotonDeAlerta(Textos.settingsDeactivateAccountAlertConfirm, rol: .destructivo) {
+                               desactivar()
+                           },
+                           BotonDeAlerta(Textos.commonCancel, rol: .cancelar),
+                       ])
+        .alertaApilada(Textos.settingsDeactivateAccount, mensaje: $errorAlDesactivar,
+                       botones: [BotonDeAlerta(Textos.commonOk, rol: .cancelar)])
     }
 
     // MARK: - Navegación
@@ -138,6 +148,7 @@ struct AjustesView: View {
             AjustesPaginaAspecto(modo: $modoApariencia, ancla: anclaDeAspecto, volver: volver)
         case .notificaciones:
             AjustesPaginaNotificaciones(manana: $notificacionManana, previo: $notificacionPrevio,
+                                        minutosPrevio: $minutosDelAvisoPrevio,
                                         calor: $notificacionCalor, volver: volver)
         case .unidades:
             AjustesPaginaUnidades(elegido: estado.sistemaDeUnidades, enCurso: unidadEnCurso,
@@ -215,6 +226,15 @@ struct AjustesView: View {
                             simboloFinal: nil) {
                     Haptico.toque()
                     confirmandoCierre = true
+                }
+                AjustesDivisorDeFila()
+                // 2026-10-22: los datos quedan; se vuelve iniciando sesión.
+                AjustesFila(simbolo: "pause.circle.fill",
+                            titulo: Textos.settingsDeactivateAccount,
+                            tono: .peligro,
+                            simboloFinal: nil) {
+                    Haptico.toque()
+                    confirmandoDesactivar = true
                 }
                 AjustesDivisorDeFila()
                 // App Store 5.1.1(v): la cuenta se borra desde la app.
@@ -298,6 +318,18 @@ struct AjustesView: View {
                 errorDeObjetivos = true
             }
             guardandoObjetivos = false
+        }
+    }
+
+    // MARK: - Desactivar
+
+    /// `POST /me/deactivate`: se cierra la sesión y la bienvenida avisa cómo
+    /// volver (`FlujoEntrada.desactivarCuenta`).
+    private func desactivar() {
+        Task {
+            if let error = await flujo.desactivarCuenta() {
+                errorAlDesactivar = error
+            }
         }
     }
 

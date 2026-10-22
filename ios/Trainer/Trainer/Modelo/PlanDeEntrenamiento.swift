@@ -532,10 +532,13 @@ public struct RutinaDelHome: Sendable {
     /// Si el plan pone gimnasio HOY. Si no, es la rutina para cuando toque, y la
     /// agenda del día no la anota.
     public let planificada: Bool
+    /// El día de la sesión (`date_ms` de `/plan/routine`). `nil` en la maqueta.
+    public let diaMs: Int64?
 
-    public init(ejercicios: [EjercicioDeGimnasio], planificada: Bool) {
+    public init(ejercicios: [EjercicioDeGimnasio], planificada: Bool, diaMs: Int64? = nil) {
         self.ejercicios = ejercicios
         self.planificada = planificada
+        self.diaMs = diaMs
     }
 }
 

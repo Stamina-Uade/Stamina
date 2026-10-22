@@ -56,30 +56,32 @@ struct EntrenoView: View {
                 deporteElegido = sugerido
             }
         }
-        .alert(Textos.workoutPermissionTitle, isPresented: $explicarUbicacion) {
-            Button(Textos.workoutPermissionContinue) { estado.empezarOPausar(deporte: deporteElegido) }
-            Button(Textos.workoutPermissionCancel, role: .cancel) {}
-        } message: {
-            Text(Textos.workoutPermissionDetail)
-        }
-        .alert(Textos.workoutNoMovementTitle, isPresented: $mostrarAvisoSinMovimiento) {
-            Button(Textos.commonResume, role: .cancel) {
-                // Desde "en curso" no hay nada que reanudar: alternar la pausaría.
-                if estado.estadoDeLaSesion == .pausada {
-                    estado.empezarOPausar(deporte: deporteElegido)
-                }
-            }
-            Button(Textos.commonDiscard, role: .destructive) {
-                estado.descartarSesion()
-            }
-        } message: {
-            Text(Textos.workoutNoMovementMessage)
-        }
-        .alert(Textos.workoutFinishConfirm,
-               isPresented: $confirmarTerminar) {
-            Button(Textos.workoutFinish, role: .destructive) { estado.terminarSesion() }
-            Button(Textos.commonKeepGoing, role: .cancel) {}
-        }
+        .alertaApilada(Textos.workoutPermissionTitle, isPresented: $explicarUbicacion,
+                       mensaje: Textos.workoutPermissionDetail,
+                       botones: [
+                           BotonDeAlerta(Textos.workoutPermissionContinue) {
+                               estado.empezarOPausar(deporte: deporteElegido)
+                           },
+                           BotonDeAlerta(Textos.workoutPermissionCancel, rol: .cancelar),
+                       ])
+        .alertaApilada(Textos.workoutNoMovementTitle, isPresented: $mostrarAvisoSinMovimiento,
+                       mensaje: Textos.workoutNoMovementMessage,
+                       botones: [
+                           BotonDeAlerta(Textos.commonDiscard, rol: .destructivo) {
+                               estado.descartarSesion()
+                           },
+                           BotonDeAlerta(Textos.commonResume, rol: .cancelar) {
+                               // Desde "en curso" no hay nada que reanudar: alternar la pausaría.
+                               if estado.estadoDeLaSesion == .pausada {
+                                   estado.empezarOPausar(deporte: deporteElegido)
+                               }
+                           },
+                       ])
+        .alertaApilada(Textos.workoutFinishConfirm, isPresented: $confirmarTerminar,
+                       botones: [
+                           BotonDeAlerta(Textos.workoutFinish, rol: .destructivo) { estado.terminarSesion() },
+                           BotonDeAlerta(Textos.commonKeepGoing, rol: .cancelar),
+                       ])
     }
 
     /// Los deportes por frecuencia de uso, sólo los que el MVP deja elegir.

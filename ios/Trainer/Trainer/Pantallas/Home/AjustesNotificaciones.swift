@@ -3,9 +3,14 @@ import TrainerCore
 
 /// Ajustes → Notificaciones: los tres avisos, ícono y título. Las claves y
 /// el reprogramar viven en `AjustesView`; acá sólo se prenden y se apagan.
+///
+/// 2026-10-22: "30 min antes" pasó a ser la "Notificación para prepararte", con
+/// el mismo interruptor y el mismo tiempo (5 min a 1 h) que en el alta, guardado
+/// en el mismo lugar (`AvisoDePreparacion`).
 struct AjustesPaginaNotificaciones: View {
     @Binding var manana: Bool
     @Binding var previo: Bool
+    @Binding var minutosPrevio: Int
     @Binding var calor: Bool
     let volver: () -> Void
 
@@ -23,9 +28,16 @@ struct AjustesPaginaNotificaciones: View {
 
                 AjustesFilaInterruptor(
                     simbolo: "alarm.fill",
-                    titulo: Textos.settingsNotificationsThirtyMinBefore,
-                    pista: Textos.settingsNotificationsThirtyMinBeforeDetail,
-                    encendido: $previo)
+                    titulo: Textos.notificationsPrepTitle,
+                    pista: Textos.settingsNotificationsPrepDetail,
+                    encendido: $previo.animation(.easeInOut(duration: TokensMovimiento.rapida)))
+
+                if previo {
+                    FilaDeMinutosDeAviso(minutos: $minutosPrevio)
+                        .padding(.horizontal, TokensEspaciado.e14)
+                        .padding(.vertical, TokensEspaciado.e8)
+                        .padding(.leading, TokensEspaciado.e34 + TokensEspaciado.e12)
+                }
 
                 AjustesDivisorDeFila()
 

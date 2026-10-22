@@ -171,12 +171,12 @@ struct AjustesPaginaDeEdicion<Contenido: View>: View {
         }
         .animation(reducirMovimiento ? nil : .easeOut(duration: TokensMovimiento.rapida), value: muestraLaBarra)
         .animation(reducirMovimiento ? nil : .easeOut(duration: TokensMovimiento.rapida), value: guardado.estado)
-        .alert(Self.tituloDescartar, isPresented: $confirmandoDescarte) {
-            Button(Textos.commonDiscard, role: .destructive) { volver() }
-            Button(Self.seguirEditando, role: .cancel) {}
-        } message: {
-            Text(Self.mensajeDescartar)
-        }
+        .alertaApilada(Self.tituloDescartar, isPresented: $confirmandoDescarte,
+                       mensaje: Self.mensajeDescartar,
+                       botones: [
+                           BotonDeAlerta(Textos.commonDiscard, rol: .destructivo) { volver() },
+                           BotonDeAlerta(Self.seguirEditando, rol: .cancelar),
+                       ])
     }
 
     private var muestraLaBarra: Bool { hayCambios || guardado.estado != .quieto }
