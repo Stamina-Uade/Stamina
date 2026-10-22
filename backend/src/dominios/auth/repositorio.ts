@@ -14,7 +14,14 @@ export interface UsuarioFila {
   password_hash: string | null;
   creado_en_ms: number;
   actualizado_en_ms: number;
+  /** `POST /me/deactivate` (1.6.0). `null` = activa. */
+  desactivada_en_ms: number | null;
+  /** `POST /me/delete` (1.6.0): cuándo se borra de verdad. `null` = no está por borrarse. */
+  borrar_en_ms: number | null;
 }
+
+const COLUMNAS_USUARIO =
+  "id, email, password_hash, creado_en_ms, actualizado_en_ms, desactivada_en_ms, borrar_en_ms";
 
 export interface SesionFila {
   id: string;
@@ -35,18 +42,47 @@ export function crearRepo(db: Db) {
     // ----------------------------------------------------------- usuarios --
     async buscarUsuarioPorEmail(email: string): Promise<UsuarioFila | null> {
       return db.unaFila<UsuarioFila>(
-        `select id, email, password_hash, creado_en_ms, actualizado_en_ms
+        `select ${COLUMNAS_USUARIO}
            from usuarios
           where email = $1`,
         [email]
       );
     },
 
+    async buscarUsuarioPorId(usuarioId: string): Promise<UsuarioFila | null> {
+      return db.unaFila<UsuarioFila>(`select ${COLUMNAS_USUARIO} from usuarios where id = $1`, [usuarioId]);
+    },
+
+    /**
+     * Vuelve a dejar la cuenta activa: ni desactivada ni por borrarse. `false` si la
+     * cuenta ya no existe (la purga llegó antes que el canje).
+     */
+    async reactivar(usuarioId: string, ahoraMs: number): Promise<boolean> {
+      const fila = await db.unaFila<{ id: string }>(
+        `update usuarios
+            set desactivada_en_ms = null, borrar_en_ms = null, actualizado_en_ms = $2
+          where id = $1
+         returning id`,
+        [usuarioId, ahoraMs]
+      );
+      return fila !== null;
+    },
+
+    /** Ni desactivada ni por borrarse. Lo mira el canje de un refresh. */
+    async cuentaActiva(usuarioId: string): Promise<boolean> {
+      const fila = await db.unaFila<{ uno: number }>(
+        `select 1 as uno from usuarios
+          where id = $1 and desactivada_en_ms is null and borrar_en_ms is null`,
+        [usuarioId]
+      );
+      return fila !== null;
+    },
+
     async crearUsuario(email: string, passwordHash: string | null, ahoraMs: number): Promise<UsuarioFila> {
       const fila = await db.unaFila<UsuarioFila>(
         `insert into usuarios (email, password_hash, creado_en_ms, actualizado_en_ms)
               values ($1, $2, $3, $3)
-           returning id, email, password_hash, creado_en_ms, actualizado_en_ms`,
+           returning ${COLUMNAS_USUARIO}`,
         [email, passwordHash, ahoraMs]
       );
       if (fila === null) throw new Error("crearUsuario: insert sin filas");
@@ -56,7 +92,8 @@ export function crearRepo(db: Db) {
     // ------------------------------------------------ identidades sociales --
     async buscarUsuarioPorIdentidad(proveedor: string, sujeto: string): Promise<UsuarioFila | null> {
       return db.unaFila<UsuarioFila>(
-        `select u.id, u.email, u.password_hash, u.creado_en_ms, u.actualizado_en_ms
+        `select u.id, u.email, u.password_hash, u.creado_en_ms, u.actualizado_en_ms,
+                u.desactivada_en_ms, u.borrar_en_ms
            from identidades_sociales i
            join usuarios u on u.id = i.usuario_id
           where i.proveedor = $1 and i.sujeto = $2`,
@@ -195,10 +232,17 @@ export function crearRepo(db: Db) {
       );
     },
 
+    /**
+     * La sesión vive y su cuenta está activa. Desactivar y borrar ya revocan las
+     * sesiones; mirar la cuenta en la misma consulta es la segunda traba, por si una
+     * sesión se abrió en carrera con la desactivación (contrato 1.6.0).
+     */
     async sesionVigente(sesionId: string, ahoraMs: number): Promise<boolean> {
       const fila = await db.unaFila<{ uno: number }>(
-        `select 1 as uno from sesiones
-          where id = $1 and revocado_en_ms is null and vence_en_ms > $2`,
+        `select 1 as uno from sesiones s
+           join usuarios u on u.id = s.usuario_id
+          where s.id = $1 and s.revocado_en_ms is null and s.vence_en_ms > $2
+            and u.desactivada_en_ms is null and u.borrar_en_ms is null`,
         [sesionId, ahoraMs]
       );
       return fila !== null;

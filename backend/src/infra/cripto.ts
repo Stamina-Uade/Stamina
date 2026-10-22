@@ -272,3 +272,87 @@ export async function leerAltaSocial(
     return null;
   }
 }
+
+// ------------------------------------------------ permisos de cuenta (1.6.0) --
+
+/**
+ * Los dos permisos cortos de la 1.6.0 —vincular un proveedor y reactivar una
+ * cuenta— son JWT firmados con su propia audiencia, como el de alta social: el
+ * permiso de un flujo no sirve en otro. Llevan un `jti` para que quien los canjea
+ * recuerde en la caché que ya se usaron (un solo uso).
+ */
+async function firmarPermiso(
+  config: Pick<Config, "jwtSecret">, audiencia: string, sujeto: string, claims: Record<string, unknown>,
+  ahoraMs: number, vidaMs: number,
+): Promise<string> {
+  return new SignJWT(claims)
+    .setProtectedHeader({ alg: ALG })
+    .setSubject(sujeto)
+    .setJti(generarTokenOpaco())
+    .setIssuedAt(Math.floor(ahoraMs / 1000))
+    .setExpirationTime(Math.floor((ahoraMs + vidaMs) / 1000))
+    .setIssuer("trainer")
+    .setAudience(audiencia)
+    .sign(config.jwtSecret);
+}
+
+async function leerPermiso(
+  config: Pick<Config, "jwtSecret">, audiencia: string, token: string, ahoraMs: number,
+): Promise<{ sujeto: string; jti: string; venceMs: number; claims: Record<string, unknown> } | null> {
+  try {
+    const { payload } = await jwtVerify(token, config.jwtSecret, {
+      algorithms: [ALG], issuer: "trainer", audience: audiencia, currentDate: new Date(ahoraMs),
+    });
+    if (typeof payload.sub !== "string" || payload.sub.length === 0) return null;
+    if (typeof payload.jti !== "string" || typeof payload.exp !== "number") return null;
+    return { sujeto: payload.sub, jti: payload.jti, venceMs: payload.exp * 1000, claims: payload };
+  } catch {
+    return null;
+  }
+}
+
+/** Lo que recuerda el permiso de vincular Google o Apple a una cuenta que ya existe. */
+export interface Vinculo {
+  usuarioId: string;
+  proveedor: "google" | "apple";
+  /** El `sub` de la persona en el proveedor. */
+  sujeto: string;
+  email: string | null;
+  /** Si el canje tiene que traer la contraseña de la cuenta. */
+  requierePassword: boolean;
+}
+
+export async function firmarVinculo(
+  config: Pick<Config, "jwtSecret">, v: Vinculo, ahoraMs: number, vidaMs: number,
+): Promise<string> {
+  return firmarPermiso(config, "trainer-social-link", v.usuarioId,
+    { prv: v.proveedor, sjt: v.sujeto, eml: v.email, rpw: v.requierePassword }, ahoraMs, vidaMs);
+}
+
+export async function leerVinculo(
+  config: Pick<Config, "jwtSecret">, token: string, ahoraMs: number,
+): Promise<(Vinculo & { jti: string; venceMs: number }) | null> {
+  const p = await leerPermiso(config, "trainer-social-link", token, ahoraMs);
+  if (p === null) return null;
+  const { prv, sjt, eml, rpw } = p.claims;
+  if (prv !== "google" && prv !== "apple") return null;
+  if (typeof sjt !== "string" || sjt.length === 0 || typeof rpw !== "boolean") return null;
+  return {
+    usuarioId: p.sujeto, proveedor: prv, sujeto: sjt, email: typeof eml === "string" ? eml : null,
+    requierePassword: rpw, jti: p.jti, venceMs: p.venceMs,
+  };
+}
+
+/** El permiso de volver a una cuenta desactivada o por borrarse. Sólo dice de quién es. */
+export async function firmarReactivacion(
+  config: Pick<Config, "jwtSecret">, usuarioId: string, ahoraMs: number, vidaMs: number,
+): Promise<string> {
+  return firmarPermiso(config, "trainer-reactivate", usuarioId, {}, ahoraMs, vidaMs);
+}
+
+export async function leerReactivacion(
+  config: Pick<Config, "jwtSecret">, token: string, ahoraMs: number,
+): Promise<{ usuarioId: string; jti: string; venceMs: number } | null> {
+  const p = await leerPermiso(config, "trainer-reactivate", token, ahoraMs);
+  return p === null ? null : { usuarioId: p.sujeto, jti: p.jti, venceMs: p.venceMs };
+}

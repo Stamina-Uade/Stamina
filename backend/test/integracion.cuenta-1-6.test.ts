@@ -22,6 +22,7 @@ import { migrar } from "../src/infra/migrar.js";
 import { prepararHashDummy } from "../src/infra/cripto.js";
 import { versionLegal } from "../src/dominios/legal/textos.js";
 import { crearTopeDeIntentos } from "../src/dominios/auth/intentos.js";
+import { purgar } from "../src/dominios/cuenta/purgar.js";
 import type { IdentidadVerificada, NombreDeProveedor } from "../src/infra/proveedores.js";
 import type { Contexto } from "../src/contexto.js";
 
@@ -255,5 +256,95 @@ describe("códigos por correo", { skip: SIN_SERVICIOS }, () => {
     for (let i = 1; i <= 5; i++) await pedir("POST", "/v1/auth/password/verify", { email, code: "ZZZZZZ" });
     const r = await pedir("POST", "/v1/auth/password/verify", { email, code: ultimoCodigo(email) });
     assert.equal(r.json.error.code, "code_attempts_exceeded");
+  });
+});
+
+describe("desactivar y reactivar", { skip: SIN_SERVICIOS }, () => {
+  test("desactivar cierra todo; con la contraseña correcta el login da el permiso y reactivar abre", async () => {
+    const { email, sesion } = await registrar();
+    const otra = await pedir("POST", "/v1/auth/login", { email, password: PASSWORD });
+    assert.equal((await pedir("POST", "/v1/me/deactivate", undefined, sesion.access_token)).status, 204);
+    assert.equal((await pedir("GET", "/v1/me", undefined, sesion.access_token)).status, 401);
+    assert.equal((await pedir("GET", "/v1/me", undefined, otra.json.data.access_token)).status, 401);
+    assert.equal((await pedir("POST", "/v1/auth/refresh", { refresh_token: otra.json.data.refresh_token })).status, 401);
+
+    const mala = await pedir("POST", "/v1/auth/login", { email, password: "Otra-clave-larga-1" });
+    assert.equal(mala.json.error.code, "wrong_password");
+    assert.equal(mala.json.error.details, undefined, "a quien no sabe la contraseña no se le dice el estado");
+
+    const buena = await pedir("POST", "/v1/auth/login", { email, password: PASSWORD });
+    assert.equal(buena.status, 403);
+    assert.equal(buena.json.error.code, "account_deactivated");
+    const token = buena.json.error.details.reactivation_token;
+    const r = await pedir("POST", "/v1/auth/reactivate", { reactivation_token: token });
+    assert.equal(r.status, 200, JSON.stringify(r.json));
+    assert.equal((await pedir("GET", "/v1/me", undefined, r.json.data.access_token)).status, 200);
+    // Un solo uso, y las sesiones viejas siguen cerradas.
+    assert.equal((await pedir("POST", "/v1/auth/reactivate", { reactivation_token: token })).json.error.code,
+      "invalid_reactivation_token");
+    assert.equal((await pedir("GET", "/v1/me", undefined, sesion.access_token)).status, 401);
+    assert.equal((await pedir("POST", "/v1/auth/login", { email, password: PASSWORD })).status, 200);
+  });
+
+  test("Google/Apple con la identidad vinculada también contesta account_deactivated", async () => {
+    const { email, sujeto, sesion } = await registrarConProveedor("google");
+    assert.equal((await pedir("POST", "/v1/me/deactivate", undefined, sesion.access_token)).status, 204);
+    const r = await social("google", idToken({ sujeto, email }));
+    assert.equal(r.status, 403);
+    assert.equal(r.json.error.code, "account_deactivated");
+    assert.ok(r.json.error.details.reactivation_token);
+  });
+
+  test("recuperar con la cuenta desactivada cambia la contraseña y contesta el estado", async () => {
+    const { email, sesion } = await registrar();
+    await pedir("POST", "/v1/me/deactivate", undefined, sesion.access_token);
+    const nueva = "Clave-nueva-de-prueba-4";
+    const r = await recuperar(email, nueva);
+    assert.equal(r.status, 403);
+    assert.equal(r.json.error.code, "account_deactivated");
+    const login = await pedir("POST", "/v1/auth/login", { email, password: nueva });
+    assert.equal(login.json.error.code, "account_deactivated", "la contraseña nueva quedó puesta");
+  });
+});
+
+describe("borrar con 30 días de gracia", { skip: SIN_SERVICIOS }, () => {
+  test("borrar marca la cuenta, cierra todo, y se puede recuperar entera", async () => {
+    const { email, sesion } = await registrar();
+    const antes = Date.now();
+    assert.equal((await pedir("POST", "/v1/me/delete", { password: PASSWORD }, sesion.access_token)).status, 204);
+    assert.equal((await pedir("GET", "/v1/me", undefined, sesion.access_token)).status, 401);
+    const fila = await db.unaFila<{ borrar_en_ms: string }>(`select borrar_en_ms from usuarios where id = $1`, [sesion.user_id]);
+    assert.ok(fila !== null, "la cuenta sigue existiendo durante la gracia");
+    const plazo = Number(fila.borrar_en_ms) - antes;
+    assert.ok(plazo >= 30 * 86_400_000 && plazo < 30 * 86_400_000 + 60_000, `plazo de 30 días, vino ${plazo}`);
+
+    // Registrarse con ese correo sigue siendo "ya registrado".
+    assert.equal((await pedir("POST", "/v1/auth/register", { email })).json.error.code, "email_already_registered");
+
+    const login = await pedir("POST", "/v1/auth/login", { email, password: PASSWORD });
+    assert.equal(login.status, 403);
+    assert.equal(login.json.error.code, "account_pending_deletion");
+    assert.equal(login.json.error.details.days_remaining, 30);
+    const r = await pedir("POST", "/v1/auth/reactivate", { reactivation_token: login.json.error.details.reactivation_token });
+    assert.equal(r.status, 200);
+    const despues = await db.unaFila<{ borrar_en_ms: string | null }>(`select borrar_en_ms from usuarios where id = $1`, [sesion.user_id]);
+    assert.equal(despues?.borrar_en_ms, null, "reactivar cancela el borrado");
+    assert.equal((await pedir("GET", "/v1/me", undefined, r.json.data.access_token)).json.data.email, email);
+  });
+
+  test("la purga borra de verdad las vencidas, y el correo queda libre", async () => {
+    const { email, sesion } = await registrar();
+    const queda = await registrar();
+    await pedir("POST", "/v1/me/delete", { password: PASSWORD }, sesion.access_token);
+    await pedir("POST", "/v1/me/delete", { password: PASSWORD }, queda.sesion.access_token);
+    // Se adelanta el plazo de la primera, como si hubieran pasado los 30 días.
+    await db.consultar(`update usuarios set borrar_en_ms = $2 where id = $1`, [sesion.user_id, Date.now() - 1]);
+    const r = await purgar(db, Date.now());
+    assert.ok((r["cuentas_borradas"] ?? 0) >= 1);
+    assert.equal(await db.unaFila(`select 1 as uno from usuarios where id = $1`, [sesion.user_id]), null);
+    assert.equal(await db.unaFila(`select 1 as uno from sesiones where usuario_id = $1`, [sesion.user_id]), null);
+    assert.ok(await db.unaFila(`select 1 as uno from usuarios where id = $1`, [queda.sesion.user_id]), "la que no venció sigue");
+    const otraVez = await registrar(email);
+    assert.notEqual(otraVez.sesion.user_id, sesion.user_id);
   });
 });

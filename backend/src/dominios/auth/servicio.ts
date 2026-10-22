@@ -26,13 +26,15 @@ import {
   verificarPassword,
   firmarAltaSocial,
   leerAltaSocial,
+  firmarReactivacion,
+  leerReactivacion,
 } from "../../infra/cripto.js";
 import {
   crearVerificadorDeProveedores,
   proveedorEsDuenoDelCorreo,
   type NombreDeProveedor,
 } from "../../infra/proveedores.js";
-import { crearRepo, type RepoAuth, type SesionFila } from "./repositorio.js";
+import { crearRepo, type RepoAuth, type SesionFila, type UsuarioFila } from "./repositorio.js";
 import { crearTopeDeIntentos } from "./intentos.js";
 
 const VIDA_CODIGO_MS = 15 * 60 * 1000; // 15 min, como el diseño (`reg-codigo`)
@@ -52,6 +54,9 @@ const RECUERDO_CODIGO_MS = VIDA_CODIGO_MS + 60 * 60 * 1000;
  * persona revisa sus datos, espera el código y lee el aviso de salud.
  */
 const VIDA_ALTA_SOCIAL_MS = 30 * 60 * 1000;
+/** Los permisos de vincular y de reactivar (1.6.0): 10 minutos, un solo uso. */
+const VIDA_PERMISO_CUENTA_MS = 10 * 60 * 1000;
+const DIA_MS = 24 * 60 * 60 * 1000;
 
 /**
  * Cuánto después de canjear un refresh se acepta volver a presentarlo como REINTENTO
@@ -159,6 +164,31 @@ export function crearServicioAuth(ctx: Contexto) {
       ctx.config.refreshTtlS * 1000
     );
     return entregar(fila, refresh);
+  }
+
+  /**
+   * 🛑 La puerta de toda sesión que se abre para una cuenta que ya existía (login,
+   * Google/Apple, vincular, recuperar): una cuenta desactivada o por borrarse no
+   * entra. Contesta el estado con un permiso para `POST /auth/reactivate`, y sólo
+   * se llega acá después de que la persona demostró ser ella (contraseña, código o
+   * proveedor): a quien no la sabe, el estado no se le dice (contrato 1.6.0).
+   */
+  async function exigirCuentaActiva(u: UsuarioFila): Promise<void> {
+    if (u.borrar_en_ms === null && u.desactivada_en_ms === null) return;
+    const ahora = ctx.ahoraMs();
+    const reactivation_token = await firmarReactivacion(ctx.config, u.id, ahora, VIDA_PERMISO_CUENTA_MS);
+    if (u.borrar_en_ms !== null) {
+      // Días enteros, para arriba: con 29,2 días por delante, la persona tiene "30".
+      const days_remaining = Math.max(0, Math.ceil((u.borrar_en_ms - ahora) / DIA_MS));
+      throw new ErrorApi("account_pending_deletion", "This account is scheduled for deletion", undefined,
+        { reactivation_token, days_remaining });
+    }
+    throw new ErrorApi("account_deactivated", "This account is deactivated", undefined, { reactivation_token });
+  }
+
+  async function abrirSesionDe(u: UsuarioFila): Promise<Sesion> {
+    await exigirCuentaActiva(u);
+    return abrirSesion(u.id, null);
   }
 
   /** Lo que devuelven login, alta, recuperación y refresh: un access nuevo para `fila`. */
@@ -384,7 +414,28 @@ export function crearServicioAuth(ctx: Contexto) {
         throw await sinPassword(usuario.id);
       }
       await comprobarPassword(email, usuario.password_hash, password, ip);
-      return abrirSesion(usuario.id, null);
+      return abrirSesionDe(usuario);
+    },
+
+    // ---------------------------------------------------------- reactivar --
+    /**
+     * `POST /auth/reactivate` (1.6.0). Canjea el permiso de `account_deactivated` o
+     * `account_pending_deletion`: la cuenta vuelve a estar activa —si estaba por
+     * borrarse, el borrado se cancela— y se abre la sesión.
+     */
+    async reactivar(token: string): Promise<Sesion> {
+      const ahora = ctx.ahoraMs();
+      const permiso = await leerReactivacion(ctx.config, token, ahora);
+      if (permiso === null) throw new ErrorApi("invalid_reactivation_token", "Reactivation token is not valid");
+      // Un solo uso: se recuerda hasta que vence, y un minuto más por los relojes.
+      const ttlS = Math.max(60, Math.ceil((permiso.venceMs - ahora) / 1000) + 60);
+      if (!(await ctx.cache.ponerSiAusente(`auth:reactivar:${hashearToken(permiso.jti)}`, "1", ttlS))) {
+        throw new ErrorApi("invalid_reactivation_token", "Reactivation token was already used");
+      }
+      if (!(await repo.reactivar(permiso.usuarioId, ahora))) {
+        throw new ErrorApi("invalid_reactivation_token", "Reactivation token is not valid");
+      }
+      return abrirSesion(permiso.usuarioId, null);
     },
 
     // -------------------------------------------------- Google y Apple --
@@ -416,7 +467,7 @@ export function crearServicioAuth(ctx: Contexto) {
       }
 
       const vinculado = await repo.buscarUsuarioPorIdentidad(proveedor, identidad.sujeto);
-      if (vinculado !== null) return { status: "signed_in", session: await abrirSesion(vinculado.id, null) };
+      if (vinculado !== null) return { status: "signed_in", session: await abrirSesionDe(vinculado) };
 
       // Se vincula a una cuenta existente sólo si el proveedor es el DUEÑO de ese
       // correo, y si esa cuenta no tiene ya otra persona del mismo proveedor.
@@ -427,7 +478,7 @@ export function crearServicioAuth(ctx: Contexto) {
           // Que el dueño se entere: una forma nueva de entrar a su cuenta no puede
           // aparecer en silencio. Si el correo falla, igual entra.
           try { await ctx.correo.avisarVinculacion(identidad.email, proveedor); } catch { /* no bloquea */ }
-          return { status: "signed_in", session: await abrirSesion(porCorreo.id, null) };
+          return { status: "signed_in", session: await abrirSesionDe(porCorreo) };
         }
       }
 
@@ -500,6 +551,8 @@ export function crearServicioAuth(ctx: Contexto) {
         }
         if (sesion.revocado_en_ms !== null) return { tipo: "revocada" } as const;
         if (sesion.vence_en_ms <= ahora) return { tipo: "vencido" } as const;
+        // Desactivar y borrar revocan las sesiones; esto cubre la que rotó en carrera.
+        if (!(await r.cuentaActiva(sesion.usuario_id))) return { tipo: "revocada" } as const;
 
         // 🛑 Rotar NO revoca la sesión vieja: sólo la marca usada, y sus access siguen
         // valiendo hasta que vencen. Revocarla dejaba con `session_revoked` a cualquier
@@ -586,7 +639,9 @@ export function crearServicioAuth(ctx: Contexto) {
       // 🛑 §12: cambiar la contraseña revoca las demás sesiones. Se revoca TODO y
       // se abre una nueva, así que quien cambió la clave no queda afuera.
       await repo.revocarTodasDe(usuario.id, ahora, "cambio_de_password");
-      return abrirSesion(usuario.id, null);
+      // Con la cuenta desactivada o por borrarse, la contraseña queda cambiada igual
+      // y contesta el estado con su permiso, como el login (contrato 1.6.0).
+      return abrirSesionDe(usuario);
     },
 
     /**

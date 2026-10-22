@@ -1,8 +1,12 @@
 /**
- * dominios/cuenta — POST /v1/me/delete y GET /v1/me/export
+ * dominios/cuenta — POST /v1/me/delete, POST /v1/me/deactivate y GET /v1/me/export
  *
  * AGENTS.md §8: "Exportar y borrar son features, no favores." Las dos bloqueaban
  * la publicación (docs/API.md §8) y las dos viven detrás de la guardia de sesión.
+ *
+ * Desde la 1.6.0 borrar deja 30 días de gracia: la cuenta queda marcada, se
+ * cierran sus sesiones y la purga diaria la borra de verdad cuando vence el plazo.
+ * Mientras tanto, entrar contesta `account_pending_deletion` y se puede recuperar.
  */
 import type { FastifyInstance } from "fastify";
 import type { Contexto } from "../../contexto.js";
@@ -19,6 +23,9 @@ import { serieAApi } from "../gimnasio/rutas.js";
 import { actividadAApi } from "../actividades/rutas.js";
 import { comidaAApi } from "../nutricion/rutas.js";
 import { crearRepoPasos, pasosAApi } from "../pasos/repositorio.js";
+
+/** Contrato 1.6.0: cuánto espera una cuenta marcada antes de borrarse de verdad. */
+export const GRACIA_BORRADO_MS = 30 * 24 * 60 * 60 * 1000;
 
 export async function rutasCuenta(app: FastifyInstance, ctx: Contexto): Promise<void> {
   const guardia = crearGuardia(ctx);
@@ -54,11 +61,22 @@ export async function rutasCuenta(app: FastifyInstance, ctx: Contexto): Promise<
       if (hash !== null && !(await verificarPassword(password as string, hash))) {
         throw new ErrorApi("invalid_credentials", "Password is not valid");
       }
-      await repo.borrar(usuarioId, ctx.ahoraMs());
+      const ahora = ctx.ahoraMs();
+      await repo.marcarParaBorrar(usuarioId, ahora, ahora + GRACIA_BORRADO_MS);
       res.code(204);
       return null;
     }
   );
+
+  /**
+   * 1.6.0. No pide contraseña: no borra nada, y volver pide entrar de nuevo (con
+   * contraseña o proveedor). Cierra TODAS las sesiones, la que pide incluida.
+   */
+  app.post("/me/deactivate", { preHandler: guardia }, async (req, res) => {
+    await repo.desactivar(usuarioDe(req), ctx.ahoraMs());
+    res.code(204);
+    return null;
+  });
 
   app.get(
     "/me/export",

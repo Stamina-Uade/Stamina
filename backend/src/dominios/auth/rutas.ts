@@ -80,6 +80,12 @@ export async function rutasAuth(app: FastifyInstance, ctx: Contexto): Promise<vo
     return { data: await auth.entrarConProveedor(b.provider, b.id_token, b.nonce) };
   });
 
+  // 1.6.0: volver a una cuenta desactivada o por borrarse.
+  app.post("/auth/reactivate", { config: ESTRICTO, schema: { body: cuerpo("reactivateAccount") } }, async (req) => {
+    const b = req.body as { reactivation_token: string };
+    return { data: await auth.reactivar(b.reactivation_token) };
+  });
+
   app.post("/auth/refresh", { schema: { body: cuerpo("refresh") } }, async (req) => {
     const b = req.body as { refresh_token: string };
     return { data: await auth.refrescar(b.refresh_token) };

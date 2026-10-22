@@ -9,7 +9,9 @@ import { crearCacheEnMemoria } from "../src/infra/redis.js";
 import { crearServicioAuth } from "../src/dominios/auth/servicio.js";
 import { versionLegal } from "../src/dominios/legal/textos.js";
 import { crearTopeDeIntentos } from "../src/dominios/auth/intentos.js";
-import { hashearPassword } from "../src/infra/cripto.js";
+import {
+  firmarReactivacion, firmarVinculo, hashearPassword, leerReactivacion, leerVinculo,
+} from "../src/infra/cripto.js";
 import type { Config } from "../src/config.js";
 import type { Contexto } from "../src/contexto.js";
 import type { Db } from "../src/infra/db.js";
@@ -208,5 +210,71 @@ describe("el tope de contraseñas equivocadas (1.6.0)", () => {
         code: "password_not_set", message: "This account signs in with Google or Apple", details: { provider: "apple" },
       });
     }
+  });
+});
+
+describe("desactivar, borrar con gracia y reactivar (1.6.0)", () => {
+  const DIA = 86_400_000;
+
+  async function cuenta(estado: { desactivada_en_ms?: number | null; borrar_en_ms?: number | null }) {
+    const hash = await hashearPassword("Caballo-bateria-9");
+    // La misma fila sirve de usuario, de sesión creada y de cuenta reactivada.
+    return armar({
+      id: "u-1", usuario_id: "u-1", familia_id: "f-1", vence_en_ms: 1_900_000_000_000,
+      email: "a@b.co", password_hash: hash, creado_en_ms: 0, actualizado_en_ms: 0,
+      desactivada_en_ms: null, borrar_en_ms: null, ...estado,
+    });
+  }
+
+  async function error(p: Promise<unknown>): Promise<ErrorApi> {
+    try { await p; } catch (e) { if (e instanceof ErrorApi) return e; throw e; }
+    assert.fail("tenía que fallar");
+  }
+
+  test("con la contraseña correcta, una cuenta desactivada contesta account_deactivated con su permiso", async () => {
+    const { auth } = await cuenta({ desactivada_en_ms: 1 });
+    const e = await error(auth.login("a@b.co", "Caballo-bateria-9", "10.0.0.1"));
+    assert.equal(e.codigo, "account_deactivated");
+    assert.equal(e.http, 403);
+    assert.deepEqual(Object.keys(e.detalles ?? {}), ["reactivation_token"]);
+  });
+
+  test("🛑 con la contraseña equivocada sigue siendo wrong_password: el estado no se le dice a quien no la sabe", async () => {
+    const { auth } = await cuenta({ desactivada_en_ms: 1, borrar_en_ms: 1_800_000_000_000 + DIA });
+    const e = await error(auth.login("a@b.co", "Otra-clave-1", "10.0.0.1"));
+    assert.equal(e.codigo, "wrong_password");
+    assert.equal(e.detalles, undefined);
+  });
+
+  test("por borrarse: account_pending_deletion con los días que faltan, redondeados para arriba", async () => {
+    const { auth, avanzar } = await cuenta({ borrar_en_ms: 1_800_000_000_000 + 30 * DIA });
+    avanzar(Math.round(0.8 * DIA));
+    const e = await error(auth.login("a@b.co", "Caballo-bateria-9", "10.0.0.1"));
+    assert.equal(e.codigo, "account_pending_deletion");
+    assert.equal(e.detalles?.days_remaining, 30);
+    assert.ok(e.detalles?.reactivation_token);
+  });
+
+  test("el permiso de reactivar abre la sesión UNA vez, y vencido no sirve", async () => {
+    const { auth, avanzar } = await cuenta({ desactivada_en_ms: 1 });
+    const token = (await error(auth.login("a@b.co", "Caballo-bateria-9", "10.0.0.1"))).detalles!.reactivation_token!;
+    assert.equal((await auth.reactivar(token)).user_id, "u-1");
+    assert.equal((await error(auth.reactivar(token))).codigo, "invalid_reactivation_token");
+    const otro = (await error(auth.login("a@b.co", "Caballo-bateria-9", "10.0.0.1"))).detalles!.reactivation_token!;
+    avanzar(10 * 60_000 + 1_000);
+    assert.equal((await error(auth.reactivar(otro))).codigo, "invalid_reactivation_token");
+    assert.equal((await error(auth.reactivar("no-es-un-jwt"))).codigo, "invalid_reactivation_token");
+  });
+
+  test("los permisos de vincular y de reactivar no se cruzan", async () => {
+    const config = { jwtSecret: CONFIG_PRUEBA.jwtSecret };
+    const ahora = Date.now();
+    const v = await firmarVinculo(config, { usuarioId: "u", proveedor: "google", sujeto: "s", email: null, requierePassword: true }, ahora, 60_000);
+    const r = await firmarReactivacion(config, "u", ahora, 60_000);
+    assert.equal((await leerVinculo(config, v, ahora))?.requierePassword, true);
+    assert.equal((await leerReactivacion(config, r, ahora))?.usuarioId, "u");
+    assert.equal(await leerVinculo(config, r, ahora), null);
+    assert.equal(await leerReactivacion(config, v, ahora), null);
+    assert.equal(await leerVinculo(config, v, ahora + 120_000), null);
   });
 });
