@@ -6,11 +6,16 @@
  *   - anti-enumeración, incluida la del TIEMPO (verificación dummy)
  *   - refresh hasheado, de un solo uso y con rotación; reuso => revoca la familia, salvo el
  *     reintento de una respuesta perdida, que recibe la misma sucesora (decisión 0013)
- *   - cambiar la contraseña revoca las demás sesiones
+ *
+ * Contrato 1.6.0 (decisión de Iván del 2026-10-22): cambiar la contraseña YA NO revoca
+ * las demás sesiones. Manda siempre un correo de aviso, y la app ofrece cerrar las otras
+ * con `POST /auth/logout/others`. Revocarlas solas dejaba afuera, sin explicación, al
+ * reloj y a la tablet de quien sólo se había olvidado la clave.
  */
 import type { Contexto } from "../../contexto.js";
 import { ErrorApi } from "../../infra/errores.js";
 import { validarPassword } from "../../infra/password.js";
+import type { IdiomaDeCorreo } from "../../infra/idioma.js";
 import { versionLegal } from "../legal/textos.js";
 import {
   firmarAcceso,
@@ -682,6 +687,15 @@ export function crearServicioAuth(ctx: Contexto) {
       await repo.revocarFamiliaDeSesion(sesionActualId, ahora, "logout");
     },
 
+    /**
+     * `POST /auth/logout/others` (1.6.0): todas las sesiones de la persona menos la
+     * cadena de la que pide, que sigue viva entera (rotar no revoca, decisión 0013).
+     * Idempotente: sin otras sesiones no hay nada que revocar.
+     */
+    async cerrarOtrasSesiones(usuarioId: string, sesionActualId: string): Promise<void> {
+      await repo.revocarOtrasFamilias(usuarioId, sesionActualId, ctx.ahoraMs(), "logout_otras");
+    },
+
     // ------------------------------------------------------- recuperación --
     async recuperacionInicio(emailCrudo: string) {
       const email = normalizarEmail(emailCrudo);
@@ -698,7 +712,8 @@ export function crearServicioAuth(ctx: Contexto) {
       return { reset_token: r.token, expires_at_ms: r.expires_at_ms };
     },
 
-    async recuperacionAplicar(resetToken: string, password: string): Promise<Sesion> {
+    /** @param idioma el del pedido: en ése sale el aviso de contraseña cambiada. */
+    async recuperacionAplicar(resetToken: string, password: string, idioma: IdiomaDeCorreo = "es"): Promise<Sesion> {
       exigirPasswordValida(password);
       const ahora = ctx.ahoraMs();
       const emailDePaso = await emailDePasoDeCorreo(ctx.config, resetToken, "recuperacion", ahora);
@@ -711,9 +726,10 @@ export function crearServicioAuth(ctx: Contexto) {
       await repo.cambiarPassword(usuario.id, await hashearPassword(password), ahora);
       // Cambiar la contraseña reinicia el tope de ese correo (contrato 1.6.0).
       await tope.reiniciar(usuario.email);
-      // 🛑 §12: cambiar la contraseña revoca las demás sesiones. Se revoca TODO y
-      // se abre una nueva, así que quien cambió la clave no queda afuera.
-      await repo.revocarTodasDe(usuario.id, ahora, "cambio_de_password");
+      // 1.6.0: las otras sesiones quedan abiertas (ver el encabezado), así que el
+      // aviso sale SIEMPRE: es como se entera el dueño si no fue él. Si el correo
+      // falla, el cambio vale igual: la persona ya eligió su contraseña nueva.
+      try { await ctx.correo.avisarCambioDePassword?.(usuario.email, idioma); } catch { /* no bloquea */ }
       // Con la cuenta desactivada o por borrarse, la contraseña queda cambiada igual
       // y contesta el estado con su permiso, como el login (contrato 1.6.0).
       return abrirSesionDe(usuario);

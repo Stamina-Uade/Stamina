@@ -12,6 +12,8 @@ import { cuerpo } from "../../infra/esquemas.js";
 import { crearHookAuth } from "../../infra/autenticacion.js";
 import { ErrorApi } from "../../infra/errores.js";
 import { crearRepoPerfil } from "../perfil/repositorio.js";
+import { crearGuardia } from "./guardia.js";
+import { idiomaDeCorreo } from "../../infra/idioma.js";
 
 /**
  * 🛑 Rate limit estricto donde duele. AGENTS.md §12 lo pide "en login, registro,
@@ -29,6 +31,7 @@ export async function rutasAuth(app: FastifyInstance, ctx: Contexto): Promise<vo
   const auth = crearServicioAuth(ctx);
   const perfiles = crearRepoPerfil(ctx.db);
   const requiereAuth = crearHookAuth(ctx.config);
+  const guardia = crearGuardia(ctx);
 
   // ------------------------------------------------------------- registro --
   app.post("/auth/register", { config: ESTRICTO, schema: { body: cuerpo("registerStart") } }, async (req, res) => {
@@ -110,6 +113,16 @@ export async function rutasAuth(app: FastifyInstance, ctx: Contexto): Promise<vo
     }
   );
 
+  // 1.6.0: cerrar las otras sesiones. Con la guardia completa (sesión viva): una
+  // sesión ya revocada no decide cuáles quedan abiertas.
+  app.post("/auth/logout/others", { preHandler: guardia }, async (req, res) => {
+    const u = req.usuario;
+    if (u === undefined) throw new ErrorApi("unauthorized", "Missing bearer token");
+    await auth.cerrarOtrasSesiones(u.id, u.sesionId);
+    res.code(204);
+    return null;
+  });
+
   // ---------------------------------------------------------- recuperación --
   app.post("/auth/password/forgot", { config: ESTRICTO, schema: { body: cuerpo("passwordForgot") } }, async (req, res) => {
     const b = req.body as { email: string };
@@ -125,6 +138,6 @@ export async function rutasAuth(app: FastifyInstance, ctx: Contexto): Promise<vo
 
   app.post("/auth/password/reset", { schema: { body: cuerpo("passwordReset") } }, async (req) => {
     const b = req.body as { reset_token: string; password: string };
-    return { data: await auth.recuperacionAplicar(b.reset_token, b.password) };
+    return { data: await auth.recuperacionAplicar(b.reset_token, b.password, idiomaDeCorreo(req)) };
   });
 }

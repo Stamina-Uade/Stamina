@@ -2,8 +2,9 @@
 import nodemailer from "nodemailer";
 import type { Config } from "../config.js";
 import {
-  CID_LOGO, correoDeCodigo, correoDeIntentoDeRegistro, correoDeVinculacion, type Proposito,
+  CID_LOGO, correoDeCambioDePassword, correoDeCodigo, correoDeIntentoDeRegistro, correoDeVinculacion, type Proposito,
 } from "./plantillas-correo.js";
+import type { IdiomaDeCorreo } from "./idioma.js";
 import { LOGO_CORREO_PNG_BASE64 } from "./logo-correo.js";
 
 /** Lo mismo que `VIDA_CODIGO_MS` de auth: el correo dice cuánto dura el código. */
@@ -19,6 +20,12 @@ export interface Correo {
   avisarIntentoDeRegistro(destino: string): Promise<void>;
   /** Se vinculó Google o Apple a una cuenta que ya existía. */
   avisarVinculacion(destino: string, proveedor: "google" | "apple"): Promise<void>;
+  /**
+   * Se cambió la contraseña de la cuenta (contrato 1.6.0: siempre, en el idioma del
+   * pedido). Opcional en la interfaz sólo para que los dobles de los tests que no
+   * lo usan no tengan que implementarlo: `crearCorreo` lo implementa siempre.
+   */
+  avisarCambioDePassword?(destino: string, idioma: IdiomaDeCorreo): Promise<void>;
 }
 
 function limpiarNombre(nombre: string | undefined): string | null {
@@ -38,6 +45,9 @@ export function crearCorreo(config: Config, log: { info: (o: object, m: string) 
       },
       async avisarVinculacion(_destino, proveedor) {
         log.info({ proveedor }, "correo: se vinculó un proveedor a una cuenta existente (proveedor=log)");
+      },
+      async avisarCambioDePassword(_destino, idioma) {
+        log.info({ idioma }, "correo: aviso de contraseña cambiada (proveedor=log)");
       },
     };
   }
@@ -83,6 +93,12 @@ export function crearCorreo(config: Config, log: { info: (o: object, m: string) 
     },
     async avisarVinculacion(destino, proveedor) {
       const correo = correoDeVinculacion({ destino, proveedor, ahoraMs: Date.now() });
+      await transporte.sendMail({
+        from: de, to: destino, subject: correo.asunto, text: correo.texto, html: correo.html, attachments: [logo],
+      });
+    },
+    async avisarCambioDePassword(destino, idioma) {
+      const correo = correoDeCambioDePassword({ destino, idioma, ahoraMs: Date.now() });
       await transporte.sendMail({
         from: de, to: destino, subject: correo.asunto, text: correo.texto, html: correo.html, attachments: [logo],
       });

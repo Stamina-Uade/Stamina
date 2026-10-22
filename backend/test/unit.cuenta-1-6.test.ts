@@ -15,6 +15,9 @@ import {
 import type { Config } from "../src/config.js";
 import type { Contexto } from "../src/contexto.js";
 import type { Db } from "../src/infra/db.js";
+import type { FastifyRequest } from "fastify";
+import { idiomaDeCorreo } from "../src/infra/idioma.js";
+import { correoDeCambioDePassword } from "../src/infra/plantillas-correo.js";
 
 describe("el sobre de error con details (1.6.0)", () => {
   test("los códigos nuevos están registrados con su status", () => {
@@ -61,9 +64,10 @@ function dbFalsa(usuario: object | null): Db {
   return db;
 }
 
-function armar(usuario: object | null = null) {
+function armar(usuario: object | null = null, opciones: { avisoFalla?: boolean } = {}) {
   let ahora = 1_800_000_000_000;
   const codigos: string[] = [];
+  const avisos: Array<{ destino: string; idioma: string }> = [];
   const ctx: Contexto = {
     config: CONFIG_PRUEBA,
     db: dbFalsa(usuario),
@@ -72,10 +76,14 @@ function armar(usuario: object | null = null) {
       async enviarCodigo(_d, codigo) { codigos.push(codigo); },
       async avisarIntentoDeRegistro() {},
       async avisarVinculacion() {},
+      async avisarCambioDePassword(destino, idioma) {
+        avisos.push({ destino, idioma });
+        if (opciones.avisoFalla === true) throw new Error("SMTP caído");
+      },
     },
     ahoraMs: () => ahora,
   };
-  return { auth: crearServicioAuth(ctx), codigos, avanzar: (ms: number) => { ahora += ms; } };
+  return { auth: crearServicioAuth(ctx), codigos, avisos, avanzar: (ms: number) => { ahora += ms; } };
 }
 
 async function codigoDeError(p: Promise<unknown>): Promise<string> {
@@ -276,5 +284,54 @@ describe("desactivar, borrar con gracia y reactivar (1.6.0)", () => {
     assert.equal(await leerVinculo(config, r, ahora), null);
     assert.equal(await leerReactivacion(config, v, ahora), null);
     assert.equal(await leerVinculo(config, v, ahora + 120_000), null);
+  });
+});
+
+describe("cambiar la contraseña avisa siempre, en el idioma del pedido (1.6.0)", () => {
+  const FILA = {
+    id: "u-1", usuario_id: "u-1", familia_id: "f-1", vence_en_ms: 1_900_000_000_000,
+    email: "a@b.co", password_hash: "x", creado_en_ms: 0, actualizado_en_ms: 0,
+    desactivada_en_ms: null, borrar_en_ms: null,
+  };
+
+  async function resetear(opciones: { avisoFalla?: boolean } = {}) {
+    const a = armar(FILA, opciones);
+    await a.auth.recuperacionInicio("a@b.co");
+    const { reset_token } = await a.auth.recuperacionVerificar("a@b.co", a.codigos.at(-1)!);
+    const sesion = await a.auth.recuperacionAplicar(reset_token, "Caballo-bateria-9", "fr");
+    return { ...a, sesion };
+  }
+
+  test("el aviso sale en el idioma pedido", async () => {
+    const { avisos, sesion } = await resetear();
+    assert.equal(sesion.user_id, "u-1");
+    assert.deepEqual(avisos, [{ destino: "a@b.co", idioma: "fr" }]);
+  });
+
+  test("si el correo falla, el cambio vale igual y vuelve la sesión", async () => {
+    const { avisos, sesion } = await resetear({ avisoFalla: true });
+    assert.equal(avisos.length, 1);
+    assert.equal(sesion.user_id, "u-1");
+  });
+
+  test("el idioma sale del Accept-Language: inglés, francés, y si no, español", () => {
+    const pedido = (h?: string) => ({ headers: h === undefined ? {} : { "accept-language": h } }) as unknown as FastifyRequest;
+    assert.equal(idiomaDeCorreo(pedido("en-US,en;q=0.9")), "en");
+    assert.equal(idiomaDeCorreo(pedido("fr-FR")), "fr");
+    assert.equal(idiomaDeCorreo(pedido("es-AR")), "es");
+    assert.equal(idiomaDeCorreo(pedido("de-DE")), "es");
+    assert.equal(idiomaDeCorreo(pedido()), "es");
+  });
+
+  test("el texto de cada idioma, con el lang del HTML y el texto plano sin entidades", () => {
+    const es = correoDeCambioDePassword({ destino: "a@b.co", idioma: "es", ahoraMs: 0 });
+    assert.ok(es.texto.includes("Cambiaste la contraseña de tu cuenta de Stamina. Si no fuiste tú, escríbenos."));
+    assert.ok(es.html.includes('<html lang="es">'));
+    const en = correoDeCambioDePassword({ destino: "a@b.co", idioma: "en", ahoraMs: 0 });
+    assert.ok(en.texto.includes("If it wasn't you, write to us."), en.texto);
+    assert.ok(en.html.includes('<html lang="en">') && en.html.includes("does not receive replies"));
+    const fr = correoDeCambioDePassword({ destino: "a@b.co", idioma: "fr", ahoraMs: 0 });
+    assert.ok(fr.texto.includes("Tu as changé le mot de passe de ton compte Stamina. Si ce n'était pas toi, écris-nous."), fr.texto);
+    assert.ok(!/\bvous\b/i.test(fr.texto + fr.html), "en francés se tutea");
   });
 });

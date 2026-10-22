@@ -222,7 +222,22 @@ export function crearRepo(db: Db) {
       );
     },
 
-    /** Cambiar la contraseña revoca las demás sesiones (AGENTS.md §12). */
+    /**
+     * `POST /auth/logout/others` (1.6.0): todas las familias de la persona menos la de
+     * `sesionId`. El `usuario_id` va en las dos condiciones: una sesión ajena no puede
+     * elegir qué familias quedan vivas. Si `sesionId` no es de esa persona, la
+     * subconsulta da null y no se revoca nada.
+     */
+    async revocarOtrasFamilias(usuarioId: string, sesionId: string, ahoraMs: number, motivo: string): Promise<void> {
+      await db.consultar(
+        `update sesiones set revocado_en_ms = $3, revocado_motivo = $4
+          where usuario_id = $1 and revocado_en_ms is null
+            and familia_id <> (select familia_id from sesiones where id = $2 and usuario_id = $1)`,
+        [usuarioId, sesionId, ahoraMs, motivo]
+      );
+    },
+
+    /** Revoca todas las sesiones de la persona (`POST /auth/logout` con `all`). */
     async revocarTodasDe(usuarioId: string, ahoraMs: number, motivo: string, exceptoSesionId?: string): Promise<void> {
       await db.consultar(
         `update sesiones set revocado_en_ms = $2, revocado_motivo = $3

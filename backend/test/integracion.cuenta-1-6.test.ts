@@ -38,6 +38,7 @@ let ctx: Contexto;
 const enviados = {
   codigos: [] as Array<{ destino: string; codigo: string }>,
   vinculaciones: [] as Array<{ destino: string; proveedor: string }>,
+  cambiosDePassword: [] as Array<{ destino: string; idioma: string }>,
 };
 
 const PASSWORD = "Caballo-bateria-grapa-9";
@@ -61,6 +62,9 @@ before(async () => {
       async avisarIntentoDeRegistro() {},
       async avisarVinculacion(destino, proveedor) {
         enviados.vinculaciones.push({ destino, proveedor });
+      },
+      async avisarCambioDePassword(destino, idioma) {
+        enviados.cambiosDePassword.push({ destino, idioma });
       },
     },
     // El id_token de prueba es la identidad en JSON. El servidor igual exige que
@@ -427,5 +431,38 @@ describe("vincular Google o Apple a una cuenta con contraseña", { skip: SIN_SER
     assert.ok(v.json.error.details.reactivation_token);
     // Ya está vinculada: el próximo Google contesta el estado, no otra oferta.
     assert.equal((await social("google", idToken({ sujeto, email }))).json.error.code, "account_deactivated");
+  });
+});
+
+describe("sesiones al cambiar la contraseña", { skip: SIN_SERVICIOS }, () => {
+  test("recuperar ya NO cierra las otras sesiones, y avisa por correo en el idioma del pedido", async () => {
+    const { email, sesion } = await registrar();
+    const otra = await pedir("POST", "/v1/auth/login", { email, password: PASSWORD });
+    const nueva = "Clave-nueva-de-prueba-4";
+    const r = await recuperar(email, nueva, { "accept-language": "fr-FR,fr;q=0.9" });
+    assert.equal(r.status, 200);
+    assert.equal((await pedir("GET", "/v1/me", undefined, sesion.access_token)).status, 200);
+    assert.equal((await pedir("GET", "/v1/me", undefined, otra.json.data.access_token)).status, 200);
+    assert.equal((await pedir("GET", "/v1/me", undefined, r.json.data.access_token)).status, 200);
+    assert.deepEqual(enviados.cambiosDePassword.filter((x) => x.destino === email), [{ destino: email, idioma: "fr" }]);
+    assert.equal((await pedir("POST", "/v1/auth/login", { email, password: PASSWORD })).json.error.code, "wrong_password");
+  });
+
+  test("POST /auth/logout/others cierra todas menos la cadena de quien pide, y es idempotente", async () => {
+    const { email, sesion: a } = await registrar();
+    const b = (await pedir("POST", "/v1/auth/login", { email, password: PASSWORD })).json.data as SesionApi;
+    const c = (await pedir("POST", "/v1/auth/login", { email, password: PASSWORD })).json.data as SesionApi;
+    // B rota: su cadena entera (el access viejo y el nuevo) tiene que seguir viva.
+    const b2 = (await pedir("POST", "/v1/auth/refresh", { refresh_token: b.refresh_token })).json.data as SesionApi;
+
+    assert.equal((await pedir("POST", "/v1/auth/logout/others", undefined, b2.access_token)).status, 204);
+    assert.equal((await pedir("GET", "/v1/me", undefined, a.access_token)).status, 401);
+    assert.equal((await pedir("GET", "/v1/me", undefined, c.access_token)).status, 401);
+    assert.equal((await pedir("POST", "/v1/auth/refresh", { refresh_token: c.refresh_token })).status, 401);
+    assert.equal((await pedir("GET", "/v1/me", undefined, b.access_token)).status, 200);
+    assert.equal((await pedir("GET", "/v1/me", undefined, b2.access_token)).status, 200);
+    assert.equal((await pedir("POST", "/v1/auth/logout/others", undefined, b2.access_token)).status, 204);
+    // Una sesión ya cerrada no decide nada.
+    assert.equal((await pedir("POST", "/v1/auth/logout/others", undefined, a.access_token)).status, 401);
   });
 });
