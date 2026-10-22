@@ -93,6 +93,11 @@ fun recordarTraductorDeErrores(): (Resultado<*>) -> String {
                 recursos.getString(R.string.error_account_pending_deletion),
             "invalid_reactivation_token" to
                 recursos.getString(R.string.error_invalid_reactivation_token),
+            // 1.4.0. El login, el alta y recuperar la contraseña dicen qué pasó.
+            "user_not_found" to recursos.getString(R.string.error_user_not_found),
+            "wrong_password" to recursos.getString(R.string.error_wrong_password),
+            "password_not_set" to recursos.getString(R.string.error_password_not_set),
+            "email_already_registered" to recursos.getString(R.string.error_email_taken),
         )
         val sinRed = recursos.getString(R.string.error_sin_red)
         val raro = recursos.getString(R.string.error_respuesta_rara)

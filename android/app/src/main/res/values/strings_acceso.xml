@@ -141,6 +141,11 @@
     <string name="error_account_pending_deletion">Esta cuenta está por borrarse. Hasta que se borre, se puede recuperar desde la app de iPhone.</string>
     <string name="error_invalid_reactivation_token">Se venció el pedido para recuperar la cuenta. Entrá de nuevo.</string>
 
+    <!-- ===== Códigos de error del contrato 1.4.0 (login y recuperar) ===== -->
+    <string name="error_user_not_found">No hay ninguna cuenta con ese correo.</string>
+    <string name="error_wrong_password">La contraseña no es correcta. Probá de nuevo.</string>
+    <string name="error_password_not_set">Esta cuenta se creó con Google o Apple y todavía no tiene contraseña. Podés crear una desde «¿Olvidaste tu contraseña?».</string>
+
     <!-- ===== Recuperar la contraseña · fpEmail, fpCode, fpNew, fpDone ===== -->
     <string name="fp_volver">Volver al paso anterior</string>
 

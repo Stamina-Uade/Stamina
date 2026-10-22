@@ -135,6 +135,11 @@
     <string name="error_account_pending_deletion">This account is about to be deleted. Until then, it can be recovered from the iPhone app.</string>
     <string name="error_invalid_reactivation_token">The request to recover the account expired. Sign in again.</string>
 
+    <!-- ===== Contract 1.4.0 error codes (sign-in and recovery) ===== -->
+    <string name="error_user_not_found">There is no account with that email.</string>
+    <string name="error_wrong_password">That password is not right. Try again.</string>
+    <string name="error_password_not_set">This account was created with Google or Apple and has no password yet. You can create one from “Forgot your password?”.</string>
+
     <!-- ===== Password recovery · fpEmail, fpCode, fpNew, fpDone ===== -->
     <string name="fp_volver">Back to the previous step</string>
 
