@@ -24,6 +24,7 @@ import { prepararHashDummy } from "../src/infra/cripto.js";
 import { sembrarCatalogo } from "../src/dominios/catalogo/sembrar.js";
 import { versionLegal } from "../src/dominios/legal/textos.js";
 import { fechaLocal } from "../src/infra/fechas.js";
+import { purgar } from "../src/dominios/cuenta/purgar.js";
 import type { Contexto } from "../src/contexto.js";
 
 const HAY_SERVICIOS = Boolean(process.env["DATABASE_URL"] && process.env["REDIS_URL"]);
@@ -244,13 +245,15 @@ describe("registro", { skip: SIN_SERVICIOS }, () => {
     assert.equal(r.json.error.code, "invalid_code");
   });
 
-  test("al tercer código equivocado el desafío expira", async () => {
+  // 1.6.0: son 5 intentos, y agotarlos tiene su propio código (vencer por tiempo
+  // sigue siendo `code_expired`).
+  test("al quinto código equivocado el código queda agotado", async () => {
     const email = nuevoEmail();
     await pedir("POST", "/v1/auth/register", { email });
-    for (let intento = 1; intento <= 3; intento++) {
+    for (let intento = 1; intento <= 5; intento++) {
       const r = await pedir("POST", "/v1/auth/register/verify", { email, code: "ZZZZZZ" });
       assert.equal(r.status, 400);
-      assert.equal(r.json.error.code, intento === 3 ? "code_expired" : "invalid_code");
+      assert.equal(r.json.error.code, intento === 5 ? "code_attempts_exceeded" : "invalid_code");
     }
     const correcto = await pedir("POST", "/v1/auth/register/verify", { email, code: codigos.at(-1)! });
     assert.notEqual(correcto.status, 200);
@@ -433,7 +436,9 @@ describe("recuperación de contraseña", { skip: SIN_SERVICIOS }, () => {
     assert.equal(r.json.error.code, "user_not_found");
   });
 
-  test("🛑 cambiar la contraseña REVOCA las demás sesiones", async () => {
+  // 1.6.0: cambiar la contraseña ya NO cierra las otras sesiones; lo decide la
+  // persona, con `POST /auth/logout/others`.
+  test("🛑 cambiar la contraseña deja las otras sesiones, y «cerrar las otras» las cierra", async () => {
     const { email, sesion } = await registrar();
     const otra = await pedir("POST", "/v1/auth/login", { email, password: PASSWORD });
     assert.equal(otra.status, 200);
@@ -445,11 +450,18 @@ describe("recuperación de contraseña", { skip: SIN_SERVICIOS }, () => {
     const reset = await pedir("POST", "/v1/auth/password/reset", { reset_token: v.json.data.reset_token, password: nueva });
     assert.equal(reset.status, 200);
 
-    assert.equal((await pedir("GET", "/v1/me", undefined, sesion.access_token)).status, 401);
-    assert.equal((await pedir("GET", "/v1/me", undefined, otra.json.data.access_token)).status, 401);
+    assert.equal((await pedir("GET", "/v1/me", undefined, sesion.access_token)).status, 200);
+    assert.equal((await pedir("GET", "/v1/me", undefined, otra.json.data.access_token)).status, 200);
     assert.equal((await pedir("GET", "/v1/me", undefined, reset.json.data.access_token)).status, 200);
     assert.equal((await pedir("POST", "/v1/auth/login", { email, password: PASSWORD })).status, 401);
     assert.equal((await pedir("POST", "/v1/auth/login", { email, password: nueva })).status, 200);
+
+    const otras = await pedir("POST", "/v1/auth/logout/others", undefined, reset.json.data.access_token);
+    assert.equal(otras.status, 204);
+    assert.equal((await pedir("GET", "/v1/me", undefined, sesion.access_token)).status, 401);
+    assert.equal((await pedir("GET", "/v1/me", undefined, otra.json.data.access_token)).status, 401);
+    assert.equal((await pedir("GET", "/v1/me", undefined, reset.json.data.access_token)).status, 200,
+      "la sesión que pide sigue abierta");
   });
 });
 
@@ -1087,7 +1099,9 @@ describe("cuenta: exportar y borrar (§8)", { skip: SIN_SERVICIOS }, () => {
     assert.ok(!texto.includes("argon2") && !texto.includes("refresh"), "🛑 ni hashes ni tokens");
   });
 
-  test("🛑 borrar pide la contraseña, cierra todo, y deja volver a registrarse", async () => {
+  // 1.6.0: borrar deja la cuenta marcada 30 días (se puede recuperar) y la purga
+  // la borra de verdad, en cascada; recién ahí el correo queda libre.
+  test("🛑 borrar pide la contraseña, cierra todo, da 30 días, y la purga deja volver a registrarse", async () => {
     const { email, sesion } = await registrar(nuevoEmail(), perfilCompleto());
     await pedir("GET", "/v1/plan", undefined, sesion.access_token);
     await pedir("POST", "/v1/gym/sessions/gym-2026-10-06/sets", { sets: [serie(1)] }, sesion.access_token);
@@ -1109,6 +1123,18 @@ describe("cuenta: exportar y borrar (§8)", { skip: SIN_SERVICIOS }, () => {
     assert.equal(mala.json.error.code, "invalid_credentials");
 
     assert.equal((await pedir("POST", "/v1/me/delete", { password: PASSWORD }, sesion.access_token)).status, 204);
+    assert.equal((await pedir("GET", "/v1/me", undefined, sesion.access_token)).status, 401, "cierra todas las sesiones");
+    assert.equal((await pedir("POST", "/v1/auth/refresh", { refresh_token: sesion.refresh_token })).status, 401);
+    const porBorrarse = await pedir("POST", "/v1/auth/login", { email, password: PASSWORD });
+    assert.equal(porBorrarse.status, 403);
+    assert.equal(porBorrarse.json.error.code, "account_pending_deletion");
+    assert.equal(porBorrarse.json.error.details.days_remaining, 30);
+    const deNuevo = await pedir("POST", "/v1/auth/register", { email });
+    assert.equal(deNuevo.json.error.code, "email_already_registered", "mientras tanto el correo sigue tomado");
+
+    // Vencido el plazo, la purga la borra físicamente.
+    await db.consultar(`update usuarios set borrar_en_ms = $2 where id = $1`, [sesion.user_id, Date.now() - 1]);
+    await purgar(db, Date.now());
     const restos = await db.unaFila<{ total: number }>(
       `select (select count(*) from usuarios where id = $1) +
               (select count(*) from perfiles where usuario_id = $1) +
@@ -1123,13 +1149,10 @@ describe("cuenta: exportar y borrar (§8)", { skip: SIN_SERVICIOS }, () => {
       [sesion.user_id]
     );
     assert.equal(restos?.total, 0, "la cuenta y sus datos se borran físicamente en cascada");
-    const me = await pedir("GET", "/v1/me", undefined, sesion.access_token);
-    assert.equal(me.status, 401);
     // La cuenta ya no existe: el login contesta lo mismo que para un correo que nunca se registró.
     const login = await pedir("POST", "/v1/auth/login", { email, password: PASSWORD });
     assert.equal(login.status, 404);
     assert.equal(login.json.error.code, "user_not_found");
-    assert.equal((await pedir("POST", "/v1/auth/refresh", { refresh_token: sesion.refresh_token })).status, 401);
 
     // El correo quedó libre: la cuenta vieja no existe para ninguna lectura.
     const otraVez = await registrar(email);
