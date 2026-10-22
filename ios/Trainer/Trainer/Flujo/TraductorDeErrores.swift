@@ -37,7 +37,7 @@ enum TraductorDeErrores {
             switch codigo {
             case "user_not_found": return Textos.errorUserNotFoundTitle
             case "wrong_password", "invalid_credentials": return Textos.errorWrongPasswordTitle
-            case "password_not_set": return Textos.errorPasswordNotSetTitle("Google / Apple")
+            case "password_not_set": return Textos.errorPasswordNotSetTitle(Textos.commonGoogleOrApple)
             case "email_already_registered": return Textos.errorEmailAlreadyRegisteredTitle
             case "invalid_code": return Textos.errorInvalidCodeTitle
             case "code_expired": return Textos.errorCodeExpiredTitle
@@ -77,7 +77,7 @@ enum TraductorDeErrores {
         // 2026-10-21: login, alta y recuperación dicen qué pasó.
         case "user_not_found": return Textos.errorUserNotFound
         case "wrong_password": return Textos.errorWrongPassword
-        case "password_not_set": return Textos.errorPasswordNotSet("Google / Apple")
+        case "password_not_set": return Textos.errorPasswordNotSet(Textos.commonGoogleOrApple)
         case "email_already_registered": return Textos.errorEmailAlreadyRegistered
         case "invalid_code": return Textos.errorInvalidCode
         case "code_expired": return Textos.errorCodeExpired
@@ -93,13 +93,13 @@ enum TraductorDeErrores {
         // Google y Apple (contrato 1.4.0).
         case "invalid_provider_token": return Textos.loginSocialFailed
         case "provider_not_configured": return Textos.loginSocialNotConfigured
-        case "invalid_signup_token": return Textos.signupSocialExpired("Google / Apple")
+        case "invalid_signup_token": return Textos.signupSocialExpired(Textos.commonGoogleOrApple)
         // 1.6.0. La mayoría tiene su propia alerta en `FlujoEntrada`; éstos son
         // los textos para cuando llegan por otro camino.
         case "too_many_attempts": return Textos.errorTooManyAttempts
         case "code_attempts_exceeded": return Textos.errorCodeAttemptsExceeded
         case "account_link_available": return Textos.loginSocialAccountExists
-        case "invalid_link_token": return Textos.signupSocialExpired("Google / Apple")
+        case "invalid_link_token": return Textos.signupSocialExpired(Textos.commonGoogleOrApple)
         case "account_deactivated": return Textos.accountDeactivatedBody
         case "account_pending_deletion": return Textos.accountPendingDeletionDone
         case "invalid_reactivation_token": return Textos.errorInvalidRegistrationToken

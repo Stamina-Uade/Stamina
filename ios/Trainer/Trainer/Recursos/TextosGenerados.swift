@@ -9,7 +9,7 @@
 // números y unidades se formatean con el locale del sistema. Esto resuelve lo
 // primero; lo segundo es de quien presenta el dato.
 //
-// 845 claves · idioma de autoría: en
+// 846 claves · idioma de autoría: en
 // =============================================================================
 
 import Foundation
@@ -188,6 +188,9 @@ enum Textos {
 
     /// Event date
     static var commonEventDate: String { String(localized: "common.event_date") }
+
+    /// Google or Apple
+    static var commonGoogleOrApple: String { String(localized: "common.google_or_apple") }
 
     /// Got it
     static var commonGotIt: String { String(localized: "common.got_it") }

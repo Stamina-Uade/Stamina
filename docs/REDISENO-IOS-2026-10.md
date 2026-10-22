@@ -208,3 +208,45 @@ target Trainer, agregar **HealthKit** si Xcode lo pide.
   cerrar sesión pide confirmación con alerta; **Datos personales** y **Entrenamiento** editables (un solo `PATCH /me`
   con lo que cambió); 11 colores + personalizado (se agregó Lavanda).
 - **Perfil:** sin opciones de Ajustes; tocar los datos del cuerpo o los días abre la página de Ajustes que los edita.
+
+## Séptima ronda (22-10) — "Entrar y registrarse" y lo general
+
+Rama `cambios-entrada-ios` (sale de `rediseno-ios-2026-10`). Compilado con Xcode 26.6 (iPhone y reloj);
+154/154 tests unitarios del iPhone, 168/168 de `TrainerCore`, 232/232 unitarios del backend.
+
+- **Contrato 1.6.0** (`shared/api/openapi.yaml`): `details` en el sobre de error; `too_many_attempts`
+  (5 contraseñas equivocadas bloquean el correo 15 min, y un tope por IP); `code_attempts_exceeded`
+  (5 códigos equivocados) distinto de `code_expired`; `password_not_set` con el proveedor; vincular
+  Google/Apple (`account_link_available` + `POST /auth/social/link`); desactivar (`POST /me/deactivate`)
+  y borrar con 30 días de gracia (`POST /me/delete`), con `account_deactivated` /
+  `account_pending_deletion` y `POST /auth/reactivate`; cambiar la contraseña ya NO cierra las otras
+  sesiones (`POST /auth/logout/others`) y manda un correo de aviso; `weak_password` sólo por las tres
+  reglas. Migración `019_desactivar_y_borrar_con_gracia.sql`. `npm run purgar` borra las vencidas.
+- **Alertas**: `AlertaApilada` (TrainerCore) reemplaza al `.alert` en toda la app: botones apilados,
+  cancelar abajo y en negrita, destructivos en rojo, azul del sistema (no el color de la app), en una
+  ventana propia. Copia la alerta de iOS 26 (y la clásica antes de iOS 26). "Listo" → "Ok".
+- **Entrar**: botones habilitados sólo con datos válidos; los errores son alertas con título y mensaje
+  (`FlujoEntrada.alerta`); el único rojo es "Las contraseñas no coinciden", al tocar.
+- **Alta en 11 pasos** (10 con Google/Apple y el correo validado): Crea tu cuenta → Valida tu correo →
+  **Antes de empezar** (texto de la app, dos casillas, hoja legal; reemplaza aviso, términos y "Antes de
+  arrancar") → Nacimiento (18+) → Sexo → Peso y altura → Deporte → Nivel → Objetivo (fecha obligatoria si
+  es carrera) → Días y horarios (con la notificación para prepararte) → **Tu apto físico**. Se borraron
+  `ProblemaView`, `PreviewPlanView`, `RegClaveView`, `RegNombreView`, `ClaveListaView`, `RegAvisoView`,
+  `RegTerminosView`, `RegSaludView`, `RegMedicionView` y `RegListoView`.
+- **Notificación para prepararte**: se guarda en el teléfono (`AvisoDePreparacion`: claves
+  `ajuste_notif_recordatorio_antes` y `ajuste_notif_recordatorio_minutos`, 5–60 min, 30 de entrada), el
+  mismo lugar que el resto de los avisos; el servidor no programa avisos.
+- **Textos**: español de "tú" en los dos catálogos, los legales (versión 1.1.0) y los correos; francés
+  tuteado y frases que estaban en inglés traducidas. Sin emojis (el ⚡ es el botón dibujado en el texto).
+- **Bienvenida** con tres fotos fijas (01, 09, 20). Las otras 17 `FondoRunning` siguen en el catálogo:
+  las usan las tarjetas de Inicio y Plan (`FondosDeTarjeta`).
+
+### Pendiente para una persona
+
+- **Desplegar el backend** con la migración 019 (`scripts/desplegar-backend.sh`) y programar `npm run
+  purgar` a diario si el timer no lo corre (borra las cuentas con el plazo vencido).
+- 3 tests de `backend/test/integracion.api.test.ts` esperan el comportamiento de antes de la 1.6.0 (3
+  códigos, el reset que revoca, el borrado en el acto). El archivo tiene cambios sin commitear de otra
+  persona y no se tocó; los comportamientos nuevos están cubiertos en `integracion.cuenta-1-6.test.ts`.
+- Los tests de UI no se corrieron enteros en esta ronda (ver el resumen de la sesión).
+- `docs/diagrama-backend-stamina.html` todavía dice que cambiar la contraseña revoca las otras sesiones.

@@ -1351,6 +1351,29 @@
         }
       }
     },
+    "common.google_or_apple" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Google or Apple"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Google o Apple"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Google ou Apple"
+          }
+        }
+      }
+    },
     "common.got_it" : {
       "comment" : "Cierra la hoja de explicación",
       "extractionState" : "manual",
