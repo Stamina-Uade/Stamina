@@ -9,7 +9,7 @@
 // números y unidades se formatean con el locale del sistema. Esto resuelve lo
 // primero; lo segundo es de quien presenta el dato.
 //
-// 868 claves · idioma de autoría: en
+// 845 claves · idioma de autoría: en
 // =============================================================================
 
 import Foundation
@@ -134,9 +134,6 @@ enum Textos {
 
     /// Cancel
     static var commonCancel: String { String(localized: "common.cancel") }
-
-    /// Change email
-    static var commonChangeEmail: String { String(localized: "common.change_email") }
 
     /// Close
     static var commonClose: String { String(localized: "common.close") }
@@ -725,9 +722,6 @@ enum Textos {
     /// Load more
     static var historyLoadMore: String { String(localized: "history.load_more") }
 
-    /// Loading…
-    static var historyLoading: String { String(localized: "history.loading") }
-
     /// This activity has no saved GPS route.
     static var historyNoRoute: String { String(localized: "history.no_route") }
 
@@ -803,9 +797,6 @@ enum Textos {
 
     /// We couldn't get this from the server. Try again in a while.
     static var homeDataError: String { String(localized: "home.data.error") }
-
-    /// Getting the latest…
-    static var homeDataLoading: String { String(localized: "home.data.loading") }
 
     /// You're offline, and there's nothing saved on this phone to show yet. It loads by itself once you're back onlin
     static var homeDataOffline: String { String(localized: "home.data.offline") }
@@ -942,12 +933,6 @@ enum Textos {
 
     /// Get ready
     static var homePrepareWorkout: String { String(localized: "home.prepare_workout") }
-
-    /// Your profile is missing details your plan uses.
-    static var homeProfileIncompleteBody: String { String(localized: "home.profile_incomplete.body") }
-
-    /// Complete profile
-    static var homeProfileIncompleteButton: String { String(localized: "home.profile_incomplete.button") }
 
     /// Back to workout
     static var homeShortcutsBackToWorkout: String { String(localized: "home.shortcuts.back_to_workout") }
@@ -1430,12 +1415,6 @@ enum Textos {
     /// New password
     static var passwordResetNewLabel: String { String(localized: "password.reset.new.label") }
 
-    /// The two passwords match.
-    static var passwordResetNewMatch: String { String(localized: "password.reset.new.match") }
-
-    /// The two passwords don't match.
-    static var passwordResetNewNoMatch: String { String(localized: "password.reset.new.no_match") }
-
     /// Repeat password
     static var passwordResetNewRepeatLabel: String { String(localized: "password.reset.new.repeat_label") }
 
@@ -1710,51 +1689,6 @@ enum Textos {
         String(format: String(localized: "plan.weeks_left"), arg1)
     }
 
-    /// A heads-up 45 min ahead so you can get bottles, gels and your pre-workout snack ready.
-    static var previewBeforeBody: String { String(localized: "preview.before_body") }
-
-    /// And before you head out
-    static var previewBeforeLabel: String { String(localized: "preview.before_label") }
-
-    /// 750 ml/h
-    static var previewChipFluid: String { String(localized: "preview.chip.fluid") }
-
-    /// 1 gel every 45′
-    static var previewChipGel: String { String(localized: "preview.chip.gel") }
-
-    /// 600 mg sodium
-    static var previewChipSodium: String { String(localized: "preview.chip.sodium") }
-
-    /// Let's build your plan in 2 minutes
-    static var previewCtaTitle: String { String(localized: "preview.cta_title") }
-
-    /// Already have an account?
-    static var previewHaveAccount: String { String(localized: "preview.have_account") }
-
-    /// Your plan on race day
-    static var previewLabel: String { String(localized: "preview.label") }
-
-    /// Long run · 14 km · 26°
-    static var previewSession: String { String(localized: "preview.session") }
-
-    /// Sign in
-    static var previewSignIn: String { String(localized: "preview.sign_in") }
-
-    /// Get started
-    static var previewStart: String { String(localized: "preview.start") }
-
-    /// of those who stopped training did so for lack of time
-    static var problemFact1: String { String(localized: "problem.fact1") }
-
-    /// of runners get cramps: losing 3 to 5 % of body weight already causes weakness and disorientation
-    static var problemFact2: String { String(localized: "problem.fact2") }
-
-    /// of people who play sport compete in organised races
-    static var problemFact3: String { String(localized: "problem.fact3") }
-
-    /// Enthusiasm isn't the problem
-    static var problemTitle: String { String(localized: "problem.title") }
-
     /// Age
     static var profileAge: String { String(localized: "profile.age") }
 
@@ -1785,9 +1719,6 @@ enum Textos {
 
     /// Your previous goals have ended. Set a new goal to start your next plan.
     static var profileGoalsFinished: String { String(localized: "profile.goals.finished") }
-
-    /// Looking for your goals…
-    static var profileGoalsLoading: String { String(localized: "profile.goals.loading") }
 
     /// + Manage
     static var profileGoalsManage: String { String(localized: "profile.goals.manage") }

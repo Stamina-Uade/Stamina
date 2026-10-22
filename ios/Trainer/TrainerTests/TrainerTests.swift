@@ -145,27 +145,11 @@ struct LoQueGuardaCadaPasoTests {
 
     private let baires = TimeZone(identifier: "America/Argentina/Buenos_Aires")!
 
-    @Test("El nombre va sin espacios de sobra, y un apellido vacío viaja como null explícito")
-    func nombre() {
-        var d = DatosRegistro()
-        d.nombre = "  Iván "
-        d.apellido = "   "
-
-        #expect(d.loQueGuarda(en: .regNombre, zonaHoraria: baires) == PerfilEntrada(firstName: "Iván"))
-        #expect(d.camposEnNull(en: .regNombre) == [.apellido],
-                "sin el null, un apellido cargado una vez no se podría borrar nunca")
-
-        d.apellido = "Benítez "
-        #expect(d.loQueGuarda(en: .regNombre, zonaHoraria: baires)
-                == PerfilEntrada(firstName: "Iván", lastName: "Benítez"))
-        #expect(d.camposEnNull(en: .regNombre).isEmpty)
-    }
-
     @Test("Con el nombre alcanza: el apellido es opcional")
     func apellidoOpcional() {
         var d = DatosRegistro()
         d.nombre = "Iván"
-        #expect(d.puedeSeguir(en: .regNombre))
+        #expect(d.identidadLista)
     }
 
     @Test("Las elecciones arrancan vacías y no dejan seguir hasta que alguien elija")
@@ -191,6 +175,18 @@ struct LoQueGuardaCadaPasoTests {
         #expect(d.puedeSeguir(en: .regNacimiento), "elegir la fecha que ya mostraba la rueda también vale")
     }
 
+    @Test("Con menos de 18 años no se sigue: es la edad mínima de los términos")
+    func nacimientoMayorDeEdad() {
+        var calendario = Calendar(identifier: .gregorian)
+        calendario.timeZone = baires
+        let hoy = calendario.date(from: DateComponents(year: 2026, month: 10, day: 22, hour: 12))!
+        var d = DatosRegistro()
+        d.nacimiento = calendario.date(from: DateComponents(year: 2008, month: 10, day: 23, hour: 12))!
+        #expect(!d.tieneEdadMinima(hoy: hoy, calendario: calendario), "le falta un día para los 18")
+        d.nacimiento = calendario.date(from: DateComponents(year: 2008, month: 10, day: 22, hour: 12))!
+        #expect(d.tieneEdadMinima(hoy: hoy, calendario: calendario), "hoy cumple 18")
+    }
+
     @Test("Cada paso manda sólo lo suyo: un campo de más pisaría lo de otro paso")
     func soloLoSuyo() {
         var d = DatosRegistro()
@@ -199,13 +195,11 @@ struct LoQueGuardaCadaPasoTests {
         d.alturaTexto = "178"
         d.deporte = .ciclismo
         d.nivel = .avanzado
-        d.descargoAceptado = true
 
         #expect(d.loQueGuarda(en: .regSexo, zonaHoraria: baires) == PerfilEntrada(biologicalSex: .femenino))
         #expect(d.loQueGuarda(en: .regCuerpo, zonaHoraria: baires) == PerfilEntrada(weightG: 72_000, heightMm: 1_780))
         #expect(d.loQueGuarda(en: .regDeporte, zonaHoraria: baires) == PerfilEntrada(sport: .ciclismo))
         #expect(d.loQueGuarda(en: .regNivel, zonaHoraria: baires) == PerfilEntrada(level: .avanzado))
-        #expect(d.loQueGuarda(en: .regSalud, zonaHoraria: baires) == PerfilEntrada(medicalDisclaimerAccepted: true))
     }
 
     @Test("El nacimiento viaja como la medianoche UTC del día elegido")
@@ -219,28 +213,31 @@ struct LoQueGuardaCadaPasoTests {
                 == PerfilEntrada(birthdateMs: UnidadesTests.veinticuatroDeJunioUTC))
     }
 
-    @Test("Sin fecha de carrera se manda null, no una fecha inventada ni la ausencia")
-    func objetivoSinFecha() {
+    @Test("Una carrera pide la fecha; con fecha viaja como medianoche UTC")
+    func objetivoConCarrera() {
         var d = DatosRegistro()
         d.objetivo = .maraton
-
-        #expect(d.loQueGuarda(en: .regObjetivo, zonaHoraria: baires) == PerfilEntrada(goal: .maraton))
-        #expect(d.camposEnNull(en: .regObjetivo) == [.fechaDelObjetivo])
+        #expect(!d.puedeSeguir(en: .regObjetivo), "sin fecha de carrera no se sigue (2026-10-22)")
 
         var calendario = Calendar(identifier: .gregorian)
         calendario.timeZone = baires
         d.fechaObjetivo = calendario.date(from: DateComponents(year: 1998, month: 6, day: 24, hour: 9))!
+        #expect(d.puedeSeguir(en: .regObjetivo))
         #expect(d.loQueGuarda(en: .regObjetivo, zonaHoraria: baires)
                 == PerfilEntrada(goal: .maraton, goalDateMs: UnidadesTests.veinticuatroDeJunioUTC))
         #expect(d.camposEnNull(en: .regObjetivo).isEmpty)
     }
 
-    @Test("La medición no guarda nada: el contrato no tiene dónde (B-006)")
-    func medicion() {
+    @Test("Volver a entrenar sin lesiones no tiene fecha: sigue derecho y manda null")
+    func objetivoSinCarrera() {
         var d = DatosRegistro()
-        d.medicion = .garmin
-        #expect(d.loQueGuarda(en: .regMedicion, zonaHoraria: baires) == nil)
-        #expect(d.puedeSeguir(en: .regMedicion), "«Ahora no» del diseño: se sigue sin elegir")
+        d.objetivo = .volverSinLesiones
+        // Aunque haya quedado una fecha de antes, no viaja: no hay calendario.
+        d.fechaObjetivo = Date(timeIntervalSince1970: 0)
+
+        #expect(d.puedeSeguir(en: .regObjetivo))
+        #expect(d.loQueGuarda(en: .regObjetivo, zonaHoraria: baires) == PerfilEntrada(goal: .volverSinLesiones))
+        #expect(d.camposEnNull(en: .regObjetivo) == [.fechaDelObjetivo])
     }
 
     @Test("Los días salen ordenados, con el día ISO, y viajan con la zona")
@@ -255,9 +252,9 @@ struct LoQueGuardaCadaPasoTests {
                 "sin la zona, el minuto del día no significa nada")
     }
 
-    @Test("El resumen no guarda nada: cada paso ya guardó lo suyo")
-    func resumen() {
-        #expect(DatosRegistro().loQueGuarda(en: .regListo, zonaHoraria: baires) == nil)
+    @Test("El apto no guarda nada en el servidor: vive en el teléfono")
+    func apto() {
+        #expect(DatosRegistro().loQueGuarda(en: .regApto, zonaHoraria: baires) == nil)
     }
 }
 
@@ -358,7 +355,7 @@ struct FlujoTests {
         let flujo = flujo()
         flujo.ir(a: .regCorreo)
         flujo.ir(a: .regCodigo)
-        flujo.ir(a: .regAviso)
+        flujo.ir(a: .regAntesDeEmpezar)
 
         flujo.volver()
         flujo.volver()
@@ -375,37 +372,27 @@ struct FlujoTests {
         #expect(flujo.pantalla == .regNacimiento)
     }
 
-    @Test("Los términos vuelven al aviso")
-    func terminos() {
-        let flujo = flujo()
-        flujo.ir(a: .regAviso)
-        flujo.ir(a: .regTerminos)
-        flujo.volver()
-        #expect(flujo.pantalla == .regAviso)
-    }
-
-    @Test("Son TRECE pasos: datos+contraseña, código, aviso y los diez de perfil")
+    @Test("Son ONCE pasos: crea tu cuenta, código, antes de empezar, siete de perfil y el apto")
     func pasosDelRegistro() {
-        #expect(Pantalla.pasosDelRegistro.count == 13)
+        #expect(Pantalla.pasosDelRegistro.count == 11)
         #expect(Pantalla.pasosDelRegistro.first == .regCorreo)
-        #expect(Pantalla.regClave.numeroDePaso == nil, "la contraseña va con el correo")
-        #expect(Pantalla.regNombre.numeroDePaso == nil, "el nombre va con el correo")
-        #expect(Pantalla.regAviso.numeroDePaso == 3)
+        #expect(Pantalla.regAntesDeEmpezar.numeroDePaso == 3)
         #expect(Pantalla.regNacimiento.numeroDePaso == 4, "la barra NO se reinicia al crear la cuenta")
         #expect(Pantalla.regObjetivo.numeroDePaso == 9)
-        #expect(Pantalla.pasosDelRegistro.last == .regListo)
-        #expect(Pantalla.pasosDePerfil.count == 11)
+        #expect(Pantalla.regDias.numeroDePaso == 10)
+        #expect(Pantalla.pasosDelRegistro.last == .regApto)
+        #expect(Pantalla.pasosDePerfil.count == 8)
         // Las de afuera del registro no cuentan para la barra de avance.
         #expect(Pantalla.login.numeroDePaso == nil)
-        #expect(Pantalla.regTerminos.numeroDePaso == nil)
         #expect(Pantalla.bienvenida.esPasoDelRegistro == false)
     }
 
-    @Test("«Completar después» está en los diez primeros pasos de perfil y no en el resumen")
+    @Test("«Completar después» aparece desde Deporte, y no en el apto")
     func completarDespues() {
-        #expect(Pantalla.pasosDePerfil.filter(\.ofreceCompletarDespues).count == 10)
-        #expect(!Pantalla.regListo.ofreceCompletarDespues)
-        #expect(!Pantalla.regAviso.ofreceCompletarDespues, "antes de crear la cuenta no hay a dónde entrar")
+        #expect(Pantalla.pasosDePerfil.filter(\.ofreceCompletarDespues)
+                == [.regDeporte, .regNivel, .regObjetivo, .regDias])
+        #expect(!Pantalla.regNacimiento.ofreceCompletarDespues)
+        #expect(!Pantalla.regAntesDeEmpezar.ofreceCompletarDespues, "antes de crear la cuenta no hay a dónde entrar")
     }
 }
 
@@ -420,8 +407,8 @@ struct FlujoContraElServidorTests {
         return FlujoEntrada(servicio: doble, zonaHoraria: { zona }, reloj: { Fijo.ahoraMs })
     }
 
-    /// Correo, código, contraseña y aviso: deja el flujo en el paso 4, listo para
-    /// crear la cuenta.
+    /// Correo, código, contraseña y las dos casillas: deja el flujo en "Antes de
+    /// empezar", listo para crear la cuenta.
     private func llegarAlAviso(_ flujo: FlujoEntrada) async {
         flujo.ir(a: .regCorreo)
         flujo.datos.nombre = "Persona"
@@ -435,6 +422,7 @@ struct FlujoContraElServidorTests {
         await flujo.verificarCodigoDeRegistro()
         await flujo.cargarLegalesSiFaltan()
         flujo.aceptoElAviso = true
+        flujo.aceptoElDescargo = true
     }
 
     // MARK: - Arranque
@@ -462,10 +450,10 @@ struct FlujoContraElServidorTests {
         #expect(await doble.pedidos == ["entrar:persona@ejemplo.com"])
     }
 
-    @Test("Un login rechazado muestra el code traducido, nunca el message")
+    @Test("Una contraseña equivocada es una alerta con «Intentar de nuevo» y nada más")
     func loginRechazado() async {
         var guion = Guion()
-        guion.login = [.rechazado(codigo: "invalid_credentials", http: 401)]
+        guion.login = [.rechazado(codigo: "wrong_password", http: 401)]
         let flujo = flujo(ServicioDePrueba(guion))
         flujo.ir(a: .login)
         flujo.loginCorreo = "persona@ejemplo.com"
@@ -474,10 +462,101 @@ struct FlujoContraElServidorTests {
         await flujo.entrar()
 
         #expect(flujo.pantalla == .login)
-        #expect(flujo.errorVisible == Textos.errorInvalidCredentials)
+        #expect(flujo.alerta?.titulo == Textos.errorWrongPasswordTitle)
+        #expect(flujo.alerta?.mensaje == Textos.errorWrongPassword)
+        #expect(flujo.alerta?.botones.map(\.titulo) == [Textos.commonTryAgain])
+        #expect(flujo.alerta?.botones.first?.rol == .cancelar)
     }
 
-    @Test("Sin red es un texto, no un cuelgue ni un crash")
+    @Test("Sin cuenta: «El usuario no existe», y «Crear cuenta» abre el alta con el correo escrito")
+    func loginSinCuenta() async {
+        var guion = Guion()
+        guion.login = [.rechazado(codigo: "user_not_found", http: 404)]
+        let flujo = flujo(ServicioDePrueba(guion))
+        flujo.ir(a: .login)
+        flujo.loginCorreo = "persona@ejemplo.com"
+        flujo.loginClave = "Trainer2026x"
+
+        await flujo.entrar()
+
+        let alerta = try? #require(flujo.alerta)
+        #expect(alerta?.titulo == Textos.errorUserNotFoundTitle)
+        #expect(alerta?.botonesOrdenados.map(\.titulo) == [Textos.commonCreateAccount, Textos.commonTryAgain],
+                "cancelar va abajo")
+        alerta?.botones.first { $0.titulo == Textos.commonCreateAccount }?.accion()
+        #expect(flujo.pantalla == .regCorreo)
+        #expect(flujo.datos.correo == "persona@ejemplo.com")
+    }
+
+    @Test("Una cuenta de Google sin contraseña lo dice con su proveedor")
+    func loginSinContrasena() async {
+        var guion = Guion()
+        guion.login = [.rechazado(codigo: "password_not_set", http: 409,
+                                  detalle: DatosDelError(provider: .google))]
+        let flujo = flujo(ServicioDePrueba(guion))
+        flujo.ir(a: .login)
+        flujo.loginCorreo = "persona@ejemplo.com"
+        flujo.loginClave = "Trainer2026x"
+
+        await flujo.entrar()
+
+        #expect(flujo.alerta?.titulo == Textos.errorPasswordNotSetTitle("Google"))
+        #expect(flujo.alerta?.mensaje == Textos.errorPasswordNotSet("Google"))
+    }
+
+    @Test("Una cuenta desactivada ofrece reactivarla, y reactivar entra al Home")
+    func loginDesactivada() async {
+        var guion = Guion()
+        guion.login = [.rechazado(codigo: "account_deactivated", http: 403,
+                                  detalle: DatosDelError(reactivationToken: "permiso-reactivar"))]
+        let doble = ServicioDePrueba(guion)
+        let flujo = flujo(doble)
+        flujo.ir(a: .login)
+        flujo.loginCorreo = "persona@ejemplo.com"
+        flujo.loginClave = "Trainer2026x"
+
+        await flujo.entrar()
+
+        #expect(flujo.alerta?.titulo == Textos.accountDeactivatedTitle)
+        #expect(flujo.alerta?.botonesOrdenados.map(\.titulo) == [Textos.accountReactivate, Textos.commonCancel])
+        await flujo.reactivar(permiso: "permiso-reactivar")
+        #expect(flujo.pantalla == .home)
+        #expect(await doble.pedidos.last == "reactivarCuenta:permiso-reactivar")
+    }
+
+    @Test("Una cuenta por borrarse dice cuántos días faltan y ofrece recuperarla")
+    func loginPorBorrarse() async {
+        var guion = Guion()
+        guion.login = [.rechazado(codigo: "account_pending_deletion", http: 403,
+                                  detalle: DatosDelError(reactivationToken: "p", daysRemaining: 12))]
+        let flujo = flujo(ServicioDePrueba(guion))
+        flujo.ir(a: .login)
+        flujo.loginCorreo = "persona@ejemplo.com"
+        flujo.loginClave = "Trainer2026x"
+
+        await flujo.entrar()
+
+        #expect(flujo.alerta?.titulo == Textos.accountPendingDeletionTitle)
+        #expect(flujo.alerta?.mensaje == Textos.accountPendingDeletionBody(12))
+        #expect(flujo.alerta?.botonesOrdenados.map(\.titulo) == [Textos.accountRecover, Textos.commonCancel])
+    }
+
+    @Test("Demasiados intentos: una alerta con un solo «Ok»")
+    func loginDemasiadosIntentos() async {
+        var guion = Guion()
+        guion.login = [.rechazado(codigo: "too_many_attempts", http: 429)]
+        let flujo = flujo(ServicioDePrueba(guion))
+        flujo.ir(a: .login)
+        flujo.loginCorreo = "persona@ejemplo.com"
+        flujo.loginClave = "Trainer2026x"
+
+        await flujo.entrar()
+
+        #expect(flujo.alerta?.titulo == Textos.errorTooManyAttemptsTitle)
+        #expect(flujo.alerta?.botones.map(\.titulo) == [Textos.commonOk])
+    }
+
+    @Test("Sin red es una alerta con el mensaje corto, no un cuelgue ni un crash")
     func loginSinRed() async {
         var guion = Guion()
         guion.login = [.sinRed]
@@ -488,19 +567,20 @@ struct FlujoContraElServidorTests {
 
         await flujo.entrar()
 
+        #expect(flujo.alerta?.mensaje == Textos.errorOffline)
         #expect(flujo.errorVisible == Textos.errorOffline)
         #expect(!flujo.enCurso)
     }
 
     // MARK: - Alta
 
-    @Test("El alta hace los pedidos del contrato, en orden, y la cuenta nace en el paso 4")
+    @Test("El alta hace los pedidos del contrato, en orden, y la cuenta nace en el paso 3")
     func alta() async {
         let doble = ServicioDePrueba(Guion())
         let flujo = flujo(doble)
 
         await llegarAlAviso(flujo)
-        #expect(flujo.pantalla == .regAviso)
+        #expect(flujo.pantalla == .regAntesDeEmpezar)
         await flujo.crearCuenta()
 
         #expect(flujo.pantalla == .regNacimiento)
@@ -508,9 +588,23 @@ struct FlujoContraElServidorTests {
                                         "verificarCodigoDeRegistro", "textosLegales", "completarRegistro"])
         #expect(await doble.altas == [ServicioDePrueba.Alta(token: "permiso-alta", clave: "Trainer2026x",
                                                             version: "1.0.0",
-                                                            perfil: PerfilEntrada(firstName: "Persona", lastName: "Ejemplo"))],
-                "el nombre viaja con el alta; lo demás lo guardan los pasos de perfil")
+                                                            perfil: PerfilEntrada(firstName: "Persona", lastName: "Ejemplo",
+                                                                                  medicalDisclaimerAccepted: true))],
+                "el nombre y el descargo viajan con el alta; lo demás lo guardan los pasos de perfil")
         #expect(flujo.claveDeRegistro.isEmpty, "la contraseña se suelta apenas se usa")
+    }
+
+    @Test("Sin las dos casillas no se crea la cuenta")
+    func casillas() async {
+        let doble = ServicioDePrueba(Guion())
+        let flujo = flujo(doble)
+        await llegarAlAviso(flujo)
+        flujo.aceptoElDescargo = false
+
+        await flujo.crearCuenta()
+
+        #expect(flujo.pantalla == .regAntesDeEmpezar)
+        #expect(await doble.altas.isEmpty)
     }
 
     @Test("Una contraseña que el servidor rechaza al crear la cuenta vuelve a su paso, con el motivo")
@@ -523,7 +617,7 @@ struct FlujoContraElServidorTests {
         await flujo.crearCuenta()
 
         #expect(flujo.pantalla == .regCorreo, "la contraseña se elige con el correo")
-        #expect(flujo.errorVisible == Textos.errorWeakPassword)
+        #expect(flujo.alerta?.mensaje == Textos.errorWeakPassword)
     }
 
     @Test("Si el aviso cambió, se baja el nuevo, se desmarca, y se acepta ESE")
@@ -537,10 +631,11 @@ struct FlujoContraElServidorTests {
 
         await flujo.crearCuenta()
 
-        #expect(flujo.pantalla == .regAviso)
+        #expect(flujo.pantalla == .regAntesDeEmpezar)
         #expect(flujo.legales?.version == "1.1.0")
         #expect(!flujo.aceptoElAviso, "aceptar un texto no es aceptar el que vino después")
-        #expect(flujo.errorVisible == Textos.errorLegalVersionStale)
+        #expect(flujo.alerta?.titulo == Textos.errorLegalVersionStaleTitle)
+        #expect(flujo.alerta?.mensaje == Textos.errorLegalVersionStale)
 
         flujo.aceptoElAviso = true
         await flujo.crearCuenta()
@@ -563,29 +658,28 @@ struct FlujoContraElServidorTests {
         #expect(flujo.loginCorreo == "persona@ejemplo.com")
     }
 
-    @Test("Con el permiso vencido, invalid_registration_token ofrece empezar de nuevo desde el correo")
+    @Test("Con el permiso vencido no se manda nada: «Se venció el registro» y Ok vuelve a «Crea tu cuenta»")
     func permisoDeAltaVencido() async {
         var guion = Guion()
         guion.verificacionDeRegistro = [.ok(TokenDeRegistro(registrationToken: "permiso-alta",
                                                             expiresAtMs: Fijo.ahoraMs - 1))]
-        guion.altas = [.rechazado(codigo: "invalid_registration_token", http: 400)]
-        let flujo = flujo(ServicioDePrueba(guion))
+        let doble = ServicioDePrueba(guion)
+        let flujo = flujo(doble)
         await llegarAlAviso(flujo)
 
         await flujo.crearCuenta()
 
-        #expect(flujo.pantalla == .regAviso)
-        #expect(flujo.errorVisible == Textos.errorInvalidRegistrationToken)
-        #expect(flujo.ofrecerEmpezarDeNuevo)
+        #expect(await doble.altas.isEmpty, "con el permiso vencido no se intenta")
+        #expect(flujo.alerta?.titulo == Textos.errorInvalidRegistrationTokenTitle)
         #expect(!flujo.ofrecerLogin, "esa cuenta no existe: entrar no es una salida")
 
-        flujo.empezarElAltaDeNuevo()
+        flujo.alerta?.botones.first?.accion()
 
         #expect(flujo.pantalla == .regCorreo)
         #expect(flujo.datos.correo == " persona@ejemplo.com ", "el correo queda escrito")
-        #expect(flujo.claveDeRegistro.isEmpty && flujo.claveDeRegistroRepetida.isEmpty)
+        #expect(flujo.datos.nombre == "Persona")
+        #expect(flujo.claveDeRegistro == "Trainer2026x", "con los datos escritos, también la contraseña")
         #expect(!flujo.aceptoElAviso)
-        #expect(!flujo.ofrecerEmpezarDeNuevo && flujo.errorVisible == nil)
     }
 
     /// 🛑 Vigente y rechazado: el permiso ya se usó y la cuenta existe. Volver al
@@ -599,28 +693,30 @@ struct FlujoContraElServidorTests {
 
         await flujo.crearCuenta()
 
-        #expect(flujo.pantalla == .regAviso)
+        #expect(flujo.pantalla == .regAntesDeEmpezar)
         #expect(flujo.ofrecerLogin)
-        #expect(!flujo.ofrecerEmpezarDeNuevo)
-        #expect(flujo.errorVisible == Textos.legalSignupAlreadyCreated)
+        #expect(flujo.alerta?.titulo == Textos.signupAccountExistsTitle)
+        #expect(flujo.alerta?.mensaje == Textos.legalSignupAlreadyCreated)
     }
 
-    @Test("Si un intento se cortó y el permiso venció después, se ofrecen las dos salidas")
+    @Test("Si un intento se cortó y el permiso venció después, «Se venció el registro» y entrar sigue a mano")
     func altaCortadaYDespuesVencida() async {
         var guion = Guion()
-        guion.altas = [.sinRed, .rechazado(codigo: "invalid_registration_token", http: 400)]
+        guion.altas = [.sinRed]
         let hora = HoraDePrueba(Fijo.ahoraMs)
-        let flujo = FlujoEntrada(servicio: ServicioDePrueba(guion), zonaHoraria: { .gmt }, reloj: { hora.ms })
+        let doble = ServicioDePrueba(guion)
+        let flujo = FlujoEntrada(servicio: doble, zonaHoraria: { .gmt }, reloj: { hora.ms })
         await llegarAlAviso(flujo)
 
         await flujo.crearCuenta()
-        #expect(flujo.ofrecerLogin && !flujo.ofrecerEmpezarDeNuevo)
+        #expect(flujo.ofrecerLogin, "el intento cortado pudo haber creado la cuenta")
 
         hora.ms += 3_600_000
         await flujo.crearCuenta()
 
-        #expect(flujo.ofrecerEmpezarDeNuevo, "el permiso venció: hace falta otro código")
-        #expect(flujo.ofrecerLogin, "pero el intento cortado pudo haber creado la cuenta")
+        #expect(flujo.alerta?.titulo == Textos.errorInvalidRegistrationTokenTitle,
+                "el permiso venció: no se puede seguir")
+        #expect(await doble.altas.count == 1, "con el permiso vencido no se manda otro intento")
     }
 
     @Test("conflict al crear la cuenta ofrece entrar, con un texto que no es el de ya tengo cuenta")
@@ -632,11 +728,10 @@ struct FlujoContraElServidorTests {
 
         await flujo.crearCuenta()
 
-        #expect(flujo.pantalla == .regAviso)
-        #expect(flujo.errorVisible == Textos.legalAccountExists)
-        #expect(flujo.errorVisible != Textos.errorConflict, "no es el conflict de un guardado en curso")
+        #expect(flujo.pantalla == .regAntesDeEmpezar)
+        #expect(flujo.alerta?.titulo == Textos.errorEmailAlreadyRegisteredTitle)
+        #expect(flujo.alerta?.mensaje != Textos.errorConflict, "no es el conflict de un guardado en curso")
         #expect(flujo.ofrecerLogin && flujo.laCuentaYaExiste)
-        #expect(!flujo.ofrecerEmpezarDeNuevo)
 
         flujo.irAlLoginDesdeElAlta()
         #expect(flujo.pantalla == .login)
@@ -653,7 +748,7 @@ struct FlujoContraElServidorTests {
 
         await flujo.crearCuenta()
 
-        #expect(flujo.pantalla == .regAviso)
+        #expect(flujo.pantalla == .regAntesDeEmpezar)
         #expect(flujo.errorVisible == Textos.errorUnexpectedResponse)
         #expect(flujo.ofrecerLogin, "la cuenta pudo crearse del otro lado")
 
@@ -680,15 +775,15 @@ struct FlujoContraElServidorTests {
     func pasoDePerfil() async {
         let doble = ServicioDePrueba(Guion())
         let flujo = flujo(doble)
-        flujo.ir(a: .regNombre)
-        flujo.datos.nombre = "Iván"
+        flujo.ir(a: .regNivel)
+        flujo.datos.nivel = .avanzado
 
         await flujo.guardarYSeguir()
 
-        #expect(flujo.pantalla == .regNacimiento)
+        #expect(flujo.pantalla == .regObjetivo)
         let guardado = await doble.guardados.first
-        #expect(guardado?.perfil == PerfilEntrada(firstName: "Iván"))
-        #expect(guardado?.anulando == [.apellido])
+        #expect(guardado?.perfil == PerfilEntrada(level: .avanzado))
+        #expect(guardado?.anulando == [])
         #expect(flujo.perfil == Fijo.perfil)
     }
 
@@ -703,7 +798,7 @@ struct FlujoContraElServidorTests {
 
         await flujo.guardarYSeguir()
         #expect(flujo.pantalla == .regSexo)
-        #expect(flujo.errorVisible == Textos.errorOffline)
+        #expect(flujo.alerta?.mensaje == Textos.errorOffline)
 
         await flujo.guardarYSeguir()
         #expect(flujo.pantalla == .regCuerpo)
@@ -753,19 +848,6 @@ struct FlujoContraElServidorTests {
         #expect(claves[0] != claves[1], "con otro cuerpo, la misma clave daría 409")
     }
 
-    @Test("La medición no le pide nada al servidor y sigue")
-    func medicion() async {
-        let doble = ServicioDePrueba(Guion())
-        let flujo = flujo(doble)
-        flujo.ir(a: .regMedicion)
-        flujo.datos.medicion = .garmin
-
-        await flujo.guardarYSeguir()
-
-        #expect(flujo.pantalla == .regDias)
-        #expect(await doble.guardados.isEmpty)
-    }
-
     @Test("Los días viajan con la zona de la persona")
     func dias() async {
         let doble = ServicioDePrueba(Guion())
@@ -775,8 +857,11 @@ struct FlujoContraElServidorTests {
 
         await flujo.guardarYSeguir()
 
-        #expect(flujo.pantalla == .regListo)
+        #expect(flujo.pantalla == .regApto, "el apto es el último paso")
         #expect(await doble.guardados.first?.perfil.timezone == "America/Argentina/Buenos_Aires")
+
+        flujo.terminarRegistro()
+        #expect(flujo.pantalla == .home, "«Guardar» o «Lo subo después»: derecho al Inicio")
     }
 
     @Test("«Completar después» entra al Home con lo que ya se guardó")
@@ -1066,12 +1151,54 @@ struct FlujoContraElServidorTests {
         flujo.claveNueva = "Trainer2027x"
         flujo.claveNuevaRepetida = "Trainer2027x"
         await flujo.guardarClaveNueva()
-        #expect(flujo.pantalla == .claveLista)
-        flujo.entrarConLaClaveNueva()
+
+        // Sin pantalla final: una alerta pregunta por las otras sesiones.
+        let alerta = try? #require(flujo.alerta)
+        #expect(alerta?.titulo == Textos.passwordResetOtherSessionsTitle)
+        #expect(alerta?.botonesOrdenados.map(\.titulo)
+                == [Textos.passwordResetOtherSessionsClose, Textos.passwordResetOtherSessionsKeep])
+        #expect(flujo.pantalla == .claveNueva)
+        alerta?.botones.first { $0.titulo == Textos.passwordResetOtherSessionsKeep }?.accion()
 
         #expect(flujo.pantalla == .home)
         #expect(await doble.pedidos == ["pedirCodigoDeClave:persona@ejemplo.com",
-                                        "verificarCodigoDeClave", "cambiarClave:permiso-clave"])
+                                        "verificarCodigoDeClave", "cambiarClave:permiso-clave"],
+                "«Mantenerlas abiertas» no cierra nada")
+    }
+
+    @Test("«Cerrar las otras sesiones» las cierra y entra igual")
+    func recuperacionCerrandoLasOtras() async {
+        let doble = ServicioDePrueba(Guion())
+        let flujo = flujo(doble)
+        await llegarAClaveNueva(flujo)
+        await flujo.guardarClaveNueva()
+
+        flujo.alerta?.botones.first { $0.titulo == Textos.passwordResetOtherSessionsClose }?.accion()
+
+        #expect(flujo.pantalla == .home)
+        var intentos = 0
+        while await !doble.pedidos.contains("cerrarOtrasSesiones"), intentos < 200 {
+            try? await Task.sleep(nanoseconds: 5_000_000)
+            intentos += 1
+        }
+        #expect(await doble.pedidos.contains("cerrarOtrasSesiones"))
+    }
+
+    @Test("Si las dos contraseñas no coinciden, el rojo va debajo de la confirmación y no se manda nada")
+    func recuperacionNoCoinciden() async {
+        let doble = ServicioDePrueba(Guion())
+        let flujo = flujo(doble)
+        await llegarAClaveNueva(flujo)
+        // Tipeadas a mano (no la sugerida del iPhone, que llena las dos iguales).
+        flujo.claveNueva = "Trainer2027z"
+        flujo.claveNuevaRepetida = "Trainer2027y"
+        #expect(!flujo.claveNuevaSugeridaPorElSistema)
+        #expect(flujo.puedeGuardarClaveNueva, "el botón se habilita con las tres reglas")
+
+        await flujo.guardarClaveNueva()
+
+        #expect(flujo.error(de: .claveRepetida) == Textos.fieldPasswordNoMatch)
+        #expect(!(await doble.pedidos.contains { $0.hasPrefix("cambiarClave") }))
     }
 
     /// Deja el flujo en "contraseña nueva", con el permiso del código en la mano.
@@ -1096,7 +1223,11 @@ struct FlujoContraElServidorTests {
         await flujo.guardarClaveNueva()
 
         #expect(flujo.pantalla == .claveNueva)
-        #expect(flujo.errorVisible == Textos.errorInvalidResetToken)
+        #expect(flujo.alerta?.titulo == Textos.errorExpiredTitle)
+        #expect(flujo.alerta?.mensaje == Textos.errorInvalidResetToken)
+        flujo.alerta?.botones.first?.accion()
+        #expect(flujo.pantalla == .claveCorreo, "«Ok» vuelve al principio")
+        #expect(flujo.recuperacionCorreo == "persona@ejemplo.com", "con el correo escrito")
     }
 
     @Test("Una contraseña nueva que el servidor rechaza se queda, con el motivo, para corregirla")
@@ -1110,14 +1241,15 @@ struct FlujoContraElServidorTests {
         await flujo.guardarClaveNueva()
 
         #expect(flujo.pantalla == .claveNueva)
-        #expect(flujo.errorVisible == Textos.errorWeakPassword)
+        #expect(flujo.alerta?.mensaje == Textos.errorWeakPassword)
         #expect(flujo.claveNueva == "Trainer2027x", "lo escrito queda para corregirlo, no para tipearlo de nuevo")
 
         flujo.claveNueva = "Trainer2028x"
         flujo.claveNuevaRepetida = "Trainer2028x"
         await flujo.guardarClaveNueva()
 
-        #expect(flujo.pantalla == .claveLista, "el mismo permiso sirve para el reintento")
+        #expect(flujo.alerta?.titulo == Textos.passwordResetOtherSessionsTitle,
+                "el mismo permiso sirve para el reintento")
         #expect(await doble.pedidos.filter { $0.hasPrefix("cambiarClave") }.count == 2)
     }
 
@@ -1151,7 +1283,193 @@ struct FlujoContraElServidorTests {
         #expect(flujo.pantalla == .claveNueva)
         #expect(flujo.errorVisible == Textos.errorOffline)
         await flujo.guardarClaveNueva()
-        #expect(flujo.pantalla == .claveLista)
+        #expect(flujo.alerta?.titulo == Textos.passwordResetOtherSessionsTitle)
+    }
+
+    // MARK: - Códigos
+
+    @Test("Un código equivocado: «El código no es correcto», «Intentar de nuevo» y se sigue en la pantalla")
+    func codigoEquivocado() async {
+        var guion = Guion()
+        guion.verificacionDeClave = [.rechazado(codigo: "invalid_code", http: 400)]
+        let flujo = flujo(ServicioDePrueba(guion))
+        flujo.ir(a: .login)
+        flujo.loginCorreo = "persona@ejemplo.com"
+        flujo.irARecuperarClave()
+        await flujo.pedirCodigoDeClave()
+        flujo.recuperacionCodigo = "A7K2Q9"
+
+        await flujo.verificarCodigoDeClave()
+
+        #expect(flujo.alerta?.titulo == Textos.errorInvalidCodeTitle)
+        #expect(flujo.alerta?.botones.map(\.titulo) == [Textos.commonTryAgain])
+        #expect(!flujo.codigoAgotado, "un código equivocado todavía deja reenviar")
+        #expect(flujo.pantalla == .claveCodigo)
+    }
+
+    @Test("Vencido o agotado: «Reenviar» desaparece y «Ok» vuelve al principio con el correo")
+    func codigoVencidoYAgotado() async {
+        for (codigo, titulo) in [("code_expired", Textos.errorCodeExpiredTitle),
+                                 ("code_attempts_exceeded", Textos.errorCodeAttemptsExceededTitle)] {
+            var guion = Guion()
+            guion.verificacionDeClave = [.rechazado(codigo: codigo, http: 400)]
+            let flujo = flujo(ServicioDePrueba(guion))
+            flujo.ir(a: .login)
+            flujo.loginCorreo = "persona@ejemplo.com"
+            flujo.irARecuperarClave()
+            await flujo.pedirCodigoDeClave()
+            flujo.recuperacionCodigo = "A7K2Q9"
+
+            await flujo.verificarCodigoDeClave()
+
+            #expect(flujo.alerta?.titulo == titulo)
+            #expect(flujo.codigoAgotado, "\(codigo): sin «Reenviar»")
+            flujo.alerta?.botones.first?.accion()
+            #expect(flujo.pantalla == .claveCorreo)
+            #expect(flujo.recuperacionCorreo == "persona@ejemplo.com")
+            #expect(!flujo.codigoAgotado)
+        }
+    }
+
+    @Test("En el alta, el código vencido vuelve a «Crea tu cuenta» con los datos escritos")
+    func codigoDelAltaVencido() async {
+        var guion = Guion()
+        guion.verificacionDeRegistro = [.rechazado(codigo: "code_expired", http: 400)]
+        let flujo = flujo(ServicioDePrueba(guion))
+        flujo.ir(a: .regCorreo)
+        flujo.datos.nombre = "Persona"
+        flujo.datos.correo = "persona@ejemplo.com"
+        flujo.claveDeRegistro = "Trainer2026x"
+        flujo.claveDeRegistroRepetida = "Trainer2026x"
+        await flujo.pedirCodigoDeRegistro()
+        flujo.datos.codigo = "A7K2Q9"
+
+        await flujo.verificarCodigoDeRegistro()
+
+        #expect(flujo.alerta?.mensaje == Textos.errorCodeExpired)
+        flujo.alerta?.botones.first?.accion()
+        #expect(flujo.pantalla == .regCorreo)
+        #expect(flujo.datos.nombre == "Persona" && flujo.datos.correo == "persona@ejemplo.com")
+        #expect(flujo.claveDeRegistro == "Trainer2026x")
+    }
+
+    @Test("«Reenviar» cuenta desde la hora de envío: con la app en segundo plano, el tiempo igual pasa")
+    func cuentaRegresivaDelReenvio() {
+        let envio = Date(timeIntervalSince1970: 1_000)
+        #expect(FilaDeReenvio.restantes(desde: envio, ahora: envio) == 60)
+        #expect(FilaDeReenvio.restantes(desde: envio, ahora: envio.addingTimeInterval(45.4)) == 15)
+        #expect(FilaDeReenvio.restantes(desde: envio, ahora: envio.addingTimeInterval(300)) == 0,
+                "volver después de cinco minutos: ya se puede reenviar")
+        #expect(FilaDeReenvio.restantes(desde: nil, ahora: envio) == 0)
+    }
+
+    @Test("Crear la cuenta con un correo ya registrado: alerta con «Iniciar sesión» que lleva el correo")
+    func correoYaRegistrado() async {
+        var guion = Guion()
+        guion.codigoDeRegistro = [.rechazado(codigo: "email_already_registered", http: 409)]
+        let flujo = flujo(ServicioDePrueba(guion))
+        flujo.ir(a: .regCorreo)
+        flujo.datos.nombre = "Persona"
+        flujo.datos.correo = "persona@ejemplo.com"
+        flujo.claveDeRegistro = "Trainer2026x"
+        flujo.claveDeRegistroRepetida = "Trainer2026x"
+
+        await flujo.pedirCodigoDeRegistro()
+
+        #expect(flujo.alerta?.titulo == Textos.errorEmailAlreadyRegisteredTitle)
+        #expect(flujo.alerta?.botonesOrdenados.map(\.titulo) == [Textos.commonSignIn, Textos.commonCancel])
+        flujo.alerta?.botones.first { $0.titulo == Textos.commonSignIn }?.accion()
+        #expect(flujo.pantalla == .login)
+        #expect(flujo.loginCorreo == "persona@ejemplo.com")
+    }
+
+    @Test("Crear la cuenta con contraseñas distintas: el rojo debajo de la confirmación y no se pide el código")
+    func altaNoCoinciden() async {
+        let doble = ServicioDePrueba(Guion())
+        let flujo = flujo(doble)
+        flujo.ir(a: .regCorreo)
+        flujo.datos.nombre = "Persona"
+        flujo.datos.correo = "persona@ejemplo.com"
+        flujo.claveDeRegistro = "Trainer2026x"
+        flujo.claveDeRegistroRepetida = "Trainer2026y"
+        #expect(flujo.puedePedirCodigoDeRegistro)
+
+        await flujo.pedirCodigoDeRegistro()
+
+        #expect(flujo.error(de: .claveRepetida) == Textos.fieldPasswordNoMatch)
+        #expect(await doble.pedidos.isEmpty)
+    }
+
+    // MARK: - Vincular
+
+    @Test("Google con el correo de una cuenta con contraseña ofrece vincular, y vincular entra")
+    func vincular() async {
+        var guion = Guion()
+        guion.social = [.rechazado(codigo: "account_link_available", http: 409,
+                                   detalle: DatosDelError(provider: .google, email: "persona@gmail.com",
+                                                          linkToken: "permiso-vincular", requiresPassword: false))]
+        let doble = ServicioDePrueba(guion)
+        let flujo = FlujoEntrada(servicio: doble, iniciarConProveedor: { _ in
+            .ok(CredencialDeProveedor(idToken: "id", nonce: "nonce-de-prueba-1234"))
+        })
+        flujo.ir(a: .login)
+
+        await flujo.entrarCon(.google)
+
+        let alerta = try? #require(flujo.alerta)
+        #expect(alerta?.titulo == Textos.linkTitle("Google"))
+        #expect(alerta?.mensaje == Textos.linkBody("persona@gmail.com", "Google"))
+        #expect(alerta?.campo == nil, "Google es dueño del correo: no hace falta la contraseña")
+        #expect(alerta?.botonesOrdenados.map(\.titulo) == [Textos.linkConfirm, Textos.commonNotNow])
+
+        await flujo.vincular(.google, permiso: "permiso-vincular", correo: "persona@gmail.com", pideClave: false)
+        #expect(flujo.pantalla == .home)
+        #expect(await doble.pedidos.last == "vincularProveedor:permiso-vincular:-")
+    }
+
+    @Test("Si el proveedor no es dueño del correo, vincular pide la contraseña de la cuenta")
+    func vincularConContrasena() async {
+        var guion = Guion()
+        guion.social = [.rechazado(codigo: "account_link_available", http: 409,
+                                   detalle: DatosDelError(provider: .google, email: "persona@hotmail.com",
+                                                          linkToken: "p", requiresPassword: true))]
+        guion.vinculos = [.rechazado(codigo: "wrong_password", http: 401), .ok(Fijo.sesion)]
+        let doble = ServicioDePrueba(guion)
+        let flujo = FlujoEntrada(servicio: doble, iniciarConProveedor: { _ in
+            .ok(CredencialDeProveedor(idToken: "id", nonce: "nonce-de-prueba-1234"))
+        })
+        flujo.ir(a: .login)
+
+        await flujo.entrarCon(.google)
+        #expect(flujo.alerta?.campo != nil)
+        #expect(flujo.alerta?.mensaje == Textos.linkBodyPassword("persona@hotmail.com", "Google"))
+
+        flujo.claveParaVincular = "mal"
+        await flujo.vincular(.google, permiso: "p", correo: "persona@hotmail.com", pideClave: true)
+        #expect(flujo.alerta?.titulo == Textos.errorWrongPasswordTitle)
+        flujo.alerta?.botones.first?.accion()
+        #expect(flujo.alerta?.titulo == Textos.linkTitle("Google"), "«Intentar de nuevo» vuelve a pedirla")
+
+        flujo.claveParaVincular = "Trainer2026x"
+        await flujo.vincular(.google, permiso: "p", correo: "persona@hotmail.com", pideClave: true)
+        #expect(flujo.pantalla == .home)
+        #expect(await doble.pedidos.suffix(2) == ["vincularProveedor:p:mal", "vincularProveedor:p:Trainer2026x"])
+    }
+
+    // MARK: - Desactivar
+
+    @Test("Desactivar cierra la sesión, vuelve a la bienvenida y avisa cómo volver")
+    func desactivar() async {
+        let doble = ServicioDePrueba(Guion(habiaSesion: true))
+        let flujo = flujo(doble)
+
+        let error = await flujo.desactivarCuenta()
+
+        #expect(error == nil)
+        #expect(flujo.pantalla == .bienvenida)
+        #expect(flujo.alerta?.titulo == Textos.accountDeactivatedTitle)
+        #expect(flujo.alerta?.mensaje == Textos.accountDeactivatedDone)
+        #expect(await doble.pedidos == ["desactivarCuenta", "cerrarSesion"])
     }
 
     // MARK: - Puerta de versión
@@ -1254,7 +1572,8 @@ struct PlataformaTests {
         for idioma in ["es", "en"] {
             let ruta = try #require(Bundle.main.path(forResource: idioma, ofType: "lproj"))
             let paquete = try #require(Bundle(path: ruta))
-            for clave in ["signup.sex.body", "signup.sex.undisclosed.detail"] {
+            // Desde 2026-10-22 las opciones no llevan texto debajo: queda el cuerpo.
+            for clave in ["signup.sex.body"] {
                 let texto = paquete.localizedString(forKey: clave, value: "∅", table: nil)
                 #expect(texto != "∅", "falta \(clave) en \(idioma)")
                 #expect(!texto.localizedCaseInsensitiveContains("promedio")
@@ -1303,6 +1622,10 @@ struct Guion: Sendable {
         [.ok(TokenDeReseteo(resetToken: "permiso-clave", expiresAtMs: 1))]
     var cambiosDeClave: [Resultado<SesionAbierta>] = [.ok(Fijo.sesion)]
     var perfiles: [Resultado<Perfil>] = [.ok(Fijo.perfil)]
+    var social: [Resultado<DesenlaceSocial>] = [.sinRed]
+    var vinculos: [Resultado<SesionAbierta>] = [.ok(Fijo.sesion)]
+    var reactivaciones: [Resultado<SesionAbierta>] = [.ok(Fijo.sesion)]
+    var desactivaciones: [Resultado<SinCuerpo>] = [.ok(SinCuerpo())]
     /// Si está, cada guardado de perfil espera a que el test la abra.
     var compuertaDeGuardado: Compuerta?
 }
@@ -1477,6 +1800,31 @@ actor ServicioDePrueba: ServicioDeCuenta {
         guardados.append(Guardado(perfil: perfil, anulando: anulando, clave: claveDeIdempotencia))
         if let compuerta = guion.compuertaDeGuardado { await compuerta.pasar() }
         return Self.siguiente(&guion.guardados)
+    }
+
+    func entrarConProveedor(_ proveedor: Proveedor, idToken: String, nonce: String) async -> Resultado<DesenlaceSocial> {
+        pedidos.append("entrarConProveedor:\(proveedor.rawValue)")
+        return Self.siguiente(&guion.social)
+    }
+
+    func vincularProveedor(permiso: String, clave: String?) async -> Resultado<SesionAbierta> {
+        pedidos.append("vincularProveedor:\(permiso):\(clave ?? "-")")
+        return Self.siguiente(&guion.vinculos)
+    }
+
+    func reactivarCuenta(permiso: String) async -> Resultado<SesionAbierta> {
+        pedidos.append("reactivarCuenta:\(permiso)")
+        return Self.siguiente(&guion.reactivaciones)
+    }
+
+    func cerrarOtrasSesiones() async -> Resultado<SinCuerpo> {
+        pedidos.append("cerrarOtrasSesiones")
+        return .ok(SinCuerpo())
+    }
+
+    func desactivarCuenta() async -> Resultado<SinCuerpo> {
+        pedidos.append("desactivarCuenta")
+        return Self.siguiente(&guion.desactivaciones)
     }
 
     func haySesion() async -> Bool { habiaSesionAlArrancar }

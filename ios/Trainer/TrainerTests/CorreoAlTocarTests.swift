@@ -4,41 +4,42 @@ import Foundation
 @testable import TrainerCore
 
 // =============================================================================
-// El correo se juzga al TOCAR el botón, no mientras se escribe.
+// El botón que manda un correo no se habilita hasta que el correo es válido.
 //
-// Iván, probando en el iPhone (2026-09-10): con la primera letra ya aparecía "ese
-// correo no parece válido", y el botón quedaba apagado hasta que el correo
-// pareciera uno. Molestaba, y hacía sentir lenta la pantalla. Las reglas de la
-// contraseña siguen en vivo: ahí el medidor ayuda mientras se escribe.
-//
+// 2026-10-22 (Iván): se va el "Ese correo no parece válido…" que aparecía debajo
+// del campo al tocar. Antes (2026-09-10) se había decidido juzgar al tocar para
+// no retar a quien todavía escribía; ahora no se reta nunca: el botón espera.
 // Vale igual en las tres pantallas con correo: `login`, `reg-correo` y
-// `clave-correo`.
+// `clave-correo`. Un correo inválido no viaja aunque se llame a la función.
 // =============================================================================
 
 @MainActor
-@Suite("El correo se valida al tocar el botón")
+@Suite("El correo tiene que ser válido para poder mandarlo")
 struct CorreoAlTocarTests {
 
     private func flujo(_ doble: ServicioDePrueba) -> FlujoEntrada {
         FlujoEntrada(servicio: doble)
     }
 
-    @Test("Login: con algo escrito en los dos campos se puede tocar, aunque el correo todavía no parezca uno")
-    func loginSePrendeConAlgoEscrito() {
+    @Test("Login: \"Ingresar\" se habilita con un correo válido y la contraseña escrita")
+    func loginSePrendeConCorreoValido() {
         let flujo = flujo(ServicioDePrueba(Guion()))
         flujo.ir(a: .login)
         #expect(!flujo.loginListo)
 
-        flujo.loginCorreo = "i"
-        #expect(!flujo.loginListo, "falta la contraseña")
-
+        flujo.loginCorreo = "ivan"
         flujo.loginClave = "x"
+        #expect(!flujo.loginListo, "con un correo que no es uno, no")
+
+        flujo.loginCorreo = "ivan@ejemplo.com"
         #expect(flujo.loginListo)
-        #expect(!flujo.correoRechazado, "mientras se escribe, el correo no se juzga")
+
+        flujo.loginClave = ""
+        #expect(!flujo.loginListo, "falta la contraseña")
     }
 
-    @Test("Login: un correo que no parece uno no viaja, deja el error, y el error se va al editar el correo")
-    func loginRechazaAlTocar() async {
+    @Test("Login: un correo que no parece uno no viaja")
+    func loginNoMandaUnCorreoInvalido() async {
         let doble = ServicioDePrueba(Guion())
         let flujo = flujo(doble)
         flujo.ir(a: .login)
@@ -47,42 +48,38 @@ struct CorreoAlTocarTests {
 
         await flujo.entrar()
 
-        #expect(flujo.correoRechazado)
         #expect(flujo.pantalla == .login)
         #expect(!flujo.enCurso)
+        #expect(flujo.alerta == nil, "no hay cartel: el botón ni siquiera estaba habilitado")
         #expect(await doble.pedidos.isEmpty, "no se manda nada")
-
-        flujo.loginClave = "Trainer2026y"
-        #expect(flujo.correoRechazado, "cambiar la contraseña no es corregir el correo")
-
-        flujo.loginCorreo = "ivan@"
-        #expect(!flujo.correoRechazado, "editar el correo borra el error")
     }
 
-    @Test("Alta: un correo que no parece uno no pide el código; corregido, sigue como siempre")
-    func altaRechazaAlTocar() async {
+    @Test("Alta: sin un correo válido no se pide el código; con uno, sigue como siempre")
+    func altaNoMandaUnCorreoInvalido() async {
         let doble = ServicioDePrueba(Guion())
         let flujo = flujo(doble)
         flujo.ir(a: .regCorreo)
+        flujo.datos.nombre = "Iván"
+        flujo.claveDeRegistro = "Trainer2026x"
+        flujo.claveDeRegistroRepetida = "Trainer2026x"
         flujo.datos.correo = "persona@ejemplo"
+        #expect(!flujo.puedePedirCodigoDeRegistro)
 
         await flujo.pedirCodigoDeRegistro()
 
-        #expect(flujo.correoRechazado)
         #expect(flujo.pantalla == .regCorreo)
         #expect(await doble.pedidos.isEmpty, "no se manda nada")
 
         flujo.datos.correo = "persona@ejemplo.com"
-        #expect(!flujo.correoRechazado, "editar el correo borra el error")
-
+        #expect(flujo.puedePedirCodigoDeRegistro)
         await flujo.pedirCodigoDeRegistro()
 
         #expect(flujo.pantalla == .regCodigo)
         #expect(await doble.pedidos == ["pedirCodigoDeRegistro:persona@ejemplo.com"])
     }
 
-    @Test("Recuperación: un correo que no parece uno no pide el código; corregido, sigue como siempre")
-    func recuperacionRechazaAlTocar() async {
+    @Test("Recuperación: sin un correo válido no se pide el código; con uno, sigue como siempre")
+    func recuperacionNoMandaUnCorreoInvalido() async {
         let doble = ServicioDePrueba(Guion())
         let flujo = flujo(doble)
         flujo.ir(a: .login)
@@ -91,48 +88,13 @@ struct CorreoAlTocarTests {
 
         await flujo.pedirCodigoDeClave()
 
-        #expect(flujo.correoRechazado)
         #expect(flujo.pantalla == .claveCorreo)
         #expect(await doble.pedidos.isEmpty, "no se manda nada")
 
         flujo.recuperacionCorreo = "persona@ejemplo.com"
-        #expect(!flujo.correoRechazado, "editar el correo borra el error")
-
         await flujo.pedirCodigoDeClave()
 
         #expect(flujo.pantalla == .claveCodigo)
         #expect(await doble.pedidos == ["pedirCodigoDeClave:persona@ejemplo.com"])
-    }
-
-    @Test("El error es de la pantalla que lo mostró: ir a otra no se lo lleva")
-    func elErrorNoViajaAOtraPantalla() async {
-        let flujo = flujo(ServicioDePrueba(Guion()))
-        flujo.ir(a: .login)
-        flujo.loginCorreo = "ivan"
-        flujo.loginClave = "Trainer2026x"
-        await flujo.entrar()
-        #expect(flujo.correoRechazado)
-
-        flujo.ir(a: .regCorreo)   // "Registrate", sin tocar el correo del login
-
-        #expect(!flujo.correoRechazado, "el alta no arranca con un error que no es suyo")
-    }
-
-    @Test("El error del intento anterior no queda pegado al del correo")
-    func rechazarBorraElErrorAnterior() async {
-        var guion = Guion()
-        guion.login = [.sinRed]
-        let flujo = flujo(ServicioDePrueba(guion))
-        flujo.ir(a: .login)
-        flujo.loginCorreo = "persona@ejemplo.com"
-        flujo.loginClave = "Trainer2026x"
-        await flujo.entrar()
-        #expect(flujo.errorVisible == Textos.errorOffline)
-
-        flujo.loginCorreo = "persona"
-        await flujo.entrar()
-
-        #expect(flujo.correoRechazado)
-        #expect(flujo.errorVisible == nil, "el «sin conexión» era del intento anterior")
     }
 }
