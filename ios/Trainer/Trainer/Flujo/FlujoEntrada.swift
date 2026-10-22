@@ -494,11 +494,11 @@ final class FlujoEntrada: ObservableObject {
             // La sesión ya quedó en el llavero: se entra aunque la persona haya
             // tocado otra cosa mientras el pedido viajaba.
             irAlHome()
-        case .rechazado(let codigo, _) where codigo == "user_not_found":
+        case .rechazado(let codigo, _, _) where codigo == "user_not_found":
             if pantalla == .login { erroresDeCampo[.correo] = Textos.fieldEmailNotFound }
-        case .rechazado(let codigo, _) where ["wrong_password", "invalid_credentials"].contains(codigo):
+        case .rechazado(let codigo, _, _) where ["wrong_password", "invalid_credentials"].contains(codigo):
             if pantalla == .login { erroresDeCampo[.clave] = Textos.fieldPasswordWrong }
-        case .rechazado(let codigo, _) where codigo == "password_not_set":
+        case .rechazado(let codigo, _, _) where codigo == "password_not_set":
             if pantalla == .login { erroresDeCampo[.clave] = Textos.fieldPasswordNotSet }
         default:
             if pantalla == .login {
@@ -695,7 +695,7 @@ final class FlujoEntrada: ObservableObject {
             datos.codigo = ""
             pedidosDeCodigo += 1
             if pantalla == .regCorreo { ir(a: .regCodigo) }
-        case .rechazado(let codigo, _) where codigo == "email_already_registered" && pantalla == .regCorreo:
+        case .rechazado(let codigo, _, _) where codigo == "email_already_registered" && pantalla == .regCorreo:
             erroresDeCampo[.correo] = Textos.fieldEmailInUse
         default:
             let texto = TraductorDeErrores.texto(respuesta)
@@ -810,7 +810,7 @@ final class FlujoEntrada: ObservableObject {
             claveDeGuardado = nil
             historial.removeAll()
             pantalla = Pantalla.primerPasoDePerfil
-        case .rechazado(let codigo, _) where codigo == "legal_version_stale":
+        case .rechazado(let codigo, _, _) where codigo == "legal_version_stale":
             // El texto cambió mientras tanto. Se baja el nuevo y se lo muestra:
             // reintentar con la versión vieja sería dar por aceptado algo que la
             // persona no leyó.
@@ -819,13 +819,13 @@ final class FlujoEntrada: ObservableObject {
             let texto = TraductorDeErrores.texto(respuesta)
             errorVisible = texto
             mostrarAlertaError(titulo: TraductorDeErrores.titulo(respuesta, siNo: Textos.signupErrorTitle), mensaje: texto)
-        case .rechazado(let codigo, _) where codigo == "weak_password":
+        case .rechazado(let codigo, _, _) where codigo == "weak_password":
             // 🛑 La contraseña se escribió un paso antes y el servidor la rechaza
             // recién ahora: la lista de conocidas no se puede anticipar mientras
             // alguien tipea. El error va donde está el campo.
             pantalla = .regCorreo
             erroresDeCampo[.clave] = Textos.fieldPasswordWeak
-        case .rechazado(let codigo, _) where codigo == "invalid_signup_token":
+        case .rechazado(let codigo, _, _) where codigo == "invalid_signup_token":
             // Pasaron más de 30 minutos desde "Continuar con Google / Apple". El
             // código del correo NO se gastó (el servidor mira esto antes), pero hay
             // que volver a entrar con el proveedor para tener un permiso nuevo.
@@ -834,7 +834,7 @@ final class FlujoEntrada: ObservableObject {
             ofrecerRenovarSocial = true
             ofrecerLogin = false
             ofrecerEmpezarDeNuevo = false
-        case .rechazado(let codigo, _) where codigo == "invalid_registration_token":
+        case .rechazado(let codigo, _, _) where codigo == "invalid_registration_token":
             if permisoVencido {
                 // Venció sin usarse: hace falta otro código. Si un intento anterior
                 // se cortó, la cuenta pudo crearse igual, y entrar queda como la otra
@@ -854,7 +854,7 @@ final class FlujoEntrada: ObservableObject {
                 ofrecerLogin = true
                 ofrecerEmpezarDeNuevo = false
             }
-        case .rechazado(let codigo, _) where codigo == "conflict":
+        case .rechazado(let codigo, _, _) where codigo == "conflict":
             // Ya hay una cuenta con ese correo, y pedir otro código no la cambia.
             // No es el `conflict` de un guardado en curso: el texto es otro.
             errorVisible = Textos.legalAccountExists
@@ -963,7 +963,7 @@ final class FlujoEntrada: ObservableObject {
             if claveDeGuardado == clave { claveDeGuardado = nil }
             // Si mientras viajaba la persona se fue a otro lado, no se la arrastra.
             if pantalla == actual { avanzar(desde: actual) }
-        case .rechazado(let codigo, _) where Self.codigosDeSesionMuerta.contains(codigo):
+        case .rechazado(let codigo, _, _) where Self.codigosDeSesionMuerta.contains(codigo):
             // El renovador ya intentó renovar y no pudo. Quedarse acá con el cartel
             // no tiene salida: se manda al login, que es lo único que reabre una
             // sesión. Se pierde lo que no se guardó, no lo anterior.
@@ -1039,7 +1039,7 @@ final class FlujoEntrada: ObservableObject {
             recuperacionCodigo = ""
             pedidosDeCodigo += 1
             if pantalla == .claveCorreo { ir(a: .claveCodigo) }
-        case .rechazado(let codigo, _) where codigo == "user_not_found":
+        case .rechazado(let codigo, _, _) where codigo == "user_not_found":
             erroresDeCampo[.correo] = Textos.fieldEmailNotFound
         default:
             let texto = TraductorDeErrores.texto(respuesta)
@@ -1100,7 +1100,7 @@ final class FlujoEntrada: ObservableObject {
             claveNuevaRepetida = ""
             historial.removeAll()
             pantalla = .claveLista
-        case .rechazado(let codigo, _) where codigo == "weak_password":
+        case .rechazado(let codigo, _, _) where codigo == "weak_password":
             if pantalla == .claveNueva { erroresDeCampo[.clave] = Textos.fieldPasswordWeak }
         default:
             if pantalla == .claveNueva {
@@ -1180,7 +1180,7 @@ final class FlujoEntrada: ObservableObject {
             mostrarAlertaError(titulo: Textos.settingsDeleteAccountDoneTitle,
                                mensaje: Textos.settingsDeleteAccountDoneBody)
             return .borrada
-        case .rechazado(let codigo, _) where codigo == "invalid_credentials":
+        case .rechazado(let codigo, _, _) where codigo == "invalid_credentials":
             return .claveIncorrecta
         default:
             return .fallo(TraductorDeErrores.texto(respuesta))
@@ -1223,7 +1223,7 @@ final class FlujoEntrada: ObservableObject {
         switch respuesta {
         case .ok(let guardado):
             perfil = guardado
-        case .rechazado(let codigo, _) where Self.codigosDeSesionMuerta.contains(codigo):
+        case .rechazado(let codigo, _, _) where Self.codigosDeSesionMuerta.contains(codigo):
             // Igual que en el alta: sin sesión, reintentar no tiene salida.
             irAlLogin(aviso: TraductorDeErrores.texto(respuesta))
         default:

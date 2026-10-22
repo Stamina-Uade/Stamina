@@ -20,7 +20,7 @@ enum TraductorDeErrores {
     static func texto<Valor>(_ resultado: Resultado<Valor>) -> String {
         switch resultado {
         case .ok: return ""
-        case .rechazado(let codigo, _): return texto(codigo: codigo)
+        case .rechazado(let codigo, _, _): return texto(codigo: codigo)
         case .sinRed: return Textos.errorOffline
         case .respuestaRara: return Textos.errorUnexpectedResponse
         }
@@ -33,7 +33,7 @@ enum TraductorDeErrores {
         switch resultado {
         case .ok, .respuestaRara: return generico
         case .sinRed: return Textos.errorOfflineTitle
-        case .rechazado(let codigo, _):
+        case .rechazado(let codigo, _, _):
             switch codigo {
             case "user_not_found": return Textos.errorUserNotFoundTitle
             case "wrong_password", "invalid_credentials": return Textos.errorWrongPasswordTitle

@@ -117,7 +117,7 @@ public final class SincronizacionConElServidor {
             olvidarIntento(clave)
             fusionar(sesionDelServidor, mandadas: lote, generacion: alSalir)
             return true
-        case .rechazado(_, let http) where http == 409 || (400..<500).contains(http) && http != 429:
+        case .rechazado(_, let http, _) where http == 409 || (400..<500).contains(http) && http != 429:
             // 409: la clave chocó con otro cuerpo o con el mismo pedido en vuelo. Un 4xx
             // no se arregla reintentando lo mismo. En los dos casos el próximo intento
             // lleva otra clave, y las series siguen pendientes en el disco.

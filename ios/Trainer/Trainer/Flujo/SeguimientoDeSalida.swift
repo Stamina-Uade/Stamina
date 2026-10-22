@@ -561,7 +561,7 @@ final class SeguimientoDeSalida: NSObject, ObservableObject, CLLocationManagerDe
         switch resultado {
         case .ok: return .aceptada
         case .sinRed, .respuestaRara: return .reintentar
-        case .rechazado(_, let http):
+        case .rechazado(_, let http, _):
             if [401, 403, 408, 425, 429].contains(http) { return .reintentar }
             return (400..<500).contains(http) ? .rechazada : .reintentar
         }

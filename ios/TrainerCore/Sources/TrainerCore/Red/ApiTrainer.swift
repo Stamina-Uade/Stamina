@@ -123,8 +123,19 @@ public protocol ServicioDeCuenta: Sendable {
     func cierres() async -> AsyncStream<MotivoDeCierre>
 
     /// `POST /me/delete`. `clave` va `nil` si la cuenta no tiene contraseña
-    /// (nació con Google o Apple: `Perfil.hasPassword == false`).
+    /// (nació con Google o Apple: `Perfil.hasPassword == false`). Desde la 1.6.0
+    /// la cuenta se borra a los 30 días, no en el acto.
     func borrarCuenta(clave: String?) async -> Resultado<SinCuerpo>
+
+    /// `POST /auth/social/link` (1.6.0): vincula Google o Apple a la cuenta que ya
+    /// tenía ese correo. `clave` sólo si el permiso dice `requires_password`.
+    func vincularProveedor(permiso: String, clave: String?) async -> Resultado<SesionAbierta>
+    /// `POST /auth/reactivate` (1.6.0): vuelve a una cuenta desactivada o por borrarse.
+    func reactivarCuenta(permiso: String) async -> Resultado<SesionAbierta>
+    /// `POST /auth/logout/others` (1.6.0): cierra todas las sesiones menos ésta.
+    func cerrarOtrasSesiones() async -> Resultado<SinCuerpo>
+    /// `POST /me/deactivate` (1.6.0).
+    func desactivarCuenta() async -> Resultado<SinCuerpo>
 }
 
 public extension ServicioDeCuenta {
@@ -138,6 +149,10 @@ public extension ServicioDeCuenta {
     func completarRegistroSocial(token: String?, permisoSocial: String, aceptacion: AceptacionLegal,
                                  perfil: PerfilEntrada) async -> Resultado<SesionAbierta> { .sinRed }
     func borrarCuenta(clave: String?) async -> Resultado<SinCuerpo> { .sinRed }
+    func vincularProveedor(permiso: String, clave: String?) async -> Resultado<SesionAbierta> { .sinRed }
+    func reactivarCuenta(permiso: String) async -> Resultado<SesionAbierta> { .sinRed }
+    func cerrarOtrasSesiones() async -> Resultado<SinCuerpo> { .sinRed }
+    func desactivarCuenta() async -> Resultado<SinCuerpo> { .sinRed }
 }
 
 extension ServicioDeCuenta {
@@ -288,7 +303,7 @@ public final class ApiTrainer: ServicioDeCuenta, ServicioDelPlan, ServicioDeActi
                 guard let alta = entrada.signup else { return .respuestaRara(http: 200) }
                 return .ok(.faltaElAlta(alta))
             }
-        case .rechazado(let codigo, let http): return .rechazado(codigo: codigo, http: http)
+        case .rechazado(let codigo, let http, let detalle): return .rechazado(codigo: codigo, http: http, detalle: detalle)
         case .sinRed: return .sinRed
         case .respuestaRara(let http): return .respuestaRara(http: http)
         }
@@ -316,9 +331,10 @@ public final class ApiTrainer: ServicioDeCuenta, ServicioDelPlan, ServicioDeActi
                             cuerpo: PedidoConCodigo(email: correo, code: codigo))
     }
 
-    /// 🛑 Cambiar la contraseña revoca las demás sesiones (AGENTS.md §12) y el
-    /// servidor devuelve una nueva. Se usa: la app entra derecho, en vez de pedirle
-    /// a alguien que tipee la contraseña que acaba de elegir.
+    /// El servidor devuelve una sesión nueva junto con la contraseña cambiada: la
+    /// app entra derecho, en vez de pedirle a alguien que tipee la contraseña que
+    /// acaba de elegir. Desde la 1.6.0 NO cierra las otras sesiones: eso lo
+    /// decide la persona (`cerrarOtrasSesiones`).
     public func cambiarClave(token: String, clave: String) async -> Resultado<SesionAbierta> {
         let respuesta: Resultado<Sesion> = await cliente.pedir(
             .post, "/auth/password/reset", cuerpo: PedidoReseteo(resetToken: token, password: clave))
@@ -501,6 +517,26 @@ public final class ApiTrainer: ServicioDeCuenta, ServicioDelPlan, ServicioDeActi
         await renovador.pedir(.post, "/me/delete", cuerpo: PedidoBorrarCuenta(password: clave))
     }
 
+    public func vincularProveedor(permiso: String, clave: String?) async -> Resultado<SesionAbierta> {
+        let respuesta: Resultado<Sesion> = await cliente.pedir(
+            .post, "/auth/social/link", cuerpo: PedidoVincular(linkToken: permiso, password: clave))
+        return await abrir(respuesta)
+    }
+
+    public func reactivarCuenta(permiso: String) async -> Resultado<SesionAbierta> {
+        let respuesta: Resultado<Sesion> = await cliente.pedir(
+            .post, "/auth/reactivate", cuerpo: PedidoReactivar(reactivationToken: permiso))
+        return await abrir(respuesta)
+    }
+
+    public func cerrarOtrasSesiones() async -> Resultado<SinCuerpo> {
+        await renovador.pedir(.post, "/auth/logout/others")
+    }
+
+    public func desactivarCuenta() async -> Resultado<SinCuerpo> {
+        await renovador.pedir(.post, "/me/deactivate")
+    }
+
     public func cierres() async -> AsyncStream<MotivoDeCierre> {
         await renovador.cierres()
     }
@@ -522,6 +558,25 @@ public final class ApiTrainer: ServicioDeCuenta, ServicioDelPlan, ServicioDeActi
 /// Sin contraseña viaja `{}`: el `Encodable` sintetizado omite el opcional nulo.
 struct PedidoBorrarCuenta: Encodable, Sendable {
     let password: String?
+}
+
+/// Sin contraseña viaja sólo el permiso: el opcional nulo no se codifica.
+struct PedidoVincular: Encodable, Sendable {
+    let linkToken: String
+    let password: String?
+
+    enum CodingKeys: String, CodingKey {
+        case linkToken = "link_token"
+        case password
+    }
+}
+
+struct PedidoReactivar: Encodable, Sendable {
+    let reactivationToken: String
+
+    enum CodingKeys: String, CodingKey {
+        case reactivationToken = "reactivation_token"
+    }
 }
 
 struct PedidoConCorreo: Encodable, Sendable {

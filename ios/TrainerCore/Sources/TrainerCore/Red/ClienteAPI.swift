@@ -32,8 +32,11 @@ public enum Resultado<Valor> {
     /// Salió bien.
     case ok(Valor)
     /// El servidor contestó con el sobre de error. `codigo` es contrato
-    /// (docs/API.md §2) y es lo que la pantalla traduce.
-    case rechazado(codigo: String, http: Int)
+    /// (docs/API.md §2) y es lo que la pantalla traduce. `detalle` (contrato
+    /// 1.6.0) es lo que algunos códigos traen para poder seguir —el proveedor de
+    /// `password_not_set`, el permiso para reactivar o vincular, los días que
+    /// faltan para un borrado— y casi siempre es `nil`.
+    case rechazado(codigo: String, http: Int, detalle: DatosDelError? = nil)
     /// No se llegó al servidor: sin señal, servidor caído, o diez segundos sin
     /// respuesta.
     case sinRed
@@ -54,7 +57,13 @@ extension Resultado {
 
     /// El código del contrato, si el servidor dijo que no.
     public var codigoDeRechazo: String? {
-        if case .rechazado(let codigo, _) = self { return codigo }
+        if case .rechazado(let codigo, _, _) = self { return codigo }
+        return nil
+    }
+
+    /// Lo que trajo el rechazo además del código (contrato 1.6.0), si trajo algo.
+    public var detalleDelRechazo: DatosDelError? {
+        if case .rechazado(_, _, let detalle) = self { return detalle }
         return nil
     }
 
@@ -62,7 +71,7 @@ extension Resultado {
     public func map<Otro>(_ transformar: (Valor) -> Otro) -> Resultado<Otro> {
         switch self {
         case .ok(let valor): return .ok(transformar(valor))
-        case .rechazado(let codigo, let http): return .rechazado(codigo: codigo, http: http)
+        case .rechazado(let codigo, let http, let detalle): return .rechazado(codigo: codigo, http: http, detalle: detalle)
         case .sinRed: return .sinRed
         case .respuestaRara(let http): return .respuestaRara(http: http)
         }
@@ -306,7 +315,7 @@ public final class ClienteAPI: Sendable {
             // Un 502 de un proxy con HTML adentro, por ejemplo.
             return .respuestaRara(http: http)
         }
-        return .rechazado(codigo: sobre.error.code, http: http)
+        return .rechazado(codigo: sobre.error.code, http: http, detalle: sobre.error.details)
     }
 }
 
