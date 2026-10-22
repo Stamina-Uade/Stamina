@@ -89,8 +89,12 @@ public struct BarraAvance: View {
     }
 }
 
-/// El aviso de una línea con punto de acento: el "vas a recibir N avisos" de
-/// `reg-dias`.
+/// Una nota: texto común en color secundario con un ícono de información a la
+/// izquierda.
+///
+/// 2026-10-22 (Iván): ya no es la caja con fondo y borde del color de la app —un
+/// recuadro rosa se leía como algo para tocar o como un error—. Vale en todos los
+/// lugares donde se usa.
 public struct AvisoSuave: View {
     private let texto: String
 
@@ -99,24 +103,16 @@ public struct AvisoSuave: View {
     }
 
     public var body: some View {
-        HStack(alignment: .top, spacing: TokensEspaciado.e9) {
-            Circle()
-                .fill(Paleta.acento)
-                .frame(width: TokensEspaciado.e5, height: TokensEspaciado.e5)
-                .padding(.top, TokensEspaciado.e6)
+        HStack(alignment: .firstTextBaseline, spacing: TokensEspaciado.e8) {
+            Image(systemName: "info.circle")
+                .font(.system(size: TokensTipografia.labelCampoTamano, weight: .semibold))
+                .foregroundStyle(Paleta.textoSecundario)
+                .accessibilityHidden(true)
             Text(texto)
-                .estilo(.labelCampo, color: Paleta.textoCuerpo)
+                .estilo(.labelCampo, color: Paleta.textoSecundario)
                 .fixedSize(horizontal: false, vertical: true)
         }
-        .padding(.vertical, TokensEspaciado.e11)
-        .padding(.horizontal, TokensEspaciado.e12)
         .frame(maxWidth: .infinity, alignment: .leading)
-        .background(Paleta.acentoSuaveFondo)
-        .clipShape(RoundedRectangle(cornerRadius: TokensRadio.input, style: .continuous))
-        .overlay(
-            RoundedRectangle(cornerRadius: TokensRadio.input, style: .continuous)
-                .strokeBorder(Paleta.acentoSuaveBorde, lineWidth: TokensEspaciado.e1)
-        )
         .accessibilityElement(children: .combine)
     }
 }

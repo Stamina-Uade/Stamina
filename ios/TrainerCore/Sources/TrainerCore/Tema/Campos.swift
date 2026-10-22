@@ -265,6 +265,8 @@ public enum UITextContentTypeCompat: Sendable {
 
 public enum TipoTecladoCompat: Sendable {
     case normal, correo, decimal, codigo
+    /// Sólo dígitos: los pasos del día.
+    case numero
     /// Una contraseña a la vista: sin mayúscula automática ni autocorrector.
     case clave
 }
@@ -301,6 +303,8 @@ extension View {
                 .autocorrectionDisabled()
         case .decimal:
             self.keyboardType(.decimalPad)
+        case .numero:
+            self.keyboardType(.numberPad)
         case .codigo:
             self.textInputAutocapitalization(.characters)
         case .clave:

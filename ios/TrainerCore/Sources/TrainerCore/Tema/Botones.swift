@@ -47,12 +47,16 @@ public struct BotonPrimario: View {
     public var body: some View {
         Button(action: accion) {
             ZStack {
+                // 2026-10-22 (Iván): el texto del botón rosa es BLANCO, con el
+                // color que sea. Apagado, el blanco también baja de opacidad
+                // junto con el rosa (lo hace `EstiloPresionado`): nunca gris.
+                // Esperando al servidor, sólo la ruedita, sin texto.
                 if cargando {
                     ProgressView()
-                        .tint(Paleta.sobreAcento)
+                        .tint(Color.white)
                 } else {
                     Text(titulo)
-                        .estilo(grande ? .botonGrande : .botonPrimario, color: Paleta.sobreAcento)
+                        .estilo(grande ? .botonGrande : .botonPrimario, color: Color.white)
                 }
             }
             .frame(maxWidth: .infinity)
@@ -68,6 +72,8 @@ public struct BotonPrimario: View {
         .buttonStyle(EstiloPresionado())
         .disabled(!habilitado || cargando)
         .accessibilityHint(habilitado ? "" : (motivoDeshabilitado ?? ""))
+        // La ruedita sola no dice nada a VoiceOver: el botón conserva su nombre.
+        .accessibilityLabel(titulo)
     }
 }
 

@@ -348,7 +348,7 @@ public struct BotonCircular: View {
                 }
                 Image(systemName: simbolo)
                     .font(.system(size: diametro * 0.36, weight: .bold))
-                    .foregroundStyle(estilo == .primario ? Paleta.sobreAcento : Paleta.textoPrimario)
+                    .foregroundStyle(estilo == .primario ? Color.white : Paleta.textoPrimario)
             }
             .frame(width: diametro, height: diametro)
             .contentShape(Circle())
@@ -364,17 +364,26 @@ public struct BotonCircular: View {
 /// "Pausar" al lado de "Seguir".
 public struct BotonTonal: View {
     private let titulo: String
+    private let cargando: Bool
     private let accion: () -> Void
 
-    public init(_ titulo: String, accion: @escaping () -> Void) {
+    /// - Parameter cargando: mientras espera, sólo la ruedita en lugar del texto.
+    public init(_ titulo: String, cargando: Bool = false, accion: @escaping () -> Void) {
         self.titulo = titulo
+        self.cargando = cargando
         self.accion = accion
     }
 
     public var body: some View {
         Button(action: accion) {
-            Text(titulo)
-                .estilo(.botonPrimario, color: Paleta.textoPrimario)
+            ZStack {
+                if cargando {
+                    ProgressView().tint(Paleta.textoPrimario)
+                } else {
+                    Text(titulo)
+                        .estilo(.botonPrimario, color: Paleta.textoPrimario)
+                }
+            }
                 .frame(maxWidth: .infinity)
                 .frame(minHeight: TokensTamano.botonPrimario)
                 .background(Paleta.superficieAlterna)
@@ -383,6 +392,7 @@ public struct BotonTonal: View {
                 .objetivoTactilAlto()
         }
         .buttonStyle(EstiloPresionado())
+        .accessibilityLabel(titulo)
     }
 }
 
