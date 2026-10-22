@@ -37,7 +37,15 @@ import { crearRepo, type RepoAuth, type SesionFila } from "./repositorio.js";
 const VIDA_CODIGO_MS = 15 * 60 * 1000; // 15 min, como el diseño (`reg-codigo`)
 const REENVIO_MS = 60 * 1000; //           60 s, como el diseño
 const VIDA_TOKEN_PASO_MS = 10 * 60 * 1000;
-const MAX_INTENTOS_CODIGO = 3;
+/** Contrato 1.6.0: al quinto código equivocado, ése queda invalidado (`code_attempts_exceeded`). */
+const MAX_INTENTOS_CODIGO = 5;
+/**
+ * Cuánto se recuerda un código en la caché DESPUÉS de vencer. Sin este margen la
+ * clave desaparecía justo a los 15 minutos y el código vencido se contestaba
+ * `invalid_code`, que le dice a la persona que lo tipeó mal cuando en realidad
+ * tiene que pedir otro. Con la clave viva, el vencido es `code_expired`.
+ */
+const RECUERDO_CODIGO_MS = VIDA_CODIGO_MS + 60 * 60 * 1000;
 /**
  * Cuánto vive el permiso de alta social. Más que el del correo: en el medio la
  * persona revisa sus datos, espera el código y lee el aviso de salud.
@@ -71,6 +79,8 @@ interface CodigoTemporal {
   id: string;
   hash: string;
   venceMs: number;
+  /** Se equivocaron cinco veces: ya no vale, ni siquiera el correcto. */
+  agotado?: true;
 }
 
 function claveCodigo(email: string, proposito: string): string {
@@ -127,12 +137,18 @@ export function crearServicioAuth(ctx: Contexto) {
     if (!(await ctx.cache.ponerSiAusente(enfriamiento, "1", Math.ceil(REENVIO_MS / 1000)))) {
       throw new ErrorApi("code_resend_too_soon", "Wait before requesting another code", Math.ceil(REENVIO_MS / 1000));
     }
-    const codigo = generarCodigo();
+    // El código nuevo reemplaza al anterior (pedir otro invalida el que había) y
+    // tiene que ser DISTINTO: si la persona recibe dos veces el mismo, cree que el
+    // reenvío no anduvo, y uno agotado no puede volver con otro nombre.
+    const anterior = await ctx.cache.obtener(clave);
+    const hashAnterior = anterior === null ? null : (JSON.parse(anterior) as CodigoTemporal).hash;
+    let codigo = generarCodigo();
+    while (hashearToken(codigo) === hashAnterior) codigo = generarCodigo();
     const estado: CodigoTemporal = {
       id: generarTokenOpaco(), hash: hashearToken(codigo), venceMs: ahora + VIDA_CODIGO_MS,
     };
     const valor = JSON.stringify(estado);
-    await ctx.cache.poner(clave, valor, Math.ceil(VIDA_CODIGO_MS / 1000));
+    await ctx.cache.poner(clave, valor, Math.ceil(RECUERDO_CODIGO_MS / 1000));
     try {
       await ctx.correo.enviarCodigo(email, codigo, proposito, nombreCompleto);
     } catch {
@@ -150,16 +166,23 @@ export function crearServicioAuth(ctx: Contexto) {
     const valor = await ctx.cache.obtener(clave);
     if (valor === null) throw new ErrorApi("invalid_code", "Code is not valid");
     const fila = JSON.parse(valor) as CodigoTemporal;
+    // Agotado antes que vencido: si se agotó, eso es lo que la persona tiene que saber.
+    if (fila.agotado === true) throw new ErrorApi("code_attempts_exceeded", "Too many wrong codes");
     if (fila.venceMs <= ahora) throw new ErrorApi("code_expired", "Code has expired");
 
     // El contador vive en la caché con TTL, y en Redis cuando está configurado.
     // La clave lleva el ID aleatorio del desafío, nunca el correo de la persona.
     const claveIntentos = `codigo-intentos:${fila.id}`;
     if (!igualSeguro(hashearToken(codigo.toUpperCase()), fila.hash)) {
-      const intentos = await ctx.cache.incrementar(claveIntentos, Math.ceil(VIDA_CODIGO_MS / 1000));
+      const intentos = await ctx.cache.incrementar(claveIntentos, Math.ceil(RECUERDO_CODIGO_MS / 1000));
       if (intentos >= MAX_INTENTOS_CODIGO) {
-        await ctx.cache.consumirSiIgual(clave, valor);
-        throw new ErrorApi("code_expired", "Code has expired");
+        // Se marca agotado en vez de borrarlo: así los pedidos siguientes, incluso
+        // con el código correcto, siguen diciendo lo mismo y no `invalid_code`.
+        // `consumirSiIgual` primero: si otro pedido ya lo canjeó, no se resucita.
+        if (await ctx.cache.consumirSiIgual(clave, valor)) {
+          await ctx.cache.poner(clave, JSON.stringify({ ...fila, agotado: true }), Math.ceil(RECUERDO_CODIGO_MS / 1000));
+        }
+        throw new ErrorApi("code_attempts_exceeded", "Too many wrong codes");
       }
       throw new ErrorApi("invalid_code", "Code is not valid");
     }
