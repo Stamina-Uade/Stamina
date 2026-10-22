@@ -1846,3 +1846,21 @@ actor ServicioDePrueba: ServicioDeCuenta {
         }
     }
 }
+
+@Suite("La maqueta del Home")
+struct MaquetaDelHomeTests {
+
+    @Test("El plan de ejemplo tiene días de hoy en adelante: no se da por vencido con el calendario")
+    func cronogramaDesdeHoy() {
+        var calendario = Calendar(identifier: .gregorian)
+        calendario.timeZone = TimeZone(identifier: "America/Argentina/Buenos_Aires")!
+        let hoy = calendario.date(from: DateComponents(year: 2027, month: 3, day: 10, hour: 9))!
+        let dias = RepositorioProvisional.cronograma(de: RepositorioProvisional.bloqueMediaMaraton,
+                                                     hoy: hoy, calendario: calendario)
+
+        #expect(dias.count == 35, "cinco semanas de siete días")
+        #expect(dias.contains { $0.fechaIso == "2027-03-10" }, "el día marcado como hoy cae hoy")
+        #expect(dias.contains { $0.fechaIso > "2027-03-10" }, "hay días por delante")
+        #expect(dias.first { $0.fechaIso == "2027-03-10" }?.tipo == "Fondo largo · 14 km")
+    }
+}

@@ -77,7 +77,8 @@ struct RepositorioProvisional: RepositorioDePlan {
                 bloque: bloque,
                 hoy: DiaDeHoy(titulo: sesion.tipo, detalle: "", sesion: sesion, esFuerza: false),
                 semanaDeHoy: bloque.semanas.first(where: \.enCurso)?.numero,
-                cargaSemanal: cargaSemanal(), indiceDeHoy: 3)),
+                cargaSemanal: cargaSemanal(), indiceDeHoy: 3,
+                cronograma: Self.cronograma(de: bloque))),
             rutina: Seccion(valor: RutinaDelHome(ejercicios: rutinaDeGimnasio(), planificada: true)),
             nutricion: Seccion(valor: NutricionDelHome(
                 objetivo: objetivoNutricional(), motivoSinObjetivo: nil, provisional: false,
@@ -327,6 +328,35 @@ extension RepositorioProvisional {
                 ("Activación · 2 km", "Trote muy suave"), ("Descanso", "Dormí 8 h"),
                 ("Carrera · 5 km", "Tu objetivo · 750 ml/h · sin geles")]),
         ])
+
+    /// Los días del bloque con fecha, contados desde HOY: el día marcado como hoy
+    /// cae en la fecha de hoy y los demás alrededor.
+    ///
+    /// 🪤 Sin cronograma el Home da el plan por vencido (`EstadoHome.planVencido`)
+    /// y la maqueta mostraba "Ingresá tu nuevo objetivo" en vez de la carrera: lo
+    /// cazó el test de UI de las pestañas. Las fechas no se escriben fijas por lo
+    /// mismo: una fecha fija vence sola con el calendario.
+    static func cronograma(de bloque: BloqueDelPlan, hoy: Date = Date(),
+                           calendario: Calendar = .autoupdatingCurrent) -> [DiaPlanificadoCompartido] {
+        guard let semanaDeHoy = bloque.semanas.firstIndex(where: \.enCurso),
+              let diaDeHoy = bloque.semanas[semanaDeHoy].dias.firstIndex(where: \.esHoy) else { return [] }
+        let formato = DateFormatter()
+        formato.calendar = Calendar(identifier: .gregorian)
+        formato.locale = Locale(identifier: "en_US_POSIX")
+        formato.timeZone = calendario.timeZone
+        formato.dateFormat = "yyyy-MM-dd"
+        let inicioDeHoy = calendario.startOfDay(for: hoy)
+        return bloque.semanas.enumerated().flatMap { indiceDeSemana, semana in
+            semana.dias.enumerated().compactMap { indiceDeDia, dia -> DiaPlanificadoCompartido? in
+                let desfase = (indiceDeSemana - semanaDeHoy) * 7 + (indiceDeDia - diaDeHoy)
+                guard let fecha = calendario.date(byAdding: .day, value: desfase, to: inicioDeHoy) else { return nil }
+                return DiaPlanificadoCompartido(
+                    fechaIso: formato.string(from: fecha), diaDeLaSemana: dia.diaDeLaSemana,
+                    tipo: dia.titulo, distanciaMetros: nil, duracionMinutos: 45, minutoDelDia: 18 * 60 + 30,
+                    geles: nil, esDescanso: dia.titulo.hasPrefix("Descanso"))
+            }
+        }
+    }
 
     private static func semana(_ numero: Int, hechos: Int, previstos: Int, desde: Int, mes: String,
                                diasHechos: Int, hoy: Int, filas: [(String, String)]) -> SemanaDelPlan {
