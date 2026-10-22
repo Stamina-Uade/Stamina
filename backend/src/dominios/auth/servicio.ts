@@ -28,6 +28,8 @@ import {
   leerAltaSocial,
   firmarReactivacion,
   leerReactivacion,
+  firmarVinculo,
+  leerVinculo,
 } from "../../infra/cripto.js";
 import {
   crearVerificadorDeProveedores,
@@ -440,13 +442,19 @@ export function crearServicioAuth(ctx: Contexto) {
 
     // -------------------------------------------------- Google y Apple --
     /**
-     * `POST /auth/social`. Tres desenlaces:
+     * `POST /auth/social`. Cuatro desenlaces:
      *
-     * 1. La identidad ya está vinculada → se abre la sesión.
-     * 2. No está vinculada, pero el proveedor VERIFICÓ un correo que ya tiene
-     *    cuenta → se vincula a esa cuenta y se abre la sesión. Es la misma persona:
-     *    el proveedor ya comprobó que el correo es suyo.
-     * 3. Nadie la conoce → `signup_required` con un permiso de alta. El teléfono
+     * 1. La identidad ya está vinculada → se abre la sesión (si la cuenta está
+     *    activa; si no, el estado con su permiso de reactivar).
+     * 2. No está vinculada y el correo es de una cuenta CON contraseña →
+     *    `account_link_available` (1.6.0) con un permiso para
+     *    `POST /auth/social/link`. La app pregunta antes de vincular, y el canje
+     *    pide la contraseña salvo que el proveedor sea el dueño del correo.
+     * 3. No está vinculada, el correo es de una cuenta SIN contraseña (nació con
+     *    el otro proveedor) y el proveedor es dueño de ese correo → se vincula sola
+     *    y se abre la sesión, como antes de la 1.6.0: es la misma persona y no hay
+     *    contraseña que pedirle.
+     * 4. Nadie la conoce → `signup_required` con un permiso de alta. El teléfono
      *    sigue con el alta de siempre (nombre, apellido, correo y su código): la
      *    cuenta se crea recién en `register/complete`, con ese permiso en vez de
      *    una contraseña.
@@ -469,10 +477,30 @@ export function crearServicioAuth(ctx: Contexto) {
       const vinculado = await repo.buscarUsuarioPorIdentidad(proveedor, identidad.sujeto);
       if (vinculado !== null) return { status: "signed_in", session: await abrirSesionDe(vinculado) };
 
-      // Se vincula a una cuenta existente sólo si el proveedor es el DUEÑO de ese
+      const porCorreo = identidad.email === null ? null : await repo.buscarUsuarioPorEmail(identidad.email);
+
+      // 1.6.0: una cuenta con contraseña no se vincula sola. Se ofrece, y la persona
+      // decide en la app. Si esa cuenta ya tiene otra persona del mismo proveedor,
+      // no hay nada que ofrecer.
+      if (porCorreo !== null && porCorreo.password_hash !== null) {
+        if (await repo.tieneIdentidadDe(porCorreo.id, proveedor)) {
+          throw new ErrorApi("conflict", "This account already has another identity of this provider");
+        }
+        // Sin contraseña sólo si el proveedor es el DUEÑO del correo: un Google
+        // creado con un @hotmail verificó ese correo alguna vez, pero quien lo
+        // controla hoy puede no ser el dueño del buzón (proveedores.ts).
+        const requierePassword = !proveedorEsDuenoDelCorreo(identidad);
+        const link_token = await firmarVinculo(ctx.config, {
+          usuarioId: porCorreo.id, proveedor, sujeto: identidad.sujeto, email: identidad.email, requierePassword,
+        }, ctx.ahoraMs(), VIDA_PERMISO_CUENTA_MS);
+        throw new ErrorApi("account_link_available", "An account with this email exists and can be linked", undefined, {
+          link_token, email: porCorreo.email, provider: proveedor, requires_password: requierePassword,
+        });
+      }
+
+      // Sin contraseña, se vincula sola sólo si el proveedor es el DUEÑO de ese
       // correo, y si esa cuenta no tiene ya otra persona del mismo proveedor.
       if (identidad.email !== null && proveedorEsDuenoDelCorreo(identidad)) {
-        const porCorreo = await repo.buscarUsuarioPorEmail(identidad.email);
         if (porCorreo !== null && !(await repo.tieneIdentidadDe(porCorreo.id, proveedor))) {
           await repo.vincularIdentidad(porCorreo.id, proveedor, identidad.sujeto, identidad.email, ctx.ahoraMs());
           // Que el dueño se entere: una forma nueva de entrar a su cuenta no puede
@@ -482,11 +510,12 @@ export function crearServicioAuth(ctx: Contexto) {
         }
       }
 
-      // Un correo verificado que ya tiene cuenta, pero del que el proveedor no es
-      // dueño (un Google creado con un @hotmail): no se vincula solo y tampoco se
-      // puede crear otra cuenta con ese correo. Que entre con su contraseña.
-      if (identidad.email !== null && identidad.emailVerificado &&
-          await repo.buscarUsuarioPorEmail(identidad.email) !== null) {
+      // Una cuenta SIN contraseña con ese correo verificado, pero el proveedor no es
+      // dueño del correo (un Google creado con un @hotmail): no se vincula sola y
+      // tampoco se puede crear otra cuenta con ese correo. Que entre con el
+      // proveedor con el que nació, o se ponga una contraseña con "¿Olvidaste tu
+      // contraseña?" y vuelva: ahí ya se le ofrece vincular.
+      if (identidad.emailVerificado && porCorreo !== null) {
         throw new ErrorApi("conflict", "An account with this email already exists");
       }
 
@@ -506,6 +535,52 @@ export function crearServicioAuth(ctx: Contexto) {
           email_verified: identidad.emailVerificado,
         },
       };
+    },
+
+    /**
+     * `POST /auth/social/link` (1.6.0). Canjea el permiso de `account_link_available`:
+     * vincula la identidad a la cuenta, le avisa al dueño por correo y abre la sesión.
+     *
+     * El permiso se gasta recién al vincular: una contraseña mal tipeada no obliga a
+     * volver a entrar con el proveedor. Lo que frena probar contraseñas con un mismo
+     * permiso es el tope por correo, que acá cuenta igual que en el login.
+     *
+     * @param ip la del pedido, para el tope de fallos por IP.
+     */
+    async vincularConPassword(token: string, password: string | undefined, ip: string): Promise<Sesion> {
+      const ahora = ctx.ahoraMs();
+      const v = await leerVinculo(ctx.config, token, ahora);
+      if (v === null) throw new ErrorApi("invalid_link_token", "Link token is not valid");
+      const claveUso = `auth:vinculo:${hashearToken(v.jti)}`;
+      if (await ctx.cache.obtener(claveUso) !== null) throw new ErrorApi("invalid_link_token", "Link token was already used");
+      const usuario = await repo.buscarUsuarioPorId(v.usuarioId);
+      if (usuario === null) throw new ErrorApi("invalid_link_token", "Link token is not valid");
+
+      if (v.requierePassword) {
+        await exigirSinBloqueo(usuario.email, password ?? "", ip);
+        // Sin contraseña es `wrong_password` (contrato), pero no cuenta para el tope:
+        // no es un intento de adivinar nada.
+        if (password === undefined || usuario.password_hash === null) {
+          await verificarDummy(password ?? "");
+          throw new ErrorApi("wrong_password", "The password does not match");
+        }
+        await comprobarPassword(usuario.email, usuario.password_hash, password, ip);
+      }
+
+      // Un solo uso: se recuerda hasta que el permiso vence, y un minuto más.
+      const ttlS = Math.max(60, Math.ceil((v.venceMs - ahora) / 1000) + 60);
+      if (!(await ctx.cache.ponerSiAusente(claveUso, "1", ttlS))) {
+        throw new ErrorApi("invalid_link_token", "Link token was already used");
+      }
+      if (await repo.tieneIdentidadDe(usuario.id, v.proveedor) ||
+          !(await repo.vincularIdentidad(usuario.id, v.proveedor, v.sujeto, v.email, ahora))) {
+        throw new ErrorApi("conflict", "This identity or provider is already linked");
+      }
+      // Una forma nueva de entrar a la cuenta no puede aparecer en silencio. Si el
+      // correo falla, el vínculo vale igual.
+      try { await ctx.correo.avisarVinculacion(usuario.email, v.proveedor); } catch { /* no bloquea */ }
+      // Desactivada o por borrarse: el vínculo queda hecho y contesta el estado.
+      return abrirSesionDe(usuario);
     },
 
     // ------------------------------------------------------------- refresh --

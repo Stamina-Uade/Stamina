@@ -80,6 +80,12 @@ export async function rutasAuth(app: FastifyInstance, ctx: Contexto): Promise<vo
     return { data: await auth.entrarConProveedor(b.provider, b.id_token, b.nonce) };
   });
 
+  // 1.6.0: vincular Google o Apple a una cuenta con contraseña (`account_link_available`).
+  app.post("/auth/social/link", { config: ESTRICTO, schema: { body: cuerpo("socialLink") } }, async (req) => {
+    const b = req.body as { link_token: string; password?: string };
+    return { data: await auth.vincularConPassword(b.link_token, b.password, req.ip) };
+  });
+
   // 1.6.0: volver a una cuenta desactivada o por borrarse.
   app.post("/auth/reactivate", { config: ESTRICTO, schema: { body: cuerpo("reactivateAccount") } }, async (req) => {
     const b = req.body as { reactivation_token: string };

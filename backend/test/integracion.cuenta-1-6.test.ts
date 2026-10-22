@@ -348,3 +348,84 @@ describe("borrar con 30 días de gracia", { skip: SIN_SERVICIOS }, () => {
     assert.notEqual(otraVez.sesion.user_id, sesion.user_id);
   });
 });
+
+describe("vincular Google o Apple a una cuenta con contraseña", { skip: SIN_SERVICIOS }, () => {
+  test("proveedor dueño del correo: se ofrece sin contraseña, se vincula una vez y avisa", async () => {
+    const { email, sesion } = await registrar(nuevoEmail("gmail.com"));
+    const sujeto = `suj-${randomUUID()}`;
+    const r = await social("google", idToken({ sujeto, email }));
+    assert.equal(r.status, 409);
+    assert.equal(r.json.error.code, "account_link_available");
+    const d = r.json.error.details;
+    assert.deepEqual({ email: d.email, provider: d.provider, requires_password: d.requires_password },
+      { email, provider: "google", requires_password: false });
+
+    const v = await pedir("POST", "/v1/auth/social/link", { link_token: d.link_token });
+    assert.equal(v.status, 200, JSON.stringify(v.json));
+    assert.equal(v.json.data.user_id, sesion.user_id);
+    assert.ok(enviados.vinculaciones.some((x) => x.destino === email && x.proveedor === "google"), "avisa al dueño");
+    assert.equal((await pedir("POST", "/v1/auth/social/link", { link_token: d.link_token })).json.error.code, "invalid_link_token");
+    // Desde ahora entra con Google, y sigue entrando con su contraseña.
+    const otra = await social("google", idToken({ sujeto, email }));
+    assert.equal(otra.json.data.status, "signed_in");
+    assert.equal((await pedir("POST", "/v1/auth/login", { email, password: PASSWORD })).status, 200);
+  });
+
+  test("proveedor que no es dueño: pide la contraseña, y las equivocadas cuentan para el tope", async () => {
+    const { email } = await registrar(nuevoEmail("hotmail.example"));
+    const r = await social("google", idToken({ email }));
+    const d = r.json.error.details;
+    assert.equal(d.requires_password, true);
+    const sinClave = await pedir("POST", "/v1/auth/social/link", { link_token: d.link_token });
+    assert.equal(sinClave.status, 401);
+    assert.equal(sinClave.json.error.code, "wrong_password");
+    for (let i = 1; i <= 4; i++) {
+      const mala = await pedir("POST", "/v1/auth/social/link", { link_token: d.link_token, password: "Otra-clave-larga-1" });
+      assert.equal(mala.json.error.code, "wrong_password");
+    }
+    const quinta = await pedir("POST", "/v1/auth/social/link", { link_token: d.link_token, password: "Otra-clave-larga-1" });
+    assert.equal(quinta.json.error.code, "too_many_attempts");
+    assert.equal((await pedir("POST", "/v1/auth/login", { email, password: PASSWORD })).json.error.code, "too_many_attempts");
+  });
+
+  test("con la contraseña correcta vincula; un permiso adulterado no sirve", async () => {
+    const { email } = await registrar(nuevoEmail("hotmail.example"));
+    const d = (await social("apple", idToken({ email, verificado: false }))).json.error.details;
+    assert.equal(d.requires_password, true);
+    const adulterado = d.link_token.slice(0, -4) + (d.link_token.endsWith("AAAA") ? "BBBB" : "AAAA");
+    assert.equal((await pedir("POST", "/v1/auth/social/link", { link_token: adulterado, password: PASSWORD })).json.error.code,
+      "invalid_link_token");
+    const v = await pedir("POST", "/v1/auth/social/link", { link_token: d.link_token, password: PASSWORD });
+    assert.equal(v.status, 200, JSON.stringify(v.json));
+  });
+
+  test("si la cuenta ya tiene otra persona de ese proveedor, es conflict", async () => {
+    const { email } = await registrar(nuevoEmail("gmail.com"));
+    const d = (await social("google", idToken({ email }))).json.error.details;
+    assert.equal((await pedir("POST", "/v1/auth/social/link", { link_token: d.link_token })).status, 200);
+    const otraPersona = await social("google", idToken({ email }));
+    assert.equal(otraPersona.status, 409);
+    assert.equal(otraPersona.json.error.code, "conflict");
+  });
+
+  test("una cuenta SIN contraseña se sigue vinculando sola si el proveedor es dueño del correo", async () => {
+    const { email, sesion } = await registrarConProveedor("apple", nuevoEmail("gmail.com"));
+    const r = await social("google", idToken({ email }));
+    assert.equal(r.status, 200, JSON.stringify(r.json));
+    assert.equal(r.json.data.status, "signed_in");
+    assert.equal(r.json.data.session.user_id, sesion.user_id);
+  });
+
+  test("con la cuenta desactivada, el vínculo queda hecho y contesta account_deactivated", async () => {
+    const { email, sesion } = await registrar(nuevoEmail("gmail.com"));
+    await pedir("POST", "/v1/me/deactivate", undefined, sesion.access_token);
+    const sujeto = `suj-${randomUUID()}`;
+    const d = (await social("google", idToken({ sujeto, email }))).json.error.details;
+    const v = await pedir("POST", "/v1/auth/social/link", { link_token: d.link_token });
+    assert.equal(v.status, 403);
+    assert.equal(v.json.error.code, "account_deactivated");
+    assert.ok(v.json.error.details.reactivation_token);
+    // Ya está vinculada: el próximo Google contesta el estado, no otra oferta.
+    assert.equal((await social("google", idToken({ sujeto, email }))).json.error.code, "account_deactivated");
+  });
+});
