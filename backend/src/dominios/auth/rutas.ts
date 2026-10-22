@@ -70,7 +70,8 @@ export async function rutasAuth(app: FastifyInstance, ctx: Contexto): Promise<vo
   // ---------------------------------------------------------------- login --
   app.post("/auth/login", { config: ESTRICTO, schema: { body: cuerpo("login") } }, async (req) => {
     const b = req.body as { email: string; password: string };
-    return { data: await auth.login(b.email, b.password) };
+    // La IP del pedido, para el tope de fallos por IP entre todos los correos.
+    return { data: await auth.login(b.email, b.password, req.ip) };
   });
 
   // ------------------------------------------------------- Google y Apple --

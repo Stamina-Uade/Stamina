@@ -82,6 +82,21 @@ export function crearRepo(db: Db) {
       return fila !== null;
     },
 
+    /**
+     * Con qué proveedor nació la cuenta: su identidad social más vieja. `null` si
+     * no tiene ninguna. Es lo que dice `password_not_set` (contrato 1.6.0).
+     */
+    async proveedorDeAlta(usuarioId: string): Promise<"google" | "apple" | null> {
+      const fila = await db.unaFila<{ proveedor: "google" | "apple" }>(
+        `select proveedor from identidades_sociales
+          where usuario_id = $1
+          order by creado_en_ms, id
+          limit 1`,
+        [usuarioId]
+      );
+      return fila?.proveedor ?? null;
+    },
+
     /** Si la cuenta ya tiene una identidad de ese proveedor (otra persona de Google, por ejemplo). */
     async tieneIdentidadDe(usuarioId: string, proveedor: string): Promise<boolean> {
       const fila = await db.unaFila<{ uno: number }>(

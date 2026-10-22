@@ -33,6 +33,7 @@ import {
   type NombreDeProveedor,
 } from "../../infra/proveedores.js";
 import { crearRepo, type RepoAuth, type SesionFila } from "./repositorio.js";
+import { crearTopeDeIntentos } from "./intentos.js";
 
 const VIDA_CODIGO_MS = 15 * 60 * 1000; // 15 min, como el diseño (`reg-codigo`)
 const REENVIO_MS = 60 * 1000; //           60 s, como el diseño
@@ -104,6 +105,48 @@ export function crearServicioAuth(ctx: Contexto) {
   const proveedores = ctx.proveedores ?? crearVerificadorDeProveedores({
     clientIds: ctx.config.proveedores ?? { google: [], apple: [] },
   });
+  const tope = crearTopeDeIntentos(ctx.cache, ctx.ahoraMs);
+
+  /**
+   * Antes de mirar una contraseña: la IP y el correo no tienen que estar bloqueados.
+   *
+   * 🛑 Con el correo bloqueado se gasta lo mismo que una verificación: si no, la
+   * respuesta rápida diría "este correo tiene cuenta y alguien le está probando
+   * contraseñas", que es más de lo que ya dice `user_not_found`.
+   */
+  async function exigirSinBloqueo(email: string, password: string, ip: string): Promise<void> {
+    const deIp = await tope.bloqueoDeIp(ip);
+    if (deIp !== null) throw new ErrorApi("rate_limited", "Too many failed attempts", deIp);
+    const deCorreo = await tope.bloqueoDeCorreo(email);
+    if (deCorreo !== null) {
+      await verificarDummy(password);
+      throw new ErrorApi("too_many_attempts", "Too many wrong passwords for this email", deCorreo);
+    }
+  }
+
+  /**
+   * La contraseña de una cuenta, con el tope. Bien: la racha vuelve a cero. Mal:
+   * suma, y el fallo que llega al tope ya contesta el bloqueo, para que la app lo
+   * diga en ese momento y no después de un sexto intento que no podía andar.
+   */
+  async function comprobarPassword(email: string, hash: string, password: string, ip: string): Promise<void> {
+    if (await verificarPassword(password, hash)) {
+      await tope.reiniciar(email);
+      return;
+    }
+    const bloqueo = await tope.fallo(email, ip);
+    if (bloqueo !== null) throw new ErrorApi("too_many_attempts", "Too many wrong passwords for this email", bloqueo);
+    throw new ErrorApi("wrong_password", "The password does not match");
+  }
+
+  /** `password_not_set` con el proveedor con el que nació la cuenta (contrato 1.6.0). */
+  async function sinPassword(usuarioId: string): Promise<ErrorApi> {
+    const proveedor = await repo.proveedorDeAlta(usuarioId);
+    return new ErrorApi(
+      "password_not_set", "This account signs in with Google or Apple", undefined,
+      proveedor === null ? undefined : { provider: proveedor },
+    );
+  }
 
   async function abrirSesion(usuarioId: string, familiaId: string | null): Promise<Sesion> {
     const ahora = ctx.ahoraMs();
@@ -321,24 +364,26 @@ export function crearServicioAuth(ctx: Contexto) {
     },
 
     // --------------------------------------------------------------- login --
-    async login(emailCrudo: string, password: string): Promise<Sesion> {
+    /** @param ip la del pedido: cuenta para el tope de fallos por IP. */
+    async login(emailCrudo: string, password: string, ip: string): Promise<Sesion> {
       const email = normalizarEmail(emailCrudo);
+      await exigirSinBloqueo(email, password, ip);
       const usuario = await repo.buscarUsuarioPorEmail(email);
 
       // 2026-10-21 (decisión de Iván): cada caso con su código, para que la app
       // diga "El usuario no existe" o "La contraseña no coincide".
       if (usuario === null) {
         await verificarDummy(password);
+        // Probar correos también es un intento fallido para la IP.
+        await tope.fallo(null, ip);
         throw new ErrorApi("user_not_found", "There is no account with this email");
       }
       // Una cuenta que nació con Google o Apple no tiene contraseña.
       if (usuario.password_hash === null) {
         await verificarDummy(password);
-        throw new ErrorApi("password_not_set", "This account signs in with Google or Apple");
+        throw await sinPassword(usuario.id);
       }
-      if (!(await verificarPassword(password, usuario.password_hash))) {
-        throw new ErrorApi("wrong_password", "The password does not match");
-      }
+      await comprobarPassword(email, usuario.password_hash, password, ip);
       return abrirSesion(usuario.id, null);
     },
 
@@ -536,6 +581,8 @@ export function crearServicioAuth(ctx: Contexto) {
       if (usuario === null) throw new ErrorApi("invalid_reset_token", "Reset token is not valid");
 
       await repo.cambiarPassword(usuario.id, await hashearPassword(password), ahora);
+      // Cambiar la contraseña reinicia el tope de ese correo (contrato 1.6.0).
+      await tope.reiniciar(usuario.email);
       // 🛑 §12: cambiar la contraseña revoca las demás sesiones. Se revoca TODO y
       // se abre una nueva, así que quien cambió la clave no queda afuera.
       await repo.revocarTodasDe(usuario.id, ahora, "cambio_de_password");

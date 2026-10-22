@@ -8,6 +8,8 @@ import { CODIGOS, ErrorApi, aCuerpo } from "../src/infra/errores.js";
 import { crearCacheEnMemoria } from "../src/infra/redis.js";
 import { crearServicioAuth } from "../src/dominios/auth/servicio.js";
 import { versionLegal } from "../src/dominios/legal/textos.js";
+import { crearTopeDeIntentos } from "../src/dominios/auth/intentos.js";
+import { hashearPassword } from "../src/infra/cripto.js";
 import type { Config } from "../src/config.js";
 import type { Contexto } from "../src/contexto.js";
 import type { Db } from "../src/infra/db.js";
@@ -140,5 +142,71 @@ describe("códigos por correo (1.6.0)", () => {
     const { reset_token } = await auth.recuperacionVerificar("a@b.co", codigos.at(-1)!);
     avanzar(10 * 60_000 + 1_000);
     assert.equal(await codigoDeError(auth.recuperacionAplicar(reset_token, "Caballo-bateria-9")), "invalid_reset_token");
+  });
+});
+
+describe("el tope de contraseñas equivocadas (1.6.0)", () => {
+  function tope() {
+    let ahora = 1_800_000_000_000;
+    const t = crearTopeDeIntentos(crearCacheEnMemoria(() => ahora), () => ahora);
+    return { t, avanzar: (ms: number) => { ahora += ms; } };
+  }
+
+  test("5 seguidas bloquean el correo 15 minutos, desde cualquier IP, y después se libera", async () => {
+    const { t, avanzar } = tope();
+    for (let i = 1; i <= 4; i++) assert.equal(await t.fallo("a@b.co", `10.0.0.${i}`), null);
+    assert.equal(await t.fallo("a@b.co", "10.0.0.9"), 900);
+    assert.equal(await t.bloqueoDeCorreo("a@b.co"), 900);
+    assert.equal(await t.bloqueoDeCorreo("otro@b.co"), null);
+    avanzar(14 * 60_000);
+    assert.equal(await t.bloqueoDeCorreo("a@b.co"), 60);
+    avanzar(60_001);
+    assert.equal(await t.bloqueoDeCorreo("a@b.co"), null);
+  });
+
+  test("entrar bien (o cambiar la contraseña) reinicia la racha", async () => {
+    const { t } = tope();
+    for (let i = 1; i <= 4; i++) await t.fallo("a@b.co", "10.0.0.1");
+    await t.reiniciar("a@b.co");
+    for (let i = 1; i <= 4; i++) assert.equal(await t.fallo("a@b.co", "10.0.0.1"), null);
+  });
+
+  test("20 fallos de una IP entre muchos correos la frenan, sin bloquear esos correos", async () => {
+    const { t, avanzar } = tope();
+    for (let i = 0; i < 19; i++) await t.fallo(i % 2 === 0 ? `c${i}@b.co` : null, "10.0.0.1");
+    assert.equal(await t.bloqueoDeIp("10.0.0.1"), null);
+    await t.fallo(null, "10.0.0.1");
+    assert.equal(await t.bloqueoDeIp("10.0.0.1"), 900);
+    assert.equal(await t.bloqueoDeIp("10.0.0.2"), null);
+    assert.equal(await t.bloqueoDeCorreo("c0@b.co"), null);
+    avanzar(15 * 60_000 + 1);
+    assert.equal(await t.bloqueoDeIp("10.0.0.1"), null);
+  });
+
+  test("login: el quinto fallo ya contesta too_many_attempts, y bloqueado ni la correcta entra", async () => {
+    const hash = await hashearPassword("Caballo-bateria-9");
+    const { auth } = armar({ id: "u-1", email: "a@b.co", password_hash: hash, creado_en_ms: 0, actualizado_en_ms: 0 });
+    for (let i = 1; i <= 4; i++) {
+      assert.equal(await codigoDeError(auth.login("a@b.co", "Otra-clave-1", `10.0.0.${i}`)), "wrong_password");
+    }
+    let bloqueo: unknown;
+    try { await auth.login("A@B.co ", "Otra-clave-1", "10.0.0.5"); } catch (e) { bloqueo = e; }
+    assert.ok(bloqueo instanceof ErrorApi && bloqueo.codigo === "too_many_attempts" && bloqueo.http === 429);
+    assert.equal(bloqueo.reintentarEnS, 900, "Retry-After con los segundos que faltan");
+    assert.equal(await codigoDeError(auth.login("a@b.co", "Caballo-bateria-9", "10.0.0.6")), "too_many_attempts");
+  });
+
+  test("password_not_set dice con qué proveedor nació la cuenta", async () => {
+    // El doble de la base contesta la misma fila a todo: sirve de usuario y de identidad.
+    const { auth } = armar({ id: "u-1", email: "a@b.co", password_hash: null, proveedor: "apple" });
+    try {
+      await auth.login("a@b.co", "Caballo-bateria-9", "10.0.0.1");
+      assert.fail("tenía que fallar");
+    } catch (e) {
+      assert.ok(e instanceof ErrorApi);
+      assert.deepEqual(aCuerpo(e).error, {
+        code: "password_not_set", message: "This account signs in with Google or Apple", details: { provider: "apple" },
+      });
+    }
   });
 });
