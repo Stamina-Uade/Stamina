@@ -19,7 +19,7 @@
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Done"
+            "value" : "Terminé"
           }
         }
       }
@@ -42,7 +42,7 @@
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Gel + 300 ml with electrolytes"
+            "value" : "Gel + 300 ml avec électrolytes"
           }
         }
       }
@@ -65,7 +65,7 @@
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "You're at 300 mg of sodium. 40 min of Z2 effort left."
+            "value" : "Tu en es à 300 mg de sodium. Encore 40 min d'effort en Z2."
           }
         }
       }
@@ -88,7 +88,7 @@
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Hydration"
+            "value" : "Hydratation"
           }
         }
       }
@@ -134,7 +134,7 @@
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "No water on me"
+            "value" : "Pas d'eau sur moi"
           }
         }
       }
@@ -157,7 +157,7 @@
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Done"
+            "value" : "Terminé"
           }
         }
       }
@@ -180,7 +180,7 @@
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Remind me in 5 min"
+            "value" : "Me le rappeler dans 5 min"
           }
         }
       }
@@ -198,13 +198,13 @@
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Tocá para continuar"
+            "value" : "Toca para continuar"
           }
         },
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Touchez pour continuer"
+            "value" : "Touche pour continuer"
           }
         }
       }
@@ -221,13 +221,13 @@
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Tomá 200 ml"
+            "value" : "Toma 200 ml"
           }
         },
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Drink 200 ml"
+            "value" : "Bois 200 ml"
           }
         }
       }
@@ -244,13 +244,13 @@
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Vas %1$@ de %2$@. Con 26° perdés más de lo que sentís."
+            "value" : "Vas %1$@ de %2$@. Con 26° pierdes más de lo que sientes."
           }
         },
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "You're at %1$@ of %2$@. At 26° you lose more than you feel."
+            "value" : "Tu en es à %1$@ sur %2$@. À 26°, tu perds plus que tu ne le sens."
           }
         }
       }
@@ -273,7 +273,7 @@
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "There are no scheduled alerts for this workout yet."
+            "value" : "Aucune alerte programmée pour cette sortie pour l'instant."
           }
         }
       }
@@ -296,7 +296,7 @@
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Done"
+            "value" : "Passées"
           }
         }
       }
@@ -319,7 +319,7 @@
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Alerts"
+            "value" : "Alertes"
           }
         }
       }
@@ -342,7 +342,7 @@
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Coming up"
+            "value" : "À venir"
           }
         }
       }
@@ -503,7 +503,7 @@
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Voulez-vous vraiment supprimer ces données ?"
+            "value" : "Tu veux vraiment supprimer ces données ?"
           }
         }
       }
@@ -689,7 +689,7 @@
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Lap"
+            "value" : "Tour"
           }
         }
       }
@@ -712,7 +712,7 @@
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Lock"
+            "value" : "Verrouiller"
           }
         }
       }
@@ -781,7 +781,7 @@
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Settings"
+            "value" : "Réglages"
           }
         }
       }
@@ -869,13 +869,13 @@
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "El entrenamiento está pausado. Guardalo o seguí entrenando."
+            "value" : "El entrenamiento está pausado. Guárdalo o sigue entrenando."
           }
         },
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "The workout is paused. Save it or keep training."
+            "value" : "L'entraînement est en pause. Enregistre-le ou continue à t'entraîner."
           }
         }
       }
@@ -921,7 +921,7 @@
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Save"
+            "value" : "Enregistrer"
           }
         }
       }
@@ -944,7 +944,7 @@
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Finish?"
+            "value" : "Terminer ?"
           }
         }
       }
@@ -961,13 +961,13 @@
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Tocá para cerrar"
+            "value" : "Toca para cerrar"
           }
         },
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Touchez pour fermer"
+            "value" : "Touche pour fermer"
           }
         }
       }
@@ -984,13 +984,13 @@
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Tomá un gel"
+            "value" : "Toma un gel"
           }
         },
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Prenez un gel"
+            "value" : "Prends un gel"
           }
         }
       }
@@ -1007,13 +1007,13 @@
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Considerá las sales"
+            "value" : "Considera las sales"
           }
         },
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Pensez aux comprimés de sel"
+            "value" : "Pense aux comprimés de sel"
           }
         }
       }
@@ -1030,13 +1030,13 @@
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Tomá agua"
+            "value" : "Toma agua"
           }
         },
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Buvez de l’eau"
+            "value" : "Bois de l’eau"
           }
         }
       }
@@ -1101,13 +1101,13 @@
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "¡Tomá un gel!"
+            "value" : "¡Toma un gel!"
           }
         },
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Prenez un gel !"
+            "value" : "Prends un gel !"
           }
         }
       }
@@ -1131,7 +1131,7 @@
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Des électrolytes pour votre rythme"
+            "value" : "Des électrolytes pour ton rythme"
           }
         }
       }
@@ -1149,13 +1149,13 @@
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "¡Tomá sales!"
+            "value" : "¡Toma sales!"
           }
         },
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Prenez des sels !"
+            "value" : "Prends des sels !"
           }
         }
       }
@@ -1179,7 +1179,7 @@
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "C’est le moment de vous hydrater"
+            "value" : "C’est le moment de t’hydrater"
           }
         }
       }
@@ -1197,13 +1197,13 @@
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "¡Tomá agua!"
+            "value" : "¡Toma agua!"
           }
         },
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Buvez de l’eau !"
+            "value" : "Bois de l’eau !"
           }
         }
       }
@@ -1268,13 +1268,13 @@
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "¿Llevás hidratación o geles?"
+            "value" : "¿Llevas hidratación o geles?"
           }
         },
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Vous emportez de l’eau ou des gels ?"
+            "value" : "Tu emportes de l’eau ou des gels ?"
           }
         }
       }
@@ -1316,13 +1316,13 @@
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Tocá para saltear"
+            "value" : "Toca para saltear"
           }
         },
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Touchez pour passer"
+            "value" : "Touche pour passer"
           }
         }
       }
@@ -1340,13 +1340,13 @@
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "¿QUÉ LLEVÁS?"
+            "value" : "¿QUÉ LLEVAS?"
           }
         },
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "QU’EMPORTEZ-VOUS ?"
+            "value" : "QU’EMPORTES-TU ?"
           }
         }
       }
@@ -1410,13 +1410,13 @@
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Lo que llevás"
+            "value" : "Lo que llevas"
           }
         },
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Ce que vous emportez"
+            "value" : "Ce que tu emportes"
           }
         }
       }
@@ -1462,7 +1462,7 @@
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Vous avez terminé toutes les séries d'aujourd'hui."
+            "value" : "Tu as terminé toutes les séries d'aujourd'hui."
           }
         }
       }
@@ -1600,7 +1600,7 @@
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Voulez-vous vraiment supprimer ces données ?"
+            "value" : "Tu veux vraiment supprimer ces données ?"
           }
         }
       }
@@ -1940,13 +1940,13 @@
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Movimiento continuo · Controlá la respiración"
+            "value" : "Movimiento continuo · Controla la respiración"
           }
         },
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Mouvement continu · Contrôlez votre respiration"
+            "value" : "Mouvement continu · Contrôle ta respiration"
           }
         }
       }
@@ -1992,7 +1992,7 @@
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Distance units"
+            "value" : "Unités de distance"
           }
         }
       }
@@ -2015,7 +2015,7 @@
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Imperial · mi"
+            "value" : "Impérial · mi"
           }
         }
       }
@@ -2038,7 +2038,7 @@
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Metric · km"
+            "value" : "Métrique · km"
           }
         }
       }
@@ -2061,7 +2061,7 @@
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Settings"
+            "value" : "Réglages"
           }
         }
       }
@@ -2153,7 +2153,7 @@
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "The route arrives with GPS."
+            "value" : "Le parcours apparaît avec le GPS."
           }
         }
       }
@@ -2176,7 +2176,7 @@
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Route"
+            "value" : "Parcours"
           }
         }
       }
@@ -2199,7 +2199,7 @@
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Your location"
+            "value" : "Ta position"
           }
         }
       }
@@ -2222,7 +2222,7 @@
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "average"
+            "value" : "moyenne"
           }
         }
       }
@@ -2291,7 +2291,7 @@
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "lap"
+            "value" : "tour"
           }
         }
       }
@@ -2308,13 +2308,13 @@
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Pantalla bloqueada · apretá dos veces el botón lateral"
+            "value" : "Pantalla bloqueada · aprieta dos veces el botón lateral"
           }
         },
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Screen locked · press the side button twice"
+            "value" : "Écran verrouillé · appuie deux fois sur le bouton latéral"
           }
         }
       }
@@ -2360,7 +2360,7 @@
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Paused"
+            "value" : "En pause"
           }
         }
       }
@@ -2383,7 +2383,7 @@
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Running"
+            "value" : "En cours"
           }
         }
       }
@@ -2476,7 +2476,7 @@
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Votre entraînement de %1$@ commence maintenant. Donnez tout !"
+            "value" : "Ton entraînement de %1$@ commence maintenant. Donne tout !"
           }
         }
       }
@@ -2753,7 +2753,7 @@
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Make sure your phone is nearby and that you have logged into Stamina."
+            "value" : "Vérifie que ton téléphone est à proximité et que tu es connecté à Stamina."
           }
         }
       }
@@ -2776,7 +2776,7 @@
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "iPhone non connecté. Rapprochez votre iPhone ou vérifiez le Bluetooth."
+            "value" : "iPhone non connecté. Rapproche ton iPhone ou vérifie le Bluetooth."
           }
         }
       }
@@ -2822,7 +2822,7 @@
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Ouvrez Stamina sur votre iPhone pour synchroniser votre compte."
+            "value" : "Ouvre Stamina sur ton iPhone pour synchroniser ton compte."
           }
         }
       }
@@ -2845,7 +2845,7 @@
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Phone not nearby"
+            "value" : "Téléphone hors de portée"
           }
         }
       }
@@ -2885,13 +2885,13 @@
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Es un día de descanso. Disfrutalo."
+            "value" : "Es un día de descanso. Disfrútalo."
           }
         },
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "It's a rest day. Enjoy it."
+            "value" : "C'est un jour de repos. Profites-en."
           }
         }
       }
@@ -2914,7 +2914,7 @@
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Today's routine"
+            "value" : "Séance du jour"
           }
         }
       }
@@ -2937,7 +2937,7 @@
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Votre session a expiré. Veuillez vous reconnecter pour continuer."
+            "value" : "Ta session a expiré. Reconnecte-toi pour continuer."
           }
         }
       }
@@ -3123,7 +3123,7 @@
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Salt and gel alerts"
+            "value" : "Alertes sels et gels"
           }
         }
       }
@@ -3146,7 +3146,7 @@
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Routine guidance"
+            "value" : "Guide de la séance"
           }
         }
       }
@@ -3169,7 +3169,7 @@
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "For this session only"
+            "value" : "Pour cette séance uniquement"
           }
         }
       }
@@ -3446,7 +3446,7 @@
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Start"
+            "value" : "Démarrer"
           }
         }
       }
@@ -3463,7 +3463,7 @@
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Elegí un deporte"
+            "value" : "Elige un deporte"
           }
         },
         "fr" : {
@@ -3631,7 +3631,7 @@
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Not sharing"
+            "value" : "Ne pas partager"
           }
         }
       }
@@ -3654,7 +3654,7 @@
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Sharing location"
+            "value" : "Partage en cours"
           }
         }
       }
@@ -3677,7 +3677,7 @@
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Share location"
+            "value" : "Partager ma position"
           }
         }
       }
@@ -3723,7 +3723,7 @@
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "No workout planned for today"
+            "value" : "Aucune séance prévue aujourd'hui"
           }
         }
       }
@@ -3938,7 +3938,7 @@
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Record"
+            "value" : "Enregistrer"
           }
         }
       }
@@ -3961,7 +3961,7 @@
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Routine guidance"
+            "value" : "Guide de la séance"
           }
         }
       }
@@ -4007,7 +4007,7 @@
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Outdoor Cycling"
+            "value" : "Vélo (extérieur)"
           }
         }
       }
@@ -4053,7 +4053,7 @@
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Outdoor Run"
+            "value" : "Course (extérieur)"
           }
         }
       }
@@ -4076,7 +4076,7 @@
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Hike"
+            "value" : "Randonnée"
           }
         }
       }
@@ -4099,7 +4099,7 @@
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Outdoor Trekking"
+            "value" : "Randonnée (extérieur)"
           }
         }
       }
@@ -4122,7 +4122,7 @@
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Start workout"
+            "value" : "Démarrer l'entraînement"
           }
         }
       }
@@ -4145,7 +4145,7 @@
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Start"
+            "value" : "Démarrer"
           }
         }
       }
@@ -4168,7 +4168,7 @@
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Today’s workout"
+            "value" : "Au programme aujourd’hui"
           }
         }
       }
@@ -4214,7 +4214,7 @@
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Close and resume"
+            "value" : "Fermer et reprendre"
           }
         }
       }
@@ -4237,7 +4237,7 @@
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "This activity cannot be saved because no location changes were detected."
+            "value" : "Impossible d'enregistrer cette activité : aucun changement de position n'a été détecté."
           }
         }
       }
@@ -4400,7 +4400,7 @@
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Done"
+            "value" : "Terminé"
           }
         }
       }
@@ -4423,7 +4423,7 @@
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Duration"
+            "value" : "Durée"
           }
         }
       }
@@ -4516,7 +4516,7 @@
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Pace"
+            "value" : "Allure"
           }
         }
       }
@@ -4695,13 +4695,13 @@
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Abrí Stamina en el iPhone para vincular tu cuenta al reloj."
+            "value" : "Abre Stamina en el iPhone para vincular tu cuenta al reloj."
           }
         },
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Open Stamina on your iPhone to link your account to the watch."
+            "value" : "Ouvre Stamina sur ton iPhone pour lier ton compte à la montre."
           }
         }
       }
@@ -4764,13 +4764,13 @@
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Permití ubicación y Salud para registrar esta salida."
+            "value" : "Permite ubicación y Salud para registrar esta salida."
           }
         },
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Allow location and Health access to record this workout."
+            "value" : "Autorise la position et Santé pour enregistrer cette sortie."
           }
         }
       }
