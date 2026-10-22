@@ -77,13 +77,13 @@
               "one" : {
                 "stringUnit" : {
                   "state" : "translated",
-                  "value" : "%lld exercice · 45 min · touchez pour voir la séance"
+                  "value" : "%lld exercice · 45 min · touche pour voir la séance"
                 }
               },
               "other" : {
                 "stringUnit" : {
                   "state" : "translated",
-                  "value" : "%lld exercices · 45 min · touchez pour voir la séance"
+                  "value" : "%lld exercices · 45 min · touche pour voir la séance"
                 }
               }
             }
@@ -155,7 +155,7 @@
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Recovery"
+            "value" : "Récupération"
           }
         }
       }
@@ -264,7 +264,7 @@
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Probá con menos filtros, registrá un ejercicio libre para esta sesión, o sugerilo para el catálogo."
+            "value" : "Prueba con menos filtros, registra un ejercicio libre para esta sesión, o sugiérelo para el catálogo."
           }
         },
         "fr" : {
@@ -333,7 +333,7 @@
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "No encontré lo que buscás"
+            "value" : "No encontré lo que buscas"
           }
         },
         "fr" : {
@@ -408,7 +408,7 @@
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Filters"
+            "value" : "Filtres"
           }
         }
       }
@@ -454,7 +454,7 @@
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "No equipment"
+            "value" : "Sans équipement"
           }
         }
       }
@@ -790,13 +790,13 @@
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Completá lo que falta para poder seguir."
+            "value" : "Completa lo que falta para poder seguir."
           }
         },
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Remplissez ce champ pour continuer"
+            "value" : "Remplis ce champ pour continuer"
           }
         }
       }
@@ -866,7 +866,7 @@
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Continue"
+            "value" : "Continuer"
           }
         }
       }
@@ -1954,7 +1954,7 @@
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Ese pedido no tiene la forma que el servidor espera. Es un bug, no vos."
+            "value" : "Ese pedido no tiene la forma que el servidor espera. Es un bug, no es culpa tuya."
           }
         },
         "fr" : {
@@ -1977,7 +1977,7 @@
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Pasaron más de 15 minutos o hubo demasiados intentos. Pedí uno nuevo con «Reenviar»."
+            "value" : "Pasaron más de 15 minutos o hubo demasiados intentos. Pide uno nuevo con «Reenviar»."
           }
         },
         "fr" : {
@@ -2023,7 +2023,7 @@
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Recién te mandamos uno. Esperá un momento antes de pedir otro."
+            "value" : "Recién te mandamos uno. Espera un momento antes de pedir otro."
           }
         },
         "fr" : {
@@ -2046,7 +2046,7 @@
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Esperá un momento"
+            "value" : "Espera un momento"
           }
         },
         "fr" : {
@@ -2069,7 +2069,7 @@
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Lo anterior todavía se está guardando. Probá de nuevo en un momento."
+            "value" : "Lo anterior todavía se está guardando. Prueba de nuevo en un momento."
           }
         },
         "fr" : {
@@ -2092,7 +2092,7 @@
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Ese correo ya está registrado. Entrá con tu contraseña, o recuperala si no te acordás."
+            "value" : "Ese correo ya está registrado. Entra con tu contraseña, o recupérala si no te acuerdas."
           }
         },
         "fr" : {
@@ -2115,7 +2115,7 @@
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Ya tenés una cuenta"
+            "value" : "Ya tienes una cuenta"
           }
         },
         "fr" : {
@@ -2161,7 +2161,7 @@
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Revisá el código que te mandamos por correo: son 6 letras y números."
+            "value" : "Revisa el código que te mandamos por correo: son 6 letras y números."
           }
         },
         "fr" : {
@@ -2253,7 +2253,7 @@
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Se venció la sesión. Entrá de nuevo."
+            "value" : "Se venció la sesión. Entra de nuevo."
           }
         },
         "fr" : {
@@ -2276,7 +2276,7 @@
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Se venció el registro. Empezá de nuevo desde el correo."
+            "value" : "Se venció el registro. Empieza de nuevo desde el correo."
           }
         },
         "fr" : {
@@ -2299,7 +2299,7 @@
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Se venció el pedido de contraseña nueva. Empezá de nuevo desde el correo."
+            "value" : "Se venció el pedido de contraseña nueva. Empieza de nuevo desde el correo."
           }
         },
         "fr" : {
@@ -2345,7 +2345,7 @@
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "El aviso cambió mientras completabas el registro. Leelo de nuevo, por favor."
+            "value" : "El aviso cambió mientras completabas el registro. Léelo de nuevo, por favor."
           }
         },
         "fr" : {
@@ -2391,7 +2391,7 @@
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "No hay conexión. Lo que escribiste queda guardado; probá de nuevo cuando vuelva."
+            "value" : "No hay conexión. Lo que escribiste queda guardado; prueba de nuevo cuando vuelva."
           }
         },
         "fr" : {
@@ -2437,7 +2437,7 @@
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "La creaste con Google o Apple, así que no tiene contraseña. Usá ese botón, o elegí una contraseña desde «¿Olvidaste tu contraseña?»."
+            "value" : "La creaste con Google o Apple, así que no tiene contraseña. Usa ese botón, o elige una contraseña desde «¿Olvidaste tu contraseña?»."
           }
         },
         "fr" : {
@@ -2506,7 +2506,7 @@
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Demasiados intentos. Esperá un momento antes de volver a probar."
+            "value" : "Demasiados intentos. Espera un momento antes de volver a probar."
           }
         },
         "fr" : {
@@ -2552,7 +2552,7 @@
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "El servidor no está respondiendo. Probá de nuevo en un momento."
+            "value" : "El servidor no está respondiendo. Prueba de nuevo en un momento."
           }
         },
         "fr" : {
@@ -2598,7 +2598,7 @@
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Se cerró la sesión desde otro lado. Entrá de nuevo."
+            "value" : "Se cerró la sesión desde otro lado. Entra de nuevo."
           }
         },
         "fr" : {
@@ -2621,7 +2621,7 @@
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Se venció la sesión. Entrá de nuevo."
+            "value" : "Se venció la sesión. Entra de nuevo."
           }
         },
         "fr" : {
@@ -2644,7 +2644,7 @@
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "El servidor contestó algo inesperado. Es un bug, no vos."
+            "value" : "El servidor contestó algo inesperado. Es un bug, no es culpa tuya."
           }
         },
         "fr" : {
@@ -2690,7 +2690,7 @@
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "No hay ninguna cuenta con ese correo. Revisá que esté bien escrito o creá una cuenta nueva."
+            "value" : "No hay ninguna cuenta con ese correo. Revisa que esté bien escrito o crea una cuenta nueva."
           }
         },
         "fr" : {
@@ -2736,7 +2736,7 @@
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Esa contraseña es fácil de adivinar. Probá una más larga o menos común."
+            "value" : "Esa contraseña es fácil de adivinar. Prueba una más larga o menos común."
           }
         },
         "fr" : {
@@ -2782,7 +2782,7 @@
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Esa no es la contraseña de esta cuenta. Probá de nuevo o tocá «¿Olvidaste tu contraseña?»."
+            "value" : "Esa no es la contraseña de esta cuenta. Prueba de nuevo o toca «¿Olvidaste tu contraseña?»."
           }
         },
         "fr" : {
@@ -2880,7 +2880,7 @@
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Secondary"
+            "value" : "Secondaires"
           }
         }
       }
@@ -2990,7 +2990,7 @@
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Ese correo ya está en uso. Entrá con él o recuperá la contraseña."
+            "value" : "Ese correo ya está en uso. Entra con él o recupera la contraseña."
           }
         },
         "fr" : {
@@ -3038,7 +3038,7 @@
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Escribí tu nombre."
+            "value" : "Escribe tu nombre."
           }
         },
         "fr" : {
@@ -3086,7 +3086,7 @@
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Esta cuenta entra con Google o Apple. Usá ese botón o elegí una contraseña desde «¿Olvidaste tu contraseña?»."
+            "value" : "Esta cuenta entra con Google o Apple. Usa ese botón o elige una contraseña desde «¿Olvidaste tu contraseña?»."
           }
         },
         "fr" : {
@@ -3134,7 +3134,7 @@
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Es fácil de adivinar. Probá una más larga o menos común."
+            "value" : "Es fácil de adivinar. Prueba una más larga o menos común."
           }
         },
         "fr" : {
@@ -3373,7 +3373,7 @@
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "¿Ya tenés fecha de carrera?"
+            "value" : "¿Ya tienes fecha de carrera?"
           }
         },
         "fr" : {
@@ -3565,7 +3565,7 @@
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Tu plan anterior terminó o todavía no tenés una meta. Contanos qué querés correr y cuándo, y armamos semanas a tu medida."
+            "value" : "Tu plan anterior terminó o todavía no tienes una meta. Cuéntanos qué quieres correr y cuándo, y armamos semanas a tu medida."
           }
         },
         "fr" : {
@@ -3802,7 +3802,7 @@
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Revisá tu conexión e intentá de nuevo."
+            "value" : "Revisa tu conexión e intenta de nuevo."
           }
         },
         "fr" : {
@@ -3873,7 +3873,7 @@
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Elegí la meta"
+            "value" : "Elige la meta"
           }
         },
         "fr" : {
@@ -3897,7 +3897,7 @@
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Poné la fecha"
+            "value" : "Pon la fecha"
           }
         },
         "fr" : {
@@ -3944,7 +3944,7 @@
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Elegí tu próxima carrera"
+            "value" : "Elige tu próxima carrera"
           }
         },
         "fr" : {
@@ -3968,7 +3968,7 @@
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Es menos de lo recomendado para esta meta (al menos %lld semanas). Podés elegir una fecha más lejana o una meta más corta."
+            "value" : "Es menos de lo recomendado para esta meta (al menos %lld semanas). Puedes elegir una fecha más lejana o una meta más corta."
           }
         },
         "fr" : {
@@ -4189,7 +4189,7 @@
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Add exercise"
+            "value" : "Ajouter un exercice"
           }
         }
       }
@@ -4229,7 +4229,7 @@
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Hoy corrés a la tarde: la sesión es de fuerza liviana, sin llegar al fallo, para no comprometer el fondo."
+            "value" : "Hoy corres a la tarde: la sesión es de fuerza liviana, sin llegar al fallo, para no comprometer el fondo."
           }
         },
         "fr" : {
@@ -4327,7 +4327,7 @@
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Next one!"
+            "value" : "Au suivant !"
           }
         }
       }
@@ -4432,7 +4432,7 @@
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Skip"
+            "value" : "Passer"
           }
         }
       }
@@ -4455,7 +4455,7 @@
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Rest"
+            "value" : "Repos"
           }
         }
       }
@@ -4478,7 +4478,7 @@
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "%lld s rest"
+            "value" : "%lld s de repos"
           }
         }
       }
@@ -4547,7 +4547,7 @@
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Extra set"
+            "value" : "Série supplémentaire"
           }
         }
       }
@@ -4593,7 +4593,7 @@
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Reps"
+            "value" : "Répétitions"
           }
         }
       }
@@ -4616,7 +4616,7 @@
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Seconds"
+            "value" : "Secondes"
           }
         }
       }
@@ -4639,7 +4639,7 @@
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Skip"
+            "value" : "Passer"
           }
         }
       }
@@ -4662,7 +4662,7 @@
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Skipped"
+            "value" : "Passée"
           }
         }
       }
@@ -4685,7 +4685,7 @@
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Weight"
+            "value" : "Poids"
           }
         }
       }
@@ -4801,7 +4801,7 @@
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Close"
+            "value" : "Fermer"
           }
         }
       }
@@ -4819,7 +4819,7 @@
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Tocá ⚡ para empezar la primera. Cuando la termines, aparece acá con su mapa, sus parciales y sus pausas."
+            "value" : "Toca ⚡ para empezar la primera. Cuando la termines, aparece acá con su mapa, sus parciales y sus pausas."
           }
         },
         "fr" : {
@@ -4890,7 +4890,7 @@
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "No se pudo cargar el historial. Probá de nuevo."
+            "value" : "No se pudo cargar el historial. Prueba de nuevo."
           }
         },
         "fr" : {
@@ -4919,7 +4919,7 @@
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Load more"
+            "value" : "Charger plus"
           }
         }
       }
@@ -4942,7 +4942,7 @@
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Loading…"
+            "value" : "Chargement…"
           }
         }
       }
@@ -5150,7 +5150,7 @@
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "tocá una para ver el detalle"
+            "value" : "toca una para ver el detalle"
           }
         },
         "fr" : {
@@ -5197,7 +5197,7 @@
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "%@. Suma lo cargado hasta ahora: tocá «Cargar más» abajo para sumar las anteriores."
+            "value" : "%@. Suma lo cargado hasta ahora: toca «Cargar más» abajo para sumar las anteriores."
           }
         },
         "fr" : {
@@ -5389,7 +5389,7 @@
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Elegí tu próxima carrera y armamos el plan semana a semana."
+            "value" : "Elige tu próxima carrera y armamos el plan semana a semana."
           }
         },
         "fr" : {
@@ -5435,7 +5435,7 @@
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "No pudimos traer esto del servidor. Probá de nuevo en un rato."
+            "value" : "No pudimos traer esto del servidor. Prueba de nuevo en un rato."
           }
         },
         "fr" : {
@@ -5504,7 +5504,7 @@
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Esto se calcula con tu perfil, y le faltan datos: completalo desde el inicio."
+            "value" : "Esto se calcula con tu perfil, y le faltan datos: complétalo desde el inicio."
           }
         },
         "fr" : {
@@ -5533,7 +5533,7 @@
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Try again"
+            "value" : "Réessayer"
           }
         }
       }
@@ -5597,7 +5597,7 @@
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Ingresá tu nuevo objetivo"
+            "value" : "Ingresa tu nuevo objetivo"
           }
         },
         "fr" : {
@@ -5813,7 +5813,7 @@
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Sobres de carbohidratos rápidos. Tomalos con agua, repartidos durante la salida."
+            "value" : "Sobres de carbohidratos rápidos. Tómalos con agua, repartidos durante la salida."
           }
         },
         "fr" : {
@@ -5885,7 +5885,7 @@
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Las sales que perdés al transpirar. Van en una bebida con electrolitos o en pastillas de sal."
+            "value" : "Las sales que pierdes al transpirar. Van en una bebida con electrolitos o en pastillas de sal."
           }
         },
         "fr" : {
@@ -6053,7 +6053,7 @@
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Cómoda. Hablás en frases completas. Es la que arma tu base y la que más vas a usar."
+            "value" : "Cómoda. Hablas en frases completas. Es la que arma tu base y la que más vas a usar."
           }
         },
         "fr" : {
@@ -6125,7 +6125,7 @@
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Al máximo. No podés hablar. Tramos muy cortos, para la velocidad."
+            "value" : "Al máximo. No puedes hablar. Tramos muy cortos, para la velocidad."
           }
         },
         "fr" : {
@@ -6149,7 +6149,7 @@
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "La zona dice qué tan fuerte ir. La forma más simple de medirla: cuánto podés hablar mientras te movés."
+            "value" : "La zona dice qué tan fuerte ir. La forma más simple de medirla: cuánto puedes hablar mientras te mueves."
           }
         },
         "fr" : {
@@ -6415,7 +6415,7 @@
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Get ready"
+            "value" : "Préparer la sortie"
           }
         }
       }
@@ -6700,7 +6700,7 @@
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Gym"
+            "value" : "Muscu"
           }
         }
       }
@@ -6886,7 +6886,7 @@
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "View plan"
+            "value" : "Voir le programme"
           }
         }
       }
@@ -6932,7 +6932,7 @@
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Weekly load"
+            "value" : "Charge hebdomadaire"
           }
         }
       }
@@ -6974,7 +6974,7 @@
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Los km de esta semana: lo hecho contra lo previsto. Cada barra es un día; tocala para verlo."
+            "value" : "Los km de esta semana: lo hecho contra lo previsto. Cada barra es un día; tócala para verlo."
           }
         },
         "fr" : {
@@ -7123,7 +7123,7 @@
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Your day"
+            "value" : "Ta journée"
           }
         }
       }
@@ -7280,7 +7280,7 @@
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Marcá que leíste el aviso para poder crear la cuenta."
+            "value" : "Marca que leíste el aviso para poder crear la cuenta."
           }
         },
         "fr" : {
@@ -7303,7 +7303,7 @@
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "No pudimos traer el aviso de salud. Sin leerlo no se puede crear la cuenta. Probá de nuevo cuando tengas señal."
+            "value" : "No pudimos traer el aviso de salud. Sin leerlo no se puede crear la cuenta. Prueba de nuevo cuando tengas señal."
           }
         },
         "fr" : {
@@ -7379,7 +7379,7 @@
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Try again"
+            "value" : "Réessayer"
           }
         }
       }
@@ -7419,13 +7419,13 @@
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Este registro ya se usó: lo más probable es que tu cuenta ya exista. Probá entrar con tu correo y tu contraseña."
+            "value" : "Este registro ya se usó: lo más probable es que tu cuenta ya exista. Prueba entrar con tu correo y tu contraseña."
           }
         },
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Ce compte a déjà été créé. Vous pouvez vous connecter dès maintenant."
+            "value" : "Ce compte a déjà été créé. Tu peux te connecter dès maintenant."
           }
         }
       }
@@ -7699,13 +7699,13 @@
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "¿No tenés cuenta?"
+            "value" : "¿No tienes cuenta?"
           }
         },
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Vous n'avez pas de compte ?"
+            "value" : "Tu n'as pas de compte ?"
           }
         }
       }
@@ -7791,13 +7791,13 @@
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Registrate"
+            "value" : "Regístrate"
           }
         },
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Inscrivez-vous"
+            "value" : "Inscris-toi"
           }
         }
       }
@@ -7814,7 +7814,7 @@
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Ya hay una cuenta con ese correo. Entrá con tu correo y tu contraseña."
+            "value" : "Ya hay una cuenta con ese correo. Entra con tu correo y tu contraseña."
           }
         },
         "fr" : {
@@ -7837,7 +7837,7 @@
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "No pudimos completar el inicio de sesión. Probá de nuevo en un momento."
+            "value" : "No pudimos completar el inicio de sesión. Prueba de nuevo en un momento."
           }
         },
         "fr" : {
@@ -7860,7 +7860,7 @@
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Esta versión de la app todavía no tiene configurado este inicio de sesión. Entrá con tu correo por ahora."
+            "value" : "Esta versión de la app todavía no tiene configurado este inicio de sesión. Entra con tu correo por ahora."
           }
         },
         "fr" : {
@@ -7954,7 +7954,7 @@
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Cargá tu apto físico"
+            "value" : "Carga tu apto físico"
           }
         },
         "fr" : {
@@ -8050,7 +8050,7 @@
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "No pudimos abrir ese archivo. Probá con otro."
+            "value" : "No pudimos abrir ese archivo. Prueba con otro."
           }
         },
         "fr" : {
@@ -8074,7 +8074,7 @@
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "No pudimos guardar el apto. Probá de nuevo."
+            "value" : "No pudimos guardar el apto. Prueba de nuevo."
           }
         },
         "fr" : {
@@ -8098,7 +8098,7 @@
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "El archivo pesa más de 15 MB. Probá con una foto más liviana."
+            "value" : "El archivo pesa más de 15 MB. Prueba con una foto más liviana."
           }
         },
         "fr" : {
@@ -8266,7 +8266,7 @@
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Archivo del apto: %@. Tocá para cambiarlo."
+            "value" : "Archivo del apto: %@. Toca para cambiarlo."
           }
         },
         "fr" : {
@@ -8290,7 +8290,7 @@
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Elegí el archivo, la fecha y marcá la declaración."
+            "value" : "Elige el archivo, la fecha y marca la declaración."
           }
         },
         "fr" : {
@@ -8338,7 +8338,7 @@
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Renovalo para seguir recibiendo sugerencias en carrera."
+            "value" : "Renuévalo para seguir recibiendo sugerencias en carrera."
           }
         },
         "fr" : {
@@ -8362,7 +8362,7 @@
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Apto vencido · renovalo"
+            "value" : "Apto vencido · renuévalo"
           }
         },
         "fr" : {
@@ -8746,7 +8746,7 @@
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Cada cuadrito es un día. Tocalo para ver qué hiciste."
+            "value" : "Cada cuadrito es un día. Tócalo para ver qué hiciste."
           }
         },
         "fr" : {
@@ -9176,7 +9176,7 @@
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Ingresá la cantidad de pasos para el día seleccionado:"
+            "value" : "Ingresa la cantidad de pasos para el día seleccionado:"
           }
         },
         "fr" : {
@@ -9392,7 +9392,7 @@
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "%1$lld °C a la hora de entrenar (sensación %2$lld °C). Revisá el horario y llevá agua. Datos:  Weather."
+            "value" : "%1$lld °C a la hora de entrenar (sensación %2$lld °C). Revisa el horario y lleva agua. Datos:  Weather."
           }
         },
         "fr" : {
@@ -9491,7 +9491,7 @@
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Votre entraînement de %1$@ commence maintenant. Donnez tout !"
+            "value" : "Ton entraînement de %1$@ commence maintenant. Donne tout !"
           }
         }
       }
@@ -9738,7 +9738,7 @@
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Enviamos un código de 6 caracteres, con números y letras, a %@. Puede tardar hasta un minuto; si no aparece, revisá spam o correo no deseado. El código vence a los 15 minutos y solo sirve una vez."
+            "value" : "Enviamos un código de 6 caracteres, con números y letras, a %@. Puede tardar hasta un minuto; si no aparece, revisa spam o correo no deseado. El código vence a los 15 minutos y solo sirve una vez."
           }
         },
         "fr" : {
@@ -9761,7 +9761,7 @@
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Revisá tu correo"
+            "value" : "Revisa tu correo"
           }
         },
         "fr" : {
@@ -9790,7 +9790,7 @@
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Verify code"
+            "value" : "Vérifier le code"
           }
         }
       }
@@ -9813,7 +9813,7 @@
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Account"
+            "value" : "Compte"
           }
         }
       }
@@ -9830,7 +9830,7 @@
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Ya podés entrar con tu contraseña nueva. Cerramos la sesión en los otros dispositivos: si no fuiste vos quien pidió el cambio, escribinos desde este mismo correo."
+            "value" : "Ya puedes entrar con tu contraseña nueva. Cerramos la sesión en los otros dispositivos: si no fuiste tú quien pidió el cambio, escríbenos desde este mismo correo."
           }
         },
         "fr" : {
@@ -9859,7 +9859,7 @@
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Changed"
+            "value" : "Modifié"
           }
         }
       }
@@ -9945,7 +9945,7 @@
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Escribí el correo con el que creaste tu cuenta y te enviamos un código para elegir una contraseña nueva. Tu plan de entrenamiento, tus días y tu historial quedan intactos: solo cambia la forma de entrar."
+            "value" : "Escribe el correo con el que creaste tu cuenta y te enviamos un código para elegir una contraseña nueva. Tu plan de entrenamiento, tus días y tu historial quedan intactos: solo cambia la forma de entrar."
           }
         },
         "fr" : {
@@ -10181,7 +10181,7 @@
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "One number"
+            "value" : "Un chiffre"
           }
         }
       }
@@ -10267,7 +10267,7 @@
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Elegí una contraseña nueva"
+            "value" : "Elige una contraseña nueva"
           }
         },
         "fr" : {
@@ -10531,7 +10531,7 @@
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Alternás tramos de trote con tramos de caminata."
+            "value" : "Alternas tramos de trote con tramos de caminata."
           }
         },
         "fr" : {
@@ -10699,7 +10699,7 @@
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Tocá para cerrar el detalle"
+            "value" : "Toca para cerrar el detalle"
           }
         },
         "fr" : {
@@ -10723,7 +10723,7 @@
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Tocá para ver qué hacer y por qué"
+            "value" : "Toca para ver qué hacer y por qué"
           }
         },
         "fr" : {
@@ -10867,7 +10867,7 @@
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Muy suave: podés charlar sin esfuerzo. Sirve para recuperarte."
+            "value" : "Muy suave: puedes charlar sin esfuerzo. Sirve para recuperarte."
           }
         },
         "fr" : {
@@ -10891,7 +10891,7 @@
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Suave y cómodo: podés hablar en frases completas. Construye resistencia sin cansarte de más."
+            "value" : "Suave y cómodo: puedes hablar en frases completas. Construye resistencia sin cansarte de más."
           }
         },
         "fr" : {
@@ -10915,7 +10915,7 @@
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Moderado: hablás con frases cortas. Mejora el ritmo que podés sostener mucho rato."
+            "value" : "Moderado: hablas con frases cortas. Mejora el ritmo que puedes sostener mucho rato."
           }
         },
         "fr" : {
@@ -10939,7 +10939,7 @@
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Fuerte: te salen pocas palabras. Sube el ritmo que aguantás antes de cansarte."
+            "value" : "Fuerte: te salen pocas palabras. Sube el ritmo que aguantas antes de cansarte."
           }
         },
         "fr" : {
@@ -10963,7 +10963,7 @@
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Al máximo: no podés hablar. Son esfuerzos cortos para ganar velocidad."
+            "value" : "Al máximo: no puedes hablar. Son esfuerzos cortos para ganar velocidad."
           }
         },
         "fr" : {
@@ -10992,7 +10992,7 @@
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Done"
+            "value" : "Fait"
           }
         }
       }
@@ -11039,7 +11039,7 @@
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "%1$@ of %2$@"
+            "value" : "%1$@ sur %2$@"
           }
         }
       }
@@ -11062,7 +11062,7 @@
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "No race date"
+            "value" : "Pas de date de course"
           }
         }
       }
@@ -11127,7 +11127,7 @@
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Si sentís que vas lento, está bien: es a propósito."
+            "value" : "Si sientes que vas lento, está bien: es a propósito."
           }
         },
         "fr" : {
@@ -11156,7 +11156,7 @@
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Build"
+            "value" : "Développement"
           }
         }
       }
@@ -11246,7 +11246,7 @@
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Una etapa con un objetivo propio. Los días de cada semana ya la tienen en cuenta: seguilos y listo."
+            "value" : "Una etapa con un objetivo propio. Los días de cada semana ya la tienen en cuenta: síguelos y listo."
           }
         },
         "fr" : {
@@ -11299,7 +11299,7 @@
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Peak"
+            "value" : "Pic"
           }
         }
       }
@@ -11341,7 +11341,7 @@
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Dormí y comé bien: acá el cansancio es esperable."
+            "value" : "Duerme y come bien: acá el cansancio es esperable."
           }
         },
         "fr" : {
@@ -11441,7 +11441,7 @@
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Taper"
+            "value" : "Affûtage"
           }
         }
       }
@@ -11555,7 +11555,7 @@
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Cada etapa tiene un objetivo distinto. Tocá una para ver para qué sirve."
+            "value" : "Cada etapa tiene un objetivo distinto. Toca una para ver para qué sirve."
           }
         },
         "fr" : {
@@ -11655,7 +11655,7 @@
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "TODAY"
+            "value" : "AUJOURD'HUI"
           }
         }
       }
@@ -11702,7 +11702,7 @@
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Week %lld"
+            "value" : "Semaine %lld"
           }
         }
       }
@@ -11725,7 +11725,7 @@
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "W%lld"
+            "value" : "S%lld"
           }
         }
       }
@@ -11934,7 +11934,7 @@
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Deslizá los días de costado para cambiar de semana"
+            "value" : "Desliza los días de costado para cambiar de semana"
           }
         },
         "fr" : {
@@ -12154,7 +12154,7 @@
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "¿Ya tenés cuenta?"
+            "value" : "¿Ya tienes cuenta?"
           }
         },
         "fr" : {
@@ -12229,7 +12229,7 @@
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Sign in"
+            "value" : "Se connecter"
           }
         }
       }
@@ -12252,7 +12252,7 @@
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Get started"
+            "value" : "Commencer"
           }
         }
       }
@@ -12367,7 +12367,7 @@
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Age"
+            "value" : "Âge"
           }
         }
       }
@@ -12390,7 +12390,7 @@
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "%lld years"
+            "value" : "%lld ans"
           }
         }
       }
@@ -12551,7 +12551,7 @@
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Tus metas anteriores ya finalizaron. Definí una nueva meta para comenzar tu próximo plan."
+            "value" : "Tus metas anteriores ya finalizaron. Define una nueva meta para comenzar tu próximo plan."
           }
         },
         "fr" : {
@@ -12772,7 +12772,7 @@
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Height"
+            "value" : "Taille"
           }
         }
       }
@@ -12790,7 +12790,7 @@
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Vencido · renovalo"
+            "value" : "Vencido · renuévalo"
           }
         },
         "fr" : {
@@ -12838,7 +12838,7 @@
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Sin cargar · subí foto o PDF"
+            "value" : "Sin cargar · sube foto o PDF"
           }
         },
         "fr" : {
@@ -12867,7 +12867,7 @@
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "No photo"
+            "value" : "Pas de photo"
           }
         }
       }
@@ -13174,7 +13174,7 @@
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Todavía no elegiste días. Completá tu perfil para que el plan sepa cuándo entrenás."
+            "value" : "Todavía no elegiste días. Completa tu perfil para que el plan sepa cuándo entrenas."
           }
         },
         "fr" : {
@@ -13203,7 +13203,7 @@
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Settings"
+            "value" : "Réglages"
           }
         }
       }
@@ -13226,7 +13226,7 @@
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Weight"
+            "value" : "Poids"
           }
         }
       }
@@ -13244,7 +13244,7 @@
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "entrenás a las %@"
+            "value" : "entrenas a las %@"
           }
         },
         "fr" : {
@@ -13535,7 +13535,7 @@
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Votre session a expiré. Veuillez vous reconnecter pour continuer."
+            "value" : "Ta session a expiré. Reconnecte-toi pour continuer."
           }
         }
       }
@@ -13604,7 +13604,7 @@
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Alerts"
+            "value" : "Alertes"
           }
         }
       }
@@ -13886,7 +13886,7 @@
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Elegí cualquier color y después tocá Usar"
+            "value" : "Elige cualquier color y después toca Usar"
           }
         },
         "fr" : {
@@ -14342,7 +14342,7 @@
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Se borran para siempre tu cuenta y todo lo que guardamos de vos: perfil, plan, entrenamientos, salidas, series del gimnasio y la constancia de lo que aceptaste. No se puede deshacer. Lo que está en Apple Salud no se toca."
+            "value" : "Se borran para siempre tu cuenta y todo lo que guardamos de ti: perfil, plan, entrenamientos, salidas, series del gimnasio y la constancia de lo que aceptaste. No se puede deshacer. Lo que está en Apple Salud no se toca."
           }
         },
         "fr" : {
@@ -14390,7 +14390,7 @@
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Ya no guardamos nada tuyo. Si entrabas con Apple, podés quitar Stamina en Ajustes del iPhone › tu nombre › Iniciar sesión con Apple."
+            "value" : "Ya no guardamos nada tuyo. Si entrabas con Apple, puedes quitar Stamina en Ajustes del iPhone › tu nombre › Iniciar sesión con Apple."
           }
         },
         "fr" : {
@@ -14438,7 +14438,7 @@
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Para confirmar que sos vos, escribí tu contraseña."
+            "value" : "Para confirmar que eres tú, escribe tu contraseña."
           }
         },
         "fr" : {
@@ -14705,7 +14705,7 @@
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Revisá la conexión e intentá de nuevo."
+            "value" : "Revisa la conexión e intenta de nuevo."
           }
         },
         "fr" : {
@@ -15087,7 +15087,7 @@
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Poné una altura entre 2′0″ y 8′6″."
+            "value" : "Pon una altura entre 2′0″ y 8′6″."
           }
         },
         "fr" : {
@@ -15111,7 +15111,7 @@
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Escribí tu nombre."
+            "value" : "Escribe tu nombre."
           }
         },
         "fr" : {
@@ -15207,7 +15207,7 @@
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Poné un peso entre 45 y 880 lb."
+            "value" : "Pon un peso entre 45 y 880 lb."
           }
         },
         "fr" : {
@@ -15279,7 +15279,7 @@
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Corregí lo marcado para guardar"
+            "value" : "Corrige lo marcado para guardar"
           }
         },
         "fr" : {
@@ -15452,7 +15452,7 @@
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Sign out"
+            "value" : "Se déconnecter"
           }
         }
       }
@@ -15470,7 +15470,7 @@
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "¿Estás seguro de que querés cerrar la sesión?"
+            "value" : "¿Estás seguro de que quieres cerrar la sesión?"
           }
         },
         "fr" : {
@@ -15753,7 +15753,7 @@
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "La edad define tus zonas de frecuencia cardíaca, el ritmo de sudoración estimado y cuántas calorías necesitás en semanas de carga alta. También nos deja compararte con tablas de rendimiento de tu categoría."
+            "value" : "La edad define tus zonas de frecuencia cardíaca, el ritmo de sudoración estimado y cuántas calorías necesitas en semanas de carga alta. También nos deja compararte con tablas de rendimiento de tu categoría."
           }
         },
         "fr" : {
@@ -15782,7 +15782,7 @@
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "day"
+            "value" : "jour"
           }
         }
       }
@@ -15828,7 +15828,7 @@
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Hi %@!"
+            "value" : "Salut %@ !"
           }
         }
       }
@@ -15851,7 +15851,7 @@
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "month"
+            "value" : "mois"
           }
         }
       }
@@ -15868,7 +15868,7 @@
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Mové la rueda hasta tu fecha de nacimiento para seguir."
+            "value" : "Mueve la rueda hasta tu fecha de nacimiento para seguir."
           }
         },
         "fr" : {
@@ -15920,7 +15920,7 @@
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "year"
+            "value" : "année"
           }
         }
       }
@@ -15937,7 +15937,7 @@
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "El peso es la base del cálculo: litros de líquido por hora, miligramos de sodio y gramos de carbohidrato que tenés que reponer se estiman por kilo. Con la altura ajustamos el gasto energético en reposo. Podés actualizar ambos cuando quieras desde tu perfil."
+            "value" : "El peso es la base del cálculo: litros de líquido por hora, miligramos de sodio y gramos de carbohidrato que tienes que reponer se estiman por kilo. Con la altura ajustamos el gasto energético en reposo. Puedes actualizar ambos cuando quieras desde tu perfil."
           }
         },
         "fr" : {
@@ -15983,7 +15983,7 @@
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Poné una altura entre 50 y 260 cm."
+            "value" : "Pon una altura entre 50 y 260 cm."
           }
         },
         "fr" : {
@@ -16075,7 +16075,7 @@
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Poné un peso entre 20 y 400 kg."
+            "value" : "Pon un peso entre 20 y 400 kg."
           }
         },
         "fr" : {
@@ -16121,7 +16121,7 @@
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Enviamos un código de 6 caracteres, con números y letras, a %@. Puede tardar hasta un minuto en llegar; si no aparece, revisá spam o correo no deseado. El código vence a los 15 minutos."
+            "value" : "Enviamos un código de 6 caracteres, con números y letras, a %@. Puede tardar hasta un minuto en llegar; si no aparece, revisa spam o correo no deseado. El código vence a los 15 minutos."
           }
         },
         "fr" : {
@@ -16144,7 +16144,7 @@
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Validá tu correo"
+            "value" : "Valida tu correo"
           }
         },
         "fr" : {
@@ -16173,7 +16173,7 @@
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Verify"
+            "value" : "Valider"
           }
         }
       }
@@ -16196,7 +16196,7 @@
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Finish later"
+            "value" : "Terminer plus tard"
           }
         }
       }
@@ -16259,7 +16259,7 @@
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Elegí al menos un día para activar los avisos."
+            "value" : "Elige al menos un día para activar los avisos."
           }
         },
         "fr" : {
@@ -16288,7 +16288,7 @@
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Time on %@"
+            "value" : "Heure du %@"
           }
         }
       }
@@ -16305,7 +16305,7 @@
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "¿Qué días y a qué hora entrenás?"
+            "value" : "¿Qué días y a qué hora entrenas?"
           }
         },
         "fr" : {
@@ -16334,7 +16334,7 @@
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Base plan"
+            "value" : "Programme de base"
           }
         }
       }
@@ -16380,7 +16380,7 @@
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Days"
+            "value" : "Jours"
           }
         }
       }
@@ -16426,7 +16426,7 @@
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Goal"
+            "value" : "Objectif"
           }
         }
       }
@@ -16449,7 +16449,7 @@
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Level"
+            "value" : "Niveau"
           }
         }
       }
@@ -16536,7 +16536,7 @@
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Completá tus datos y elegí una contraseña. Después te mandamos un código para validar el correo."
+            "value" : "Completa tus datos y elige una contraseña. Después te mandamos un código para validar el correo."
           }
         },
         "fr" : {
@@ -16559,7 +16559,7 @@
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Ese correo no parece válido: revisá que tenga @ y dominio."
+            "value" : "Ese correo no parece válido: revisa que tenga @ y dominio."
           }
         },
         "fr" : {
@@ -16582,7 +16582,7 @@
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Al continuar aceptás los términos y la política de privacidad."
+            "value" : "Al continuar aceptas los términos y la política de privacidad."
           }
         },
         "fr" : {
@@ -16606,7 +16606,7 @@
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Al continuar aceptás los [Términos y condiciones](stamina-legal://terminos) y la [Política de privacidad](stamina-legal://privacidad)."
+            "value" : "Al continuar aceptas los [Términos y condiciones](stamina-legal://terminos) y la [Política de privacidad](stamina-legal://privacidad)."
           }
         },
         "fr" : {
@@ -16652,7 +16652,7 @@
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Creá tu cuenta"
+            "value" : "Crea tu cuenta"
           }
         },
         "fr" : {
@@ -16698,7 +16698,7 @@
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Con la fecha del evento armamos la cuenta regresiva y repartimos las semanas de carga, descarga y afinamiento. Si todavía no tenés carrera elegida, seguí sin fecha: armamos un plan de base y lo ajustamos cuando la definas."
+            "value" : "Con la fecha del evento armamos la cuenta regresiva y repartimos las semanas de carga, descarga y afinamiento. Si todavía no tienes carrera elegida, sigue sin fecha: armamos un plan de base y lo ajustamos cuando la definas."
           }
         },
         "fr" : {
@@ -16813,7 +16813,7 @@
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Elegí tu objetivo"
+            "value" : "Elige tu objetivo"
           }
         },
         "fr" : {
@@ -17021,7 +17021,7 @@
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Podés elegir varios. El primero será tu plan principal."
+            "value" : "Puedes elegir varios. El primero será tu plan principal."
           }
         },
         "fr" : {
@@ -17050,7 +17050,7 @@
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Next month"
+            "value" : "Mois suivant"
           }
         }
       }
@@ -17165,7 +17165,7 @@
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Votre objectif"
+            "value" : "Ton objectif"
           }
         }
       }
@@ -17228,7 +17228,7 @@
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "No somos médicos y esta app no reemplaza una consulta. Si tenés alguna condición previa, tomás medicación o hace años que no entrenás, hablá con un profesional antes de empezar el plan."
+            "value" : "No somos médicos y esta app no reemplaza una consulta. Si tienes alguna condición previa, tomas medicación o hace años que no entrenas, habla con un profesional antes de empezar el plan."
           }
         },
         "fr" : {
@@ -17251,7 +17251,7 @@
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Marcá que entendiste el descargo para poder seguir."
+            "value" : "Marca que entendiste el descargo para poder seguir."
           }
         },
         "fr" : {
@@ -17274,7 +17274,7 @@
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Pará y consultá si aparece"
+            "value" : "Para y consulta si aparece"
           }
         },
         "fr" : {
@@ -17343,7 +17343,7 @@
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Dolor articular que empeora mientras corrés"
+            "value" : "Dolor articular que empeora mientras corres"
           }
         },
         "fr" : {
@@ -17527,7 +17527,7 @@
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Define desde qué volumen arranca tu plan y cuánto puede crecer por semana sin exponerte a lesiones. Si volvés después de un parate largo, elegí principiante: siempre se puede subir la carga más adelante."
+            "value" : "Define desde qué volumen arranca tu plan y cuánto puede crecer por semana sin exponerte a lesiones. Si vuelves después de un parate largo, elige principiante: siempre se puede subir la carga más adelante."
           }
         },
         "fr" : {
@@ -17596,13 +17596,13 @@
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "¿Hace cuánto entrenás?"
+            "value" : "¿Hace cuánto entrenas?"
           }
         },
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Quel est votre niveau ?"
+            "value" : "Quel est ton niveau ?"
           }
         }
       }
@@ -17619,7 +17619,7 @@
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Usamos tu nombre para hablarte en las notificaciones y en el resumen de cada semana. El apellido solo aparece si algún día compartís tus resultados o te sumás a un grupo de entrenamiento; tu perfil arranca privado."
+            "value" : "Usamos tu nombre para hablarte en las notificaciones y en el resumen de cada semana. El apellido solo aparece si algún día compartes tus resultados o te sumas a un grupo de entrenamiento; tu perfil arranca privado."
           }
         },
         "fr" : {
@@ -17648,7 +17648,7 @@
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "First name"
+            "value" : "Prénom"
           }
         }
       }
@@ -17688,13 +17688,13 @@
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Correo validado. ¿Cómo te llamás?"
+            "value" : "Correo validado. ¿Cómo te llamas?"
           }
         },
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Comment vous appelez-vous ?"
+            "value" : "E-mail vérifié. Comment tu t'appelles ?"
           }
         }
       }
@@ -17711,7 +17711,7 @@
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Al menos %lld caracteres, con una mayúscula y un número. Es la única contraseña que te vamos a pedir: con ella entrás desde cualquier teléfono."
+            "value" : "Al menos %lld caracteres, con una mayúscula y un número. Es la única contraseña que te vamos a pedir: con ella entras desde cualquier teléfono."
           }
         },
         "fr" : {
@@ -17757,7 +17757,7 @@
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Elegí una contraseña"
+            "value" : "Elige una contraseña"
           }
         },
         "fr" : {
@@ -17780,7 +17780,7 @@
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Las tasas de sudoración, la pérdida de sodio y el gasto calórico difieren bastante entre hombres y mujeres con el mismo peso y ritmo. Solo lo usamos para el cálculo del plan: no se muestra en tu perfil ni se comparte. Si preferís no responder, podés elegir «Prefiero no decirlo»."
+            "value" : "Las tasas de sudoración, la pérdida de sodio y el gasto calórico difieren bastante entre hombres y mujeres con el mismo peso y ritmo. Solo lo usamos para el cálculo del plan: no se muestra en tu perfil ni se comparte. Si prefieres no responder, puedes elegir «Prefiero no decirlo»."
           }
         },
         "fr" : {
@@ -17964,7 +17964,7 @@
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Seguís con %@. Revisá tus datos: te mandamos un código para validar el correo y no vas a necesitar contraseña."
+            "value" : "Sigues con %@. Revisa tus datos: te mandamos un código para validar el correo y no vas a necesitar contraseña."
           }
         },
         "fr" : {
@@ -17987,7 +17987,7 @@
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Seguís con %@. Revisá tu nombre: %@ ya validó tu correo, así que no hace falta código ni contraseña."
+            "value" : "Sigues con %@. Revisa tu nombre: %@ ya validó tu correo, así que no hace falta código ni contraseña."
           }
         },
         "fr" : {
@@ -18010,7 +18010,7 @@
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Pasó demasiado tiempo desde que elegiste Google o Apple. Volvé a continuar con tu cuenta para terminar el registro."
+            "value" : "Pasó demasiado tiempo desde que elegiste Google o Apple. Vuelve a continuar con tu cuenta para terminar el registro."
           }
         },
         "fr" : {
@@ -18056,7 +18056,7 @@
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Cada disciplina consume líquido y carbohidrato de forma distinta: en bici podés tomar más y comer sólido, corriendo conviene fraccionar. Elegí el que más entrenás; después podés sumar los otros desde tu perfil."
+            "value" : "Cada disciplina consume líquido y carbohidrato de forma distinta: en bici puedes tomar más y comer sólido, corriendo conviene fraccionar. Elige el que más entrenas; después puedes sumar los otros desde tu perfil."
           }
         },
         "fr" : {
@@ -18201,7 +18201,7 @@
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Votre discipline principale"
+            "value" : "Ta discipline principale"
           }
         }
       }
@@ -18356,7 +18356,7 @@
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Si conectás tu reloj o el GPS del teléfono, ajustamos hidratación y geles con el ritmo y la frecuencia cardíaca reales, no con estimaciones. Podés saltear este paso y conectarlo más adelante desde Ajustes."
+            "value" : "Si conectas tu reloj o el GPS del teléfono, ajustamos hidratación y geles con el ritmo y la frecuencia cardíaca reales, no con estimaciones. Puedes saltear este paso y conectarlo más adelante desde Ajustes."
           }
         },
         "fr" : {
@@ -18385,7 +18385,7 @@
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Garmin watch"
+            "value" : "Montre Garmin"
           }
         }
       }
@@ -18431,7 +18431,7 @@
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Phone GPS"
+            "value" : "GPS du téléphone"
           }
         }
       }
@@ -18523,7 +18523,7 @@
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Not now"
+            "value" : "Pas maintenant"
           }
         }
       }
@@ -18540,7 +18540,7 @@
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Esta respuesta todavía no se guarda: el contrato no tiene dónde. Está anotado como B-006 y no bloquea nada: podés seguir y conectarlo más adelante."
+            "value" : "Esta respuesta todavía no se guarda: el contrato no tiene dónde. Está anotado como B-006 y no bloquea nada: puedes seguir y conectarlo más adelante."
           }
         },
         "fr" : {
@@ -18563,7 +18563,7 @@
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "¿Con qué medís tus salidas?"
+            "value" : "¿Con qué mides tus salidas?"
           }
         },
         "fr" : {
@@ -18751,7 +18751,7 @@
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "No tenés una racha activa. ¡Entrená en tu próximo día para encender el fueguito!"
+            "value" : "No tienes una racha activa. ¡Entrena en tu próximo día para encender el fueguito!"
           }
         },
         "fr" : {
@@ -18774,7 +18774,7 @@
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Hoy te toca entrenar. ¡Completá tu sesión para mantener vivo el fueguito!"
+            "value" : "Hoy te toca entrenar. ¡Completa tu sesión para mantener vivo el fueguito!"
           }
         },
         "fr" : {
@@ -18820,7 +18820,7 @@
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Tu racha solo cuenta los días que tu plan dice que tenés que entrenar. Si no entrenás un día programado, el fueguito se pierde como en Duolingo."
+            "value" : "Tu racha solo cuenta los días que tu plan dice que tienes que entrenar. Si no entrenas un día programado, el fueguito se pierde como en Duolingo."
           }
         },
         "fr" : {
@@ -18896,7 +18896,7 @@
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Avg HR"
+            "value" : "FC moy."
           }
         }
       }
@@ -18991,7 +18991,7 @@
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Max HR"
+            "value" : "FC max"
           }
         }
       }
@@ -19155,7 +19155,7 @@
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Done"
+            "value" : "Terminé"
           }
         }
       }
@@ -19338,7 +19338,7 @@
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "¡Listo! Tocá ⚡ cuando quieras salir a correr."
+            "value" : "¡Listo! Toca ⚡ cuando quieras salir a correr."
           }
         },
         "fr" : {
@@ -19386,7 +19386,7 @@
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Con ⚡ arrancás una salida: GPS, ritmo y pausa."
+            "value" : "Con ⚡ arrancas una salida: GPS, ritmo y pausa."
           }
         },
         "fr" : {
@@ -19528,7 +19528,7 @@
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Podés seguir usando esta, pero conviene actualizar."
+            "value" : "Puedes seguir usando esta, pero conviene actualizar."
           }
         },
         "fr" : {
@@ -19574,13 +19574,13 @@
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Esta versión ya no puede hablar con el servidor. Actualizá desde la App Store para seguir."
+            "value" : "Esta versión ya no puede hablar con el servidor. Actualiza desde la App Store para seguir."
           }
         },
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Pour continuer à utiliser Stamina, vous devez installer la dernière version."
+            "value" : "Pour continuer à utiliser Stamina, tu dois installer la dernière version."
           }
         }
       }
@@ -20050,7 +20050,7 @@
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Salí a correr con todo medido"
+            "value" : "Sal a correr con todo medido"
           }
         },
         "fr" : {
@@ -20119,7 +20119,7 @@
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Llegá entero al día de la carrera"
+            "value" : "Llega entero al día de la carrera"
           }
         },
         "fr" : {
@@ -20172,7 +20172,7 @@
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Duration"
+            "value" : "Durée"
           }
         }
       }
@@ -20195,7 +20195,7 @@
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Finish"
+            "value" : "Terminer"
           }
         }
       }
@@ -20242,7 +20242,7 @@
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Fueling"
+            "value" : "Ravitaillement"
           }
         }
       }
@@ -20385,7 +20385,7 @@
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "in progress"
+            "value" : "en cours"
           }
         }
       }
@@ -20504,7 +20504,7 @@
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "L'entraînement n'a pas enregistré de déplacement suffisant ou a duré moins de 10 secondes. Souhaitez-vous le supprimer ou le reprendre ?"
+            "value" : "L'entraînement n'a pas enregistré de déplacement suffisant ou a duré moins de 10 secondes. Tu veux le supprimer ou le reprendre ?"
           }
         }
       }
@@ -20620,7 +20620,7 @@
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Not now"
+            "value" : "Pas maintenant"
           }
         }
       }
@@ -20807,7 +20807,7 @@
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Start"
+            "value" : "Commencer"
           }
         }
       }
@@ -20947,7 +20947,7 @@
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "high"
+            "value" : "élevée"
           }
         }
       }
@@ -20970,7 +20970,7 @@
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "low"
+            "value" : "basse"
           }
         }
       }
@@ -20993,7 +20993,7 @@
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "maximum"
+            "value" : "maximale"
           }
         }
       }
@@ -21016,7 +21016,7 @@
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "moderate"
+            "value" : "modérée"
           }
         }
       }
