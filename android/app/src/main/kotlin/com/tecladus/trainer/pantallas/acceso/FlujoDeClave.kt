@@ -58,8 +58,8 @@ import java.time.format.FormatStyle
  * reglas que muestra son las de [REGLAS_DE_CLAVE], las mismas que aplica el
  * servidor.
  *
- * 🛑 **Cambiar la contraseña cierra las demás sesiones** (AGENTS.md §12) y el
- * servidor devuelve una sesión nueva. Se usa: `fpDone` entra derecho a la app. El
+ * 🛑 Cambiar la contraseña devuelve una sesión nueva (desde la 1.6.0 ya NO cierra
+ * las demás sesiones). Se usa: `fpDone` entra derecho a la app. El
  * diseño manda al login, y eso sería pedirle a alguien que tipee la contraseña
  * que acaba de elegir treinta segundos antes. Está anotado como desvío.
  */

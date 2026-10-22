@@ -91,7 +91,7 @@
     <string name="error_code_resend_too_soon">Recién te mandamos uno. Esperá un momento antes de pedir otro.</string>
     <string name="error_invalid_code">Ese código no es. Fijate que sean los 6 caracteres.</string>
     <string name="error_code_expired">El código venció. Pedí uno nuevo.</string>
-    <string name="error_weak_password">Esa contraseña es fácil de adivinar. Probá una más larga o menos común.</string>
+    <string name="error_weak_password">Esa contraseña no cumple las reglas: al menos %1$d caracteres, con una mayúscula y un número.</string>
     <string name="error_invalid_registration_token">Se venció el registro. Empezá de nuevo desde el correo.</string>
     <string name="error_session_revoked">Se cerró la sesión desde otro lado. Entrá de nuevo.</string>
     <string name="error_invalid_refresh_token">Se venció la sesión. Entrá de nuevo.</string>
@@ -156,11 +156,11 @@
     <string name="fp_codigo_validar">Verificar código</string>
 
     <string name="fp_clave_titulo">Elegí una contraseña nueva</string>
-    <string name="fp_clave_cuerpo">Al menos %1$d caracteres, con una mayúscula y un número. Cuando la guardes vamos a cerrar la sesión en los otros dispositivos donde hayas entrado.</string>
+    <string name="fp_clave_cuerpo">Al menos %1$d caracteres, con una mayúscula y un número.</string>
     <string name="fp_clave_guardar">Guardar contraseña</string>
 
     <string name="fp_listo_titulo">Contraseña actualizada</string>
-    <string name="fp_listo_cuerpo">Ya está lista. Cerramos la sesión en los otros dispositivos: si no fuiste vos quien pidió el cambio, escribinos desde este mismo correo.</string>
+    <string name="fp_listo_cuerpo">Ya está lista. Si no fuiste vos quien pidió el cambio, escribinos desde este mismo correo.</string>
     <string name="fp_listo_cuenta">Cuenta</string>
     <string name="fp_listo_cuando">Cambio hecho</string>
     <string name="fp_listo_hoy">Hoy, %1$s</string>

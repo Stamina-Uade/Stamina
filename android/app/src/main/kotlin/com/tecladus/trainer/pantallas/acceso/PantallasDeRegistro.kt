@@ -295,8 +295,8 @@ fun PantallaRegistroCodigo(
  * flujo dibujado.
  *
  * El largo mínimo se chequea acá para no gastar un viaje, pero la decisión es del
- * servidor: si la contraseña es larga y a la vez conocida, contesta
- * `weak_password` y eso se muestra tal como viene traducido.
+ * servidor: si no cumple sus reglas contesta `weak_password` y eso se muestra tal
+ * como viene traducido.
  */
 @Composable
 fun PantallaRegistroClave(

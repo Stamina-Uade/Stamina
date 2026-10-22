@@ -243,10 +243,9 @@ class ApiTrainer(private val cliente: ClienteApi) {
     /**
      * Paso 3 de 3: la contraseña nueva. Devuelve una sesión abierta.
      *
-     * 🛑 **Cambiar la contraseña revoca todas las demás sesiones** (AGENTS.md §12),
-     * y por eso el servidor devuelve una sesión nueva: si no, quien acaba de
-     * cambiarla se quedaría afuera de su propio teléfono. Acá se la guarda, igual
-     * que en [entrar] — la pantalla `fpDone` entra derecho con ella en vez de
+     * El servidor devuelve una sesión nueva. Desde la 1.6.0 ya NO revoca las demás
+     * sesiones (cerrarlas es `POST /auth/logout/others`, que Android no usa).
+     * Acá se la guarda, igual que en [entrar] — la pantalla `fpDone` entra derecho con ella en vez de
      * pedirle a alguien que tipee la contraseña que acaba de elegir.
      */
     suspend fun cambiarClave(tokenDeReseteo: String, contrasena: String): Resultado<Sesion> {

@@ -65,7 +65,8 @@ fun recordarTraductorDeErrores(): (Resultado<*>) -> String {
             "code_resend_too_soon" to recursos.getString(R.string.error_code_resend_too_soon),
             "invalid_code" to recursos.getString(R.string.error_invalid_code),
             "code_expired" to recursos.getString(R.string.error_code_expired),
-            "weak_password" to recursos.getString(R.string.error_weak_password),
+            "weak_password" to
+                recursos.getString(R.string.error_weak_password, LARGO_MINIMO_DE_CLAVE),
             "invalid_registration_token" to
                 recursos.getString(R.string.error_invalid_registration_token),
             "invalid_reset_token" to recursos.getString(R.string.error_invalid_reset_token),
