@@ -438,12 +438,11 @@ fun FlujoDeAcceso(
                                     error = traducir(r)
                                 }
                                 // 🛑 La contraseña se escribió DOS pasos antes y el
-                                // servidor la rechaza recién ahora: las dos reglas
-                                // que no se pueden anticipar mientras alguien tipea
-                                // —la lista de conocidas y los caracteres distintos,
-                                // ver `ReglasDeClave.kt`— sólo se ven al crear la
-                                // cuenta. El error tiene que aparecer donde está el
-                                // campo, no abajo del aviso de salud.
+                                // servidor la rechaza recién ahora. Desde la 1.6.0
+                                // sólo aplica las tres reglas de `ReglasDeClave.kt`,
+                                // así que esto no debería pasar; si pasa, el error
+                                // tiene que aparecer donde está el campo, no abajo
+                                // del aviso de salud.
                                 r is Resultado.Rechazado && r.codigo == "weak_password" -> {
                                     error = traducir(r)
                                     paso = PasoDeAcceso.REG_CLAVE

@@ -273,12 +273,9 @@ struct PerfilView: View {
         }
     }
 
+    /// Cargando: sólo la ruedita (2026-10-22).
     private var cargandoLasMetas: some View {
-        HStack(spacing: TokensEspaciado.e10) {
-            ProgressView().tint(Paleta.acento)
-            Text(Textos.profileGoalsLoading)
-                .estilo(.cuerpoSecundario, color: Paleta.textoSecundario)
-        }
+        ProgressView().tint(Paleta.acento)
         .padding(TokensEspaciado.e16)
         .frame(maxWidth: .infinity)
         .tarjeta()

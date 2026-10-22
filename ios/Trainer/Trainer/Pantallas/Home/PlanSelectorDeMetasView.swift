@@ -71,11 +71,9 @@ struct SelectorInteractivoDeMetasView: View {
             selectorDeFecha
             llamadoAAccion
         }
-        .alert(Textos.goalsSaveFailedTitle, isPresented: $errorGuardado) {
-            Button(Textos.commonOk, role: .cancel) {}
-        } message: {
-            Text(Textos.goalsSaveFailedMessage)
-        }
+        .alertaApilada(Textos.goalsSaveFailedTitle, isPresented: $errorGuardado,
+                       mensaje: Textos.goalsSaveFailedMessage,
+                       botones: [BotonDeAlerta(Textos.commonOk, rol: .cancelar)])
     }
 
     // MARK: - Cabecera motivadora

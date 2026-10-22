@@ -161,7 +161,7 @@ final class SincronizadorDePasos: ObservableObject {
             switch resultado {
             case .ok(let respuesta):
                 almacen.confirmarSubida(lote, respuesta: respuesta)
-            case .rechazado(_, let http) where http == 400:
+            case .rechazado(_, let http, _) where http == 400:
                 // El lote no cumple el contrato: reintentarlo daría lo mismo.
                 almacen.descartarPendientes(lote)
             default:

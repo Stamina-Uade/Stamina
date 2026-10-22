@@ -5,9 +5,10 @@ import TrainerCore
 // La actualización obligatoria (AGENTS.md §5.1), y el texto de los dos avisos de
 // versión.
 //
-// Esta pantalla no está en el diseño. Se arma con `PantallaCierre` —el andamio de
-// `clave-lista` y `reg-listo`— para no inventar una estética: es un final, y el
-// design system ya sabe dibujar finales.
+// Esta pantalla no está en el diseño. Se arma con `PantallaCierre` para no
+// inventar una estética: es un final, y el design system ya sabe dibujar
+// finales. Arriba va el ícono de la app tal cual se ve en el iPhone (2026-10-22),
+// no el tilde de los cierres: no hay nada "hecho" que festejar.
 // =============================================================================
 
 struct ActualizacionRequeridaView: View {
@@ -17,6 +18,11 @@ struct ActualizacionRequeridaView: View {
     var body: some View {
         PantallaCierre(titulo: Textos.versionRequiredTitle,
                        texto: aviso.texto(generico: Textos.versionRequiredBody),
+                       sello: {
+                           // Las esquinas de un ícono de iOS: 22,37 % del lado.
+                           LogoApp(tamano: TokensEspaciado.e56 * 1.5,
+                                   radio: TokensEspaciado.e56 * 1.5 * 0.2237)
+                       },
                        pie: {
                            // Sin enlace a la tienda no hay botón: uno que no hace nada
                            // es peor que el texto, que ya dice dónde actualizar.

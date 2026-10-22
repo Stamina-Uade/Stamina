@@ -85,7 +85,7 @@
     <string name="error_code_resend_too_soon">We just sent one. Wait a moment before asking for another.</string>
     <string name="error_invalid_code">That code is not right. Check all 6 characters.</string>
     <string name="error_code_expired">The code expired. Ask for a new one.</string>
-    <string name="error_weak_password">That password is easy to guess. Try a longer or less common one.</string>
+    <string name="error_weak_password">That password does not meet the rules: at least %1$d characters, with one capital letter and one number.</string>
     <string name="error_invalid_registration_token">The sign-up expired. Start again from the email.</string>
     <string name="error_session_revoked">The session was closed elsewhere. Sign in again.</string>
     <string name="error_invalid_refresh_token">Your session expired. Sign in again.</string>
@@ -126,6 +126,20 @@
     <string name="error_profile_incomplete">A profile detail is missing before we can build the plan.</string>
     <string name="error_service_unavailable">The server is having trouble. Try again in a bit.</string>
 
+    <!-- ===== Contract 1.6.0 error codes ===== -->
+    <string name="error_too_many_attempts">Too many attempts. For security, we blocked sign-in with this email for 15 minutes.</string>
+    <string name="error_code_attempts_exceeded">For security, this code no longer works. Start again.</string>
+    <string name="error_account_link_available">There is already an account with that email. Sign in with your email and password.</string>
+    <string name="error_invalid_link_token">The request to link the account expired. Start again.</string>
+    <string name="error_account_deactivated">This account is deactivated. For now it can be turned back on from the iPhone app.</string>
+    <string name="error_account_pending_deletion">This account is about to be deleted. Until then, it can be recovered from the iPhone app.</string>
+    <string name="error_invalid_reactivation_token">The request to recover the account expired. Sign in again.</string>
+
+    <!-- ===== Contract 1.4.0 error codes (sign-in and recovery) ===== -->
+    <string name="error_user_not_found">There is no account with that email.</string>
+    <string name="error_wrong_password">That password is not right. Try again.</string>
+    <string name="error_password_not_set">This account was created with Google or Apple and has no password yet. You can create one from “Forgot your password?”.</string>
+
     <!-- ===== Password recovery · fpEmail, fpCode, fpNew, fpDone ===== -->
     <string name="fp_volver">Back to the previous step</string>
 
@@ -141,11 +155,11 @@
     <string name="fp_codigo_validar">Verify code</string>
 
     <string name="fp_clave_titulo">Choose a new password</string>
-    <string name="fp_clave_cuerpo">At least %1$d characters, with one capital letter and one number. When you save it we will sign out every other device you signed in on.</string>
+    <string name="fp_clave_cuerpo">At least %1$d characters, with one capital letter and one number.</string>
     <string name="fp_clave_guardar">Save password</string>
 
     <string name="fp_listo_titulo">Password updated</string>
-    <string name="fp_listo_cuerpo">It is ready. We signed out the other devices: if it wasn\'t you who asked for the change, write to us from this same address.</string>
+    <string name="fp_listo_cuerpo">It is ready. If it wasn\'t you who asked for the change, write to us from this same address.</string>
     <string name="fp_listo_cuenta">Account</string>
     <string name="fp_listo_cuando">Changed</string>
     <string name="fp_listo_hoy">Today, %1$s</string>

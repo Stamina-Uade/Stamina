@@ -19,6 +19,23 @@ export function localeDe(req: FastifyRequest): Locale {
   return primero.startsWith("en") ? "en-US" : "es-AR";
 }
 
+/**
+ * El idioma de un correo que manda el servidor (contrato 1.6.0: el aviso de
+ * contraseña cambiada sale "en el idioma del pedido"). Es otra lista que `Locale`
+ * a propósito: el contenido del plan y del catálogo se publica en dos idiomas
+ * (decisión 0010), pero la app está en tres, y un aviso de seguridad tiene que
+ * llegar en el que la persona lee. Cualquier otra cosa cae en español.
+ */
+export type IdiomaDeCorreo = "es" | "en" | "fr";
+
+export function idiomaDeCorreo(req: FastifyRequest): IdiomaDeCorreo {
+  const header = req.headers["accept-language"];
+  const primero = (Array.isArray(header) ? header[0] : header)?.split(",")[0]?.trim().toLowerCase() ?? "";
+  if (primero.startsWith("en")) return "en";
+  if (primero.startsWith("fr")) return "fr";
+  return "es";
+}
+
 /** El nombre en ese idioma, o el castellano, o el id: nunca un hueco. */
 export function nombreEn(nombres: Record<string, string | null | undefined>, locale: Locale, respaldo: string): string {
   return nombres[locale] ?? nombres["es-AR"] ?? respaldo;

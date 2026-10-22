@@ -1,5 +1,6 @@
 /**
- * dominios/cuenta/repositorio.ts — borrar la cuenta y juntar todo para exportar.
+ * dominios/cuenta/repositorio.ts — desactivar, marcar para borrar y juntar todo
+ * para exportar.
  *
  * 🛑 AGENTS.md §12: cada consulta filtra por `usuario_id` en el mismo SQL. Acá eso
  * pesa más que en ningún otro lado: un export sin ese filtro es una filtración
@@ -24,9 +25,43 @@ export function crearRepoCuenta(db: Db) {
       return f === null ? undefined : f.password_hash;
     },
 
-    /** Borra la cuenta y sus datos dependientes en una sola transacción de PostgreSQL. */
-    async borrar(usuarioId: string, _ahoraMs: number): Promise<void> {
-      await db.consultar(`delete from usuarios where id = $1`, [usuarioId]);
+    /**
+     * Desactiva la cuenta y revoca TODAS sus sesiones, en una sola sentencia: no
+     * puede quedar una cuenta desactivada con una sesión viva. Idempotente: si ya
+     * estaba desactivada, conserva la fecha de entonces.
+     */
+    async desactivar(usuarioId: string, ahoraMs: number): Promise<void> {
+      await db.consultar(
+        `with cuenta as (
+           update usuarios
+              set desactivada_en_ms = coalesce(desactivada_en_ms, $2), actualizado_en_ms = $2
+            where id = $1
+           returning id
+         )
+         update sesiones set revocado_en_ms = $2, revocado_motivo = 'desactivar'
+          where usuario_id in (select id from cuenta) and revocado_en_ms is null`,
+        [usuarioId, ahoraMs]
+      );
+    },
+
+    /**
+     * Marca la cuenta para borrarse en `borrarEnMs` y revoca todas sus sesiones, en
+     * una sola sentencia. El borrado de verdad lo hace la purga (purgar.ts) cuando
+     * llega la fecha. Si ya estaba marcada, conserva la fecha de entonces: repetir
+     * el pedido no corre el plazo.
+     */
+    async marcarParaBorrar(usuarioId: string, ahoraMs: number, borrarEnMs: number): Promise<void> {
+      await db.consultar(
+        `with cuenta as (
+           update usuarios
+              set borrar_en_ms = coalesce(borrar_en_ms, $3), actualizado_en_ms = $2
+            where id = $1
+           returning id
+         )
+         update sesiones set revocado_en_ms = $2, revocado_motivo = 'borrar_cuenta'
+          where usuario_id in (select id from cuenta) and revocado_en_ms is null`,
+        [usuarioId, ahoraMs, borrarEnMs]
+      );
     },
 
     async aceptacionesLegales(usuarioId: string) {

@@ -28,7 +28,8 @@ import SwiftUI
 /// La rueda de nacimiento. `reg-nacimiento`.
 public struct RuedaDeNacimiento: View {
     @Binding private var fecha: Date
-    private let nota: String
+    /// Una línea debajo de la rueda; sin nota no ocupa lugar.
+    private let nota: String?
 
     /// El diseño ofrece de 1945 hasta hace 12 años. El techo no es estético:
     /// abajo de esa edad el producto necesita otro camino entero (AGENTS.md
@@ -36,7 +37,7 @@ public struct RuedaDeNacimiento: View {
     public static let anioMinimo = 1945
     public static let edadMinima = 12
 
-    public init(fecha: Binding<Date>, nota: String) {
+    public init(fecha: Binding<Date>, nota: String? = nil) {
         self._fecha = fecha
         self.nota = nota
     }
@@ -53,10 +54,12 @@ public struct RuedaDeNacimiento: View {
                 .frame(maxWidth: .infinity)
                 .tarjetaDeFecha()
 
-            Text(nota)
-                .estilo(.labelCampo, color: Paleta.textoTerciario)
-                .frame(maxWidth: .infinity)
-                .multilineTextAlignment(.center)
+            if let nota {
+                Text(nota)
+                    .estilo(.labelCampo, color: Paleta.textoTerciario)
+                    .frame(maxWidth: .infinity)
+                    .multilineTextAlignment(.center)
+            }
         }
     }
 

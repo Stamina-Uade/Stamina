@@ -1,4 +1,5 @@
 import Foundation
+import SwiftUI
 import TrainerCore
 
 // =============================================================================
@@ -15,66 +16,71 @@ import TrainerCore
 // sueltan apenas se usan (AGENTS.md §8). Los tokens de la sesión ni siquiera
 // pasan por este archivo: los guarda `RenovadorDeSesion` en el llavero, y lo
 // único que llega hasta acá es que se abrió una.
+//
+// 2026-10-22 (Iván, "Entrar y registrarse"): lo que sale mal se dice con una
+// ALERTA con título y mensaje (`alerta`), no en rojo debajo del campo. El único
+// rojo que queda es "Las contraseñas no coinciden", debajo de la confirmación y
+// recién al tocar. Los botones se habilitan cuando lo escrito ya sirve (un correo
+// válido, la contraseña con sus tres reglas): ya no se juzga el correo al tocar.
 // =============================================================================
 
 /// Las pantallas del flujo de entrada. La última —`home`— es el import de
 /// `HomeB.dc.html`, que es otra pieza.
 enum Pantalla: String, CaseIterable, Equatable {
-    case bienvenida, problema, previewPlan
-    case login, claveCorreo, claveCodigo, claveNueva, claveLista
-    case regCorreo, regCodigo, regClave, regAviso, regTerminos
-    case regNombre, regNacimiento, regSexo, regCuerpo
-    case regDeporte, regNivel, regObjetivo, regSalud, regMedicion, regDias, regListo
+    case bienvenida
+    case login, claveCorreo, claveCodigo, claveNueva
+    case regCorreo, regCodigo, regAntesDeEmpezar
+    case regNacimiento, regSexo, regCuerpo
+    case regDeporte, regNivel, regObjetivo, regDias, regApto
     case home
 
-    /// Los TRECE pasos que cuenta la barra de avance (2026-10-21).
+    /// Los ONCE pasos que cuenta la barra de avance (2026-10-22).
     ///
     /// ```
-    ///  1 datos (nombre, apellido, correo, contraseña y su confirmación)
-    ///  2 código   3 aviso de salud                   ← acá NACE la cuenta
-    ///  4 nacimiento   5 sexo   6 cuerpo   7 deporte   8 nivel
-    ///  9 objetivo  10 salud  11 medición  12 días  13 resumen   ← un PATCH /me cada uno
+    ///  1 crea tu cuenta (nombre, apellido, correo, contraseña y su confirmación)
+    ///  2 valida tu correo   3 antes de empezar          ← acá NACE la cuenta
+    ///  4 nacimiento   5 sexo   6 peso y altura   7 deporte   8 nivel
+    ///  9 objetivo  10 días y horarios                    ← un PATCH /me cada uno
+    /// 11 tu apto físico (opcional, sólo en el teléfono)
     /// ```
     ///
-    /// La contraseña y el nombre se piden JUNTO con el correo (pedido de Iván):
-    /// así, después del código no queda nada que no aplique a quien entró con
-    /// Google o Apple, que se saltea el código y la contraseña. El nombre viaja en
-    /// el `profile` de `register/complete`. `regClave` y `regNombre` siguen
-    /// existiendo como pantallas pero ya no son pasos del alta.
+    /// Con Google o Apple y el correo ya validado por el proveedor no hay código:
+    /// son diez.
     ///
-    /// 🛑 El aviso de salud no se puede saltear: sin él no hay cuenta. Los pasos de
-    /// perfil van DESPUÉS de crearla (decisión 0008). La barra NO se reinicia.
+    /// 🛑 "Antes de empezar" no se puede saltear: sin las dos casillas no hay
+    /// cuenta. Los pasos de perfil van DESPUÉS de crearla (decisión 0008). La
+    /// barra NO se reinicia.
     static let pasosDelRegistro: [Pantalla] = [
-        .regCorreo, .regCodigo, .regAviso,
+        .regCorreo, .regCodigo, .regAntesDeEmpezar,
         .regNacimiento, .regSexo, .regCuerpo, .regDeporte, .regNivel,
-        .regObjetivo, .regSalud, .regMedicion, .regDias, .regListo,
+        .regObjetivo, .regDias, .regApto,
     ]
 
     /// El primer paso con la cuenta ya creada.
     static let primerPasoDePerfil: Pantalla = .regNacimiento
 
-    /// Los que corren con la cuenta ya creada. `regNombre` va aparte: no es paso
-    /// del alta, pero si alguien llega (desde una prueba) guarda como cualquiera.
+    /// Los que corren con la cuenta ya creada.
     static let pasosDePerfil: [Pantalla] =
-        [.regNombre] + Array(pasosDelRegistro.drop { $0 != primerPasoDePerfil })
+        Array(pasosDelRegistro.drop { $0 != primerPasoDePerfil })
 
     var esPasoDelRegistro: Bool { Pantalla.pasosDelRegistro.contains(self) }
     var esPasoDePerfil: Bool { Pantalla.pasosDePerfil.contains(self) }
 
-    /// Los pasos del alta ANTES de que exista la cuenta, más los términos que se
-    /// leen desde el aviso. Salir de acá es abandonar el alta.
+    /// Los pasos del alta ANTES de que exista la cuenta. Salir de acá es
+    /// abandonar el alta.
     var esDelAlta: Bool {
-        [.regCorreo, .regCodigo, .regClave, .regAviso, .regTerminos].contains(self)
+        [.regCorreo, .regCodigo, .regAntesDeEmpezar].contains(self)
     }
 
     var esDeLaRecuperacion: Bool {
         [.claveCorreo, .claveCodigo, .claveNueva].contains(self)
     }
 
-    /// Los diez primeros pasos de perfil llevan "Completar después" (decisión 0008
-    /// §3): con la cuenta ya creada, una pantalla que sólo se pasa guardando
-    /// encierra a quien se quedó sin señal. El resumen no la necesita: ya entra.
-    var ofreceCompletarDespues: Bool { esPasoDePerfil && self != .regListo }
+    /// "Completar después" aparece desde Deporte (2026-10-22): nacimiento, sexo
+    /// y cuerpo se completan sí o sí. El apto tiene su propio "Lo subo después".
+    var ofreceCompletarDespues: Bool {
+        esPasoDePerfil && ![.regNacimiento, .regSexo, .regCuerpo, .regApto].contains(self)
+    }
 
     /// Qué lleva la cabecera. Está acá y no repartido por las pantallas porque
     /// la flecha de volver la dibuja **un solo lugar**: `RaizFlujoView`.
@@ -83,16 +89,16 @@ enum Pantalla: String, CaseIterable, Equatable {
     var cabecera: Cabecera {
         switch self {
         // Entradas y finales: de acá no se vuelve.
-        case .bienvenida, .problema, .previewPlan, .claveLista, .regListo, .home:
+        case .bienvenida, .home:
             return .ninguna
         // El diseño les dibuja la flecha adentro de la pantalla; acá la pone el
         // andamio, que es lo mismo en pantalla y una sola implementación.
-        case .login, .claveCorreo, .claveCodigo, .claveNueva, .regTerminos:
+        case .login, .claveCorreo, .claveCodigo, .claveNueva:
             return .soloVolver
         // 🛑 El primer paso de perfil lleva la barra y NO la flecha: la cuenta ya
         // existe y atrás sólo hay pasos que mandarían un permiso consumido. Una
         // flecha deshabilitada se ve y no hace nada, que es peor que no tenerla.
-        case .regNombre, .regNacimiento:
+        case .regNacimiento:
             return .soloAvance
         default:
             return esPasoDelRegistro ? .volverYAvance : .ninguna
@@ -107,9 +113,6 @@ enum Pantalla: String, CaseIterable, Equatable {
 
     /// El paso que sigue, o `nil` si éste es el último o no es un paso del alta.
     var pasoSiguiente: Pantalla? {
-        // `regNombre` ya no es paso del alta (2026-10-21); si se llega, sigue el
-        // primero de perfil.
-        if self == .regNombre { return Pantalla.primerPasoDePerfil }
         guard let i = Pantalla.pasosDelRegistro.firstIndex(of: self),
               Pantalla.pasosDelRegistro.indices.contains(i + 1) else { return nil }
         return Pantalla.pasosDelRegistro[i + 1]
@@ -120,10 +123,8 @@ enum Pantalla: String, CaseIterable, Equatable {
 final class FlujoEntrada: ObservableObject {
     @Published private(set) var objetivosActivos: [ObjetivoDeUsuario] = []
     @Published private(set) var pantalla: Pantalla = .bienvenida {
-        // El "no parece un correo" y los errores de campo son de la pantalla que
-        // los mostró.
+        // El "no coinciden" es de la pantalla que lo mostró.
         didSet {
-            if correoRechazado, pantalla != oldValue { correoRechazado = false }
             if pantalla != oldValue, !erroresDeCampo.isEmpty { erroresDeCampo = [:] }
         }
     }
@@ -135,20 +136,15 @@ final class FlujoEntrada: ObservableObject {
     @Published var datos = DatosRegistro() {
         didSet {
             if datos != oldValue { claveDeGuardado = nil }
-            if correoRechazado, datos.correo != oldValue.correo { correoRechazado = false }
         }
     }
 
     /// Los campos del login, de la recuperación y de la contraseña del alta viven
     /// aparte de `datos`: son otra conversación, y mezclarlos hace que volver
     /// atrás arrastre basura — o que una contraseña quede junto al perfil.
-    @Published var loginCorreo = "" {
-        didSet { if correoRechazado, loginCorreo != oldValue { correoRechazado = false } }
-    }
+    @Published var loginCorreo = ""
     @Published var loginClave = ""
-    @Published var recuperacionCorreo = "" {
-        didSet { if correoRechazado, recuperacionCorreo != oldValue { correoRechazado = false } }
-    }
+    @Published var recuperacionCorreo = ""
     @Published var recuperacionCodigo = ""
     @Published var claveNueva = "" {
         didSet {
@@ -203,9 +199,18 @@ final class FlujoEntrada: ObservableObject {
         }
     }
 
-    /// La casilla del aviso de salud. Arranca sin marcar: una aceptación por
-    /// defecto no es una aceptación.
+    /// La casilla de los términos y la privacidad de "Antes de empezar". Arranca
+    /// sin marcar: una aceptación por defecto no es una aceptación.
     @Published var aceptoElAviso = false
+    /// La segunda casilla de "Antes de empezar": que Stamina no reemplaza a un
+    /// profesional y que ante un síntoma se para y se consulta. Es lo que antes
+    /// guardaba "Antes de arrancar" (`medical_disclaimer_accepted`), y viaja con
+    /// el perfil inicial de la cuenta.
+    @Published var aceptoElDescargo = false
+
+    /// La contraseña que se escribe en la alerta de vincular, cuando el proveedor
+    /// no es dueño del correo.
+    @Published var claveParaVincular = ""
 
     @Published private(set) var enCurso = false
     /// Con qué proveedor se está entrando ahora: su botón muestra la ruedita.
@@ -214,7 +219,7 @@ final class FlujoEntrada: ObservableObject {
     /// cuenta se crea con el permiso social. Se suelta con el resto de la entrada.
     @Published private(set) var proveedorDelAlta: Proveedor?
     /// El permiso social venció en el último paso del alta: se ofrece volver a
-    /// pasar por Google o Apple SIN perder el código ya validado ni la casilla.
+    /// pasar por Google o Apple SIN perder el código ya validado ni las casillas.
     @Published private(set) var ofrecerRenovarSocial = false
     /// Google o Apple ya verificaron el correo: el alta NO pide código (sólo se
     /// valida con código a quien se registra con correo y contraseña). El campo
@@ -223,13 +228,11 @@ final class FlujoEntrada: ObservableObject {
 
     /// Los campos de los formularios de entrada que pueden mostrar un error debajo.
     enum CampoDelFormulario: Hashable {
-        case nombre, correo, clave, claveRepetida
+        case claveRepetida
     }
 
-    /// 2026-10-21 (Iván): el error de un dato va DEBAJO del campo que falló, en
-    /// rojo, y no en una alerta: "Ese correo ya está registrado" debajo del
-    /// correo, "Las contraseñas no coinciden" debajo de la confirmación. Las
-    /// alertas quedan para lo que no es de un campo (sin conexión, el servidor).
+    /// 2026-10-22: el único error debajo de un campo es "Las contraseñas no
+    /// coinciden", al tocar el botón. Todo lo demás es una alerta.
     @Published private(set) var erroresDeCampo: [CampoDelFormulario: String] = [:]
 
     func error(de campo: CampoDelFormulario) -> String? { erroresDeCampo[campo] }
@@ -243,46 +246,28 @@ final class FlujoEntrada: ObservableObject {
     /// a la vez, así que la confirmación sobra y se oculta. Si después se cambia la
     /// primera, vuelve a pedirse.
     @Published private(set) var claveSugeridaPorElSistema = false
+    /// El texto del último error. Ya no se dibuja en ninguna pantalla —lo dice la
+    /// alerta—, pero lo leen Ajustes y los tests.
     @Published var errorVisible: String?
     @Published var alertaSesionExpirada = false
-    @Published var alertaError: InfoAlerta?
+    /// La alerta del flujo, si hay una a la vista (`RaizFlujoView` la presenta con
+    /// `alertaApilada`). Una sola a la vez: la nueva reemplaza a la anterior.
+    @Published var alerta: ContenidoDeAlerta?
 
-    public struct InfoAlerta: Identifiable, Equatable {
-        public let id = UUID()
-        public let titulo: String
-        public let mensaje: String
-        public let boton: String
-
-        public init(titulo: String, mensaje: String, boton: String = Textos.commonDone) {
-            self.titulo = titulo
-            self.mensaje = mensaje
-            self.boton = boton
-        }
+    /// Una alerta con título, mensaje y "Ok".
+    func mostrarAlerta(titulo: String, mensaje: String, alAceptar: @escaping () -> Void = {}) {
+        alerta = ContenidoDeAlerta(titulo, mensaje: mensaje,
+                                   botones: [BotonDeAlerta(Textos.commonOk, rol: .cancelar, accion: alAceptar)])
     }
-
-    func mostrarAlertaError(titulo: String, mensaje: String, boton: String = Textos.commonDone) {
-        alertaError = InfoAlerta(titulo: titulo, mensaje: mensaje, boton: boton)
-    }
-
-    /// Se tocó el botón con algo que no parece un correo: la pantalla lo dice
-    /// debajo del campo, y no se manda nada.
-    ///
-    /// 🛑 El correo se juzga al TOCAR, no mientras se escribe. El "no parece
-    /// válido" que aparecía con la primera letra retaba a quien todavía no había
-    /// terminado, y el botón apagado hasta que el correo pareciera uno hacía
-    /// sentir lenta la pantalla (Iván, probando en el iPhone, 2026-09-10). Se
-    /// apaga al editar ese correo y al cambiar de pantalla; el `if correoRechazado`
-    /// de esos `didSet` evita avisarle a SwiftUI en cada tecla. Las reglas de la
-    /// contraseña sí siguen en vivo.
-    @Published private(set) var correoRechazado = false
 
     /// Lo que el login tiene que explicar cuando se llega de rebote —la sesión se
     /// cerró— y no por elección. Sin esto el login aparece solo y parece que la app
     /// se reinició.
     @Published private(set) var avisoDelLogin: String?
 
-    /// El aviso de salud y los términos, con su versión. Bajan de `GET /legal` y
-    /// no vienen en la app, a propósito (contrato, `/legal`).
+    /// El aviso de salud, los términos y la privacidad, con su versión. Bajan de
+    /// `GET /legal` y los muestra la hoja legal; "Antes de empezar" usa la
+    /// versión para dejar constancia de lo aceptado.
     @Published private(set) var legales: TextosLegales?
     @Published private(set) var cargandoLegales = false
     @Published private(set) var falloLegales = false
@@ -292,19 +277,20 @@ final class FlujoEntrada: ObservableObject {
     /// cuenta pudo haberse creado igual del otro lado.
     @Published private(set) var ofrecerLogin = false
 
-    /// Se prende cuando el permiso del alta VENCIÓ sin usarse: hace falta otro
-    /// código, y ofrecer sólo "Ya tengo cuenta" mandaba a entrar a una cuenta que
-    /// no existe.
-    @Published private(set) var ofrecerEmpezarDeNuevo = false
-
     /// El servidor dijo `conflict`: ya hay una cuenta con ese correo. La salida al
     /// login lleva su propio texto, porque no es "ya tengo cuenta" de quien la acaba
     /// de crear.
     @Published private(set) var laCuentaYaExiste = false
 
-    /// Cambia cada vez que el servidor aceptó un pedido de código: reinicia la
-    /// cuenta regresiva de "Reenviar".
+    /// Cambia cada vez que el servidor aceptó un pedido de código.
     @Published private(set) var pedidosDeCodigo = 0
+    /// Cuándo el servidor aceptó el último pedido de código. La cuenta regresiva de
+    /// "Reenviar" se calcula desde acá y no descontando de a un segundo: así sigue
+    /// corriendo con la app en segundo plano.
+    @Published private(set) var envioDelCodigo: Date?
+    /// El código venció o se agotaron sus intentos: "Reenviar" desaparece y lo que
+    /// queda es volver al principio.
+    @Published private(set) var codigoAgotado = false
 
     @Published private(set) var decisionDeVersion: DecisionDeVersion = .pasar
     @Published var recomendacionDescartada = false
@@ -332,13 +318,13 @@ final class FlujoEntrada: ObservableObject {
     private let reloj: () -> Int64
 
     private var historial: [Pantalla] = []
-    /// El permiso del alta. 🛑 Otro permiso es otra alta: la casilla del aviso que
-    /// se marcó con el anterior no vale para éste.
+    /// El permiso del alta. 🛑 Otro permiso es otra alta: la casilla de los
+    /// términos que se marcó con el anterior no vale para éste.
     private var tokenDeRegistro: String? {
         didSet { if tokenDeRegistro != oldValue { aceptoElAviso = false } }
     }
     /// Cuándo vence ese permiso (`expires_at_ms`). Es lo que deja leer un
-    /// `invalid_registration_token`: vencido es "pedí otro código"; vigente es que
+    /// `invalid_registration_token`: vencido es "empezá de nuevo"; vigente es que
     /// el permiso ya se usó y la cuenta existe.
     private var vencimientoDelPermisoMs: Int64?
     /// Un intento de crear la cuenta terminó sin saber cómo —sin red o con una
@@ -348,6 +334,8 @@ final class FlujoEntrada: ObservableObject {
     /// El permiso de `POST /auth/social` para terminar un alta con Google o Apple.
     /// 🛑 Sólo en memoria, como los otros permisos (AGENTS.md §8).
     private var permisoSocial: String?
+    /// Cuándo vence `permisoSocial` (30 minutos).
+    private var vencimientoSocialMs: Int64?
     /// El correo para el que se validó el código (`tokenDeRegistro`).
     private var correoDelPermiso: String?
     private let iniciarConProveedor: @MainActor (Proveedor) async -> DesenlaceDelProveedor
@@ -408,8 +396,7 @@ final class FlujoEntrada: ObservableObject {
         // Dentro del alta, volver sigue el ORDEN de los pasos y no el historial.
         // Apilar cada paso hacía que, al retroceder hasta el correo, la flecha
         // llevara a un paso intermedio en vez de a donde se había empezado.
-        let adentro: (Pantalla) -> Bool = { $0.esPasoDelRegistro || $0 == .regTerminos }
-        if !(adentro(pantalla) && adentro(destino)) {
+        if !(pantalla.esPasoDelRegistro && destino.esPasoDelRegistro) {
             historial.append(pantalla)
         }
         errorVisible = nil
@@ -428,13 +415,9 @@ final class FlujoEntrada: ObservableObject {
         errorVisible = nil
         claveDeGuardado = nil
         ofrecerLogin = false
-        ofrecerEmpezarDeNuevo = false
         ofrecerRenovarSocial = false
         laCuentaYaExiste = false
-        if pantalla == .regTerminos {
-            pantalla = .regAviso
-            return
-        }
+        codigoAgotado = false
         if let paso = numeroDelPasoActual, paso > 1 {
             // 🛑 Del perfil no se vuelve al alta: la cuenta ya existe. La cabecera
             // del primer paso de perfil no tiene flecha; esto es la red de abajo.
@@ -458,13 +441,11 @@ final class FlujoEntrada: ObservableObject {
         pantalla = destino
     }
 
-    /// Los pasos que cuenta la barra en ESTE alta. Con Google o Apple no hay
-    /// contraseña ni (si el proveedor verificó el correo) código: la barra cuenta
-    /// sólo los pasos que de verdad hay.
+    /// Los pasos que cuenta la barra en ESTE alta. Con Google o Apple y el correo
+    /// verificado no hay código: la barra cuenta sólo los pasos que de verdad hay.
     var pasosDelAlta: [Pantalla] {
-        guard proveedorDelAlta != nil else { return Pantalla.pasosDelRegistro }
-        let sinPedir: Set<Pantalla> = correoValidadoPorProveedor ? [.regCodigo] : []
-        return Pantalla.pasosDelRegistro.filter { !sinPedir.contains($0) }
+        guard proveedorDelAlta != nil, correoValidadoPorProveedor else { return Pantalla.pasosDelRegistro }
+        return Pantalla.pasosDelRegistro.filter { $0 != .regCodigo }
     }
 
     /// 1-based, para la barra y para VoiceOver.
@@ -482,30 +463,110 @@ final class FlujoEntrada: ObservableObject {
 
     func entrar() async {
         guard loginListo, !enCurso else { return }
-        guard DatosRegistro.pareceCorreo(loginCorreo) else { rechazarCorreo(); return }
         enCurso = true
         errorVisible = nil
-        erroresDeCampo = [:]
         avisoDelLogin = nil
         let respuesta = await servicio.entrar(correo: Self.limpio(loginCorreo), clave: loginClave)
         enCurso = false
-        switch respuesta {
-        case .ok:
+        if case .ok = respuesta {
             // La sesión ya quedó en el llavero: se entra aunque la persona haya
             // tocado otra cosa mientras el pedido viajaba.
             irAlHome()
-        case .rechazado(let codigo, _) where codigo == "user_not_found":
-            if pantalla == .login { erroresDeCampo[.correo] = Textos.fieldEmailNotFound }
-        case .rechazado(let codigo, _) where ["wrong_password", "invalid_credentials"].contains(codigo):
-            if pantalla == .login { erroresDeCampo[.clave] = Textos.fieldPasswordWrong }
-        case .rechazado(let codigo, _) where codigo == "password_not_set":
-            if pantalla == .login { erroresDeCampo[.clave] = Textos.fieldPasswordNotSet }
-        default:
-            if pantalla == .login {
-                let texto = TraductorDeErrores.texto(respuesta)
-                errorVisible = texto
-                mostrarAlertaError(titulo: TraductorDeErrores.titulo(respuesta, siNo: Textos.loginErrorTitle), mensaje: texto)
+            return
+        }
+        guard pantalla == .login else { return }
+        errorVisible = TraductorDeErrores.texto(respuesta)
+        switch respuesta.codigoDeRechazo {
+        case "user_not_found":
+            alertaUsuarioInexistente(correo: loginCorreo)
+        case "wrong_password", "invalid_credentials":
+            alertaClaveIncorrecta()
+        case "password_not_set":
+            let proveedor = respuesta.detalleDelRechazo?.provider.flatMap { Proveedor(rawValue: $0.rawValue) }
+            if let proveedor {
+                mostrarAlerta(titulo: Textos.errorPasswordNotSetTitle(proveedor.nombre),
+                              mensaje: Textos.errorPasswordNotSet(proveedor.nombre))
+            } else {
+                mostrarAlertaDeError(respuesta, siNo: Textos.loginErrorTitle)
             }
+        default:
+            if !alertaDeCuenta(respuesta) {
+                mostrarAlertaDeError(respuesta, siNo: Textos.loginErrorTitle)
+            }
+        }
+    }
+
+    /// "El usuario no existe", con la salida a crear la cuenta con ese correo.
+    private func alertaUsuarioInexistente(correo: String) {
+        alerta = ContenidoDeAlerta(
+            Textos.errorUserNotFoundTitle, mensaje: Textos.errorUserNotFound,
+            botones: [
+                BotonDeAlerta(Textos.commonCreateAccount) { [weak self] in self?.crearCuentaCon(correo: correo) },
+                BotonDeAlerta(Textos.commonTryAgain, rol: .cancelar),
+            ])
+    }
+
+    private func alertaClaveIncorrecta(alReintentar: @escaping () -> Void = {}) {
+        alerta = ContenidoDeAlerta(
+            Textos.errorWrongPasswordTitle, mensaje: Textos.errorWrongPassword,
+            botones: [BotonDeAlerta(Textos.commonTryAgain, rol: .cancelar, accion: alReintentar)])
+    }
+
+    /// "Crear cuenta" desde una alerta: el alta arranca con ese correo escrito.
+    private func crearCuentaCon(correo: String) {
+        let limpio = Self.limpio(correo)
+        olvidarLaEntrada()
+        datos = DatosRegistro()
+        datos.correo = limpio
+        ir(a: .regCorreo)
+    }
+
+    /// Lo que pasa al entrar —con correo, con Google o Apple, al vincular o al
+    /// cambiar la contraseña— y no es de esa pantalla: la cuenta está desactivada
+    /// o por borrarse, o se agotaron los intentos. `true` si lo atendió.
+    private func alertaDeCuenta<Valor>(_ respuesta: Resultado<Valor>) -> Bool {
+        switch respuesta.codigoDeRechazo {
+        case "account_deactivated":
+            guard let permiso = respuesta.detalleDelRechazo?.reactivationToken else { return false }
+            alerta = ContenidoDeAlerta(
+                Textos.accountDeactivatedTitle, mensaje: Textos.accountDeactivatedBody,
+                botones: [
+                    BotonDeAlerta(Textos.accountReactivate) { [weak self] in
+                        Task { await self?.reactivar(permiso: permiso) }
+                    },
+                    BotonDeAlerta(Textos.commonCancel, rol: .cancelar),
+                ])
+            return true
+        case "account_pending_deletion":
+            guard let permiso = respuesta.detalleDelRechazo?.reactivationToken else { return false }
+            let dias = Int(max(respuesta.detalleDelRechazo?.daysRemaining ?? 1, 1))
+            alerta = ContenidoDeAlerta(
+                Textos.accountPendingDeletionTitle, mensaje: Textos.accountPendingDeletionBody(dias),
+                botones: [
+                    BotonDeAlerta(Textos.accountRecover) { [weak self] in
+                        Task { await self?.reactivar(permiso: permiso) }
+                    },
+                    BotonDeAlerta(Textos.commonCancel, rol: .cancelar),
+                ])
+            return true
+        case "too_many_attempts":
+            mostrarAlerta(titulo: Textos.errorTooManyAttemptsTitle, mensaje: Textos.errorTooManyAttempts)
+            return true
+        default:
+            return false
+        }
+    }
+
+    /// "Reactivar" o "Recuperar": `POST /auth/reactivate` y al Inicio.
+    func reactivar(permiso: String) async {
+        guard !enCurso else { return }
+        enCurso = true
+        let respuesta = await servicio.reactivarCuenta(permiso: permiso)
+        enCurso = false
+        if case .ok = respuesta {
+            irAlHome()
+        } else {
+            mostrarAlertaDeError(respuesta, siNo: Textos.loginErrorTitle)
         }
     }
 
@@ -513,8 +574,9 @@ final class FlujoEntrada: ObservableObject {
 
     /// "Continuar con Google / Apple". Si la persona ya tiene cuenta, entra. Si no,
     /// empieza el alta de siempre con lo que dio el proveedor ya escrito: nombre,
-    /// apellido y correo, que la persona revisa; después el código al correo, el
-    /// aviso de salud y los pasos de perfil. Lo único que no se pide es contraseña.
+    /// apellido y correo, que la persona revisa; después el código al correo (si
+    /// el proveedor no lo verificó), "Antes de empezar" y los pasos de perfil. Lo
+    /// único que no se pide es contraseña.
     func entrarCon(_ proveedor: Proveedor) async {
         guard !enCurso else { return }
         enCurso = true
@@ -536,12 +598,12 @@ final class FlujoEntrada: ObservableObject {
         case .sinConfigurar:
             enCurso = false
             conectandoCon = nil
-            mostrarAlertaError(titulo: Textos.loginErrorTitle, mensaje: Textos.loginSocialNotConfigured)
+            mostrarAlerta(titulo: Textos.loginErrorTitle, mensaje: Textos.loginSocialNotConfigured)
             return
         case .fallo:
             enCurso = false
             conectandoCon = nil
-            mostrarAlertaError(titulo: Textos.loginErrorTitle, mensaje: Textos.loginSocialFailed)
+            mostrarAlerta(titulo: Textos.loginErrorTitle, mensaje: Textos.loginSocialFailed)
             return
         }
 
@@ -557,23 +619,89 @@ final class FlujoEntrada: ObservableObject {
             empezarAltaSocial(proveedor, permiso: alta, credencial: credencial)
         default:
             guard pantalla == desde else { return }
-            let texto: String
-            switch respuesta.codigoDeRechazo {
-            case "provider_not_configured": texto = Textos.loginSocialNotConfigured
-            // Ese correo ya tiene cuenta con contraseña y no se vincula solo.
-            case "conflict": texto = Textos.loginSocialAccountExists
-            default: texto = TraductorDeErrores.texto(respuesta)
+            errorVisible = TraductorDeErrores.texto(respuesta)
+            if respuesta.codigoDeRechazo == "account_link_available",
+               let detalle = respuesta.detalleDelRechazo, let permiso = detalle.linkToken {
+                ofrecerVincular(proveedor, permiso: permiso,
+                                correo: detalle.email ?? credencial.correo ?? "",
+                                pideClave: detalle.requiresPassword ?? true)
+                return
             }
-            errorVisible = texto
-            mostrarAlertaError(titulo: TraductorDeErrores.titulo(respuesta, siNo: Textos.loginErrorTitle),
-                               mensaje: texto)
+            if alertaDeCuenta(respuesta) { return }
+            switch respuesta.codigoDeRechazo {
+            case "provider_not_configured":
+                mostrarAlerta(titulo: Textos.loginErrorTitle, mensaje: Textos.loginSocialNotConfigured)
+            // Ese correo ya tiene cuenta y no se puede vincular.
+            case "conflict":
+                mostrarAlerta(titulo: Textos.loginErrorTitle, mensaje: Textos.loginSocialAccountExists)
+            default:
+                mostrarAlertaDeError(respuesta, siNo: Textos.loginErrorTitle)
+            }
         }
     }
 
-    /// El permiso social venció antes de crear la cuenta (más de 30 minutos en el
-    /// alta). Se vuelve a pasar por el proveedor y, si sigue sin cuenta, se crea con
-    /// el permiso nuevo: el código del correo ya validado y la casilla del aviso
-    /// siguen valiendo, así que no se vuelve a pedir nada.
+    /// 2026-10-22: quien ya tenía cuenta con correo y contraseña y toca "Continuar
+    /// con Google/Apple" con el mismo correo puede vincular las dos. Si el
+    /// proveedor no es dueño del correo, primero se pide la contraseña de la
+    /// cuenta: si no, cualquiera con un Google armado con un correo ajeno entraría.
+    private func ofrecerVincular(_ proveedor: Proveedor, permiso: String, correo: String, pideClave: Bool) {
+        claveParaVincular = ""
+        let campo = pideClave
+            ? CampoDeAlerta(Textos.loginPasswordLabel,
+                            texto: Binding(get: { [weak self] in self?.claveParaVincular ?? "" },
+                                           set: { [weak self] in self?.claveParaVincular = $0 }),
+                            seguro: true, teclado: .clave, contenido: .claveActual)
+            : nil
+        alerta = ContenidoDeAlerta(
+            Textos.linkTitle(proveedor.nombre),
+            mensaje: pideClave ? Textos.linkBodyPassword(correo, proveedor.nombre)
+                               : Textos.linkBody(correo, proveedor.nombre),
+            campo: campo,
+            botones: [
+                BotonDeAlerta(Textos.linkConfirm) { [weak self] in
+                    Task { await self?.vincular(proveedor, permiso: permiso, correo: correo, pideClave: pideClave) }
+                },
+                BotonDeAlerta(Textos.commonNotNow, rol: .cancelar) { [weak self] in
+                    self?.claveParaVincular = ""
+                },
+            ])
+    }
+
+    /// "Vincular": `POST /auth/social/link`, y al Inicio. Desde ahí la cuenta entra
+    /// con la contraseña o con el proveedor.
+    func vincular(_ proveedor: Proveedor, permiso: String, correo: String, pideClave: Bool) async {
+        guard !enCurso else { return }
+        let clave = pideClave ? claveParaVincular : nil
+        claveParaVincular = ""
+        enCurso = true
+        conectandoCon = proveedor
+        let respuesta = await servicio.vincularProveedor(permiso: permiso, clave: clave)
+        enCurso = false
+        conectandoCon = nil
+        if case .ok = respuesta {
+            irAlHome()
+            return
+        }
+        errorVisible = TraductorDeErrores.texto(respuesta)
+        switch respuesta.codigoDeRechazo {
+        case "wrong_password", "invalid_credentials":
+            // "Intentar de nuevo" vuelve a pedir la contraseña con el mismo permiso.
+            alertaClaveIncorrecta { [weak self] in
+                self?.ofrecerVincular(proveedor, permiso: permiso, correo: correo, pideClave: pideClave)
+            }
+        case "invalid_link_token":
+            mostrarAlerta(titulo: Textos.errorExpiredTitle, mensaje: Textos.signupSocialExpired(proveedor.nombre))
+        default:
+            if !alertaDeCuenta(respuesta) {
+                mostrarAlertaDeError(respuesta, siNo: Textos.loginErrorTitle)
+            }
+        }
+    }
+
+    /// El permiso social venció (más de 30 minutos en el alta). Se vuelve a pasar
+    /// por el proveedor y, si sigue sin cuenta, se sigue con el permiso nuevo: el
+    /// código del correo ya validado y las casillas siguen valiendo, así que no se
+    /// vuelve a pedir nada. En "Antes de empezar" la cuenta se crea en el acto.
     func renovarPermisoSocial() async {
         guard let proveedor = proveedorDelAlta, !enCurso else { return }
         enCurso = true
@@ -585,9 +713,9 @@ final class FlujoEntrada: ObservableObject {
             conectandoCon = nil
             switch desenlace {
             case .sinConfigurar:
-                mostrarAlertaError(titulo: Textos.signupErrorTitle, mensaje: Textos.loginSocialNotConfigured)
+                mostrarAlerta(titulo: Textos.signupErrorTitle, mensaje: Textos.loginSocialNotConfigured)
             case .fallo:
-                mostrarAlertaError(titulo: Textos.signupErrorTitle, mensaje: Textos.loginSocialFailed)
+                mostrarAlerta(titulo: Textos.signupErrorTitle, mensaje: Textos.loginSocialFailed)
             case .cancelado, .ok:
                 break
             }
@@ -603,21 +731,22 @@ final class FlujoEntrada: ObservableObject {
             irAlHome()
         case .ok(.faltaElAlta(let alta)):
             permisoSocial = alta.signupToken
+            vencimientoSocialMs = alta.expiresAtMs
+            ofrecerRenovarSocial = false
             // Si el proveedor ahora no verifica el correo, el alta sin código no
             // sirve: tiene que haber un código validado (`tokenDeRegistro`).
             if alta.emailVerified != true && tokenDeRegistro == nil {
                 correoValidadoPorProveedor = false
-                ofrecerRenovarSocial = false
                 pantalla = .regCorreo
                 return
             }
-            ofrecerRenovarSocial = false
             ofrecerLogin = false
-            await crearCuenta()
+            if pantalla == .regAntesDeEmpezar { await crearCuenta() }
         default:
-            let texto = TraductorDeErrores.texto(respuesta)
-            errorVisible = texto
-            mostrarAlertaError(titulo: TraductorDeErrores.titulo(respuesta, siNo: Textos.signupErrorTitle), mensaje: texto)
+            errorVisible = TraductorDeErrores.texto(respuesta)
+            if !alertaDeCuenta(respuesta) {
+                mostrarAlertaDeError(respuesta, siNo: Textos.signupErrorTitle)
+            }
         }
     }
 
@@ -630,49 +759,78 @@ final class FlujoEntrada: ObservableObject {
         nuevos.correo = Self.limpio(permiso.email ?? credencial.correo ?? "")
         datos = nuevos
         permisoSocial = permiso.signupToken
+        vencimientoSocialMs = permiso.expiresAtMs
         proveedorDelAlta = proveedor
         correoValidadoPorProveedor = permiso.emailVerified == true && !(permiso.email ?? "").isEmpty
         ir(a: .regCorreo)
     }
 
     /// El primer paso de un alta con Google o Apple cuyo correo ya verificó el
-    /// proveedor: con nombre y apellido, derecho al aviso de salud. Sin código.
+    /// proveedor: con el nombre, derecho a "Antes de empezar". Sin código.
     func seguirConDatosDelProveedor() {
         guard correoValidadoPorProveedor, datos.identidadLista, !enCurso else { return }
-        ir(a: .regAviso)
+        guard !permisoSocialVencido else { alertaSocialVencida(); return }
+        ir(a: .regAntesDeEmpezar)
     }
 
-    // MARK: - Alta: correo, código, contraseña y aviso (pasos 1 a 4)
+    /// Si el permiso de Google/Apple ya venció, según el reloj del teléfono.
+    private var permisoSocialVencido: Bool {
+        guard permisoSocial != nil, let vence = vencimientoSocialMs else { return false }
+        return reloj() >= vence
+    }
+
+    /// "Pasó demasiado tiempo · Vuelve a continuar con Google", con el botón para
+    /// hacerlo. Con el permiso vencido no se puede validar, reenviar ni seguir.
+    private func alertaSocialVencida() {
+        guard let proveedor = proveedorDelAlta else { return }
+        ofrecerRenovarSocial = true
+        ofrecerLogin = false
+        alerta = ContenidoDeAlerta(
+            Textos.errorExpiredTitle, mensaje: Textos.signupSocialExpired(proveedor.nombre),
+            botones: [
+                BotonDeAlerta(Textos.signupSocialRetry(proveedor.nombre)) { [weak self] in
+                    Task { await self?.renovarPermisoSocial() }
+                },
+                BotonDeAlerta(Textos.commonCancel, rol: .cancelar),
+            ])
+    }
+
+    /// "Se venció el registro · Pasó demasiado tiempo. Empieza de nuevo." Con el
+    /// permiso del alta vencido no se puede hacer nada más que volver a "Crea tu
+    /// cuenta", con lo escrito.
+    private func alertaRegistroVencido() {
+        mostrarAlerta(titulo: Textos.errorInvalidRegistrationTokenTitle,
+                      mensaje: Textos.errorInvalidRegistrationToken) { [weak self] in
+            self?.volverAlPrincipioDelAlta()
+        }
+    }
+
+    // MARK: - Alta: crea tu cuenta, valida tu correo, antes de empezar (pasos 1 a 3)
 
     /// Paso 1, y también "Reenviar" del paso 2: `POST /auth/register`.
     func pedirCodigoDeRegistro() async {
         guard !enCurso else { return }
-        // Al tocar se juzga todo, y cada error va debajo de su campo.
         if pantalla == .regCorreo {
-            var errores: [CampoDelFormulario: String] = [:]
-            if !datos.identidadLista { errores[.nombre] = Textos.fieldNameRequired }
-            if proveedorDelAlta == nil {
-                if reglasDeClaveDeRegistroCumplidas < 3 {
-                    errores[.clave] = Textos.fieldPasswordRulesUnmet
-                } else if !claveSugeridaPorElSistema && !claveDeRegistroCoincide {
-                    errores[.claveRepetida] = Textos.fieldPasswordNoMatch
-                }
+            // El botón ya exige nombre, correo válido y las tres reglas: lo único
+            // que se juzga al tocar es que las dos contraseñas coincidan.
+            guard puedePedirCodigoDeRegistro else { return }
+            if proveedorDelAlta == nil, !claveSugeridaPorElSistema, !claveDeRegistroCoincide {
+                erroresDeCampo[.claveRepetida] = Textos.fieldPasswordNoMatch
+                return
             }
-            erroresDeCampo = errores
-            if !datos.correoValido { rechazarCorreo() }
-            guard errores.isEmpty, datos.correoValido else { return }
+            erroresDeCampo = [:]
         }
-        // La contraseña se elige en el mismo paso: sin una válida no se pide código.
-        guard proveedorDelAlta != nil || claveDeRegistroLista else { return }
-        // Volvió acá a corregir la contraseña (el servidor la rechazó al crear la
-        // cuenta): el código de ESTE correo ya se validó y el permiso sigue vivo.
-        // Pedir otro tiraría `code_resend_too_soon` y desmarcaría el aviso.
+        if permisoSocialVencido { alertaSocialVencida(); return }
+        if pantalla == .regCodigo, tokenDeRegistro != nil, permisoVencido { alertaRegistroVencido(); return }
+        // Volvió acá a corregir algo y el código de ESTE correo ya se validó con un
+        // permiso vivo: pedir otro tiraría `code_resend_too_soon` y desmarcaría
+        // las casillas.
         if pantalla == .regCorreo, tokenDeRegistro != nil, !permisoVencido,
            correoDelPermiso == Self.limpio(datos.correo).lowercased() {
-            ir(a: .regAviso)
+            ir(a: .regAntesDeEmpezar)
             return
         }
-        guard datos.correoValido else { rechazarCorreo(); return }
+        guard datos.correoValido else { return }
         let desde = pantalla
         enCurso = true
         errorVisible = nil
@@ -693,20 +851,43 @@ final class FlujoEntrada: ObservableObject {
             // persona cambió el correo, ese permiso era de otra dirección.
             tokenDeRegistro = nil
             datos.codigo = ""
-            pedidosDeCodigo += 1
+            codigoRecibido()
             if pantalla == .regCorreo { ir(a: .regCodigo) }
-        case .rechazado(let codigo, _) where codigo == "email_already_registered" && pantalla == .regCorreo:
-            erroresDeCampo[.correo] = Textos.fieldEmailInUse
+        case .rechazado(let codigo, _, _) where codigo == "email_already_registered":
+            let correo = datos.correo
+            alerta = ContenidoDeAlerta(
+                Textos.errorEmailAlreadyRegisteredTitle, mensaje: Textos.errorEmailAlreadyRegistered,
+                botones: [
+                    BotonDeAlerta(Textos.commonSignIn) { [weak self] in self?.irAlLogin(conCorreo: correo) },
+                    BotonDeAlerta(Textos.commonCancel, rol: .cancelar),
+                ])
         default:
-            let texto = TraductorDeErrores.texto(respuesta)
-            errorVisible = texto
-            mostrarAlertaError(titulo: TraductorDeErrores.titulo(respuesta, siNo: Textos.signupErrorTitle), mensaje: texto)
+            errorVisible = TraductorDeErrores.texto(respuesta)
+            if !alertaDeCodigo(respuesta, vencido: Textos.errorCodeExpired, alVolver: {}) {
+                mostrarAlertaDeError(respuesta, siNo: Textos.signupErrorTitle)
+            }
         }
+    }
+
+    /// Lo que habilita "Enviarme el código" (o "Continuar" con Google/Apple): el
+    /// nombre, un correo válido y, sin proveedor, la contraseña con sus tres
+    /// reglas. El apellido es opcional.
+    var puedePedirCodigoDeRegistro: Bool {
+        datos.identidadLista && datos.correoValido
+            && (proveedorDelAlta != nil || reglasDeClaveDeRegistroCumplidas == 3)
+    }
+
+    private func codigoRecibido() {
+        codigoAgotado = false
+        envioDelCodigo = Date()
+        pedidosDeCodigo += 1
     }
 
     /// Paso 2: `POST /auth/register/verify`, a cambio de un permiso de un solo uso.
     func verificarCodigoDeRegistro() async {
-        guard datos.codigoCompleto, !enCurso else { return }
+        guard datos.codigoCompleto, !enCurso, !codigoAgotado else { return }
+        if permisoSocialVencido { alertaSocialVencida(); return }
+        if tokenDeRegistro != nil, permisoVencido { alertaRegistroVencido(); return }
         enCurso = true
         errorVisible = nil
         let respuesta = await servicio.verificarCodigoDeRegistro(
@@ -721,20 +902,57 @@ final class FlujoEntrada: ObservableObject {
             // Un código que llega y se verifica es de una dirección SIN cuenta: lo
             // que dejó un intento cortado ya no aplica.
             altaSinDesenlace = false
-            // La contraseña ya se eligió con el correo: derecho al aviso.
-            ir(a: .regAviso)
+            ir(a: .regAntesDeEmpezar)
         default:
-            let texto = TraductorDeErrores.texto(respuesta)
-            errorVisible = texto
-            mostrarAlertaError(titulo: TraductorDeErrores.titulo(respuesta, siNo: Textos.signupErrorTitle), mensaje: texto)
+            errorVisible = TraductorDeErrores.texto(respuesta)
+            if !alertaDeCodigo(respuesta, vencido: Textos.errorCodeExpired,
+                               alVolver: { [weak self] in self?.volverAlPrincipioDelAlta() }) {
+                mostrarAlertaDeError(respuesta, siNo: Textos.signupErrorTitle)
+            }
         }
     }
 
-    /// Paso 3. No sale ningún pedido: la contraseña viaja con el paso 4, que es
-    /// el que crea la cuenta.
-    func seguirConLaClave() {
-        guard claveDeRegistroLista else { return }
-        ir(a: .regAviso)
+    /// Las alertas de un código equivocado, vencido o agotado, iguales en el alta
+    /// y en la recuperación. Con el código vencido o agotado "Reenviar" desaparece
+    /// y "Ok" vuelve al principio: ese código ya no sirve. `true` si la atendió.
+    private func alertaDeCodigo<Valor>(_ respuesta: Resultado<Valor>, vencido: String,
+                                       alVolver: @escaping () -> Void) -> Bool {
+        switch respuesta.codigoDeRechazo {
+        case "invalid_code":
+            alerta = ContenidoDeAlerta(Textos.errorInvalidCodeTitle, mensaje: Textos.errorInvalidCode,
+                                       botones: [BotonDeAlerta(Textos.commonTryAgain, rol: .cancelar)])
+            return true
+        case "code_expired":
+            codigoAgotado = true
+            mostrarAlerta(titulo: Textos.errorCodeExpiredTitle, mensaje: vencido, alAceptar: alVolver)
+            return true
+        case "code_attempts_exceeded":
+            codigoAgotado = true
+            mostrarAlerta(titulo: Textos.errorCodeAttemptsExceededTitle,
+                          mensaje: Textos.errorCodeAttemptsExceeded, alAceptar: alVolver)
+            return true
+        case "code_resend_too_soon":
+            mostrarAlerta(titulo: Textos.errorCodeResendTooSoonTitle, mensaje: Textos.errorCodeResendTooSoon)
+            return true
+        default:
+            return false
+        }
+    }
+
+    /// "Ok" de un código o un permiso que ya no sirve: de vuelta a "Crea tu
+    /// cuenta" con lo que se escribió —nombre, apellido, correo y contraseña—. Con
+    /// Google o Apple, el permiso social y el proveedor siguen.
+    func volverAlPrincipioDelAlta() {
+        guard !enCurso else { return }
+        tokenDeRegistro = nil
+        correoDelPermiso = nil
+        vencimientoDelPermisoMs = nil
+        datos.codigo = ""
+        codigoAgotado = false
+        ofrecerLogin = false
+        laCuentaYaExiste = false
+        errorVisible = nil
+        pantalla = .regCorreo
     }
 
     func cargarLegalesSiFaltan() async {
@@ -753,23 +971,38 @@ final class FlujoEntrada: ObservableObject {
             return
         }
         // Otra versión es otro texto: lo aceptado antes no vale para éste.
-        if textos.version != legales?.version { aceptoElAviso = false }
+        if let anterior = legales?.version, textos.version != anterior { aceptoElAviso = false }
         legales = textos
     }
 
-    /// Paso 4: `POST /auth/register/complete`. Acá nace la cuenta.
+    /// Lo que habilita "Crear mi cuenta": las dos casillas.
+    var puedeCrearCuenta: Bool { aceptoElAviso && aceptoElDescargo }
+
+    /// Paso 3: `POST /auth/register/complete`. Acá nace la cuenta.
     ///
-    /// `perfil` va vacío y el contrato lo permite: los once pasos de perfil lo
-    /// guardan después, de a uno (decisión 0008).
+    /// `perfil` lleva el nombre y la constancia del descargo médico; el resto lo
+    /// guardan los pasos de perfil después, de a uno (decisión 0008).
     func crearCuenta() async {
-        guard !enCurso, aceptoElAviso, let legales else { return }
+        guard !enCurso, puedeCrearCuenta else { return }
+        if permisoSocialVencido { alertaSocialVencida(); return }
         // Con Google/Apple y el correo ya verificado no hay permiso de código.
         let sinCodigo = permisoSocial != nil && correoValidadoPorProveedor
         guard sinCodigo || tokenDeRegistro != nil else {
             // No debería pasar: a este paso se llega con el permiso del código. Si
             // pasa, se vuelve al correo en vez de mandar un pedido que no puede andar.
-            errorVisible = nil
-            pantalla = .regCorreo
+            volverAlPrincipioDelAlta()
+            return
+        }
+        if !sinCodigo, permisoVencido { alertaRegistroVencido(); return }
+        // La versión de los textos es lo que queda como constancia: sin ella no
+        // se puede aceptar nada. La pantalla se ve sin señal; la cuenta, no.
+        if legales == nil {
+            enCurso = true
+            await cargarLegales()
+            enCurso = false
+        }
+        guard let legales else {
+            mostrarAlerta(titulo: Textos.errorOfflineTitle, mensaje: Textos.errorOffline)
             return
         }
         let token = tokenDeRegistro
@@ -777,11 +1010,12 @@ final class FlujoEntrada: ObservableObject {
         errorVisible = nil
         let aceptacion = AceptacionLegal(version: legales.version, accepted: true)
         // El nombre y el apellido ya se pidieron con el correo: viajan acá y no
-        // en un paso de perfil aparte.
+        // en un paso de perfil aparte. El descargo es la segunda casilla.
         let apellido = DatosRegistro.recortado(datos.apellido)
         let nombre = DatosRegistro.recortado(datos.nombre)
         let perfilInicial = PerfilEntrada(firstName: nombre.isEmpty ? nil : nombre,
-                                          lastName: apellido.isEmpty ? nil : apellido)
+                                          lastName: apellido.isEmpty ? nil : apellido,
+                                          medicalDisclaimerAccepted: true)
         let respuesta: Resultado<SesionAbierta>
         if let permisoSocial {
             respuesta = await servicio.completarRegistroSocial(
@@ -798,83 +1032,63 @@ final class FlujoEntrada: ObservableObject {
             // hace falta en memoria (§8). De acá no se vuelve al alta.
             tokenDeRegistro = nil
             permisoSocial = nil
+            vencimientoSocialMs = nil
             ofrecerRenovarSocial = false
             vencimientoDelPermisoMs = nil
             altaSinDesenlace = false
             claveDeRegistro = ""
             claveDeRegistroRepetida = ""
             ofrecerLogin = false
-            ofrecerEmpezarDeNuevo = false
             laCuentaYaExiste = false
             errorVisible = nil
             claveDeGuardado = nil
             historial.removeAll()
             pantalla = Pantalla.primerPasoDePerfil
-        case .rechazado(let codigo, _) where codigo == "legal_version_stale":
-            // El texto cambió mientras tanto. Se baja el nuevo y se lo muestra:
-            // reintentar con la versión vieja sería dar por aceptado algo que la
-            // persona no leyó.
+        case .rechazado(let codigo, _, _) where codigo == "legal_version_stale":
+            // El texto cambió mientras tanto. Se baja el nuevo y se desmarca la
+            // casilla: reintentar con la versión vieja sería dar por aceptado algo
+            // que la persona no leyó.
             aceptoElAviso = false
             await cargarLegales()
-            let texto = TraductorDeErrores.texto(respuesta)
-            errorVisible = texto
-            mostrarAlertaError(titulo: TraductorDeErrores.titulo(respuesta, siNo: Textos.signupErrorTitle), mensaje: texto)
-        case .rechazado(let codigo, _) where codigo == "weak_password":
-            // 🛑 La contraseña se escribió un paso antes y el servidor la rechaza
-            // recién ahora: la lista de conocidas no se puede anticipar mientras
-            // alguien tipea. El error va donde está el campo.
+            aceptoElAviso = false
+            mostrarAlerta(titulo: Textos.errorLegalVersionStaleTitle, mensaje: Textos.errorLegalVersionStale)
+        case .rechazado(let codigo, _, _) where codigo == "weak_password":
+            // Con la 1.6.0 no debería pasar: el botón ya exige las tres reglas.
             pantalla = .regCorreo
-            erroresDeCampo[.clave] = Textos.fieldPasswordWeak
-        case .rechazado(let codigo, _) where codigo == "invalid_signup_token":
+            mostrarAlertaDeError(respuesta, siNo: Textos.signupErrorTitle)
+        case .rechazado(let codigo, _, _) where codigo == "invalid_signup_token":
             // Pasaron más de 30 minutos desde "Continuar con Google / Apple". El
-            // código del correo NO se gastó (el servidor mira esto antes), pero hay
-            // que volver a entrar con el proveedor para tener un permiso nuevo.
-            errorVisible = Textos.signupSocialExpired
-            mostrarAlertaError(titulo: Textos.signupErrorTitle, mensaje: Textos.signupSocialExpired)
-            ofrecerRenovarSocial = true
-            ofrecerLogin = false
-            ofrecerEmpezarDeNuevo = false
-        case .rechazado(let codigo, _) where codigo == "invalid_registration_token":
+            // código del correo NO se gastó (el servidor mira esto antes).
+            alertaSocialVencida()
+        case .rechazado(let codigo, _, _) where codigo == "invalid_registration_token":
             if permisoVencido {
-                // Venció sin usarse: hace falta otro código. Si un intento anterior
-                // se cortó, la cuenta pudo crearse igual, y entrar queda como la otra
-                // salida.
-                let texto = TraductorDeErrores.texto(respuesta)
-                errorVisible = texto
-                mostrarAlertaError(titulo: TraductorDeErrores.titulo(respuesta, siNo: Textos.signupErrorTitle), mensaje: texto)
-                ofrecerEmpezarDeNuevo = true
-                ofrecerLogin = altaSinDesenlace
+                alertaRegistroVencido()
             } else {
                 // 🛑 Vigente y rechazado: el permiso ya se usó, así que la cuenta SÍ
                 // se creó y la respuesta no llegó. Volver al correo sería una trampa
-                // —`POST /auth/register` contesta 202 igual y el código no llega
-                // nunca—. La salida es entrar.
+                // —`POST /auth/register` contesta "ya registrado"—. La salida es entrar.
                 errorVisible = Textos.legalSignupAlreadyCreated
-                mostrarAlertaError(titulo: Textos.signupErrorTitle, mensaje: Textos.legalSignupAlreadyCreated)
+                mostrarAlerta(titulo: Textos.signupAccountExistsTitle, mensaje: Textos.legalSignupAlreadyCreated)
                 ofrecerLogin = true
-                ofrecerEmpezarDeNuevo = false
             }
-        case .rechazado(let codigo, _) where codigo == "conflict":
+        case .rechazado(let codigo, _, _) where codigo == "conflict":
             // Ya hay una cuenta con ese correo, y pedir otro código no la cambia.
             // No es el `conflict` de un guardado en curso: el texto es otro.
-            errorVisible = Textos.legalAccountExists
-            mostrarAlertaError(titulo: Textos.errorEmailAlreadyRegisteredTitle, mensaje: Textos.errorEmailAlreadyRegistered)
+            mostrarAlerta(titulo: Textos.errorEmailAlreadyRegisteredTitle,
+                          mensaje: Textos.errorEmailAlreadyRegistered)
             laCuentaYaExiste = true
             ofrecerLogin = true
-            ofrecerEmpezarDeNuevo = false
         case .sinRed, .respuestaRara:
             // No se sabe cómo terminó: la cuenta pudo crearse del otro lado sin que
             // la respuesta volviera. Reintentar con el mismo permiso sigue valiendo,
             // y entrar es la otra salida.
             altaSinDesenlace = true
-            let texto = TraductorDeErrores.texto(respuesta)
-            errorVisible = texto
-            mostrarAlertaError(titulo: TraductorDeErrores.titulo(respuesta, siNo: Textos.signupErrorTitle), mensaje: texto)
+            errorVisible = TraductorDeErrores.texto(respuesta)
+            mostrarAlertaDeError(respuesta, siNo: Textos.signupErrorTitle)
             ofrecerLogin = true
         default:
-            let texto = TraductorDeErrores.texto(respuesta)
-            errorVisible = texto
-            mostrarAlertaError(titulo: TraductorDeErrores.titulo(respuesta, siNo: Textos.signupErrorTitle), mensaje: texto)
+            errorVisible = TraductorDeErrores.texto(respuesta)
+            mostrarAlertaDeError(respuesta, siNo: Textos.signupErrorTitle)
         }
     }
 
@@ -885,36 +1099,24 @@ final class FlujoEntrada: ObservableObject {
         return reloj() >= vence
     }
 
-    /// "Empezar de nuevo desde el correo": el permiso venció y hace falta otro
-    /// código. El correo queda escrito; la contraseña y la casilla, no.
-    func empezarElAltaDeNuevo() {
-        guard !enCurso else { return }
-        let anteriores = datos
-        // El permiso social sigue valiendo aunque haya vencido el del correo.
-        let social = (permisoSocial, proveedorDelAlta, correoValidadoPorProveedor)
-        olvidarLaEntrada()
-        datos = DatosRegistro()
-        datos.correo = anteriores.correo
-        if social.1 != nil {
-            datos.nombre = anteriores.nombre
-            datos.apellido = anteriores.apellido
-            (permisoSocial, proveedorDelAlta, correoValidadoPorProveedor) = social
-        }
-        pantalla = .regCorreo
-    }
-
     func irAlLoginDesdeElAlta() {
-        loginCorreo = Self.limpio(datos.correo)
-        irAlLogin(aviso: nil)
+        irAlLogin(conCorreo: datos.correo)
     }
 
-    // MARK: - Perfil (pasos 5 a 15)
+    /// "Iniciar sesión" desde una alerta: el login con ese correo escrito.
+    private func irAlLogin(conCorreo correo: String) {
+        let limpio = Self.limpio(correo)
+        irAlLogin(aviso: nil)
+        loginCorreo = limpio
+    }
+
+    // MARK: - Perfil (pasos 4 a 11)
 
     /// Guarda lo de ESTE paso con `PATCH /me` y avanza.
     ///
-    /// Si el servidor dice que no, **no avanza**: el error queda a la vista y el
-    /// botón vuelve a estar disponible para reintentar con la misma clave. Quien no
-    /// pueda pasar de ahí tiene "Completar después".
+    /// Si el servidor dice que no, **no avanza**: la alerta lo dice y el botón
+    /// vuelve a estar disponible para reintentar con la misma clave. Quien no
+    /// pueda pasar de ahí tiene "Completar después" (desde Deporte).
     func guardarYSeguir() async {
         let actual = pantalla
         guard actual.esPasoDePerfil, !enCurso, datos.puedeSeguir(en: actual) else { return }
@@ -952,9 +1154,8 @@ final class FlujoEntrada: ObservableObject {
                 enCurso = false
                 guard case .ok(let recibidos) = guardadoDeObjetivos else {
                     if pantalla == actual {
-                        let texto = TraductorDeErrores.texto(guardadoDeObjetivos)
-                        errorVisible = texto
-                        mostrarAlertaError(titulo: TraductorDeErrores.titulo(guardadoDeObjetivos, siNo: Textos.signupErrorTitle), mensaje: texto)
+                        errorVisible = TraductorDeErrores.texto(guardadoDeObjetivos)
+                        mostrarAlertaDeError(guardadoDeObjetivos, siNo: Textos.signupErrorTitle)
                     }
                     return
                 }
@@ -963,16 +1164,15 @@ final class FlujoEntrada: ObservableObject {
             if claveDeGuardado == clave { claveDeGuardado = nil }
             // Si mientras viajaba la persona se fue a otro lado, no se la arrastra.
             if pantalla == actual { avanzar(desde: actual) }
-        case .rechazado(let codigo, _) where Self.codigosDeSesionMuerta.contains(codigo):
+        case .rechazado(let codigo, _, _) where Self.codigosDeSesionMuerta.contains(codigo):
             // El renovador ya intentó renovar y no pudo. Quedarse acá con el cartel
             // no tiene salida: se manda al login, que es lo único que reabre una
             // sesión. Se pierde lo que no se guardó, no lo anterior.
             irAlLogin(aviso: TraductorDeErrores.texto(respuesta))
         default:
             if pantalla == actual {
-                let texto = TraductorDeErrores.texto(respuesta)
-                errorVisible = texto
-                mostrarAlertaError(titulo: TraductorDeErrores.titulo(respuesta, siNo: Textos.signupErrorTitle), mensaje: texto)
+                errorVisible = TraductorDeErrores.texto(respuesta)
+                mostrarAlertaDeError(respuesta, siNo: Textos.signupErrorTitle)
             }
         }
     }
@@ -987,7 +1187,10 @@ final class FlujoEntrada: ObservableObject {
         irAlHome()
     }
 
+    /// El último paso —"Tu apto físico"— terminó, con el apto guardado o con "Lo
+    /// subo después". Derecho al Inicio, sin pantalla final.
     func terminarRegistro() {
+        guard !enCurso else { return }
         irAlHome()
     }
 
@@ -1021,15 +1224,13 @@ final class FlujoEntrada: ObservableObject {
         ir(a: .claveCorreo)
     }
 
-    /// `POST /auth/password/forgot`. Contesta 202 exista o no la cuenta: la
-    /// pantalla no puede prometer que el mensaje llegó.
+    /// `POST /auth/password/forgot`. Desde la 1.4.0 dice si el correo no tiene
+    /// cuenta (`user_not_found`).
     func pedirCodigoDeClave() async {
-        guard !enCurso else { return }
-        guard DatosRegistro.pareceCorreo(recuperacionCorreo) else { rechazarCorreo(); return }
+        guard !enCurso, DatosRegistro.pareceCorreo(recuperacionCorreo) else { return }
         let desde = pantalla
         enCurso = true
         errorVisible = nil
-        erroresDeCampo = [:]
         let respuesta = await servicio.pedirCodigoDeClave(correo: Self.limpio(recuperacionCorreo))
         enCurso = false
         guard pantalla == desde else { return }
@@ -1037,19 +1238,20 @@ final class FlujoEntrada: ObservableObject {
         case .ok:
             tokenDeReseteo = nil
             recuperacionCodigo = ""
-            pedidosDeCodigo += 1
+            codigoRecibido()
             if pantalla == .claveCorreo { ir(a: .claveCodigo) }
-        case .rechazado(let codigo, _) where codigo == "user_not_found":
-            erroresDeCampo[.correo] = Textos.fieldEmailNotFound
+        case .rechazado(let codigo, _, _) where codigo == "user_not_found":
+            alertaUsuarioInexistente(correo: recuperacionCorreo)
         default:
-            let texto = TraductorDeErrores.texto(respuesta)
-            errorVisible = texto
-            mostrarAlertaError(titulo: TraductorDeErrores.titulo(respuesta, siNo: Textos.passwordResetErrorTitle), mensaje: texto)
+            errorVisible = TraductorDeErrores.texto(respuesta)
+            if !alertaDeCodigo(respuesta, vencido: Textos.errorCodeExpiredReset, alVolver: {}) {
+                mostrarAlertaDeError(respuesta, siNo: Textos.passwordResetErrorTitle)
+            }
         }
     }
 
     func verificarCodigoDeClave() async {
-        guard recuperacionCodigo.count == CampoCodigo.largo, !enCurso else { return }
+        guard recuperacionCodigo.count == CampoCodigo.largo, !enCurso, !codigoAgotado else { return }
         enCurso = true
         errorVisible = nil
         let respuesta = await servicio.verificarCodigoDeClave(
@@ -1063,30 +1265,43 @@ final class FlujoEntrada: ObservableObject {
             claveNuevaRepetida = ""
             ir(a: .claveNueva)
         default:
-            let texto = TraductorDeErrores.texto(respuesta)
-            errorVisible = texto
-            mostrarAlertaError(titulo: TraductorDeErrores.titulo(respuesta, siNo: Textos.passwordResetErrorTitle), mensaje: texto)
+            errorVisible = TraductorDeErrores.texto(respuesta)
+            if !alertaDeCodigo(respuesta, vencido: Textos.errorCodeExpiredReset,
+                               alVolver: { [weak self] in self?.volverAlPrincipioDeLaRecuperacion() }) {
+                mostrarAlertaDeError(respuesta, siNo: Textos.passwordResetErrorTitle)
+            }
         }
     }
 
-    /// `POST /auth/password/reset`. 🛑 Cambiar la contraseña revoca las demás
-    /// sesiones y el servidor devuelve una nueva: se usa para entrar derecho, en
-    /// vez de pedirle a alguien que tipee la contraseña que acaba de elegir.
-    func guardarClaveNueva() async {
+    /// De vuelta a "Recuperar tu contraseña", con el correo escrito.
+    func volverAlPrincipioDeLaRecuperacion() {
         guard !enCurso else { return }
-        // Se juzga al tocar, y el error va debajo del campo que falló.
-        if reglasDeClaveNuevaCumplidas < 3 {
-            erroresDeCampo = [.clave: Textos.fieldPasswordRulesUnmet]; return
-        }
-        if !claveNuevaCoincide {
-            erroresDeCampo = [.claveRepetida: Textos.fieldPasswordNoMatch]; return
+        tokenDeReseteo = nil
+        recuperacionCodigo = ""
+        claveNueva = ""
+        claveNuevaRepetida = ""
+        codigoAgotado = false
+        errorVisible = nil
+        historial = [.bienvenida, .login]
+        pantalla = .claveCorreo
+    }
+
+    /// Lo que habilita "Guardar contraseña": las tres reglas.
+    var puedeGuardarClaveNueva: Bool { reglasDeClaveNuevaCumplidas == 3 }
+
+    /// `POST /auth/password/reset`. El servidor devuelve una sesión nueva, que se
+    /// usa para entrar derecho. 🛑 Desde la 1.6.0 NO cierra las otras sesiones: se
+    /// le pregunta a la persona, y las dos respuestas llevan al Inicio.
+    func guardarClaveNueva() async {
+        guard !enCurso, puedeGuardarClaveNueva else { return }
+        if !claveNuevaSugeridaPorElSistema && !claveNuevaCoincide {
+            erroresDeCampo = [.claveRepetida: Textos.fieldPasswordNoMatch]
+            return
         }
         erroresDeCampo = [:]
-        guard claveNuevaLista else { return }
         guard let token = tokenDeReseteo else {
-            // Sin permiso no hay pedido posible: se vuelve a pedir el código.
-            errorVisible = nil
-            pantalla = .claveCorreo
+            // Sin permiso no hay pedido posible.
+            alertaReseteoVencido()
             return
         }
         enCurso = true
@@ -1098,21 +1313,41 @@ final class FlujoEntrada: ObservableObject {
             tokenDeReseteo = nil
             claveNueva = ""
             claveNuevaRepetida = ""
-            historial.removeAll()
-            pantalla = .claveLista
-        case .rechazado(let codigo, _) where codigo == "weak_password":
-            if pantalla == .claveNueva { erroresDeCampo[.clave] = Textos.fieldPasswordWeak }
+            preguntarPorLasOtrasSesiones()
+        case .rechazado(let codigo, _, _) where codigo == "invalid_reset_token":
+            alertaReseteoVencido()
         default:
-            if pantalla == .claveNueva {
-                let texto = TraductorDeErrores.texto(respuesta)
-                errorVisible = texto
-                mostrarAlertaError(titulo: TraductorDeErrores.titulo(respuesta, siNo: Textos.passwordResetErrorTitle), mensaje: texto)
+            errorVisible = TraductorDeErrores.texto(respuesta)
+            // La contraseña ya cambió, pero la cuenta está desactivada o por
+            // borrarse: se ofrece volver a ella como en el login.
+            if !alertaDeCuenta(respuesta), pantalla == .claveNueva {
+                mostrarAlertaDeError(respuesta, siNo: Textos.passwordResetErrorTitle)
             }
         }
     }
 
-    func entrarConLaClaveNueva() {
-        irAlHome()
+    private func alertaReseteoVencido() {
+        mostrarAlerta(titulo: Textos.errorExpiredTitle, mensaje: Textos.errorInvalidResetToken) { [weak self] in
+            self?.volverAlPrincipioDeLaRecuperacion()
+        }
+    }
+
+    private func preguntarPorLasOtrasSesiones() {
+        alerta = ContenidoDeAlerta(
+            Textos.passwordResetOtherSessionsTitle, mensaje: Textos.passwordResetOtherSessionsBody,
+            botones: [
+                BotonDeAlerta(Textos.passwordResetOtherSessionsClose) { [weak self] in
+                    guard let self else { return }
+                    // Se entra igual: si el pedido falla, la contraseña ya cambió y
+                    // las otras sesiones se pueden cerrar desde otro teléfono.
+                    let servicio = self.servicio
+                    Task { _ = await servicio.cerrarOtrasSesiones() }
+                    self.irAlHome()
+                },
+                BotonDeAlerta(Textos.passwordResetOtherSessionsKeep, rol: .cancelar) { [weak self] in
+                    self?.irAlHome()
+                },
+            ])
     }
 
     // MARK: - Sesión
@@ -1162,6 +1397,9 @@ final class FlujoEntrada: ObservableObject {
         await servicio.cerrarSesion()
         perfil = nil
         sincronizador.cerrarSesion()
+        // Los avisos programados son de esta cuenta: con la sesión cerrada (o la
+        // cuenta desactivada o por borrarse) no tiene que llegar ninguno.
+        NotificadorDeEntrenamiento.limpiarRecordatorios()
         irALaBienvenida()
     }
 
@@ -1170,17 +1408,17 @@ final class FlujoEntrada: ObservableObject {
     var cuentaConContrasena: Bool { perfil?.hasPassword ?? true }
 
     /// `POST /me/delete` (App Store 5.1.1(v): borrar la cuenta desde la app).
-    /// Si sale bien se cierra la sesión, se vuelve a la bienvenida y se avisa.
-    /// La contraseña incorrecta vuelve como `false` para mostrarla debajo del campo.
+    /// Desde la 1.6.0 la cuenta se borra a los 30 días: hasta entonces se recupera
+    /// iniciando sesión. Si sale bien se cierra la sesión, se vuelve a la
+    /// bienvenida y se avisa.
     func borrarCuenta(clave: String?) async -> ResultadoDeBorrarCuenta {
         let respuesta = await servicio.borrarCuenta(clave: cuentaConContrasena ? clave : nil)
         switch respuesta {
         case .ok:
             await cerrarSesion()
-            mostrarAlertaError(titulo: Textos.settingsDeleteAccountDoneTitle,
-                               mensaje: Textos.settingsDeleteAccountDoneBody)
+            mostrarAlerta(titulo: Textos.accountPendingDeletionTitle, mensaje: Textos.accountPendingDeletionDone)
             return .borrada
-        case .rechazado(let codigo, _) where codigo == "invalid_credentials":
+        case .rechazado(let codigo, _, _) where codigo == "invalid_credentials" || codigo == "wrong_password":
             return .claveIncorrecta
         default:
             return .fallo(TraductorDeErrores.texto(respuesta))
@@ -1189,6 +1427,17 @@ final class FlujoEntrada: ObservableObject {
 
     enum ResultadoDeBorrarCuenta: Equatable {
         case borrada, claveIncorrecta, fallo(String)
+    }
+
+    /// `POST /me/deactivate`. Los datos quedan; se cierra la sesión, se vuelve a
+    /// la bienvenida y se avisa cómo volver. `nil` si salió bien; si no, el texto
+    /// del error.
+    func desactivarCuenta() async -> String? {
+        let respuesta = await servicio.desactivarCuenta()
+        guard case .ok = respuesta else { return TraductorDeErrores.texto(respuesta) }
+        await cerrarSesion()
+        mostrarAlerta(titulo: Textos.accountDeactivatedTitle, mensaje: Textos.accountDeactivatedDone)
+        return nil
     }
 
     /// `GET /me`. Si no hay sesión o no hay red, el Home sigue con lo que tiene: un
@@ -1223,7 +1472,7 @@ final class FlujoEntrada: ObservableObject {
         switch respuesta {
         case .ok(let guardado):
             perfil = guardado
-        case .rechazado(let codigo, _) where Self.codigosDeSesionMuerta.contains(codigo):
+        case .rechazado(let codigo, _, _) where Self.codigosDeSesionMuerta.contains(codigo):
             // Igual que en el alta: sin sesión, reintentar no tiene salida.
             irAlLogin(aviso: TraductorDeErrores.texto(respuesta))
         default:
@@ -1318,8 +1567,8 @@ final class FlujoEntrada: ObservableObject {
     }
 
     /// 🛑 Todo lo que alguien tipeó o recibió para ENTRAR —contraseñas, códigos, el
-    /// correo de la recuperación, los permisos, la casilla del aviso— y las salidas
-    /// que ofrecía la pantalla. Es UNA sola función a propósito: con una lista por
+    /// correo de la recuperación, los permisos, las casillas— y las salidas que
+    /// ofrecía la pantalla. Es UNA sola función a propósito: con una lista por
     /// destino, cada destino se olvidaba de un campo distinto, y lo que tipeó una
     /// persona quedaba en memoria para la siguiente.
     ///
@@ -1330,6 +1579,7 @@ final class FlujoEntrada: ObservableObject {
         correoDelPermiso = nil
         tokenDeReseteo = nil
         permisoSocial = nil
+        vencimientoSocialMs = nil
         proveedorDelAlta = nil
         ofrecerRenovarSocial = false
         correoValidadoPorProveedor = false
@@ -1343,11 +1593,14 @@ final class FlujoEntrada: ObservableObject {
         claveNuevaRepetida = ""
         claveDeRegistro = ""
         claveDeRegistroRepetida = ""
+        claveParaVincular = ""
         aceptoElAviso = false
+        aceptoElDescargo = false
         errorVisible = nil
         ofrecerLogin = false
-        ofrecerEmpezarDeNuevo = false
         laCuentaYaExiste = false
+        codigoAgotado = false
+        envioDelCodigo = nil
         vencimientoDelPermisoMs = nil
         altaSinDesenlace = false
         retomandoPerfil = false
@@ -1375,6 +1628,13 @@ final class FlujoEntrada: ObservableObject {
         avisoDelLogin = nil
         historial.removeAll()
         pantalla = .bienvenida
+    }
+
+    /// La alerta de un error que no tiene una propia: el título de su código (o
+    /// `siNo`) y su texto. Sin conexión es "Revisa tu conexión y prueba de nuevo."
+    private func mostrarAlertaDeError<Valor>(_ respuesta: Resultado<Valor>, siNo titulo: String) {
+        mostrarAlerta(titulo: TraductorDeErrores.titulo(respuesta, siNo: titulo),
+                      mensaje: TraductorDeErrores.texto(respuesta))
     }
 
     // MARK: - Reglas de la contraseña
@@ -1426,17 +1686,10 @@ final class FlujoEntrada: ObservableObject {
         reglasDeClaveDeRegistroCumplidas == 3 && claveDeRegistroCoincide
     }
 
-    /// Con algo escrito en los dos campos se puede tocar "Ingresar". Si el correo
-    /// no parece uno, lo dice el toque (`correoRechazado`), no un botón apagado.
+    /// "Ingresar" se habilita con un correo válido y una contraseña escrita
+    /// (2026-10-22: el "no parece un correo" debajo del campo ya no existe).
     var loginListo: Bool {
-        !loginCorreo.isEmpty && !loginClave.isEmpty
-    }
-
-    /// El toque con algo que no parece un correo: no viaja nada, y el error de un
-    /// intento anterior no queda pegado al de ahora.
-    private func rechazarCorreo() {
-        errorVisible = nil
-        correoRechazado = true
+        DatosRegistro.pareceCorreo(loginCorreo) && !loginClave.isEmpty
     }
 
     // MARK: - El correo que se muestra en las pantallas de código
@@ -1451,4 +1704,9 @@ final class FlujoEntrada: ObservableObject {
     static func limpio(_ texto: String) -> String {
         texto.trimmingCharacters(in: .whitespacesAndNewlines)
     }
+}
+
+extension Proveedor {
+    /// El nombre de la marca, igual en todos los idiomas.
+    var nombre: String { self == .google ? "Google" : "Apple" }
 }

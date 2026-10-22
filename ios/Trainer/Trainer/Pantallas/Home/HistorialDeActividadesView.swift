@@ -149,7 +149,7 @@ struct HistorialDeActividadesView: View {
             }
             // Vacío y sin cargar ya tiene sus propios botones (reintentar, empezar).
             if hayMas, !actividades.isEmpty || cargando {
-                BotonTonal(cargando ? Textos.historyLoading : Textos.historyLoadMore) {
+                BotonTonal(Textos.historyLoadMore, cargando: cargando) {
                     Task { await cargar() }
                 }
                 .disabled(cargando)
@@ -397,11 +397,7 @@ struct DetalleDeActividadView: View {
                 inicioMs: actividad.startedAtMs
             )
         } else if cargando {
-            HStack(spacing: TokensEspaciado.e8) {
-                ProgressView().tint(Paleta.acento)
-                Text(Textos.historyLoading)
-                    .estilo(.cuerpoSecundario, color: Paleta.textoSecundario)
-            }
+            ProgressView().tint(Paleta.acento)
             .frame(maxWidth: .infinity)
             .frame(height: TokensEspaciado.e40 * 3)
             .resumenTarjeta()

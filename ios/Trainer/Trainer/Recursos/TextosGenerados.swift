@@ -9,7 +9,7 @@
 // números y unidades se formatean con el locale del sistema. Esto resuelve lo
 // primero; lo segundo es de quien presenta el dato.
 //
-// 888 claves · idioma de autoría: en
+// 846 claves · idioma de autoría: en
 // =============================================================================
 
 import Foundation
@@ -17,6 +17,32 @@ import Foundation
 /// Los textos. Una propiedad por clave del catálogo: un typo en una
 /// clave deja de ser un bug de producción y pasa a ser un error de compilación.
 enum Textos {
+
+    /// Your data is still saved. If you reactivate it, everything will be just as you left it.
+    static var accountDeactivatedBody: String { String(localized: "account.deactivated.body") }
+
+    /// Whenever you want to come back, sign in.
+    static var accountDeactivatedDone: String { String(localized: "account.deactivated.done") }
+
+    /// Your account is deactivated
+    static var accountDeactivatedTitle: String { String(localized: "account.deactivated.title") }
+
+    /// You asked to delete it, and in %lld days it'll be gone for good. If you recover it, you lose nothing.
+    static func accountPendingDeletionBody(_ arg1: Int) -> String {
+        String(format: String(localized: "account.pending_deletion.body"), arg1)
+    }
+
+    /// If you change your mind, sign in within 30 days.
+    static var accountPendingDeletionDone: String { String(localized: "account.pending_deletion.done") }
+
+    /// Your account is going to be deleted
+    static var accountPendingDeletionTitle: String { String(localized: "account.pending_deletion.title") }
+
+    /// Reactivate
+    static var accountReactivate: String { String(localized: "account.reactivate") }
+
+    /// Recover
+    static var accountRecover: String { String(localized: "account.recover") }
 
     /// Gym · upper body and core
     static var agendaGym: String { String(localized: "agenda.gym") }
@@ -109,9 +135,6 @@ enum Textos {
     /// Cancel
     static var commonCancel: String { String(localized: "common.cancel") }
 
-    /// Change email
-    static var commonChangeEmail: String { String(localized: "common.change_email") }
-
     /// Close
     static var commonClose: String { String(localized: "common.close") }
 
@@ -129,6 +152,9 @@ enum Textos {
 
     /// Continue
     static var commonContinueNext: String { String(localized: "common.continue_next") }
+
+    /// Create account
+    static var commonCreateAccount: String { String(localized: "common.create_account") }
 
     /// day
     static var commonDay: String { String(localized: "common.day") }
@@ -163,6 +189,9 @@ enum Textos {
     /// Event date
     static var commonEventDate: String { String(localized: "common.event_date") }
 
+    /// Google or Apple
+    static var commonGoogleOrApple: String { String(localized: "common.google_or_apple") }
+
     /// Got it
     static var commonGotIt: String { String(localized: "common.got_it") }
 
@@ -180,6 +209,9 @@ enum Textos {
 
     /// Next
     static var commonNext: String { String(localized: "common.next") }
+
+    /// Not now
+    static var commonNotNow: String { String(localized: "common.not_now") }
 
     /// Not set
     static var commonNotSet: String { String(localized: "common.not_set") }
@@ -222,6 +254,9 @@ enum Textos {
     /// Save
     static var commonSave: String { String(localized: "common.save") }
 
+    /// Sign in
+    static var commonSignIn: String { String(localized: "common.sign_in") }
+
     /// Registration progress
     static var commonSignupProgress: String { String(localized: "common.signup_progress") }
 
@@ -255,6 +290,9 @@ enum Textos {
     /// today
     static var commonTodayLowercase: String { String(localized: "common.today_lowercase") }
 
+    /// Try again
+    static var commonTryAgain: String { String(localized: "common.try_again") }
+
     /// Use
     static var commonUse: String { String(localized: "common.use") }
 
@@ -264,19 +302,31 @@ enum Textos {
     /// weeks
     static var commonWeeks: String { String(localized: "common.weeks") }
 
+    /// Workout button
+    static var commonWorkoutButton: String { String(localized: "common.workout_button") }
+
     /// Yesterday
     static var commonYesterday: String { String(localized: "common.yesterday") }
 
     /// That request isn't the shape the server expects. That's a bug, not you.
     static var errorBadRequest: String { String(localized: "error.bad_request") }
 
-    /// More than 15 minutes went by or there were too many attempts. Ask for a new one with “Resend”.
+    /// For your security, this code no longer works. Start again.
+    static var errorCodeAttemptsExceeded: String { String(localized: "error.code_attempts_exceeded") }
+
+    /// Too many attempts
+    static var errorCodeAttemptsExceededTitle: String { String(localized: "error.code_attempts_exceeded.title") }
+
+    /// 15 minutes went by. Start again.
     static var errorCodeExpired: String { String(localized: "error.code_expired") }
+
+    /// 15 minutes went by. Ask for a new one from the start.
+    static var errorCodeExpiredReset: String { String(localized: "error.code_expired.reset") }
 
     /// The code expired
     static var errorCodeExpiredTitle: String { String(localized: "error.code_expired.title") }
 
-    /// We just sent one. Wait a moment before asking for another.
+    /// We already sent you a code. Wait a minute to ask for another one.
     static var errorCodeResendTooSoon: String { String(localized: "error.code_resend_too_soon") }
 
     /// Wait a moment
@@ -285,16 +335,19 @@ enum Textos {
     /// The previous save is still going through. Try again in a moment.
     static var errorConflict: String { String(localized: "error.conflict") }
 
-    /// That email is already registered. Sign in with your password, or reset it if you forgot it.
+    /// That email is already registered.
     static var errorEmailAlreadyRegistered: String { String(localized: "error.email_already_registered") }
 
     /// You already have an account
     static var errorEmailAlreadyRegisteredTitle: String { String(localized: "error.email_already_registered.title") }
 
+    /// Too much time went by
+    static var errorExpiredTitle: String { String(localized: "error.expired.title") }
+
     /// Something broke on the server. Not your fault.
     static var errorInternal: String { String(localized: "error.internal") }
 
-    /// Check the code we emailed you: it has 6 letters and numbers.
+    /// Check it and try again.
     static var errorInvalidCode: String { String(localized: "error.invalid_code") }
 
     /// The code isn't correct
@@ -309,32 +362,42 @@ enum Textos {
     /// Your session expired. Sign in again.
     static var errorInvalidRefreshToken: String { String(localized: "error.invalid_refresh_token") }
 
-    /// The sign-up expired. Start again from the email.
+    /// Too much time went by. Start again.
     static var errorInvalidRegistrationToken: String { String(localized: "error.invalid_registration_token") }
 
-    /// The password reset expired. Start again from your email.
+    /// Your sign-up expired
+    static var errorInvalidRegistrationTokenTitle: String { String(localized: "error.invalid_registration_token.title") }
+
+    /// Start again from the email step.
     static var errorInvalidResetToken: String { String(localized: "error.invalid_reset_token") }
 
     /// You have to accept the health notice to create an account.
     static var errorLegalNotAccepted: String { String(localized: "error.legal_not_accepted") }
 
-    /// The notice changed while you were signing up. Please read it again.
+    /// Read them again to continue.
     static var errorLegalVersionStale: String { String(localized: "error.legal_version_stale") }
+
+    /// The texts changed
+    static var errorLegalVersionStaleTitle: String { String(localized: "error.legal_version_stale.title") }
 
     /// That address doesn't exist on the server.
     static var errorNotFound: String { String(localized: "error.not_found") }
 
-    /// No connection. What you typed is saved — try again when it's back.
+    /// Check your connection and try again.
     static var errorOffline: String { String(localized: "error.offline") }
 
     /// No connection
     static var errorOfflineTitle: String { String(localized: "error.offline.title") }
 
-    /// You created it with Google or Apple, so it has no password. Use that button, or set a password from “Forgot yo
-    static var errorPasswordNotSet: String { String(localized: "error.password_not_set") }
+    /// You created it with %1$@, so it has no password. Use “Continue with %1$@” or choose a password from “Forgot yo
+    static func errorPasswordNotSet(_ arg1: String) -> String {
+        String(format: String(localized: "error.password_not_set"), arg1)
+    }
 
-    /// This account signs in with Google or Apple
-    static var errorPasswordNotSetTitle: String { String(localized: "error.password_not_set.title") }
+    /// This account signs in with %@
+    static func errorPasswordNotSetTitle(_ arg1: String) -> String {
+        String(format: String(localized: "error.password_not_set.title"), arg1)
+    }
 
     /// A profile detail is missing before we can build the plan.
     static var errorProfileIncomplete: String { String(localized: "error.profile_incomplete") }
@@ -354,6 +417,12 @@ enum Textos {
     /// The session was closed elsewhere. Sign in again.
     static var errorSessionRevoked: String { String(localized: "error.session_revoked") }
 
+    /// For your security, we've blocked sign-in with this email for 15 minutes.
+    static var errorTooManyAttempts: String { String(localized: "error.too_many_attempts") }
+
+    /// Too many attempts
+    static var errorTooManyAttemptsTitle: String { String(localized: "error.too_many_attempts.title") }
+
     /// Your session expired. Sign in again.
     static var errorUnauthorized: String { String(localized: "error.unauthorized") }
 
@@ -365,22 +434,22 @@ enum Textos {
         String(format: String(localized: "error.unknown_code"), arg1)
     }
 
-    /// There is no account with that email. Check the spelling or create a new account.
+    /// There's no account with that email.
     static var errorUserNotFound: String { String(localized: "error.user_not_found") }
 
     /// That account doesn't exist
     static var errorUserNotFoundTitle: String { String(localized: "error.user_not_found.title") }
 
-    /// That password is easy to guess. Try a longer or less common one.
+    /// It needs at least 10 characters, an uppercase letter and a number.
     static var errorWeakPassword: String { String(localized: "error.weak_password") }
 
-    /// That password is too easy
+    /// The password doesn't meet the requirements
     static var errorWeakPasswordTitle: String { String(localized: "error.weak_password.title") }
 
-    /// That's not the password for this account. Try again or tap “Forgot your password?”.
+    /// The password you entered is incorrect.
     static var errorWrongPassword: String { String(localized: "error.wrong_password") }
 
-    /// The password doesn't match
+    /// Incorrect password
     static var errorWrongPasswordTitle: String { String(localized: "error.wrong_password.title") }
 
     /// Movement pattern
@@ -406,29 +475,8 @@ enum Textos {
     /// Use this exercise
     static var exerciseUse: String { String(localized: "exercise.use") }
 
-    /// That email is already in use. Sign in with it or reset the password.
-    static var fieldEmailInUse: String { String(localized: "field.email.in_use") }
-
-    /// There's no account with that email.
-    static var fieldEmailNotFound: String { String(localized: "field.email.not_found") }
-
-    /// Enter your first name.
-    static var fieldNameRequired: String { String(localized: "field.name.required") }
-
     /// The passwords don't match.
     static var fieldPasswordNoMatch: String { String(localized: "field.password.no_match") }
-
-    /// This account signs in with Google or Apple. Use that button or set a password from “Forgot your password?”.
-    static var fieldPasswordNotSet: String { String(localized: "field.password.not_set") }
-
-    /// The password doesn't meet the requirements above.
-    static var fieldPasswordRulesUnmet: String { String(localized: "field.password.rules_unmet") }
-
-    /// It's easy to guess. Try a longer or less common one.
-    static var fieldPasswordWeak: String { String(localized: "field.password.weak") }
-
-    /// The password is incorrect.
-    static var fieldPasswordWrong: String { String(localized: "field.password.wrong") }
 
     /// Build my %@ plan
     static func goalsBuildMyPlan(_ arg1: String) -> String {
@@ -649,8 +697,10 @@ enum Textos {
     /// sets completed · 45 min estimated
     static var gymSetsCompleted: String { String(localized: "gym.sets_completed") }
 
-    /// Thu Aug 28 · upper body and core
-    static var gymSubtitle: String { String(localized: "gym.subtitle") }
+    /// %@ · upper body and core
+    static func gymSubtitle(_ arg1: String) -> String {
+        String(format: String(localized: "gym.subtitle"), arg1)
+    }
 
     /// All your workouts
     static var historyAllWorkouts: String { String(localized: "history.all_workouts") }
@@ -658,8 +708,10 @@ enum Textos {
     /// Close
     static var historyClose: String { String(localized: "history.close") }
 
-    /// Tap ⚡ to start your first one. When you finish, it shows up here with its map, splits and pauses.
-    static var historyEmptyBody: String { String(localized: "history.empty.body") }
+    /// Tap %@ to start your first one. When you finish, it shows up here with its map, splits and pauses.
+    static func historyEmptyBody(_ arg1: String) -> String {
+        String(format: String(localized: "history.empty.body"), arg1)
+    }
 
     /// Start my first workout
     static var historyEmptyStartFirst: String { String(localized: "history.empty.start_first") }
@@ -672,9 +724,6 @@ enum Textos {
 
     /// Load more
     static var historyLoadMore: String { String(localized: "history.load_more") }
-
-    /// Loading…
-    static var historyLoading: String { String(localized: "history.loading") }
 
     /// This activity has no saved GPS route.
     static var historyNoRoute: String { String(localized: "history.no_route") }
@@ -737,14 +786,20 @@ enum Textos {
     /// Choose your next race and we'll build your plan week by week.
     static var homeChooseNextRace: String { String(localized: "home.choose_next_race") }
 
+    /// A few details are missing to build your plan.
+    static var homeCompleteProfileBody: String { String(localized: "home.complete_profile.body") }
+
+    /// Complete profile
+    static var homeCompleteProfileButton: String { String(localized: "home.complete_profile.button") }
+
+    /// Complete your profile
+    static var homeCompleteProfileTitle: String { String(localized: "home.complete_profile.title") }
+
     /// Nothing to show here yet.
     static var homeDataEmpty: String { String(localized: "home.data.empty") }
 
     /// We couldn't get this from the server. Try again in a while.
     static var homeDataError: String { String(localized: "home.data.error") }
-
-    /// Getting the latest…
-    static var homeDataLoading: String { String(localized: "home.data.loading") }
 
     /// You're offline, and there's nothing saved on this phone to show yet. It loads by itself once you're back onlin
     static var homeDataOffline: String { String(localized: "home.data.offline") }
@@ -882,12 +937,6 @@ enum Textos {
     /// Get ready
     static var homePrepareWorkout: String { String(localized: "home.prepare_workout") }
 
-    /// Your profile is missing details your plan uses.
-    static var homeProfileIncompleteBody: String { String(localized: "home.profile_incomplete.body") }
-
-    /// Complete profile
-    static var homeProfileIncompleteButton: String { String(localized: "home.profile_incomplete.button") }
-
     /// Back to workout
     static var homeShortcutsBackToWorkout: String { String(localized: "home.shortcuts.back_to_workout") }
 
@@ -981,9 +1030,6 @@ enum Textos {
     /// Explains what intensity zones are
     static var homeZonesHint: String { String(localized: "home.zones.hint") }
 
-    /// There's already an account with this email.
-    static var legalAccountExists: String { String(localized: "legal.account_exists") }
-
     /// Create my account
     static var legalCreateAccount: String { String(localized: "legal.create_account") }
 
@@ -993,17 +1039,8 @@ enum Textos {
     /// Health notice
     static var legalHealthTitle: String { String(localized: "legal.health.title") }
 
-    /// We're fetching the health notice from the server.
-    static var legalLoading: String { String(localized: "legal.loading") }
-
-    /// Tick that you read the notice to create your account.
-    static var legalMustAccept: String { String(localized: "legal.must_accept") }
-
-    /// We couldn't fetch the health notice. You can't create an account without reading it. Try again when you have s
+    /// We couldn't load the texts. Check your connection.
     static var legalNoText: String { String(localized: "legal.no_text") }
-
-    /// No one with legal training has reviewed this text yet. It's a draft and it will be replaced.
-    static var legalNotReviewed: String { String(localized: "legal.not_reviewed") }
 
     /// Privacy Policy
     static var legalPrivacyTitle: String { String(localized: "legal.privacy.title") }
@@ -1014,11 +1051,8 @@ enum Textos {
     /// Sign in with that email
     static var legalSignInWithEmail: String { String(localized: "legal.sign_in_with_email") }
 
-    /// This sign-up was already used, so your account most likely exists. Try signing in with your email and password
+    /// Sign in with your email and password.
     static var legalSignupAlreadyCreated: String { String(localized: "legal.signup_already_created") }
-
-    /// Start again from the email
-    static var legalStartOver: String { String(localized: "legal.start_over") }
 
     /// Health
     static var legalTabHealth: String { String(localized: "legal.tab.health") }
@@ -1032,11 +1066,23 @@ enum Textos {
     /// Terms and Conditions
     static var legalTermsTitle: String { String(localized: "legal.terms.title") }
 
-    /// Health notice
-    static var legalTitle: String { String(localized: "legal.title") }
+    /// You already have an account with %1$@. If you link it, you'll be able to sign in with your password or with %2
+    static func linkBody(_ arg1: String, _ arg2: String) -> String {
+        String(format: String(localized: "link.body"), arg1, arg2)
+    }
 
-    /// Read the terms and conditions
-    static var legalViewTerms: String { String(localized: "legal.view_terms") }
+    /// You already have an account with %1$@. Enter its password to link it; then you'll be able to sign in with your
+    static func linkBodyPassword(_ arg1: String, _ arg2: String) -> String {
+        String(format: String(localized: "link.body_password"), arg1, arg2)
+    }
+
+    /// Link
+    static var linkConfirm: String { String(localized: "link.confirm") }
+
+    /// Link your %@ account?
+    static func linkTitle(_ arg1: String) -> String {
+        String(format: String(localized: "link.title"), arg1)
+    }
 
     /// Continue with Apple
     static var loginApple: String { String(localized: "login.apple") }
@@ -1340,7 +1386,13 @@ enum Textos {
     /// Workout complete!
     static var notificationWorkoutTitle: String { String(localized: "notification.workout.title") }
 
-    /// We sent a 6-character code, with numbers and letters, to %@. It can take up to a minute; if it doesn't turn up
+    /// Before each session
+    static var notificationsPrepBefore: String { String(localized: "notifications.prep.before") }
+
+    /// Reminder to get ready
+    static var notificationsPrepTitle: String { String(localized: "notifications.prep.title") }
+
+    /// We sent a 6-character code to %@. It expires in 15 minutes.
     static func passwordResetCodeBody(_ arg1: String) -> String {
         String(format: String(localized: "password.reset.code.body"), arg1)
     }
@@ -1351,25 +1403,7 @@ enum Textos {
     /// Verify code
     static var passwordResetCodeVerify: String { String(localized: "password.reset.code.verify") }
 
-    /// Account
-    static var passwordResetDoneAccount: String { String(localized: "password.reset.done.account") }
-
-    /// You can sign in with your new password now. We signed you out everywhere else — if you didn't ask for this cha
-    static var passwordResetDoneBody: String { String(localized: "password.reset.done.body") }
-
-    /// Changed
-    static var passwordResetDoneChanged: String { String(localized: "password.reset.done.changed") }
-
-    /// Go to my home
-    static var passwordResetDoneGoHome: String { String(localized: "password.reset.done.go_home") }
-
-    /// Password updated
-    static var passwordResetDoneTitle: String { String(localized: "password.reset.done.title") }
-
-    /// For security, the message is sent whether or not the address has an account.
-    static var passwordResetEmailAntiEnumeration: String { String(localized: "password.reset.email.anti_enumeration") }
-
-    /// Enter the email you signed up with and we'll send you a code to choose a new password. Your training plan, you
+    /// We'll send you a code to choose a new password.
     static var passwordResetEmailBody: String { String(localized: "password.reset.email.body") }
 
     /// Send me the code
@@ -1381,17 +1415,8 @@ enum Textos {
     /// We couldn't change your password
     static var passwordResetErrorTitle: String { String(localized: "password.reset.error.title") }
 
-    /// At least 10 characters, with one capital letter and one number. When you save it we'll sign you out on every o
-    static var passwordResetNewBody: String { String(localized: "password.reset.new.body") }
-
     /// New password
     static var passwordResetNewLabel: String { String(localized: "password.reset.new.label") }
-
-    /// The two passwords match.
-    static var passwordResetNewMatch: String { String(localized: "password.reset.new.match") }
-
-    /// The two passwords don't match.
-    static var passwordResetNewNoMatch: String { String(localized: "password.reset.new.no_match") }
 
     /// Repeat password
     static var passwordResetNewRepeatLabel: String { String(localized: "password.reset.new.repeat_label") }
@@ -1415,6 +1440,18 @@ enum Textos {
 
     /// Choose a new password
     static var passwordResetNewTitle: String { String(localized: "password.reset.new.title") }
+
+    /// If you don't recognize one, close them all to protect your account.
+    static var passwordResetOtherSessionsBody: String { String(localized: "password.reset.other_sessions.body") }
+
+    /// Close the other sessions
+    static var passwordResetOtherSessionsClose: String { String(localized: "password.reset.other_sessions.close") }
+
+    /// Keep them open
+    static var passwordResetOtherSessionsKeep: String { String(localized: "password.reset.other_sessions.keep") }
+
+    /// Sign out of your other devices?
+    static var passwordResetOtherSessionsTitle: String { String(localized: "password.reset.other_sessions.title") }
 
     /// Current phase: %@
     static func planCurrentPhase(_ arg1: String) -> String {
@@ -1655,51 +1692,6 @@ enum Textos {
         String(format: String(localized: "plan.weeks_left"), arg1)
     }
 
-    /// A heads-up 45 min ahead so you can get bottles, gels and your pre-workout snack ready.
-    static var previewBeforeBody: String { String(localized: "preview.before_body") }
-
-    /// And before you head out
-    static var previewBeforeLabel: String { String(localized: "preview.before_label") }
-
-    /// 750 ml/h
-    static var previewChipFluid: String { String(localized: "preview.chip.fluid") }
-
-    /// 1 gel every 45′
-    static var previewChipGel: String { String(localized: "preview.chip.gel") }
-
-    /// 600 mg sodium
-    static var previewChipSodium: String { String(localized: "preview.chip.sodium") }
-
-    /// Let's build your plan in 2 minutes
-    static var previewCtaTitle: String { String(localized: "preview.cta_title") }
-
-    /// Already have an account?
-    static var previewHaveAccount: String { String(localized: "preview.have_account") }
-
-    /// Your plan on race day
-    static var previewLabel: String { String(localized: "preview.label") }
-
-    /// Long run · 14 km · 26°
-    static var previewSession: String { String(localized: "preview.session") }
-
-    /// Sign in
-    static var previewSignIn: String { String(localized: "preview.sign_in") }
-
-    /// Get started
-    static var previewStart: String { String(localized: "preview.start") }
-
-    /// of those who stopped training did so for lack of time
-    static var problemFact1: String { String(localized: "problem.fact1") }
-
-    /// of runners get cramps: losing 3 to 5 % of body weight already causes weakness and disorientation
-    static var problemFact2: String { String(localized: "problem.fact2") }
-
-    /// of people who play sport compete in organised races
-    static var problemFact3: String { String(localized: "problem.fact3") }
-
-    /// Enthusiasm isn't the problem
-    static var problemTitle: String { String(localized: "problem.title") }
-
     /// Age
     static var profileAge: String { String(localized: "profile.age") }
 
@@ -1730,9 +1722,6 @@ enum Textos {
 
     /// Your previous goals have ended. Set a new goal to start your next plan.
     static var profileGoalsFinished: String { String(localized: "profile.goals.finished") }
-
-    /// Looking for your goals…
-    static var profileGoalsLoading: String { String(localized: "profile.goals.loading") }
 
     /// + Manage
     static var profileGoalsManage: String { String(localized: "profile.goals.manage") }
@@ -1957,29 +1946,35 @@ enum Textos {
     /// Yellow
     static var settingsColorYellow: String { String(localized: "settings.color.yellow") }
 
+    /// Deactivate account
+    static var settingsDeactivateAccount: String { String(localized: "settings.deactivate_account") }
+
+    /// Deactivate
+    static var settingsDeactivateAccountAlertConfirm: String { String(localized: "settings.deactivate_account.alert_confirm") }
+
+    /// Your data stays saved. To come back, sign in.
+    static var settingsDeactivateAccountAlertMessage: String { String(localized: "settings.deactivate_account.alert_message") }
+
+    /// Deactivate your account?
+    static var settingsDeactivateAccountAlertTitle: String { String(localized: "settings.deactivate_account.alert_title") }
+
     /// Delete account
     static var settingsDeleteAccount: String { String(localized: "settings.delete_account") }
 
-    /// Delete for good
+    /// Delete
     static var settingsDeleteAccountAlertConfirm: String { String(localized: "settings.delete_account.alert_confirm") }
 
-    /// Everything is deleted right away and can't be recovered.
+    /// You have 30 days to change your mind.
     static var settingsDeleteAccountAlertMessage: String { String(localized: "settings.delete_account.alert_message") }
 
-    /// Delete your account for good?
+    /// Delete your account?
     static var settingsDeleteAccountAlertTitle: String { String(localized: "settings.delete_account.alert_title") }
 
-    /// Your account and everything we keep about you are deleted for good: profile, plan, workouts, runs, gym sets an
+    /// Your account and all your data are deleted after 30 days. Until then you can recover it by signing in.
     static var settingsDeleteAccountBody: String { String(localized: "settings.delete_account.body") }
 
     /// Delete my account
     static var settingsDeleteAccountConfirmButton: String { String(localized: "settings.delete_account.confirm_button") }
-
-    /// We no longer keep anything of yours. If you signed in with Apple, you can remove Stamina in iPhone Settings › 
-    static var settingsDeleteAccountDoneBody: String { String(localized: "settings.delete_account.done_body") }
-
-    /// Your account was deleted
-    static var settingsDeleteAccountDoneTitle: String { String(localized: "settings.delete_account.done_title") }
 
     /// To confirm it's you, enter your password.
     static var settingsDeleteAccountPasswordHint: String { String(localized: "settings.delete_account.password_hint") }
@@ -2047,11 +2042,8 @@ enum Textos {
     /// 1 on
     static var settingsNotificationsOneOn: String { String(localized: "settings.notifications.one_on") }
 
-    /// 30 min before
-    static var settingsNotificationsThirtyMinBefore: String { String(localized: "settings.notifications.thirty_min_before") }
-
-    /// 30 minutes before the scheduled workout time
-    static var settingsNotificationsThirtyMinBeforeDetail: String { String(localized: "settings.notifications.thirty_min_before.detail") }
+    /// Before each session, so you can get ready.
+    static var settingsNotificationsPrepDetail: String { String(localized: "settings.notifications.prep.detail") }
 
     /// Notifications
     static var settingsNotificationsTitle: String { String(localized: "settings.notifications.title") }
@@ -2154,26 +2146,36 @@ enum Textos {
     /// View tour
     static var settingsViewTour: String { String(localized: "settings.view_tour") }
 
-    /// Your age sets your heart-rate zones, your estimated sweat rate and how many calories you need in high-load wee
+    /// Your account already exists
+    static var signupAccountExistsTitle: String { String(localized: "signup.account_exists.title") }
+
+    /// I understand that Stamina doesn't replace a professional and that, if something happens to me while I train, I
+    static var signupBeforeAcceptHealth: String { String(localized: "signup.before.accept_health") }
+
+    /// I accept the terms and conditions and the privacy policy.
+    static var signupBeforeAcceptTerms: String { String(localized: "signup.before.accept_terms") }
+
+    /// We're not doctors and the app doesn't replace a medical visit. If you have a condition or take medication, tal
+    static var signupBeforeBody: String { String(localized: "signup.before.body") }
+
+    /// Check both boxes to create your account.
+    static var signupBeforeMustAccept: String { String(localized: "signup.before.must_accept") }
+
+    /// Read terms, privacy and health
+    static var signupBeforeReadLegal: String { String(localized: "signup.before.read_legal") }
+
+    /// Before you start
+    static var signupBeforeTitle: String { String(localized: "signup.before.title") }
+
+    /// We use your age to work out your heart-rate zones and your hydration.
     static var signupBirthBody: String { String(localized: "signup.birth.body") }
-
-    /// day
-    static var signupBirthDay: String { String(localized: "signup.birth.day") }
-
-    /// Order follows your language (%@): %@
-    static func signupBirthFormat(_ arg1: String, _ arg2: String) -> String {
-        String(format: String(localized: "signup.birth.format"), arg1, arg2)
-    }
 
     /// Hi %@!
     static func signupBirthGreeting(_ arg1: String) -> String {
         String(format: String(localized: "signup.birth.greeting"), arg1)
     }
 
-    /// month
-    static var signupBirthMonth: String { String(localized: "signup.birth.month") }
-
-    /// Scroll the wheel to your date of birth to continue.
+    /// Choose your date of birth. You need to be 18 or older.
     static var signupBirthMustChoose: String { String(localized: "signup.birth.must_choose") }
 
     /// %@ When were you born?
@@ -2181,10 +2183,7 @@ enum Textos {
         String(format: String(localized: "signup.birth.title"), arg1)
     }
 
-    /// year
-    static var signupBirthYear: String { String(localized: "signup.birth.year") }
-
-    /// Weight is the basis of the whole calculation: litres of fluid per hour, milligrams of sodium and grams of carb
+    /// We use your weight to work out fluids, sodium and carbs. You can change it anytime.
     static var signupBodyBody: String { String(localized: "signup.body.body") }
 
     /// Height (cm)
@@ -2208,7 +2207,7 @@ enum Textos {
     /// 72
     static var signupBodyWeightPlaceholder: String { String(localized: "signup.body.weight_placeholder") }
 
-    /// We sent a 6-character code, with numbers and letters, to %@. It can take up to a minute; if it doesn't turn up
+    /// We sent a 6-character code to %@. It expires in 15 minutes.
     static func signupCodeBody(_ arg1: String) -> String {
         String(format: String(localized: "signup.code.body"), arg1)
     }
@@ -2222,12 +2221,7 @@ enum Textos {
     /// Finish later
     static var signupCompleteLater: String { String(localized: "signup.complete_later") }
 
-    /// You'll get %lld alerts a week, 45 min before each session.
-    static func signupDaysAlert(_ arg1: Int) -> String {
-        String(format: String(localized: "signup.days.alert"), arg1)
-    }
-
-    /// This isn't a profile field: it's what triggers your alerts. We message you 45 minutes before each session so y
+    /// We'll remind you before each session so you can get ready.
     static var signupDaysBody: String { String(localized: "signup.days.body") }
 
     /// Pick at least one day to switch the alerts on.
@@ -2241,46 +2235,8 @@ enum Textos {
     /// Which days and at what time do you train?
     static var signupDaysTitle: String { String(localized: "signup.days.title") }
 
-    /// Base plan
-    static var signupDoneBasePlan: String { String(localized: "signup.done.base_plan") }
-
-    /// Date of birth
-    static var signupDoneBirth: String { String(localized: "signup.done.birth") }
-
-    /// Days
-    static var signupDoneDays: String { String(localized: "signup.done.days") }
-
-    /// Go to my home
-    static var signupDoneGoHome: String { String(localized: "signup.done.go_home") }
-
-    /// Goal
-    static var signupDoneGoal: String { String(localized: "signup.done.goal") }
-
-    /// Level
-    static var signupDoneLevel: String { String(localized: "signup.done.level") }
-
-    /// Your profile is complete.
-    static var signupDoneProfileComplete: String { String(localized: "signup.done.profile_complete") }
-
-    /// Sport
-    static var signupDoneSport: String { String(localized: "signup.done.sport") }
-
-    /// You're all set, %@
-    static func signupDoneTitle(_ arg1: String) -> String {
-        String(format: String(localized: "signup.done.title"), arg1)
-    }
-
-    /// Fill in your details and choose a password. Then we will send you a code to verify your email.
+    /// Fill in your details and choose a password.
     static var signupEmailBody: String { String(localized: "signup.email.body") }
-
-    /// That email doesn't look valid — check it has an @ and a domain.
-    static var signupEmailInvalid: String { String(localized: "signup.email.invalid") }
-
-    /// By continuing you accept the terms and the privacy policy.
-    static var signupEmailLegal: String { String(localized: "signup.email.legal") }
-
-    /// By continuing you accept the [Terms and Conditions](stamina-legal://terminos) and the [Privacy Policy](stamina
-    static var signupEmailLegalLinks: String { String(localized: "signup.email.legal_links") }
 
     /// Send me the code
     static var signupEmailSend: String { String(localized: "signup.email.send") }
@@ -2291,7 +2247,7 @@ enum Textos {
     /// We couldn't continue your sign-up
     static var signupErrorTitle: String { String(localized: "signup.error.title") }
 
-    /// With the date of your event we build the countdown and lay out the loading, recovery and taper weeks. If you h
+    /// With the race date we build your plan and the countdown.
     static var signupGoalBody: String { String(localized: "signup.goal.body") }
 
     /// 10 km
@@ -2303,7 +2259,7 @@ enum Textos {
     /// 5 km
     static var signupGoalC5k: String { String(localized: "signup.goal.c5k") }
 
-    /// 5 km · 4-week plan
+    /// 5 km
     static var signupGoalC5kDetail: String { String(localized: "signup.goal.c5k.detail") }
 
     /// Choose your goal
@@ -2317,9 +2273,6 @@ enum Textos {
 
     /// Get back to training without injuries
     static var signupGoalInjuryFree: String { String(localized: "signup.goal.injury_free") }
-
-    /// no fixed distance
-    static var signupGoalInjuryFreeDetail: String { String(localized: "signup.goal.injury_free.detail") }
 
     /// Marathon
     static var signupGoalMarathon: String { String(localized: "signup.goal.marathon") }
@@ -2336,11 +2289,11 @@ enum Textos {
     /// You can choose several. The first one will be your main plan.
     static var signupGoalMultipleHint: String { String(localized: "signup.goal.multiple_hint") }
 
+    /// Choose the race date to continue.
+    static var signupGoalMustChooseDate: String { String(localized: "signup.goal.must_choose_date") }
+
     /// Next month
     static var signupGoalNextMonth: String { String(localized: "signup.goal.next_month") }
-
-    /// No date yet: we'll build you a base plan.
-    static var signupGoalNoDate: String { String(localized: "signup.goal.no_date") }
 
     /// Olympic triathlon
     static var signupGoalOlympicTriathlon: String { String(localized: "signup.goal.olympic_triathlon") }
@@ -2359,15 +2312,6 @@ enum Textos {
         String(format: String(localized: "signup.goal.with_date"), arg1, arg2)
     }
 
-    /// I understand that Stamina gives general suggestions and that if any symptom appears I have to stop and seek ad
-    static var signupHealthAccept: String { String(localized: "signup.health.accept") }
-
-    /// We're not doctors and this app is not a substitute for seeing one. If you have a pre-existing condition, take 
-    static var signupHealthBody: String { String(localized: "signup.health.body") }
-
-    /// Tick the disclaimer to continue.
-    static var signupHealthMustAccept: String { String(localized: "signup.health.must_accept") }
-
     /// Stop and get checked if you feel
     static var signupHealthStopAndConsult: String { String(localized: "signup.health.stop_and_consult") }
 
@@ -2379,9 +2323,6 @@ enum Textos {
 
     /// Joint pain that gets worse as you run
     static var signupHealthSymptom3: String { String(localized: "signup.health.symptom3") }
-
-    /// One thing before you start
-    static var signupHealthTitle: String { String(localized: "signup.health.title") }
 
     /// Surname (optional)
     static var signupLastNameLabel: String { String(localized: "signup.last_name.label") }
@@ -2401,7 +2342,7 @@ enum Textos {
     /// Less than a year training, or coming back after a break
     static var signupLevelBeginnerDetail: String { String(localized: "signup.level.beginner.detail") }
 
-    /// This sets the volume your plan starts at and how much it can grow each week without exposing you to injury. If
+    /// It sets where your plan starts. If you're coming back after a break, choose beginner.
     static var signupLevelBody: String { String(localized: "signup.level.body") }
 
     /// Intermediate
@@ -2413,8 +2354,11 @@ enum Textos {
     /// How long have you been training?
     static var signupLevelTitle: String { String(localized: "signup.level.title") }
 
-    /// We use your first name to talk to you in notifications and in the weekly summary. Your surname only shows up i
-    static var signupNameBody: String { String(localized: "signup.name.body") }
+    /// Upload it now or later from your profile. With a valid one we give you tips during races.
+    static var signupMedicalBody: String { String(localized: "signup.medical.body") }
+
+    /// I'll upload it later
+    static var signupMedicalLater: String { String(localized: "signup.medical.later") }
 
     /// First name
     static var signupNameLabel: String { String(localized: "signup.name.label") }
@@ -2422,60 +2366,34 @@ enum Textos {
     /// Alex
     static var signupNamePlaceholder: String { String(localized: "signup.name.placeholder") }
 
-    /// Email verified. What's your name?
-    static var signupNameTitle: String { String(localized: "signup.name.title") }
-
-    /// At least %lld characters, with one capital letter and one number. It's the only password we'll ask you for: it
-    static func signupPasswordBody(_ arg1: Int) -> String {
-        String(format: String(localized: "signup.password.body"), arg1)
-    }
-
-    /// This screen is NOT in the design: the 13 steps never ask for a password and the contract requires one. It's a 
-    static var signupPasswordGapNote: String { String(localized: "signup.password.gap_note") }
-
-    /// Choose a password
-    static var signupPasswordTitle: String { String(localized: "signup.password.title") }
-
-    /// Sweat rates, sodium loss and calorie burn differ quite a bit between men and women at the same weight and pace
+    /// We only use it to calculate your plan. It isn't shown or shared.
     static var signupSexBody: String { String(localized: "signup.sex.body") }
 
     /// Female
     static var signupSexFemale: String { String(localized: "signup.sex.female") }
 
-    /// Lower average sweat rate and a different sodium loss
-    static var signupSexFemaleDetail: String { String(localized: "signup.sex.female.detail") }
-
     /// Male
     static var signupSexMale: String { String(localized: "signup.sex.male") }
 
-    /// Higher average sweat rate at the same weight and pace
-    static var signupSexMaleDetail: String { String(localized: "signup.sex.male.detail") }
-
-    /// Which biological sex should we use for your sweat rate?
+    /// What's your biological sex?
     static var signupSexTitle: String { String(localized: "signup.sex.title") }
 
     /// I'd rather not say
     static var signupSexUndisclosed: String { String(localized: "signup.sex.undisclosed") }
 
-    /// Without it, some parts of your plan may not be available
-    static var signupSexUndisclosedDetail: String { String(localized: "signup.sex.undisclosed.detail") }
-
-    /// Continuing with %@. Check your details: we'll send a code to verify your email, and you won't need a password.
-    static func signupSocialBanner(_ arg1: String) -> String {
-        String(format: String(localized: "signup.social_banner"), arg1)
+    /// Continue with %@ again.
+    static func signupSocialExpired(_ arg1: String) -> String {
+        String(format: String(localized: "signup.social_expired"), arg1)
     }
-
-    /// Continuing with %@. Check your name: %@ already verified your email, so there's no code and no password.
-    static func signupSocialBannerVerified(_ arg1: String, _ arg2: String) -> String {
-        String(format: String(localized: "signup.social_banner_verified"), arg1, arg2)
-    }
-
-    /// Too much time has passed since you chose Google or Apple. Continue with your account again to finish signing u
-    static var signupSocialExpired: String { String(localized: "signup.social_expired") }
 
     /// Continue with %@ again
     static func signupSocialRetry(_ arg1: String) -> String {
         String(format: String(localized: "signup.social_retry"), arg1)
+    }
+
+    /// Check that your name and email are right: we brought them from your %@ account.
+    static func signupSocialReview(_ arg1: String) -> String {
+        String(format: String(localized: "signup.social_review"), arg1)
     }
 
     /// Each discipline burns fluid and carbohydrate differently: on a bike you can drink more and eat solid food; run
@@ -2511,42 +2429,6 @@ enum Textos {
     /// Swim, bike and run
     static var signupSportTriathlonDetail: String { String(localized: "signup.sport.triathlon.detail") }
 
-    /// Apple Watch and Health
-    static var signupTrackingApple: String { String(localized: "signup.tracking.apple") }
-
-    /// Heart rate, steps and workouts
-    static var signupTrackingAppleDetail: String { String(localized: "signup.tracking.apple.detail") }
-
-    /// If you connect your watch or your phone's GPS, we tune hydration and gels to your real pace and heart rate ins
-    static var signupTrackingBody: String { String(localized: "signup.tracking.body") }
-
-    /// Garmin watch
-    static var signupTrackingGarmin: String { String(localized: "signup.tracking.garmin") }
-
-    /// Pace, heart rate and elevation
-    static var signupTrackingGarminDetail: String { String(localized: "signup.tracking.garmin.detail") }
-
-    /// Phone GPS
-    static var signupTrackingGps: String { String(localized: "signup.tracking.gps") }
-
-    /// Pace and distance, no extra kit
-    static var signupTrackingGpsDetail: String { String(localized: "signup.tracking.gps.detail") }
-
-    /// I log everything by hand
-    static var signupTrackingManual: String { String(localized: "signup.tracking.manual") }
-
-    /// We estimate from weight, weather and target pace
-    static var signupTrackingManualDetail: String { String(localized: "signup.tracking.manual.detail") }
-
-    /// Not now
-    static var signupTrackingNotNow: String { String(localized: "signup.tracking.not_now") }
-
-    /// This answer isn't saved yet: the contract has nowhere to put it. It's logged as B-006 and blocks nothing — con
-    static var signupTrackingNotSaved: String { String(localized: "signup.tracking.not_saved") }
-
-    /// How do you track your sessions?
-    static var signupTrackingTitle: String { String(localized: "signup.tracking.title") }
-
     /// Other
     static var sportOther: String { String(localized: "sport.other") }
 
@@ -2579,7 +2461,7 @@ enum Textos {
     /// Today is a rest day. Your streak is safe without working out.
     static var streakDetailRest: String { String(localized: "streak.detail.rest") }
 
-    /// Your streak only counts days you are scheduled to train. If you miss a scheduled training day, the streak is l
+    /// Your streak only counts days you are scheduled to train. If you miss a scheduled training day, the little flam
     static var streakExplanation: String { String(localized: "streak.explanation") }
 
     /// Workout streak
@@ -2653,14 +2535,18 @@ enum Textos {
     /// Closes the tour and goes to Home
     static var tourCloseHint: String { String(localized: "tour.close.hint") }
 
-    /// All set! Tap ⚡ whenever you want to go for a run.
-    static var tourCoachDoneBubble: String { String(localized: "tour.coach.done.bubble") }
+    /// All set! Tap %@ whenever you want to go for a run.
+    static func tourCoachDoneBubble(_ arg1: String) -> String {
+        String(format: String(localized: "tour.coach.done.bubble"), arg1)
+    }
 
     /// Your training week, day by day.
     static var tourCoachPlanBubble: String { String(localized: "tour.coach.plan.bubble") }
 
-    /// Start a workout with ⚡: GPS, pace and pause.
-    static var tourCoachWorkoutBubble: String { String(localized: "tour.coach.workout.bubble") }
+    /// Start a workout with %@: GPS, pace and pause.
+    static func tourCoachWorkoutBubble(_ arg1: String) -> String {
+        String(format: String(localized: "tour.coach.workout.bubble"), arg1)
+    }
 
     /// Every workout stays here, with your numbers.
     static var tourPageHistoryBubble: String { String(localized: "tour.page.history.bubble") }

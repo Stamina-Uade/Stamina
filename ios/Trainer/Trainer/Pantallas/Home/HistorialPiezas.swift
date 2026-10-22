@@ -393,10 +393,12 @@ struct HistorialEstadoVacio: View {
                 .multilineTextAlignment(.center)
                 .accessibilityAddTraits(.isHeader)
 
-            Text(Textos.historyEmptyBody)
+            // El botón del rayo, dibujado en chiquito adentro del texto.
+            TextoConRayo.texto(Textos.historyEmptyBody, alto: TokensTipografia.cuerpoSecundarioTamano * 1.15)
                 .estilo(.cuerpoSecundario, color: Paleta.textoSecundario)
                 .multilineTextAlignment(.center)
                 .fixedSize(horizontal: false, vertical: true)
+                .accessibilityLabel(TextoConRayo.etiqueta(Textos.historyEmptyBody))
 
             if let empezar {
                 BotonPrimario(Textos.historyEmptyStartFirst) {

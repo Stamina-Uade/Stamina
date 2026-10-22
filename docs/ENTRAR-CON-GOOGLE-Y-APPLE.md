@@ -1,6 +1,6 @@
 # Continuar con Google y con Apple
 
-Contrato 1.4.0 · 2026-10-20
+Contrato 1.4.0 · 2026-10-20 · actualizado con la 1.6.0 (2026-10-22)
 
 ## Cómo funciona
 
@@ -12,19 +12,25 @@ Contrato 1.4.0 · 2026-10-20
    acepta cada id_token **una sola vez** (se recuerda su hash hasta que vence).
 3. Tres desenlaces:
    - **La identidad ya estaba vinculada** → entra.
-   - **El proveedor es dueño de un correo que ya tiene cuenta** → se vincula a esa cuenta, entra,
-     y al dueño le llega un mail avisando. "Dueño" = Apple, o Google con @gmail.com o dominio de
-     Workspace (`hd`). Un Google creado con otro correo (p. ej. @hotmail.com) NO vincula: sigue el
-     alta, que pide el código. Tampoco vincula si esa cuenta ya tiene otra persona de ese proveedor.
+   - **Ese correo ya tiene una cuenta CON contraseña** (1.6.0) → `account_link_available` con un
+     permiso de 10 minutos. La app pregunta "¿Vincular tu cuenta de Google?" (o Apple): "Vincular"
+     llama a `POST /auth/social/link`, entra, y desde ahí la cuenta entra con la contraseña o con el
+     proveedor; al dueño le llega un mail avisando. Si el proveedor NO es dueño del correo ("dueño" =
+     Apple, o Google con @gmail.com o dominio de Workspace `hd`), la alerta pide primero la
+     contraseña de la cuenta. "Ahora no" deja a la persona en Iniciar sesión.
+   - **Ese correo tiene una cuenta SIN contraseña** (nació con el otro proveedor) y el proveedor es
+     dueño del correo → se vincula sola, como antes. Si esa cuenta ya tiene otra persona de ese
+     proveedor, `conflict`.
    - **Nadie la conoce** → `signup_required` con un permiso de 30 min. La app abre el alta con
      **nombre, apellido y correo ya escritos** (el correo fijo). Si el proveedor verificó el correo
-     (casi siempre), **no hay código**: sigue el aviso de salud, la cuenta se crea con `social_token`
-     y vienen los pasos de perfil (13 pasos en la barra). Sólo si el proveedor NO verificó el correo
-     se pide el código, como en el alta común.
-   - **Ese correo ya tiene cuenta con contraseña y el proveedor no es dueño del correo** → `conflict`:
-     "Entrá con tu correo y tu contraseña".
+     (casi siempre), **no hay código**: sigue "Antes de empezar", la cuenta se crea con
+     `social_token` y vienen los pasos de perfil (10 pasos en la barra; 11 con el código). Sólo si el
+     proveedor NO verificó el correo se pide el código, como en el alta común.
 4. Una cuenta creada así no tiene contraseña: el login con correo y contraseña contesta
-   `invalid_credentials`, y «¿Olvidaste tu contraseña?» le pone una.
+   `password_not_set` con el proveedor (1.6.0: "Esta cuenta entra con Google"), y «¿Olvidaste tu
+   contraseña?» le pone una.
+5. Con la identidad ya vinculada, una cuenta desactivada o por borrarse contesta
+   `account_deactivated` / `account_pending_deletion`, igual que el login con contraseña.
 
 Tabla nueva: `identidades_sociales` (migración `017_identidades_sociales.sql`, que además deja
 `usuarios.password_hash` aceptar `null`).
@@ -58,8 +64,9 @@ Tabla nueva: `identidades_sociales` (migración `017_identidades_sociales.sql`, 
 
 - Cuenta nueva con Google → tiene que abrir el alta con nombre/apellido/correo cargados → llega el
   mail con el código → aviso → perfil. Cerrar sesión y volver a entrar con Google: entra derecho.
-- Una cuenta existente creada con contraseña → Continuar con Google con el mismo Gmail → entra a
-  esa cuenta (queda vinculada).
+- Una cuenta existente creada con contraseña → Continuar con Google con el mismo Gmail → aparece
+  "¿Vincular tu cuenta de Google?" → "Vincular" entra a esa cuenta (queda vinculada). Con un Google
+  armado sobre un @hotmail, la misma alerta pide la contraseña de la cuenta.
 - Apple con "Ocultar mi correo" → el código tiene que llegar al correo real (paso 3 de Apple).
 
 ## Pendiente
@@ -67,5 +74,7 @@ Tabla nueva: `identidades_sociales` (migración `017_identidades_sociales.sql`, 
 - **Borrar la cuenta con Apple vinculada** (App Review 5.1.1(v)): hay que revocar los tokens de
   Apple (`/auth/revoke`). Para eso el teléfono tiene que mandar `authorizationCode` al vincular y el
   servidor guardarlo. Hoy no se hace.
-- Si el permiso social vence en el último paso (más de 30 min), el aviso ofrece «Volver a continuar
-  con Google/Apple»: renueva el permiso y crea la cuenta sin volver a pedir el código.
+- Si el permiso social vence (más de 30 min), la app no deja validar, reenviar ni seguir: alerta
+  "Pasó demasiado tiempo · Vuelve a continuar con Google" con el botón «Volver a continuar con
+  Google/Apple», que renueva el permiso (y en "Antes de empezar" crea la cuenta sin volver a pedir
+  el código).

@@ -28,31 +28,18 @@ struct LoginView: View {
                     }
 
                     VStack(alignment: .leading, spacing: TokensEspaciado.e13) {
-                        // Mientras se escribe no se juzga: el error aparece al tocar
-                        // "Ingresar" (`FlujoEntrada.correoRechazado`), pegado al campo.
-                        ScrollViewReader { desplazamiento in
-                            VStack(alignment: .leading, spacing: TokensEspaciado.e8) {
-                                CampoTexto(etiqueta: Textos.commonEmailLabel,
-                                           marcador: Textos.commonEmailPlaceholder,
-                                           texto: $flujo.loginCorreo,
-                                           contenido: .correo, teclado: .correo,
-                                           conError: flujo.correoRechazado || flujo.error(de: .correo) != nil)
-                                if flujo.correoRechazado {
-                                    PistaDeCorreoRechazado()
-                                } else {
-                                    ErrorDeCampo(flujo.error(de: .correo))
-                                }
-                            }
-                            .muestraElCorreoRechazado(flujo.correoRechazado, desplazando: desplazamiento)
-                        }
+                        // 2026-10-22: lo que sale mal lo dice una alerta, no un rojo
+                        // debajo del campo; "Ingresar" se habilita con un correo
+                        // válido y la contraseña escrita.
+                        CampoTexto(etiqueta: Textos.commonEmailLabel,
+                                   marcador: Textos.commonEmailPlaceholder,
+                                   texto: $flujo.loginCorreo,
+                                   contenido: .correo, teclado: .correo)
 
                         CampoTexto(etiqueta: Textos.loginPasswordLabel,
                                    marcador: Textos.commonPasswordPlaceholder,
                                    texto: $flujo.loginClave,
-                                   contenido: .claveActual, seguro: true,
-                                   conError: flujo.error(de: .clave) != nil)
-                        ErrorDeCampo(flujo.error(de: .clave))
-                            .padding(.top, -TokensEspaciado.e6)
+                                   contenido: .claveActual, seguro: true)
 
                         HStack {
                             Spacer()
@@ -69,7 +56,8 @@ struct LoginView: View {
                         // "Ingresar" va acá, pegado a los campos que habilita, y
                         // no al pie de la pantalla: quien termina de escribir la
                         // contraseña lo tiene abajo del pulgar, sin bajar la
-                        // vista. Apagado sigue siendo el color de la app.
+                        // vista. Apagado sigue siendo el color de la app; esperando
+                        // al servidor, sólo la ruedita.
                         BotonPrimario(Textos.loginSignIn,
                                       habilitado: flujo.loginListo && !flujo.enCurso,
                                       cargando: flujo.enCurso && flujo.conectandoCon == nil,
@@ -122,12 +110,6 @@ struct LoginView: View {
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
         .background(Paleta.fondo)
-        // Un error viejo no tiene que quedar pegado a lo que se está corrigiendo.
-        .onChange(of: flujo.loginClave) { _ in
-            flujo.errorVisible = nil
-            flujo.corrigiendo(.clave)
-        }
-        .onChange(of: flujo.loginCorreo) { _ in flujo.corrigiendo(.correo) }
     }
 
     private var separador: some View {

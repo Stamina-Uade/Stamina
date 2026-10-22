@@ -80,6 +80,18 @@ class ModelosTest {
             """{"error":{"code":"invalid_credentials","message":"no"}}""",
         )
         assertEquals("invalid_credentials", e.error.code)
+        assertNull("sin details es null, como antes de la 1.6.0", e.error.details)
+    }
+
+    @Test
+    fun `los details del error 1_6_0 se leen con los nombres del contrato`() {
+        val e = json.decodeFromString(
+            Error.serializer(),
+            """{"error":{"code":"account_pending_deletion","message":"no",""" +
+                """"details":{"reactivation_token":"rt","days_remaining":29}}}""",
+        )
+        assertEquals("rt", e.error.details?.reactivationToken)
+        assertEquals(29, e.error.details?.daysRemaining)
     }
 
     @Test

@@ -33,7 +33,8 @@ struct GimnasioView: View {
                     } else {
                         AvisoDeLoGuardado(seccion: estado.contenido.rutina)
 
-                        Text(Textos.gymSubtitle)
+                        // La fecha es la del día de la sesión, no una escrita.
+                        Text(Textos.gymSubtitle(fechaDeLaRutina))
                             .estilo(.labelCampo, color: Paleta.textoTerciario)
 
                         tarjetaDeProgreso
@@ -64,6 +65,13 @@ struct GimnasioView: View {
         .sheet(isPresented: $mostrandoCatalogo) {
             CatalogoDeEjerciciosView().environmentObject(estado)
         }
+    }
+
+    /// "Jue 28 ago": el día de la sesión que mandó el servidor, o hoy si no vino.
+    private var fechaDeLaRutina: String {
+        let fecha = estado.contenido.rutina.valor?.diaMs
+            .map { Date(timeIntervalSince1970: TimeInterval($0) / 1000) } ?? Date()
+        return fecha.formatted(.dateTime.weekday(.abbreviated).day().month(.abbreviated))
     }
 
     private var tarjetaDeProgreso: some View {

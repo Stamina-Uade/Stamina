@@ -65,7 +65,8 @@ fun recordarTraductorDeErrores(): (Resultado<*>) -> String {
             "code_resend_too_soon" to recursos.getString(R.string.error_code_resend_too_soon),
             "invalid_code" to recursos.getString(R.string.error_invalid_code),
             "code_expired" to recursos.getString(R.string.error_code_expired),
-            "weak_password" to recursos.getString(R.string.error_weak_password),
+            "weak_password" to
+                recursos.getString(R.string.error_weak_password, LARGO_MINIMO_DE_CLAVE),
             "invalid_registration_token" to
                 recursos.getString(R.string.error_invalid_registration_token),
             "invalid_reset_token" to recursos.getString(R.string.error_invalid_reset_token),
@@ -79,6 +80,24 @@ fun recordarTraductorDeErrores(): (Resultado<*>) -> String {
             "not_found" to recursos.getString(R.string.error_not_found),
             "legal_not_accepted" to recursos.getString(R.string.error_legal_not_accepted),
             "legal_version_stale" to recursos.getString(R.string.error_legal_version_stale),
+            // 1.6.0. Android no usa las rutas nuevas (vincular, reactivar), así que
+            // estos sólo se muestran: no hay paso siguiente desde acá.
+            "too_many_attempts" to recursos.getString(R.string.error_too_many_attempts),
+            "code_attempts_exceeded" to
+                recursos.getString(R.string.error_code_attempts_exceeded),
+            "account_link_available" to
+                recursos.getString(R.string.error_account_link_available),
+            "invalid_link_token" to recursos.getString(R.string.error_invalid_link_token),
+            "account_deactivated" to recursos.getString(R.string.error_account_deactivated),
+            "account_pending_deletion" to
+                recursos.getString(R.string.error_account_pending_deletion),
+            "invalid_reactivation_token" to
+                recursos.getString(R.string.error_invalid_reactivation_token),
+            // 1.4.0. El login, el alta y recuperar la contraseña dicen qué pasó.
+            "user_not_found" to recursos.getString(R.string.error_user_not_found),
+            "wrong_password" to recursos.getString(R.string.error_wrong_password),
+            "password_not_set" to recursos.getString(R.string.error_password_not_set),
+            "email_already_registered" to recursos.getString(R.string.error_email_taken),
         )
         val sinRed = recursos.getString(R.string.error_sin_red)
         val raro = recursos.getString(R.string.error_respuesta_rara)

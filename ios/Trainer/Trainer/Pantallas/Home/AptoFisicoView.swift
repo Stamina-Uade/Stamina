@@ -7,9 +7,23 @@ import TrainerCore
 ///
 /// Archivo (PDF o foto) + fecha de vencimiento + declaración jurada. Lo guarda
 /// `AlmacenDeAptoFisico`, sólo en el teléfono.
+///
+/// 2026-10-22: también es el último paso del alta (`RegAptoView`). Ahí no lleva
+/// su cabecera —la flecha y la barra son de `RaizFlujoView`—, el texto cuenta
+/// para qué sirve, y abajo van "Guardar" y "Lo subo después".
 struct AptoFisicoView: View {
     @ObservedObject private var almacen = AlmacenDeAptoFisico.compartido
     @Environment(\.dismiss) private var cerrar
+
+    /// Es el paso del alta y no la hoja de Perfil.
+    private let enElAlta: Bool
+    /// Lo que pasa al guardar o al dejarlo para después, en el alta.
+    private let alTerminar: () -> Void
+
+    init(enElAlta: Bool = false, alTerminar: @escaping () -> Void = {}) {
+        self.enElAlta = enElAlta
+        self.alTerminar = alTerminar
+    }
 
     @State private var archivoElegido: URL?
     @State private var vence: Date = Calendar.current.date(byAdding: .year, value: 1, to: Date()) ?? Date()
@@ -23,17 +37,30 @@ struct AptoFisicoView: View {
         (archivoElegido != nil || almacen.apto != nil) && declaracion && vence > Date()
     }
 
+    /// Termina: en el alta sigue al Inicio; en Perfil cierra la hoja.
+    private func terminar() {
+        if enElAlta { alTerminar() } else { cerrar() }
+    }
+
     var body: some View {
         VStack(spacing: 0) {
-            // Flecha y título fijos arriba, como una barra de navegación.
-            CabeceraSecundaria(titulo: Textos.medicalYourClearance) {
-                cerrar()
+            if !enElAlta {
+                // Flecha y título fijos arriba, como una barra de navegación.
+                CabeceraSecundaria(titulo: Textos.medicalYourClearance) {
+                    cerrar()
+                }
+                .padding(.top, TokensEspaciado.e12)
             }
-            .padding(.top, TokensEspaciado.e12)
 
             ScrollView {
                 VStack(alignment: .leading, spacing: TokensEspaciado.e20) {
-                    Text(Textos.medicalAddBody)
+                    if enElAlta {
+                        Text(Textos.medicalYourClearance)
+                            .estilo(.display)
+                            .fixedSize(horizontal: false, vertical: true)
+                            .accessibilityAddTraits(.isHeader)
+                    }
+                    Text(enElAlta ? Textos.signupMedicalBody : Textos.medicalAddBody)
                         .estilo(.cuerpoSecundario, color: Paleta.textoSecundario)
                         .fixedSize(horizontal: false, vertical: true)
 
@@ -90,10 +117,13 @@ struct AptoFisicoView: View {
             }
 
             VStack(spacing: TokensEspaciado.e10) {
-                BotonPrimario(Textos.commonConfirm,
+                BotonPrimario(enElAlta ? Textos.commonSave : Textos.commonConfirm,
                               habilitado: puedeConfirmar,
                               motivoDeshabilitado: Textos.medicalFormIncomplete) {
                     confirmar()
+                }
+                if enElAlta {
+                    BotonTexto(Textos.signupMedicalLater, color: Paleta.textoSecundario) { alTerminar() }
                 }
                 Text(Textos.medicalDisclaimer)
                     .estilo(.notaLegal, color: Paleta.textoTerciario)
@@ -207,14 +237,14 @@ struct AptoFisicoView: View {
         if let archivoElegido {
             switch almacen.guardar(desde: archivoElegido, vence: vence, declaracionAceptada: declaracion) {
             case .success:
-                cerrar()
+                terminar()
             case .failure(.muyGrande):
                 error = Textos.medicalErrorTooLarge
             case .failure:
                 error = Textos.medicalErrorSaveFailed
             }
         } else if almacen.actualizarVencimiento(vence, declaracionAceptada: declaracion) {
-            cerrar()
+            terminar()
         } else {
             error = Textos.medicalErrorSaveFailed
         }

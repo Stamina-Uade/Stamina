@@ -9,10 +9,14 @@
  * (pantalla `fpNew`) dibuja tres puntitos y tres barras, y son estas tres. Si acá
  * se agrega una cuarta regla visible, la pantalla queda mintiendo.
  *
- * Las otras dos —lista de conocidas y repetición— NO se muestran, porque no se
- * pueden anticipar mientras alguien escribe: la lista vive acá y "repetitiva" es
- * una propiedad del resultado, no un objetivo que alguien persiga. Se explican
- * cuando se rechaza, no antes.
+ * Son las ÚNICAS desde el contrato 1.6.0 (decisión de Iván del 2026-10-22).
+ * Antes había dos reglas más que no se mostraban —una lista de contraseñas
+ * conocidas y "repetitiva" (menos de cuatro caracteres distintos)— y rechazaban
+ * con `weak_password` algo que cumplía las tres barras de la pantalla: la persona
+ * veía todo en verde y el servidor le decía que no, sin poder explicarle por qué.
+ * Ahora `weak_password` quiere decir sólo que falla una de las tres (o que pasa el
+ * tope). Lo que protege de verdad contra adivinar es el tope de intentos por
+ * correo del login (dominios/auth/intentos.ts), no una lista de doce palabras.
  *
  * Sobre exigir mayúscula y número: NIST SP 800-63B recomienda NO pedirlo, porque
  * en la práctica produce `Password1!` en vez de una frase larga. Acá se piden
@@ -22,32 +26,7 @@
  * descuido.
  */
 
-/**
- * Las que se rechazan aunque cumplan todo lo demás: tienen largo, mayúscula y
- * número, y aun así son de las primeras que alguien probaría. Es una lista corta
- * y deliberada.
- * No pretende ser una lista completa de 100k — eso es un archivo de datos y va
- * a la fase de endurecimiento (§12).
- */
-const CONOCIDAS = new Set([
-  // 🛑 Todas EN MINÚSCULA: la comparación se hace sobre `claro.toLowerCase()`.
-  // Una entrada con mayúsculas acá no se compara nunca con nada y es una regla
-  // apagada que parece prendida.
-  "password123",
-  "password1234",
-  "contrasena123",
-  "contraseña123",
-  "trainer2026",
-  "trainer1234",
-  "iloveyou123",
-  "qwerty12345",
-  "letmein1234",
-  "admin123456",
-  "welcome1234",
-  "abcd1234567",
-]);
-
-export type MotivoPassword = "corta" | "larga" | "sin_mayuscula" | "sin_numero" | "conocida" | "repetitiva";
+export type MotivoPassword = "corta" | "larga" | "sin_mayuscula" | "sin_numero";
 export type ResultadoPassword = { ok: true } | { ok: false; motivo: MotivoPassword };
 
 export const LARGO_MINIMO = 10;
@@ -61,9 +40,6 @@ export const LARGO_MAXIMO = 200;
 const MAYUSCULA = /\p{Lu}/u;
 const NUMERO = /\p{Nd}/u;
 
-/** Cuántos caracteres distintos hace falta que tenga. `aaaaaaaaaa` no es una contraseña. */
-const DISTINTOS_MINIMO = 4;
-
 export function validarPassword(claro: string): ResultadoPassword {
   if (claro.length < LARGO_MINIMO) return { ok: false, motivo: "corta" };
   // El tope no es capricho: argon2 sobre una entrada gigante es CPU regalada, y
@@ -72,12 +48,6 @@ export function validarPassword(claro: string): ResultadoPassword {
 
   if (!MAYUSCULA.test(claro)) return { ok: false, motivo: "sin_mayuscula" };
   if (!NUMERO.test(claro)) return { ok: false, motivo: "sin_numero" };
-
-  const normal = claro.toLowerCase().trim();
-  if (CONOCIDAS.has(normal)) return { ok: false, motivo: "conocida" };
-
-  // "Aaaaaaaaa1" tiene largo, mayúscula y número, y ninguna entropía.
-  if (new Set(normal).size < DISTINTOS_MINIMO) return { ok: false, motivo: "repetitiva" };
 
   return { ok: true };
 }

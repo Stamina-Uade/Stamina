@@ -71,15 +71,16 @@ export async function crearServidor(ctx: Contexto): Promise<FastifyInstance> {
   app.setErrorHandler((err, req, res) => {
     if (err instanceof ErrorApi) {
       if (err.reintentarEnS !== undefined) res.header("Retry-After", String(err.reintentarEnS));
+      // `aCuerpo` saca `error.details` cuando el error lo trae (contrato 1.6.0).
       return res.code(err.http).send(aCuerpo(err));
     }
     // Fallo de validación de Fastify/Ajv: el cuerpo no cumple el contrato.
     const validacion = (err as { validation?: Array<{ instancePath?: string }> }).validation;
     if (validacion !== undefined) {
       // La contraseña la rechazan DOS capas: el contrato (largo) y la política del
-      // servicio (lista de conocidas, entropía). Para el cliente eso tiene que ser
-      // UN solo código, o no puede mostrar un mensaje coherente: una contraseña
-      // corta daría `bad_request` y una común `weak_password`.
+      // servicio (mayúscula y número, infra/password.ts). Para el cliente eso tiene
+      // que ser UN solo código, o no puede mostrar un mensaje coherente: una
+      // contraseña corta daría `bad_request` y una sin número `weak_password`.
       const esPassword = validacion.some((v) => (v.instancePath ?? "").includes("password"));
       const e = esPassword
         ? new ErrorApi("weak_password", "Password does not meet the policy")

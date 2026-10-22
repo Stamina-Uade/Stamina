@@ -16,6 +16,8 @@ import TrainerCore
 /// otros `Inicio*.swift`. El calendario anual se mudó a la pestaña Historial.
 struct InicioView: View {
     @EnvironmentObject private var estado: EstadoHome
+    /// El perfil a medio hacer y el camino de vuelta a sus pasos.
+    @EnvironmentObject private var flujo: FlujoEntrada
     @Environment(\.accessibilityReduceMotion) private var movimientoReducido
     @State private var actividadElegida: Actividad?
     @State private var mostrarApto = false
@@ -172,9 +174,15 @@ struct InicioView: View {
     /// Con plan vigente, la cuenta regresiva de la carrera. Sin plan (o con el plan
     /// terminado), la invitación a elegir el próximo objetivo. Sin red no se invita:
     /// ahí el problema es la conexión, no el objetivo.
+    ///
+    /// 2026-10-22: con el perfil a medio hacer ("Completar después"), en su lugar
+    /// va "Completa tu perfil", que lleva al primer dato que falta. También cuando
+    /// lo dice el motor (`profile_incomplete`) y `GET /me` todavía no llegó.
     @ViewBuilder
     private var tarjetaDelObjetivo: some View {
-        if let bloque = estado.bloque, !estado.planVencido {
+        if flujo.pasoPendienteDelPerfil != nil || estado.faltaPerfil {
+            tarjetaCompletaTuPerfil
+        } else if let bloque = estado.bloque, !estado.planVencido {
             tarjetaDeLaCarrera(bloque)
         } else if !(estado.actualizando && estado.plan == nil),
                   estado.contenido.plan.problema == nil || estado.contenido.plan.problema == .perfilIncompleto {
@@ -248,6 +256,34 @@ struct InicioView: View {
 
     /// Sin objetivo: la tarjeta héroe invita a elegir el próximo. Lleva a Plan,
     /// que es donde vive el selector de metas.
+    private var tarjetaCompletaTuPerfil: some View {
+        TarjetaHeroe(imagen: FondosDeTarjeta.imagen(para: .running, contexto: "inicio"), alto: TokensEspaciado.e56 * 4) {
+            VStack(alignment: .leading, spacing: TokensEspaciado.e12) {
+                Spacer(minLength: TokensEspaciado.e20)
+                Text(Textos.homeCompleteProfileTitle)
+                    .estilo(.display)
+                    .fixedSize(horizontal: false, vertical: true)
+                Text(Textos.homeCompleteProfileBody)
+                    .estilo(.cuerpoSecundario, color: Paleta.textoSecundario)
+                    .fixedSize(horizontal: false, vertical: true)
+                BotonPrimario(Textos.homeCompleteProfileButton) {
+                    Haptico.toque()
+                    retomarPerfil()
+                }
+            }
+        }
+    }
+
+    /// Al primer hueco del perfil. Si el que avisó fue el motor y el perfil todavía
+    /// no llegó, primero se pide: sin él no se sabe a qué paso ir.
+    private func retomarPerfil() {
+        guard flujo.pasoPendienteDelPerfil == nil else { return flujo.retomarPerfil() }
+        Task {
+            await flujo.cargarPerfil()
+            flujo.retomarPerfil()
+        }
+    }
+
     private var tarjetaNuevoObjetivo: some View {
         TarjetaHeroe(imagen: FondosDeTarjeta.imagen(para: .running, contexto: "inicio"), alto: TokensEspaciado.e56 * 4) {
             VStack(alignment: .leading, spacing: TokensEspaciado.e12) {

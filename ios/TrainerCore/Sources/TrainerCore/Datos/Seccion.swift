@@ -16,7 +16,7 @@ public enum ProblemaDeCarga: Equatable, Sendable {
         switch resultado {
         case .ok: return nil
         case .sinRed: return .sinRed
-        case .rechazado(let codigo, _) where codigo == "profile_incomplete": return .perfilIncompleto
+        case .rechazado(let codigo, _, _) where codigo == "profile_incomplete": return .perfilIncompleto
         case .rechazado, .respuestaRara: return .servidor
         }
     }

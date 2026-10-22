@@ -1,8 +1,12 @@
 /**
  * dominios/cuenta/purgar.ts — la tarea programada que borra DE VERDAD.
  *
- * Tres podas, cada una con su motivo:
+ * Cuatro podas, cada una con su motivo:
  *
+ *   0. Las cuentas cuyo plazo de gracia venció (contrato 1.6.0): `POST /me/delete`
+ *      sólo las marca con `borrar_en_ms`; acá se borran de verdad, con todos sus
+ *      datos por cascada, y el correo queda libre. Va primero: lo que cae en
+ *      cascada (sesiones, historial) ya no lo tienen que contar las otras.
  *   1. El historial de series de más de 90 días (decisión 0006, "Lo que se
  *      cerró"): la última versión de cada serie sigue en `series_gimnasio`, que es
  *      lo que usa el motor; lo que se va es la cadena de correcciones.
@@ -23,6 +27,9 @@ export async function purgar(db: Db, ahoraMs: number): Promise<Record<string, nu
     (await db.consultar<{ uno: number }>(`${sql} returning 1 as uno`, valores)).length;
 
   return {
+    cuentas_borradas: await contar(
+      `delete from usuarios where borrar_en_ms is not null and borrar_en_ms <= $1`, [ahoraMs]
+    ),
     historial_series: await contar(`delete from series_gimnasio_historial where recibida_en_servidor_ms < $1`, [
       ahoraMs - VIDA_HISTORIAL_SERIES_MS,
     ]),

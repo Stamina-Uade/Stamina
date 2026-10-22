@@ -296,7 +296,7 @@ public actor RenovadorDeSesion {
     /// El desenlace de una renovación que no salió bien, con el tipo de quien pidió.
     private static func sinValor<T>(_ motivo: Resultado<Sesion>) -> Resultado<T> {
         switch motivo {
-        case .rechazado(let codigo, let http): return .rechazado(codigo: codigo, http: http)
+        case .rechazado(let codigo, let http, let detalle): return .rechazado(codigo: codigo, http: http, detalle: detalle)
         case .sinRed: return .sinRed
         case .respuestaRara(let http): return .respuestaRara(http: http)
         // No pasa: una renovación que salió bien es `.renovada`, no `.fallida`.
@@ -353,7 +353,7 @@ public actor RenovadorDeSesion {
             guard sigueSiendoLaMisma else { return .descartada(nueva) }
             adoptar(nueva)
             return .renovada(nueva)
-        case .rechazado(let codigo, _) where codigo == Self.renovacionInvalida || codigo == Self.revocada:
+        case .rechazado(let codigo, _, _) where codigo == Self.renovacionInvalida || codigo == Self.revocada:
             if sigueSiendoLaMisma { cerrarLocalmente(.rechazada(codigo: codigo)) }
             return .cerrada(codigo: codigo)
         case .rechazado, .sinRed, .respuestaRara:
@@ -369,7 +369,7 @@ public actor RenovadorDeSesion {
     private static func pudoPerderseLaRespuesta(_ motivo: Resultado<Sesion>) -> Bool {
         switch motivo {
         case .sinRed: return true
-        case .rechazado(_, let http), .respuestaRara(let http): return http >= 500
+        case .rechazado(_, let http, _), .respuestaRara(let http): return http >= 500
         case .ok: return false
         }
     }

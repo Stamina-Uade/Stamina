@@ -6,11 +6,16 @@
  *   - anti-enumeración, incluida la del TIEMPO (verificación dummy)
  *   - refresh hasheado, de un solo uso y con rotación; reuso => revoca la familia, salvo el
  *     reintento de una respuesta perdida, que recibe la misma sucesora (decisión 0013)
- *   - cambiar la contraseña revoca las demás sesiones
+ *
+ * Contrato 1.6.0 (decisión de Iván del 2026-10-22): cambiar la contraseña YA NO revoca
+ * las demás sesiones. Manda siempre un correo de aviso, y la app ofrece cerrar las otras
+ * con `POST /auth/logout/others`. Revocarlas solas dejaba afuera, sin explicación, al
+ * reloj y a la tablet de quien sólo se había olvidado la clave.
  */
 import type { Contexto } from "../../contexto.js";
 import { ErrorApi } from "../../infra/errores.js";
 import { validarPassword } from "../../infra/password.js";
+import type { IdiomaDeCorreo } from "../../infra/idioma.js";
 import { versionLegal } from "../legal/textos.js";
 import {
   firmarAcceso,
@@ -26,23 +31,39 @@ import {
   verificarPassword,
   firmarAltaSocial,
   leerAltaSocial,
+  firmarReactivacion,
+  leerReactivacion,
+  firmarVinculo,
+  leerVinculo,
 } from "../../infra/cripto.js";
 import {
   crearVerificadorDeProveedores,
   proveedorEsDuenoDelCorreo,
   type NombreDeProveedor,
 } from "../../infra/proveedores.js";
-import { crearRepo, type RepoAuth, type SesionFila } from "./repositorio.js";
+import { crearRepo, type RepoAuth, type SesionFila, type UsuarioFila } from "./repositorio.js";
+import { crearTopeDeIntentos } from "./intentos.js";
 
 const VIDA_CODIGO_MS = 15 * 60 * 1000; // 15 min, como el diseño (`reg-codigo`)
 const REENVIO_MS = 60 * 1000; //           60 s, como el diseño
 const VIDA_TOKEN_PASO_MS = 10 * 60 * 1000;
-const MAX_INTENTOS_CODIGO = 3;
+/** Contrato 1.6.0: al quinto código equivocado, ése queda invalidado (`code_attempts_exceeded`). */
+const MAX_INTENTOS_CODIGO = 5;
+/**
+ * Cuánto se recuerda un código en la caché DESPUÉS de vencer. Sin este margen la
+ * clave desaparecía justo a los 15 minutos y el código vencido se contestaba
+ * `invalid_code`, que le dice a la persona que lo tipeó mal cuando en realidad
+ * tiene que pedir otro. Con la clave viva, el vencido es `code_expired`.
+ */
+const RECUERDO_CODIGO_MS = VIDA_CODIGO_MS + 60 * 60 * 1000;
 /**
  * Cuánto vive el permiso de alta social. Más que el del correo: en el medio la
  * persona revisa sus datos, espera el código y lee el aviso de salud.
  */
 const VIDA_ALTA_SOCIAL_MS = 30 * 60 * 1000;
+/** Los permisos de vincular y de reactivar (1.6.0): 10 minutos, un solo uso. */
+const VIDA_PERMISO_CUENTA_MS = 10 * 60 * 1000;
+const DIA_MS = 24 * 60 * 60 * 1000;
 
 /**
  * Cuánto después de canjear un refresh se acepta volver a presentarlo como REINTENTO
@@ -71,6 +92,8 @@ interface CodigoTemporal {
   id: string;
   hash: string;
   venceMs: number;
+  /** Se equivocaron cinco veces: ya no vale, ni siquiera el correcto. */
+  agotado?: true;
 }
 
 function claveCodigo(email: string, proposito: string): string {
@@ -94,6 +117,48 @@ export function crearServicioAuth(ctx: Contexto) {
   const proveedores = ctx.proveedores ?? crearVerificadorDeProveedores({
     clientIds: ctx.config.proveedores ?? { google: [], apple: [] },
   });
+  const tope = crearTopeDeIntentos(ctx.cache, ctx.ahoraMs);
+
+  /**
+   * Antes de mirar una contraseña: la IP y el correo no tienen que estar bloqueados.
+   *
+   * 🛑 Con el correo bloqueado se gasta lo mismo que una verificación: si no, la
+   * respuesta rápida diría "este correo tiene cuenta y alguien le está probando
+   * contraseñas", que es más de lo que ya dice `user_not_found`.
+   */
+  async function exigirSinBloqueo(email: string, password: string, ip: string): Promise<void> {
+    const deIp = await tope.bloqueoDeIp(ip);
+    if (deIp !== null) throw new ErrorApi("rate_limited", "Too many failed attempts", deIp);
+    const deCorreo = await tope.bloqueoDeCorreo(email);
+    if (deCorreo !== null) {
+      await verificarDummy(password);
+      throw new ErrorApi("too_many_attempts", "Too many wrong passwords for this email", deCorreo);
+    }
+  }
+
+  /**
+   * La contraseña de una cuenta, con el tope. Bien: la racha vuelve a cero. Mal:
+   * suma, y el fallo que llega al tope ya contesta el bloqueo, para que la app lo
+   * diga en ese momento y no después de un sexto intento que no podía andar.
+   */
+  async function comprobarPassword(email: string, hash: string, password: string, ip: string): Promise<void> {
+    if (await verificarPassword(password, hash)) {
+      await tope.reiniciar(email);
+      return;
+    }
+    const bloqueo = await tope.fallo(email, ip);
+    if (bloqueo !== null) throw new ErrorApi("too_many_attempts", "Too many wrong passwords for this email", bloqueo);
+    throw new ErrorApi("wrong_password", "The password does not match");
+  }
+
+  /** `password_not_set` con el proveedor con el que nació la cuenta (contrato 1.6.0). */
+  async function sinPassword(usuarioId: string): Promise<ErrorApi> {
+    const proveedor = await repo.proveedorDeAlta(usuarioId);
+    return new ErrorApi(
+      "password_not_set", "This account signs in with Google or Apple", undefined,
+      proveedor === null ? undefined : { provider: proveedor },
+    );
+  }
 
   async function abrirSesion(usuarioId: string, familiaId: string | null): Promise<Sesion> {
     const ahora = ctx.ahoraMs();
@@ -106,6 +171,31 @@ export function crearServicioAuth(ctx: Contexto) {
       ctx.config.refreshTtlS * 1000
     );
     return entregar(fila, refresh);
+  }
+
+  /**
+   * 🛑 La puerta de toda sesión que se abre para una cuenta que ya existía (login,
+   * Google/Apple, vincular, recuperar): una cuenta desactivada o por borrarse no
+   * entra. Contesta el estado con un permiso para `POST /auth/reactivate`, y sólo
+   * se llega acá después de que la persona demostró ser ella (contraseña, código o
+   * proveedor): a quien no la sabe, el estado no se le dice (contrato 1.6.0).
+   */
+  async function exigirCuentaActiva(u: UsuarioFila): Promise<void> {
+    if (u.borrar_en_ms === null && u.desactivada_en_ms === null) return;
+    const ahora = ctx.ahoraMs();
+    const reactivation_token = await firmarReactivacion(ctx.config, u.id, ahora, VIDA_PERMISO_CUENTA_MS);
+    if (u.borrar_en_ms !== null) {
+      // Días enteros, para arriba: con 29,2 días por delante, la persona tiene "30".
+      const days_remaining = Math.max(0, Math.ceil((u.borrar_en_ms - ahora) / DIA_MS));
+      throw new ErrorApi("account_pending_deletion", "This account is scheduled for deletion", undefined,
+        { reactivation_token, days_remaining });
+    }
+    throw new ErrorApi("account_deactivated", "This account is deactivated", undefined, { reactivation_token });
+  }
+
+  async function abrirSesionDe(u: UsuarioFila): Promise<Sesion> {
+    await exigirCuentaActiva(u);
+    return abrirSesion(u.id, null);
   }
 
   /** Lo que devuelven login, alta, recuperación y refresh: un access nuevo para `fila`. */
@@ -127,12 +217,18 @@ export function crearServicioAuth(ctx: Contexto) {
     if (!(await ctx.cache.ponerSiAusente(enfriamiento, "1", Math.ceil(REENVIO_MS / 1000)))) {
       throw new ErrorApi("code_resend_too_soon", "Wait before requesting another code", Math.ceil(REENVIO_MS / 1000));
     }
-    const codigo = generarCodigo();
+    // El código nuevo reemplaza al anterior (pedir otro invalida el que había) y
+    // tiene que ser DISTINTO: si la persona recibe dos veces el mismo, cree que el
+    // reenvío no anduvo, y uno agotado no puede volver con otro nombre.
+    const anterior = await ctx.cache.obtener(clave);
+    const hashAnterior = anterior === null ? null : (JSON.parse(anterior) as CodigoTemporal).hash;
+    let codigo = generarCodigo();
+    while (hashearToken(codigo) === hashAnterior) codigo = generarCodigo();
     const estado: CodigoTemporal = {
       id: generarTokenOpaco(), hash: hashearToken(codigo), venceMs: ahora + VIDA_CODIGO_MS,
     };
     const valor = JSON.stringify(estado);
-    await ctx.cache.poner(clave, valor, Math.ceil(VIDA_CODIGO_MS / 1000));
+    await ctx.cache.poner(clave, valor, Math.ceil(RECUERDO_CODIGO_MS / 1000));
     try {
       await ctx.correo.enviarCodigo(email, codigo, proposito, nombreCompleto);
     } catch {
@@ -150,16 +246,23 @@ export function crearServicioAuth(ctx: Contexto) {
     const valor = await ctx.cache.obtener(clave);
     if (valor === null) throw new ErrorApi("invalid_code", "Code is not valid");
     const fila = JSON.parse(valor) as CodigoTemporal;
+    // Agotado antes que vencido: si se agotó, eso es lo que la persona tiene que saber.
+    if (fila.agotado === true) throw new ErrorApi("code_attempts_exceeded", "Too many wrong codes");
     if (fila.venceMs <= ahora) throw new ErrorApi("code_expired", "Code has expired");
 
     // El contador vive en la caché con TTL, y en Redis cuando está configurado.
     // La clave lleva el ID aleatorio del desafío, nunca el correo de la persona.
     const claveIntentos = `codigo-intentos:${fila.id}`;
     if (!igualSeguro(hashearToken(codigo.toUpperCase()), fila.hash)) {
-      const intentos = await ctx.cache.incrementar(claveIntentos, Math.ceil(VIDA_CODIGO_MS / 1000));
+      const intentos = await ctx.cache.incrementar(claveIntentos, Math.ceil(RECUERDO_CODIGO_MS / 1000));
       if (intentos >= MAX_INTENTOS_CODIGO) {
-        await ctx.cache.consumirSiIgual(clave, valor);
-        throw new ErrorApi("code_expired", "Code has expired");
+        // Se marca agotado en vez de borrarlo: así los pedidos siguientes, incluso
+        // con el código correcto, siguen diciendo lo mismo y no `invalid_code`.
+        // `consumirSiIgual` primero: si otro pedido ya lo canjeó, no se resucita.
+        if (await ctx.cache.consumirSiIgual(clave, valor)) {
+          await ctx.cache.poner(clave, JSON.stringify({ ...fila, agotado: true }), Math.ceil(RECUERDO_CODIGO_MS / 1000));
+        }
+        throw new ErrorApi("code_attempts_exceeded", "Too many wrong codes");
       }
       throw new ErrorApi("invalid_code", "Code is not valid");
     }
@@ -298,36 +401,65 @@ export function crearServicioAuth(ctx: Contexto) {
     },
 
     // --------------------------------------------------------------- login --
-    async login(emailCrudo: string, password: string): Promise<Sesion> {
+    /** @param ip la del pedido: cuenta para el tope de fallos por IP. */
+    async login(emailCrudo: string, password: string, ip: string): Promise<Sesion> {
       const email = normalizarEmail(emailCrudo);
+      await exigirSinBloqueo(email, password, ip);
       const usuario = await repo.buscarUsuarioPorEmail(email);
 
       // 2026-10-21 (decisión de Iván): cada caso con su código, para que la app
       // diga "El usuario no existe" o "La contraseña no coincide".
       if (usuario === null) {
         await verificarDummy(password);
+        // Probar correos también es un intento fallido para la IP.
+        await tope.fallo(null, ip);
         throw new ErrorApi("user_not_found", "There is no account with this email");
       }
       // Una cuenta que nació con Google o Apple no tiene contraseña.
       if (usuario.password_hash === null) {
         await verificarDummy(password);
-        throw new ErrorApi("password_not_set", "This account signs in with Google or Apple");
+        throw await sinPassword(usuario.id);
       }
-      if (!(await verificarPassword(password, usuario.password_hash))) {
-        throw new ErrorApi("wrong_password", "The password does not match");
+      await comprobarPassword(email, usuario.password_hash, password, ip);
+      return abrirSesionDe(usuario);
+    },
+
+    // ---------------------------------------------------------- reactivar --
+    /**
+     * `POST /auth/reactivate` (1.6.0). Canjea el permiso de `account_deactivated` o
+     * `account_pending_deletion`: la cuenta vuelve a estar activa —si estaba por
+     * borrarse, el borrado se cancela— y se abre la sesión.
+     */
+    async reactivar(token: string): Promise<Sesion> {
+      const ahora = ctx.ahoraMs();
+      const permiso = await leerReactivacion(ctx.config, token, ahora);
+      if (permiso === null) throw new ErrorApi("invalid_reactivation_token", "Reactivation token is not valid");
+      // Un solo uso: se recuerda hasta que vence, y un minuto más por los relojes.
+      const ttlS = Math.max(60, Math.ceil((permiso.venceMs - ahora) / 1000) + 60);
+      if (!(await ctx.cache.ponerSiAusente(`auth:reactivar:${hashearToken(permiso.jti)}`, "1", ttlS))) {
+        throw new ErrorApi("invalid_reactivation_token", "Reactivation token was already used");
       }
-      return abrirSesion(usuario.id, null);
+      if (!(await repo.reactivar(permiso.usuarioId, ahora))) {
+        throw new ErrorApi("invalid_reactivation_token", "Reactivation token is not valid");
+      }
+      return abrirSesion(permiso.usuarioId, null);
     },
 
     // -------------------------------------------------- Google y Apple --
     /**
-     * `POST /auth/social`. Tres desenlaces:
+     * `POST /auth/social`. Cuatro desenlaces:
      *
-     * 1. La identidad ya está vinculada → se abre la sesión.
-     * 2. No está vinculada, pero el proveedor VERIFICÓ un correo que ya tiene
-     *    cuenta → se vincula a esa cuenta y se abre la sesión. Es la misma persona:
-     *    el proveedor ya comprobó que el correo es suyo.
-     * 3. Nadie la conoce → `signup_required` con un permiso de alta. El teléfono
+     * 1. La identidad ya está vinculada → se abre la sesión (si la cuenta está
+     *    activa; si no, el estado con su permiso de reactivar).
+     * 2. No está vinculada y el correo es de una cuenta CON contraseña →
+     *    `account_link_available` (1.6.0) con un permiso para
+     *    `POST /auth/social/link`. La app pregunta antes de vincular, y el canje
+     *    pide la contraseña salvo que el proveedor sea el dueño del correo.
+     * 3. No está vinculada, el correo es de una cuenta SIN contraseña (nació con
+     *    el otro proveedor) y el proveedor es dueño de ese correo → se vincula sola
+     *    y se abre la sesión, como antes de la 1.6.0: es la misma persona y no hay
+     *    contraseña que pedirle.
+     * 4. Nadie la conoce → `signup_required` con un permiso de alta. El teléfono
      *    sigue con el alta de siempre (nombre, apellido, correo y su código): la
      *    cuenta se crea recién en `register/complete`, con ese permiso en vez de
      *    una contraseña.
@@ -348,26 +480,47 @@ export function crearServicioAuth(ctx: Contexto) {
       }
 
       const vinculado = await repo.buscarUsuarioPorIdentidad(proveedor, identidad.sujeto);
-      if (vinculado !== null) return { status: "signed_in", session: await abrirSesion(vinculado.id, null) };
+      if (vinculado !== null) return { status: "signed_in", session: await abrirSesionDe(vinculado) };
 
-      // Se vincula a una cuenta existente sólo si el proveedor es el DUEÑO de ese
+      const porCorreo = identidad.email === null ? null : await repo.buscarUsuarioPorEmail(identidad.email);
+
+      // 1.6.0: una cuenta con contraseña no se vincula sola. Se ofrece, y la persona
+      // decide en la app. Si esa cuenta ya tiene otra persona del mismo proveedor,
+      // no hay nada que ofrecer.
+      if (porCorreo !== null && porCorreo.password_hash !== null) {
+        if (await repo.tieneIdentidadDe(porCorreo.id, proveedor)) {
+          throw new ErrorApi("conflict", "This account already has another identity of this provider");
+        }
+        // Sin contraseña sólo si el proveedor es el DUEÑO del correo: un Google
+        // creado con un @hotmail verificó ese correo alguna vez, pero quien lo
+        // controla hoy puede no ser el dueño del buzón (proveedores.ts).
+        const requierePassword = !proveedorEsDuenoDelCorreo(identidad);
+        const link_token = await firmarVinculo(ctx.config, {
+          usuarioId: porCorreo.id, proveedor, sujeto: identidad.sujeto, email: identidad.email, requierePassword,
+        }, ctx.ahoraMs(), VIDA_PERMISO_CUENTA_MS);
+        throw new ErrorApi("account_link_available", "An account with this email exists and can be linked", undefined, {
+          link_token, email: porCorreo.email, provider: proveedor, requires_password: requierePassword,
+        });
+      }
+
+      // Sin contraseña, se vincula sola sólo si el proveedor es el DUEÑO de ese
       // correo, y si esa cuenta no tiene ya otra persona del mismo proveedor.
       if (identidad.email !== null && proveedorEsDuenoDelCorreo(identidad)) {
-        const porCorreo = await repo.buscarUsuarioPorEmail(identidad.email);
         if (porCorreo !== null && !(await repo.tieneIdentidadDe(porCorreo.id, proveedor))) {
           await repo.vincularIdentidad(porCorreo.id, proveedor, identidad.sujeto, identidad.email, ctx.ahoraMs());
           // Que el dueño se entere: una forma nueva de entrar a su cuenta no puede
           // aparecer en silencio. Si el correo falla, igual entra.
           try { await ctx.correo.avisarVinculacion(identidad.email, proveedor); } catch { /* no bloquea */ }
-          return { status: "signed_in", session: await abrirSesion(porCorreo.id, null) };
+          return { status: "signed_in", session: await abrirSesionDe(porCorreo) };
         }
       }
 
-      // Un correo verificado que ya tiene cuenta, pero del que el proveedor no es
-      // dueño (un Google creado con un @hotmail): no se vincula solo y tampoco se
-      // puede crear otra cuenta con ese correo. Que entre con su contraseña.
-      if (identidad.email !== null && identidad.emailVerificado &&
-          await repo.buscarUsuarioPorEmail(identidad.email) !== null) {
+      // Una cuenta SIN contraseña con ese correo verificado, pero el proveedor no es
+      // dueño del correo (un Google creado con un @hotmail): no se vincula sola y
+      // tampoco se puede crear otra cuenta con ese correo. Que entre con el
+      // proveedor con el que nació, o se ponga una contraseña con "¿Olvidaste tu
+      // contraseña?" y vuelva: ahí ya se le ofrece vincular.
+      if (identidad.emailVerificado && porCorreo !== null) {
         throw new ErrorApi("conflict", "An account with this email already exists");
       }
 
@@ -387,6 +540,52 @@ export function crearServicioAuth(ctx: Contexto) {
           email_verified: identidad.emailVerificado,
         },
       };
+    },
+
+    /**
+     * `POST /auth/social/link` (1.6.0). Canjea el permiso de `account_link_available`:
+     * vincula la identidad a la cuenta, le avisa al dueño por correo y abre la sesión.
+     *
+     * El permiso se gasta recién al vincular: una contraseña mal tipeada no obliga a
+     * volver a entrar con el proveedor. Lo que frena probar contraseñas con un mismo
+     * permiso es el tope por correo, que acá cuenta igual que en el login.
+     *
+     * @param ip la del pedido, para el tope de fallos por IP.
+     */
+    async vincularConPassword(token: string, password: string | undefined, ip: string): Promise<Sesion> {
+      const ahora = ctx.ahoraMs();
+      const v = await leerVinculo(ctx.config, token, ahora);
+      if (v === null) throw new ErrorApi("invalid_link_token", "Link token is not valid");
+      const claveUso = `auth:vinculo:${hashearToken(v.jti)}`;
+      if (await ctx.cache.obtener(claveUso) !== null) throw new ErrorApi("invalid_link_token", "Link token was already used");
+      const usuario = await repo.buscarUsuarioPorId(v.usuarioId);
+      if (usuario === null) throw new ErrorApi("invalid_link_token", "Link token is not valid");
+
+      if (v.requierePassword) {
+        await exigirSinBloqueo(usuario.email, password ?? "", ip);
+        // Sin contraseña es `wrong_password` (contrato), pero no cuenta para el tope:
+        // no es un intento de adivinar nada.
+        if (password === undefined || usuario.password_hash === null) {
+          await verificarDummy(password ?? "");
+          throw new ErrorApi("wrong_password", "The password does not match");
+        }
+        await comprobarPassword(usuario.email, usuario.password_hash, password, ip);
+      }
+
+      // Un solo uso: se recuerda hasta que el permiso vence, y un minuto más.
+      const ttlS = Math.max(60, Math.ceil((v.venceMs - ahora) / 1000) + 60);
+      if (!(await ctx.cache.ponerSiAusente(claveUso, "1", ttlS))) {
+        throw new ErrorApi("invalid_link_token", "Link token was already used");
+      }
+      if (await repo.tieneIdentidadDe(usuario.id, v.proveedor) ||
+          !(await repo.vincularIdentidad(usuario.id, v.proveedor, v.sujeto, v.email, ahora))) {
+        throw new ErrorApi("conflict", "This identity or provider is already linked");
+      }
+      // Una forma nueva de entrar a la cuenta no puede aparecer en silencio. Si el
+      // correo falla, el vínculo vale igual.
+      try { await ctx.correo.avisarVinculacion(usuario.email, v.proveedor); } catch { /* no bloquea */ }
+      // Desactivada o por borrarse: el vínculo queda hecho y contesta el estado.
+      return abrirSesionDe(usuario);
     },
 
     // ------------------------------------------------------------- refresh --
@@ -432,6 +631,8 @@ export function crearServicioAuth(ctx: Contexto) {
         }
         if (sesion.revocado_en_ms !== null) return { tipo: "revocada" } as const;
         if (sesion.vence_en_ms <= ahora) return { tipo: "vencido" } as const;
+        // Desactivar y borrar revocan las sesiones; esto cubre la que rotó en carrera.
+        if (!(await r.cuentaActiva(sesion.usuario_id))) return { tipo: "revocada" } as const;
 
         // 🛑 Rotar NO revoca la sesión vieja: sólo la marca usada, y sus access siguen
         // valiendo hasta que vencen. Revocarla dejaba con `session_revoked` a cualquier
@@ -486,6 +687,15 @@ export function crearServicioAuth(ctx: Contexto) {
       await repo.revocarFamiliaDeSesion(sesionActualId, ahora, "logout");
     },
 
+    /**
+     * `POST /auth/logout/others` (1.6.0): todas las sesiones de la persona menos la
+     * cadena de la que pide, que sigue viva entera (rotar no revoca, decisión 0013).
+     * Idempotente: sin otras sesiones no hay nada que revocar.
+     */
+    async cerrarOtrasSesiones(usuarioId: string, sesionActualId: string): Promise<void> {
+      await repo.revocarOtrasFamilias(usuarioId, sesionActualId, ctx.ahoraMs(), "logout_otras");
+    },
+
     // ------------------------------------------------------- recuperación --
     async recuperacionInicio(emailCrudo: string) {
       const email = normalizarEmail(emailCrudo);
@@ -502,7 +712,8 @@ export function crearServicioAuth(ctx: Contexto) {
       return { reset_token: r.token, expires_at_ms: r.expires_at_ms };
     },
 
-    async recuperacionAplicar(resetToken: string, password: string): Promise<Sesion> {
+    /** @param idioma el del pedido: en ése sale el aviso de contraseña cambiada. */
+    async recuperacionAplicar(resetToken: string, password: string, idioma: IdiomaDeCorreo = "es"): Promise<Sesion> {
       exigirPasswordValida(password);
       const ahora = ctx.ahoraMs();
       const emailDePaso = await emailDePasoDeCorreo(ctx.config, resetToken, "recuperacion", ahora);
@@ -513,10 +724,15 @@ export function crearServicioAuth(ctx: Contexto) {
       if (usuario === null) throw new ErrorApi("invalid_reset_token", "Reset token is not valid");
 
       await repo.cambiarPassword(usuario.id, await hashearPassword(password), ahora);
-      // 🛑 §12: cambiar la contraseña revoca las demás sesiones. Se revoca TODO y
-      // se abre una nueva, así que quien cambió la clave no queda afuera.
-      await repo.revocarTodasDe(usuario.id, ahora, "cambio_de_password");
-      return abrirSesion(usuario.id, null);
+      // Cambiar la contraseña reinicia el tope de ese correo (contrato 1.6.0).
+      await tope.reiniciar(usuario.email);
+      // 1.6.0: las otras sesiones quedan abiertas (ver el encabezado), así que el
+      // aviso sale SIEMPRE: es como se entera el dueño si no fue él. Si el correo
+      // falla, el cambio vale igual: la persona ya eligió su contraseña nueva.
+      try { await ctx.correo.avisarCambioDePassword?.(usuario.email, idioma); } catch { /* no bloquea */ }
+      // Con la cuenta desactivada o por borrarse, la contraseña queda cambiada igual
+      // y contesta el estado con su permiso, como el login (contrato 1.6.0).
+      return abrirSesionDe(usuario);
     },
 
     /**

@@ -1,4 +1,5 @@
 import XCTest
+import UIKit
 
 // =============================================================================
 // Tests de UI del flujo de entrada.
@@ -23,7 +24,7 @@ final class FlujoDeEntradaUITests: XCTestCase {
     ///
     /// `-serviciosDePrueba` (sólo en DEBUG, `ServiciosDeLaApp`) arma la app con una
     /// cuenta que contesta "sin red" a todo y sin sesión guardada: cada pantalla
-    /// muestra siempre el mismo estado. Antes, lo que se veía en `regAviso` —y la
+    /// muestra siempre el mismo estado. Antes, lo que se veía en el aviso de salud —y la
     /// puerta de versión del arranque— dependía de lo que contestara la red en ese
     /// momento. `-apiBase` a un puerto vacío queda de segunda red.
     static let sinServidor = ["-serviciosDePrueba", "-apiBase", "http://127.0.0.1:9/v1"]
@@ -45,10 +46,10 @@ final class FlujoDeEntradaUITests: XCTestCase {
 
     func testCadaPantallaTieneComoMuchoUnaFlechaDeVolver() {
         let conFlecha = ["login", "claveCorreo", "claveCodigo", "claveNueva",
-                         "regCorreo", "regCodigo", "regAviso", "regTerminos",
+                         "regCorreo", "regCodigo", "regAntesDeEmpezar",
                          "regSexo",
-                         "regCuerpo", "regDeporte", "regNivel", "regObjetivo", "regSalud",
-                         "regMedicion", "regDias"]
+                         "regCuerpo", "regDeporte", "regNivel", "regObjetivo",
+                         "regDias", "regApto"]
         for pantalla in conFlecha {
             let app = abrir(pantalla)
             let flechas = app.buttons.matching(identifier: "Volver")
@@ -61,10 +62,9 @@ final class FlujoDeEntradaUITests: XCTestCase {
     /// `regNacimiento` está acá a propósito: es el primer paso con la cuenta ya
     /// creada (desde 2026-10-21, que el nombre y la contraseña van con el correo),
     /// y atrás sólo hay pasos que mandarían un permiso consumido (decisión 0008).
-    /// Lleva la barra de avance y no la flecha. `regNombre` y `regClave` ya no son
-    /// pasos del alta.
+    /// Lleva la barra de avance y no la flecha.
     func testLasPantallasDeEntradaYDeCierreNoTienenFlecha() {
-        for pantalla in ["bienvenida", "claveLista", "regListo", "regNacimiento", "regNombre"] {
+        for pantalla in ["bienvenida", "regNacimiento"] {
             let app = abrir(pantalla)
             XCTAssertEqual(app.buttons.matching(identifier: "Volver").count, 0,
                            "«\(pantalla)» no debería tener flecha de volver")
@@ -78,20 +78,18 @@ final class FlujoDeEntradaUITests: XCTestCase {
     /// que es justo lo que desapareció cuando la trailing closure se emparejó mal.
     func testCadaPantallaMuestraSuContenido() {
         let esperado: [(String, String)] = [
-            ("regNombre", "Nombre"),
+            ("regCorreo", "Nombre"),
             ("regSexo", "Femenino"),
             ("regCuerpo", "Peso (kg)"),
             ("regDeporte", "Running"),
             ("regNivel", "Principiante"),
             ("regObjetivo", "Media maratón"),
-            ("regSalud", "Dolor u opresión en el pecho"),
-            ("regMedicion", "GPS del teléfono"),
-            ("regDias", "Martes"),
+            // "Antes de empezar" es texto de la app: se ve sin servidor.
+            ("regAntesDeEmpezar", "Dolor u opresión en el pecho"),
+            ("regDias", "Notificación para prepararte"),
+            ("regApto", "Lo subo después"),
             ("claveNueva", "Nueva contraseña"),
             ("claveCorreo", "Correo electrónico"),
-            // Sin servidor el texto legal no baja: lo que tiene que estar es el
-            // estado de la pantalla, cargando o sin texto, y nunca un hueco.
-            ("regAviso", "Aviso de salud"),
         ]
         for (pantalla, texto) in esperado {
             let app = abrir(pantalla)
@@ -175,7 +173,7 @@ final class FlujoDeEntradaUITests: XCTestCase {
         let casos = [
             (idioma: "es", region: "es_AR", irALaFoto: "Ver la foto %d de 3",
              titulo1: "Tu plan de running, a tu ritmo",
-             titulo3: "Llegá entero al día de la carrera"),
+             titulo3: "Llega entero al día de la carrera"),
             (idioma: "en", region: "en_US", irALaFoto: "Show photo %d of 3",
              titulo1: "Your running plan, at your pace",
              titulo3: "Show up strong on race day"),
@@ -265,17 +263,13 @@ final class FlujoDeEntradaUITests: XCTestCase {
                       "«Crear cuenta gratis» tiene que seguir llevando al correo")
     }
 
-    // MARK: - El correo se juzga al tocar, no mientras se escribe
+    // MARK: - El botón espera un correo válido
 
-    /// Iván, probando en el iPhone: con la primera letra ya aparecía "ese correo no
-    /// parece válido", y el botón quedaba apagado hasta que el correo pareciera uno.
-    /// Ahora se escribe en paz y el botón se prende con algo escrito. El error
-    /// aparece al tocarlo, con el teclado todavía arriba, y se va al editar el correo.
+    /// 2026-10-22 (Iván): ya no hay "Ese correo no parece válido" debajo del campo.
+    /// El botón que manda el correo no se habilita hasta que el correo es válido.
     ///
-    /// Sin `-datosDeEjemplo`: los campos tienen que arrancar vacíos. Y sólo se
-    /// tipean letras, que es justo un correo sin `@`.
-    func testElCorreoSeJuzgaAlTocarElBotonYNoMientrasSeEscribe() {
-        let error = "Ese correo no parece válido: revisá que tenga @ y dominio."
+    /// Sin `-datosDeEjemplo`: los campos tienen que arrancar vacíos.
+    func testElBotonEsperaUnCorreoValido() {
         let casos: [(pantalla: String, boton: String)] = [
             ("regCorreo", "Enviarme el código"),
             ("claveCorreo", "Enviarme el código"),
@@ -296,89 +290,35 @@ final class FlujoDeEntradaUITests: XCTestCase {
             XCTAssertFalse(boton.isEnabled, "«\(caso.pantalla)»: sin nada escrito, el botón no se prende")
 
             if caso.pantalla == "regCorreo" {
-                // Desde 2026-10-21 el alta pide todo junto: nombre, apellido,
-                // correo, contraseña y su confirmación.
-                for (campo, texto) in [("Nombre", "Iván"), ("Apellido (opcional)", "Karkoszka")] {
-                    app.textFields[campo].tap()
-                    app.textFields[campo].typeText(texto)
-                }
-                for campo in ["Contraseña", "Repetir contraseña"] {
-                    app.secureTextFields[campo].tap()
-                    app.secureTextFields[campo].typeText("Trainer2026x")
-                }
+                // En el alta el botón además pide la contraseña con sus tres reglas, y
+                // el simulador no la deja tipear entera (la sugerencia de contraseña
+                // segura se come las teclas). Acá se mira que espere; que se prenda
+                // con todo bien lo prueba `CorreoAlTocarTests.altaNoMandaUnCorreoInvalido`.
+                correo.tap()
+                correo.typeText("ivan")
+                XCTAssertFalse(boton.isEnabled, "«regCorreo»: con un correo que no es uno, no se prende")
+                app.terminate()
+                continue
             }
-            correo.tap()
-            correo.typeText("ivan")
             if caso.pantalla == "login" {
                 let clave = app.secureTextFields["Contraseña"]
                 clave.tap()
                 clave.typeText("x")
             }
-            XCTAssertFalse(app.staticTexts[error].exists, "«\(caso.pantalla)»: mientras se escribe, no se juzga")
-            XCTAssertTrue(boton.isEnabled, "«\(caso.pantalla)»: con algo escrito, el botón se prende")
+            correo.tap()
+            correo.typeText("ivan")
+            XCTAssertFalse(boton.isEnabled, "«\(caso.pantalla)»: con un correo que no es uno, no se prende")
 
-            boton.tap()
-            XCTAssertTrue(app.staticTexts[error].waitForExistence(timeout: 5),
-                          "«\(caso.pantalla)»: al tocar con algo que no parece un correo, aparece el error")
-
-            // El teclado sigue arriba: `typeText` sobre la app, sin tocar ningún
-            // campo, falla si nada tiene el foco.
-            app.typeText("x")
-            if caso.pantalla == "login" {
-                XCTAssertTrue(app.staticTexts[error].exists,
-                              "«login»: escribir en la contraseña no es corregir el correo")
-                correo.tap()
-                correo.typeText("x")
+            // `@` no se puede tipear con el teclado de esta Mac: se pega.
+            UIPasteboard.general.string = "@ejemplo.com"
+            correo.press(forDuration: 1.2)
+            if app.menuItems["Pegar"].waitForExistence(timeout: 3) {
+                app.menuItems["Pegar"].tap()
+                XCTAssertTrue(boton.waitForExistence(timeout: 2) && boton.isEnabled,
+                              "«\(caso.pantalla)»: con un correo válido, el botón se prende")
             }
-            XCTAssertTrue(app.staticTexts[error].waitForNonExistence(timeout: 5),
-                          "«\(caso.pantalla)»: editar el correo borra el error")
             app.terminate()
         }
-    }
-
-    /// 🛑 El error aparece debajo del campo, y ahí puede no haber lugar: con el
-    /// teclado arriba el pie sube, y si el campo quedó al borde de lo que se ve, el
-    /// renglón nuevo queda tapado y el toque parece no hacer nada. La pantalla se
-    /// desplaza lo justo para mostrarlo.
-    ///
-    /// Se prueba con letra grande, que deja el campo al borde igual que el teclado:
-    /// en los tests el simulador escribe con el teclado de la Mac y no dibuja el
-    /// del teléfono.
-    func testElErrorDelCorreoQuedaALaVistaAunqueElCampoEsteAlBorde() {
-        let app = XCUIApplication()
-        app.launchArguments = [
-            "-pantallaInicial", "regCorreo",
-            "-AppleLanguages", "(es)",
-            "-AppleLocale", "es_AR",
-            "-UIPreferredContentSizeCategoryName", "UICTContentSizeCategoryAccessibilityL",
-        ] + Self.sinServidor
-        app.launch()
-
-        let correo = app.textFields["Correo electrónico"]
-        XCTAssertTrue(correo.waitForExistence(timeout: 5))
-        for (campo, texto) in [("Nombre", "Iván"), ("Apellido (opcional)", "Karkoszka")] {
-            app.textFields[campo].tap()
-            app.textFields[campo].typeText(texto)
-        }
-        for campo in ["Contraseña", "Repetir contraseña"] {
-            app.secureTextFields[campo].tap()
-            app.secureTextFields[campo].typeText("Trainer2026x")
-        }
-        correo.tap()
-        correo.typeText("ivan")
-        app.buttons["Enviarme el código"].tap()
-
-        let error = app.staticTexts["Ese correo no parece válido: revisá que tenga @ y dominio."]
-        let pie = app.staticTexts["Al continuar aceptás los términos y la política de privacidad. No mandamos publicidad."]
-        XCTAssertTrue(error.waitForExistence(timeout: 5))
-
-        // El desplazamiento es animado: se le da un momento antes de medir.
-        let limite = Date().addingTimeInterval(3)
-        while error.frame.maxY > pie.frame.minY, Date() < limite {
-            usleep(200_000)
-        }
-        XCTAssertLessThanOrEqual(error.frame.maxY, pie.frame.minY,
-                                 "el error quedó debajo del pie, donde no se ve")
     }
 
     // MARK: - El Home
@@ -389,6 +329,9 @@ final class FlujoDeEntradaUITests: XCTestCase {
         app.launchArguments = [
             "-pantallaInicial", "home", "-pestanaHome", pestana,
             "-datosDeEjemplo", "-AppleLanguages", "(es)", "-AppleLocale", "es_AR",
+            // El tour de la primera vez tapa el Home: con la app recién instalada
+            // aparecía en cada arranque y ningún elemento de abajo se podía tocar.
+            "-tour_visto", "YES",
         ] + Self.sinServidor
         app.launch()
         return app

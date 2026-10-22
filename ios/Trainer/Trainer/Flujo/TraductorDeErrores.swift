@@ -20,7 +20,7 @@ enum TraductorDeErrores {
     static func texto<Valor>(_ resultado: Resultado<Valor>) -> String {
         switch resultado {
         case .ok: return ""
-        case .rechazado(let codigo, _): return texto(codigo: codigo)
+        case .rechazado(let codigo, _, _): return texto(codigo: codigo)
         case .sinRed: return Textos.errorOffline
         case .respuestaRara: return Textos.errorUnexpectedResponse
         }
@@ -33,15 +33,23 @@ enum TraductorDeErrores {
         switch resultado {
         case .ok, .respuestaRara: return generico
         case .sinRed: return Textos.errorOfflineTitle
-        case .rechazado(let codigo, _):
+        case .rechazado(let codigo, _, _):
             switch codigo {
             case "user_not_found": return Textos.errorUserNotFoundTitle
             case "wrong_password", "invalid_credentials": return Textos.errorWrongPasswordTitle
-            case "password_not_set": return Textos.errorPasswordNotSetTitle
+            case "password_not_set": return Textos.errorPasswordNotSetTitle(Textos.commonGoogleOrApple)
             case "email_already_registered": return Textos.errorEmailAlreadyRegisteredTitle
             case "invalid_code": return Textos.errorInvalidCodeTitle
             case "code_expired": return Textos.errorCodeExpiredTitle
             case "code_resend_too_soon": return Textos.errorCodeResendTooSoonTitle
+            case "code_attempts_exceeded": return Textos.errorCodeAttemptsExceededTitle
+            case "too_many_attempts": return Textos.errorTooManyAttemptsTitle
+            case "invalid_registration_token": return Textos.errorInvalidRegistrationTokenTitle
+            case "invalid_reset_token", "invalid_signup_token", "invalid_link_token",
+                 "invalid_reactivation_token": return Textos.errorExpiredTitle
+            case "legal_version_stale": return Textos.errorLegalVersionStaleTitle
+            case "account_deactivated": return Textos.accountDeactivatedTitle
+            case "account_pending_deletion": return Textos.accountPendingDeletionTitle
             case "weak_password": return Textos.errorWeakPasswordTitle
             case "rate_limited": return Textos.errorRateLimitedTitle
             case "service_unavailable": return Textos.errorServerUnavailableTitle
@@ -69,7 +77,7 @@ enum TraductorDeErrores {
         // 2026-10-21: login, alta y recuperación dicen qué pasó.
         case "user_not_found": return Textos.errorUserNotFound
         case "wrong_password": return Textos.errorWrongPassword
-        case "password_not_set": return Textos.errorPasswordNotSet
+        case "password_not_set": return Textos.errorPasswordNotSet(Textos.commonGoogleOrApple)
         case "email_already_registered": return Textos.errorEmailAlreadyRegistered
         case "invalid_code": return Textos.errorInvalidCode
         case "code_expired": return Textos.errorCodeExpired
@@ -85,7 +93,16 @@ enum TraductorDeErrores {
         // Google y Apple (contrato 1.4.0).
         case "invalid_provider_token": return Textos.loginSocialFailed
         case "provider_not_configured": return Textos.loginSocialNotConfigured
-        case "invalid_signup_token": return Textos.signupSocialExpired
+        case "invalid_signup_token": return Textos.signupSocialExpired(Textos.commonGoogleOrApple)
+        // 1.6.0. La mayoría tiene su propia alerta en `FlujoEntrada`; éstos son
+        // los textos para cuando llegan por otro camino.
+        case "too_many_attempts": return Textos.errorTooManyAttempts
+        case "code_attempts_exceeded": return Textos.errorCodeAttemptsExceeded
+        case "account_link_available": return Textos.loginSocialAccountExists
+        case "invalid_link_token": return Textos.signupSocialExpired(Textos.commonGoogleOrApple)
+        case "account_deactivated": return Textos.accountDeactivatedBody
+        case "account_pending_deletion": return Textos.accountPendingDeletionDone
+        case "invalid_reactivation_token": return Textos.errorInvalidRegistrationToken
         default: return Textos.errorUnknownCode(codigo)
         }
     }

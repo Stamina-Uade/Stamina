@@ -17,12 +17,9 @@ import com.tecladus.trainer.R
  * revés, deja pasar algo que el servidor rechaza y el error llega después del
  * viaje.
  *
- * **Lo que el servidor rechaza y acá NO se muestra**: la lista de contraseñas
- * conocidas y las que tienen menos de cuatro caracteres distintos. Las dos son
- * correctas y las dos quedan afuera de esta lista a propósito: no se pueden
- * anticipar mientras alguien tipea. Un puntito que dice "que no sea conocida"
- * está apagado hasta que deja de estarlo, sin que nadie sepa por qué. Esas dos se
- * explican **cuando se rechaza** (`error_weak_password`), no antes.
+ * Desde el contrato 1.6.0 el servidor ya no rechaza contraseñas conocidas ni con
+ * pocos caracteres distintos: `weak_password` es sólo no cumplir estas tres. Si
+ * igual llega, `error_weak_password` repite las tres reglas.
  */
 class ReglaDeClave internal constructor(
     /** El id que usa el test para chequear que las tres siguen estando. */

@@ -46,15 +46,9 @@ struct RaizHomeView: View {
         // `PantallaPaso`, que es el que funciona en este código.
         ZStack {
             VStack(spacing: 0) {
-                // Arriba del inicio, que es la pantalla con la que se entra: ahí se ve
-                // antes que nada, y no tapa las otras pestañas.
-                // También cuando el que lo dice es el motor (`profile_incomplete`), aunque
-                // `GET /me` todavía no haya llegado.
-                if estado.pestana == .inicio, flujo.pasoPendienteDelPerfil != nil || estado.faltaPerfil {
-                    AvisoDePerfilIncompleto { retomarPerfil() }
-                        .padding(.horizontal, TokensEspaciado.e16)
-                        .padding(.top, TokensEspaciado.e8)
-                }
+                // 2026-10-22: el perfil a medio hacer ya no lleva un aviso arriba de
+                // todo: en Inicio, la tarjeta del objetivo pasa a ser "Completa tu
+                // perfil" (`InicioView.tarjetaCompletaTuPerfil`).
                 contenido
                 if estado.muestraLaBarra {
                     BarraDePestanas(
@@ -164,16 +158,6 @@ struct RaizHomeView: View {
         withTransaction(sinAnimar) { estado.ir(a: destino) }
     }
 
-    /// Al primer hueco del perfil. Si el que avisó fue el motor y el perfil todavía
-    /// no llegó, primero se pide: sin él no se sabe a qué paso ir.
-    private func retomarPerfil() {
-        guard flujo.pasoPendienteDelPerfil == nil else { return flujo.retomarPerfil() }
-        Task {
-            await flujo.cargarPerfil()
-            flujo.retomarPerfil()
-        }
-    }
-
     /// Lo único del perfil que el Home usa: el nombre y el objetivo. Plan, rutina,
     /// comidas y series tienen sus propios endpoints desde la 1.1.0
     /// (`ServicioDelPlan`, en `ApiTrainer`); de dónde los saca el Home lo decide
@@ -203,20 +187,6 @@ struct RaizHomeView: View {
         case .ajustes:   AjustesView()
         case .gimnasio:  GimnasioView()
         case .entreno:   InicioView()
-        }
-    }
-}
-
-/// El aviso de un perfil al que le faltan datos del alta: un texto y el botón que
-/// lleva al primer hueco. Chico a propósito: reusa las pantallas del alta en vez de
-/// traer un formulario propio.
-struct AvisoDePerfilIncompleto: View {
-    let retomar: () -> Void
-
-    var body: some View {
-        VStack(alignment: .leading, spacing: TokensEspaciado.e8) {
-            AvisoSuave(Textos.homeProfileIncompleteBody)
-            BotonTexto(Textos.homeProfileIncompleteButton, accion: retomar)
         }
     }
 }

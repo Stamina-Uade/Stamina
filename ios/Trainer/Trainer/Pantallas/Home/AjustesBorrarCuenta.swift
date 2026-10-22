@@ -4,16 +4,18 @@ import TrainerCore
 /// Ajustes → Borrar cuenta. App Store 5.1.1(v): quien creó la cuenta en la app
 /// tiene que poder borrarla desde la app, sin mandar un mail ni entrar a una web.
 ///
-/// `POST /me/delete` borra todo en el acto (no hay 30 días de gracia). Por eso
-/// hay dos frenos: la contraseña, si la cuenta tiene una (un teléfono
-/// desbloqueado no alcanza para borrarle la cuenta a nadie), y una confirmación.
-/// Las cuentas de Google o Apple no tienen contraseña: la sesión es la prueba.
+/// Desde la 1.6.0 `POST /me/delete` deja la cuenta marcada y la borra a los 30
+/// días; hasta entonces se recupera iniciando sesión. Igual hay dos frenos: la
+/// contraseña, si la cuenta tiene una (un teléfono desbloqueado no alcanza para
+/// borrarle la cuenta a nadie), y una confirmación. Las cuentas de Google o Apple
+/// no tienen contraseña: la sesión es la prueba. Lo que sale mal lo dice una
+/// alerta.
 struct AjustesPaginaBorrarCuenta: View {
     @EnvironmentObject private var flujo: FlujoEntrada
     let volver: () -> Void
 
     @State private var clave = ""
-    @State private var errorDeClave: String?
+    @State private var claveIncorrecta = false
     @State private var errorGeneral: String?
     @State private var confirmando = false
     @State private var borrando = false
@@ -29,23 +31,14 @@ struct AjustesPaginaBorrarCuenta: View {
                     Text(Textos.settingsDeleteAccountPasswordHint)
                         .estilo(.cuerpoSecundario, color: Paleta.textoSecundario)
                         .fixedSize(horizontal: false, vertical: true)
-                    VStack(alignment: .leading, spacing: TokensEspaciado.e6) {
-                        CampoTexto(etiqueta: Textos.loginPasswordLabel,
-                                   texto: $clave,
-                                   contenido: .claveActual, seguro: true,
-                                   conError: errorDeClave != nil)
-                            .disabled(borrando)
-                        ErrorDeCampo(errorDeClave)
-                    }
-                    .onChange(of: clave) { _ in errorDeClave = nil }
+                    CampoTexto(etiqueta: Textos.loginPasswordLabel,
+                               texto: $clave,
+                               contenido: .claveActual, seguro: true)
+                        .disabled(borrando)
                 } else {
                     Text(Textos.settingsDeleteAccountSocialHint)
                         .estilo(.cuerpoSecundario, color: Paleta.textoSecundario)
                         .fixedSize(horizontal: false, vertical: true)
-                }
-
-                if let errorGeneral {
-                    PistaDeCampo(estado: .error(errorGeneral))
                 }
 
                 Button {
@@ -73,12 +66,17 @@ struct AjustesPaginaBorrarCuenta: View {
                 .padding(.top, TokensEspaciado.e8)
             }
         }
-        .alert(Textos.settingsDeleteAccountAlertTitle, isPresented: $confirmando) {
-            Button(Textos.commonCancel, role: .cancel) {}
-            Button(Textos.settingsDeleteAccountAlertConfirm, role: .destructive) { borrar() }
-        } message: {
-            Text(Textos.settingsDeleteAccountAlertMessage)
-        }
+        .alertaApilada(Textos.settingsDeleteAccountAlertTitle, isPresented: $confirmando,
+                       mensaje: Textos.settingsDeleteAccountAlertMessage,
+                       botones: [
+                           BotonDeAlerta(Textos.settingsDeleteAccountAlertConfirm, rol: .destructivo) { borrar() },
+                           BotonDeAlerta(Textos.commonCancel, rol: .cancelar),
+                       ])
+        .alertaApilada(Textos.errorWrongPasswordTitle, isPresented: $claveIncorrecta,
+                       mensaje: Textos.errorWrongPassword,
+                       botones: [BotonDeAlerta(Textos.commonTryAgain, rol: .cancelar)])
+        .alertaApilada(Textos.settingsDeleteAccount, mensaje: $errorGeneral,
+                       botones: [BotonDeAlerta(Textos.commonOk, rol: .cancelar)])
         .task { await flujo.cargarPerfil() }
     }
 
@@ -92,7 +90,7 @@ struct AjustesPaginaBorrarCuenta: View {
             case .borrada:
                 Haptico.exito()
             case .claveIncorrecta:
-                errorDeClave = Textos.fieldPasswordWrong
+                claveIncorrecta = true
             case .fallo(let texto):
                 errorGeneral = texto
             }

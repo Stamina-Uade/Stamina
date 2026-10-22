@@ -3,7 +3,7 @@
 // NO EDITAR A MANO: se reescribe en cada `npm run generar:modelos`, y el CI
 // falla si el archivo commiteado no coincide con lo que el generador produce.
 //
-// Contrato 1.5.0
+// Contrato 1.6.0
 //
 // AGENTS.md §4.2: los modelos de red se generan desde el contrato, no se
 // escriben a mano. AGENTS.md §5: a partir de la primera versión en tienda,
@@ -30,7 +30,7 @@ public typealias Id = String
 public typealias Email = String
 
 /// Mínimo 10 caracteres, con al menos una mayúscula y al menos un número. Las mayúsculas acentuadas y la Ñ cuentan: el servidor usa `\p{Lu}`, no `[A-Z]`.
-/// Esas tres son las reglas que la app MUESTRA mientras alguien escribe (`design/origen/Trainer App.dc.html`, pantalla `fpNew`: tres barras y tres puntitos). El servidor además rechaza, sin anticiparlo, las que están en su lista de contraseñas conocidas y las que tienen menos de cuatro caracteres distintos; las dos devuelven `weak_password`.
+/// Esas tres son las reglas que la app MUESTRA mientras alguien escribe (`design/origen/Trainer App.dc.html`, pantalla `fpNew`: tres barras y tres puntitos). Desde la 1.6.0 son las ÚNICAS: el servidor ya no rechaza por "fácil de adivinar" (lista de conocidas o pocos caracteres distintos), y `weak_password` quiere decir sólo que no se cumple alguna de las tres (o que pasa los 200 caracteres).
 /// Se guarda con argon2id, nunca en claro y nunca en un log.
 public typealias Password = String
 
@@ -2010,12 +2010,62 @@ public struct DetalleDeError: Codable, Equatable, Sendable {
     public let code: String
     /// Para el log del desarrollador y como respaldo. **El cliente no lo muestra tal cual**: muestra su propia traducción del `code`. Nunca lleva datos de salud ni de identidad (AGENTS.md §8).
     public let message: String
+    public let details: DatosDelError?
 
     public init(
         code: String,
-        message: String
+        message: String,
+        details: DatosDelError? = nil
     ) {
         self.code = code
         self.message = message
+        self.details = details
+    }
+}
+
+/// 1.6.0. Lo que algunos códigos necesitan además del `code` para que la app
+/// pueda seguir. Sólo viaja lo que corresponde a ese código, y sólo a quien
+/// ya demostró ser la persona (contraseña correcta o token del proveedor):
+/// - `password_not_set`: `provider`.
+/// - `account_link_available`: `link_token`, `email`, `provider` y `requires_password`.
+/// - `account_deactivated`: `reactivation_token`.
+/// - `account_pending_deletion`: `reactivation_token`, `days_remaining`.
+public struct DatosDelError: Codable, Equatable, Sendable {
+    public enum Provider: String, Codable, CaseIterable, Sendable {
+        case google = "google"
+        case apple = "apple"
+    }
+
+    public let provider: Provider?
+    public let email: String?
+    public let linkToken: String?
+    public let requiresPassword: Bool?
+    public let reactivationToken: String?
+    /// Días enteros que faltan para el borrado, redondeados para arriba.
+    public let daysRemaining: Int64?
+
+    enum CodingKeys: String, CodingKey {
+        case provider
+        case email
+        case linkToken = "link_token"
+        case requiresPassword = "requires_password"
+        case reactivationToken = "reactivation_token"
+        case daysRemaining = "days_remaining"
+    }
+
+    public init(
+        provider: Provider? = nil,
+        email: String? = nil,
+        linkToken: String? = nil,
+        requiresPassword: Bool? = nil,
+        reactivationToken: String? = nil,
+        daysRemaining: Int64? = nil
+    ) {
+        self.provider = provider
+        self.email = email
+        self.linkToken = linkToken
+        self.requiresPassword = requiresPassword
+        self.reactivationToken = reactivationToken
+        self.daysRemaining = daysRemaining
     }
 }

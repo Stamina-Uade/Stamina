@@ -48,9 +48,36 @@ export const CODIGOS = {
   invalid_provider_token: 401,
   provider_not_configured: 503,
   invalid_signup_token: 401,
+  // Contrato 1.6.0 ("Entrar y registrarse", decisión de Iván del 2026-10-22).
+  // `too_many_attempts` es el tope POR CORREO (5 contraseñas equivocadas seguidas);
+  // el tope por IP sigue siendo `rate_limited`. Son dos porque la app dice cosas
+  // distintas: "esta cuenta está bloqueada un rato" no es "estás yendo muy rápido".
+  too_many_attempts: 429,
+  // Un código de correo agotado (5 equivocados) no es uno vencido (15 minutos): la
+  // app explica cada uno a su manera, aunque la salida sea la misma, pedir otro.
+  code_attempts_exceeded: 400,
+  account_link_available: 409,
+  invalid_link_token: 401,
+  account_deactivated: 403,
+  account_pending_deletion: 403,
+  invalid_reactivation_token: 401,
 } as const;
 
 export type CodigoError = keyof typeof CODIGOS;
+
+/**
+ * `DatosDelError` del contrato (1.6.0): lo que algunos códigos necesitan además
+ * del `code` para que la app pueda seguir. Sólo viaja lo que corresponde a ese
+ * código, y sólo a quien ya demostró ser la persona.
+ */
+export interface DatosDelError {
+  provider?: "google" | "apple";
+  email?: string;
+  link_token?: string;
+  requires_password?: boolean;
+  reactivation_token?: string;
+  days_remaining?: number;
+}
 
 /**
  * El único error que las rutas tiran. `mensaje` es para el desarrollador y como
@@ -60,24 +87,30 @@ export type CodigoError = keyof typeof CODIGOS;
 export class ErrorApi extends Error {
   readonly codigo: CodigoError;
   readonly http: number;
-  /** Segundos hasta poder reintentar. Sólo para rate_limited. */
+  /** Segundos hasta poder reintentar: sale en `Retry-After`. Para los 429. */
   readonly reintentarEnS?: number;
+  /** Sale en `error.details`. */
+  readonly detalles?: DatosDelError;
 
-  constructor(codigo: CodigoError, mensaje: string, reintentarEnS?: number) {
+  constructor(codigo: CodigoError, mensaje: string, reintentarEnS?: number, detalles?: DatosDelError) {
     super(mensaje);
     this.name = "ErrorApi";
     this.codigo = codigo;
     this.http = CODIGOS[codigo];
     if (reintentarEnS !== undefined) this.reintentarEnS = reintentarEnS;
+    if (detalles !== undefined) this.detalles = detalles;
   }
 }
 
 export interface CuerpoError {
-  error: { code: CodigoError; message: string };
+  error: { code: CodigoError; message: string; details?: DatosDelError };
 }
 
 export function aCuerpo(e: ErrorApi): CuerpoError {
-  return { error: { code: e.codigo, message: e.message } };
+  // Sin `details` cuando no hay: el sobre de siempre, igual que antes de la 1.6.0.
+  return e.detalles === undefined
+    ? { error: { code: e.codigo, message: e.message } }
+    : { error: { code: e.codigo, message: e.message, details: e.detalles } };
 }
 
 /**

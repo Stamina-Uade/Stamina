@@ -101,8 +101,9 @@ final class EstadoHome: ObservableObject {
     @Published var avisoDeCarrera = true
     @Published var resumenSemanal = true
     @Published var perfilPrivado = true
-    /// Minutos de anticipación del aviso de preparación.
-    @Published var anticipacionMinutos: Int = 45
+    /// Minutos de anticipación del aviso de preparación: los que eligió la
+    /// persona (`AvisoDePreparacion`, 30 de entrada).
+    var anticipacionMinutos: Int { AvisoDePreparacion.minutos() }
     @Published var sistemaDeUnidades: SistemaDeUnidades = .metrico
 
     // MARK: - Perfil
@@ -449,7 +450,8 @@ final class EstadoHome: ObservableObject {
         NotificadorDeEntrenamiento.limpiarRecordatorios()
 
         let avisoMananaHabilitado = UserDefaults.standard.object(forKey: "ajuste_notif_manana") as? Bool ?? true
-        let recordatorioPrevioHabilitado = UserDefaults.standard.object(forKey: "ajuste_notif_recordatorio_antes") as? Bool ?? true
+        let recordatorioPrevioHabilitado = AvisoDePreparacion.encendido()
+        let minutosPrevios = AvisoDePreparacion.minutos()
 
         guard avisoMananaHabilitado || recordatorioPrevioHabilitado else { return }
 
@@ -483,10 +485,11 @@ final class EstadoHome: ObservableObject {
                 }
             }
 
-            // 2. Notificación previa al entrenamiento: 30 minutos antes de la hora definida
+            // 2. La notificación para prepararte: los minutos que eligió la persona
+            // (de 5 a 60) antes de la hora definida, o ninguna si la apagó.
             if recordatorioPrevioHabilitado {
                 let minutoEntreno = dia.minutoDelDia ?? 1140
-                let minutoAviso = max(0, minutoEntreno - 30)
+                let minutoAviso = max(0, minutoEntreno - minutosPrevios)
                 var compHora = componentesDia
                 compHora.hour = minutoAviso / 60
                 compHora.minute = minutoAviso % 60

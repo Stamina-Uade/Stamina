@@ -119,10 +119,10 @@ public final class ColaDeComidas {
         switch resultado {
         case .ok:
             return true
-        case .rechazado(_, let http) where http == 404:
+        case .rechazado(_, let http, _) where http == 404:
             // Un PUT sobre una comida que se borró en otro lado: borrar gana.
             return true
-        case .rechazado(_, let http) where (400..<500).contains(http) && http != 401 && http != 429:
+        case .rechazado(_, let http, _) where (400..<500).contains(http) && http != 401 && http != 429:
             // No se arregla reintentando lo mismo, y trabaría todo lo que viene atrás.
             return true
         case .rechazado, .sinRed, .respuestaRara:
