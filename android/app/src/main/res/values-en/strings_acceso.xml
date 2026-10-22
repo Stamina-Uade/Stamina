@@ -126,6 +126,15 @@
     <string name="error_profile_incomplete">A profile detail is missing before we can build the plan.</string>
     <string name="error_service_unavailable">The server is having trouble. Try again in a bit.</string>
 
+    <!-- ===== Contract 1.6.0 error codes ===== -->
+    <string name="error_too_many_attempts">Too many attempts. For security, we blocked sign-in with this email for 15 minutes.</string>
+    <string name="error_code_attempts_exceeded">For security, this code no longer works. Start again.</string>
+    <string name="error_account_link_available">There is already an account with that email. Sign in with your email and password.</string>
+    <string name="error_invalid_link_token">The request to link the account expired. Start again.</string>
+    <string name="error_account_deactivated">This account is deactivated. For now it can be turned back on from the iPhone app.</string>
+    <string name="error_account_pending_deletion">This account is about to be deleted. Until then, it can be recovered from the iPhone app.</string>
+    <string name="error_invalid_reactivation_token">The request to recover the account expired. Sign in again.</string>
+
     <!-- ===== Password recovery · fpEmail, fpCode, fpNew, fpDone ===== -->
     <string name="fp_volver">Back to the previous step</string>
 

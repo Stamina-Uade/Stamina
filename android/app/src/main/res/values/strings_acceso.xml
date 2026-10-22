@@ -132,6 +132,15 @@
     <string name="error_profile_incomplete">Falta un dato del perfil para poder armar el plan.</string>
     <string name="error_service_unavailable">El servidor está con problemas. Probá en un rato.</string>
 
+    <!-- ===== Códigos de error del contrato 1.6.0 ===== -->
+    <string name="error_too_many_attempts">Demasiados intentos. Por seguridad, bloqueamos el ingreso con este correo durante 15 minutos.</string>
+    <string name="error_code_attempts_exceeded">Por seguridad, este código ya no sirve. Empezá de nuevo.</string>
+    <string name="error_account_link_available">Ya hay una cuenta con ese correo. Entrá con tu correo y tu contraseña.</string>
+    <string name="error_invalid_link_token">Se venció el pedido para vincular la cuenta. Empezá de nuevo.</string>
+    <string name="error_account_deactivated">Esta cuenta está desactivada. Por ahora se puede volver a activar desde la app de iPhone.</string>
+    <string name="error_account_pending_deletion">Esta cuenta está por borrarse. Hasta que se borre, se puede recuperar desde la app de iPhone.</string>
+    <string name="error_invalid_reactivation_token">Se venció el pedido para recuperar la cuenta. Entrá de nuevo.</string>
+
     <!-- ===== Recuperar la contraseña · fpEmail, fpCode, fpNew, fpDone ===== -->
     <string name="fp_volver">Volver al paso anterior</string>
 

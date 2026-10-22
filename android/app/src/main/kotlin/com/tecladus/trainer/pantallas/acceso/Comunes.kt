@@ -79,6 +79,19 @@ fun recordarTraductorDeErrores(): (Resultado<*>) -> String {
             "not_found" to recursos.getString(R.string.error_not_found),
             "legal_not_accepted" to recursos.getString(R.string.error_legal_not_accepted),
             "legal_version_stale" to recursos.getString(R.string.error_legal_version_stale),
+            // 1.6.0. Android no usa las rutas nuevas (vincular, reactivar), así que
+            // estos sólo se muestran: no hay paso siguiente desde acá.
+            "too_many_attempts" to recursos.getString(R.string.error_too_many_attempts),
+            "code_attempts_exceeded" to
+                recursos.getString(R.string.error_code_attempts_exceeded),
+            "account_link_available" to
+                recursos.getString(R.string.error_account_link_available),
+            "invalid_link_token" to recursos.getString(R.string.error_invalid_link_token),
+            "account_deactivated" to recursos.getString(R.string.error_account_deactivated),
+            "account_pending_deletion" to
+                recursos.getString(R.string.error_account_pending_deletion),
+            "invalid_reactivation_token" to
+                recursos.getString(R.string.error_invalid_reactivation_token),
         )
         val sinRed = recursos.getString(R.string.error_sin_red)
         val raro = recursos.getString(R.string.error_respuesta_rara)
