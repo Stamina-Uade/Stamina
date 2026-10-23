@@ -250,34 +250,3 @@ struct AptoFisicoView: View {
         }
     }
 }
-
-// MARK: - La píldora del inicio
-
-/// "Apto vigente · vence en 45 días". Tocarla abre la pantalla del apto.
-struct PildoraDelApto: View {
-    @ObservedObject private var almacen = AlmacenDeAptoFisico.compartido
-    let alTocar: () -> Void
-
-    var body: some View {
-        Button(action: alTocar) {
-            switch almacen.estado {
-            case .sinCargar:
-                PildoraDeEstado(Textos.medicalAddTitle,
-                                simbolo: "plus", tono: .neutro)
-            case .vigente(let dias):
-                PildoraDeEstado(Textos.medicalStatusValidDaysLeft(dias),
-                                simbolo: "checkmark.shield", tono: .acento)
-            case .porVencer(let dias):
-                PildoraDeEstado(dias == 0
-                                ? Textos.medicalExpiresToday
-                                : Textos.medicalExpiresInDays(dias),
-                                simbolo: "exclamationmark.shield", tono: .alerta)
-            case .vencido:
-                PildoraDeEstado(Textos.medicalStatusExpired,
-                                simbolo: "xmark.shield", tono: .alerta)
-            }
-        }
-        .buttonStyle(EstiloPresionado())
-        .frame(minHeight: TokensTamano.objetivoTactilMinimo)
-    }
-}

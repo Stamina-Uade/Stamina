@@ -1,4 +1,5 @@
 import Foundation
+import SwiftUI
 import UIKit
 import TrainerCore
 
@@ -14,6 +15,15 @@ import TrainerCore
 // Las fotos nuevas se agregan al catálogo con el nombre exacto
 // (FondoRunning01…20, FondoCiclismo01…20, FondoNatacion01…20; ver
 // docs/PROMPTS-FONDOS.md) y aparecen solas: sólo se eligen las que existen.
+//
+// 2026-10-23 (decisión de Iván): la persona de la foto se ve ENTERA, nunca con
+// la cabeza cortada. Las fotos son verticales (1536 × 2752) y la tarjeta es
+// apaisada: entra apenas un tercio del alto. Cada foto que entra tiene su punto
+// de encuadre (dónde está la persona), y `TarjetaHeroe` centra el recorte ahí.
+// Las que tienen a la persona de cuerpo entero ocupando media foto no entran en
+// esa proporción y salen de las candidatas (`noEntranEnLaTarjeta`). Se revisaron
+// las 20 una por una; las que salen siguen en el catálogo (la bienvenida usa 01,
+// 09 y 20 a pantalla completa).
 // =============================================================================
 
 /// La familia de fotos. No es lo mismo que `DeporteDeSesion`: trekking y
@@ -53,6 +63,32 @@ enum FondosDeTarjeta {
         case .running: return ["BienvenidaRuta"]
         case .ciclismo, .natacion: return []
         }
+    }
+
+    /// Dónde está la persona en cada foto que entra en la tarjeta apaisada, en
+    /// fracciones de la foto (0 arriba/izquierda, 1 abajo/derecha).
+    static let encuadres: [String: UnitPoint] = [
+        "FondoRunning02": UnitPoint(x: 0.50, y: 0.52),
+        "FondoRunning06": UnitPoint(x: 0.48, y: 0.51),
+        "FondoRunning10": UnitPoint(x: 0.53, y: 0.55),
+        "FondoRunning13": UnitPoint(x: 0.50, y: 0.52),
+        "FondoRunning14": UnitPoint(x: 0.50, y: 0.50),
+        "FondoRunning15": UnitPoint(x: 0.50, y: 0.62),
+        "FondoRunning17": UnitPoint(x: 0.50, y: 0.51),
+        "FondoRunning19": UnitPoint(x: 0.50, y: 0.50),
+    ]
+
+    /// La persona va de cuerpo entero y ocupa casi media foto (o más): en una
+    /// tarjeta apaisada se le cortaría la cabeza o las piernas. No se eligen.
+    static let noEntranEnLaTarjeta: Set<String> = [
+        "FondoRunning01", "FondoRunning03", "FondoRunning04", "FondoRunning05",
+        "FondoRunning07", "FondoRunning08", "FondoRunning09", "FondoRunning11",
+        "FondoRunning12", "FondoRunning16", "FondoRunning18", "FondoRunning20",
+    ]
+
+    /// El punto de encuadre de una foto; sin dato, el centro.
+    static func encuadre(de imagen: String?) -> UnitPoint {
+        imagen.flatMap { encuadres[$0] } ?? .center
     }
 
     /// Las tarjetas que piden foto. El orden define el desfase: cada una
@@ -109,9 +145,10 @@ enum FondosDeTarjeta {
     }
 
     /// Las fotos que se pueden usar, en el orden del pool. Si del pool no
-    /// existe ninguna, las de respaldo. Nunca una prohibida.
+    /// existe ninguna, las de respaldo. Nunca una prohibida ni una que no entra
+    /// en la tarjeta.
     static func candidatas(para disciplina: Disciplina, disponibles: Set<String>) -> [String] {
-        let fuera = prohibidas(para: disciplina)
+        let fuera = prohibidas(para: disciplina).union(noEntranEnLaTarjeta)
         let usables: (String) -> Bool = { disponibles.contains($0) && !fuera.contains($0) }
         let delPool = pool(de: disciplina).filter(usables)
         if !delPool.isEmpty { return delPool }
