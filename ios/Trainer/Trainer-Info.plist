@@ -15,6 +15,19 @@
 	<array>
 		<string>location</string>
 	</array>
+	<key>NSSupportsLiveActivities</key>
+	<true/>
+	<key>CFBundleURLTypes</key>
+	<array>
+		<dict>
+			<key>CFBundleURLName</key>
+			<string>com.tecladus.Trainer.salida</string>
+			<key>CFBundleURLSchemes</key>
+			<array>
+				<string>stamina</string>
+			</array>
+		</dict>
+	</array>
 	<key>CFBundleDisplayName</key>
 	<string>Stamina</string>
 	<key>CFBundleName</key>

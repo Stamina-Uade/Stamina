@@ -14,6 +14,8 @@
 		C0DE000000000000000000B4 /* TrainerCore in Embed Frameworks */ = {isa = PBXBuildFile; productRef = C0DE000000000000000000B2 /* TrainerCore */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
 		C0DE000000000000000000B5 /* TrainerCore in Frameworks */ = {isa = PBXBuildFile; productRef = C0DE000000000000000000B2 /* TrainerCore */; };
 		C0DE000000000000000000C1 /* TrainerWatch Watch App.app in Embed Watch Content */ = {isa = PBXBuildFile; fileRef = B5F3FEA83051B52600A4659E /* TrainerWatch Watch App.app */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
+		E1A00000000000000000000C /* TrainerCore in Frameworks */ = {isa = PBXBuildFile; productRef = E1A00000000000000000000B /* TrainerCore */; };
+		E1A00000000000000000000D /* StaminaEnVivo.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = E1A000000000000000000001 /* StaminaEnVivo.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -52,6 +54,13 @@
 			remoteGlobalIDString = B5F3FEA73051B52600A4659E;
 			remoteInfo = "TrainerWatch Watch App";
 		};
+		E1A00000000000000000000F /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = B5E4E83730517FE5001AB65F /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = E1A000000000000000000004;
+			remoteInfo = StaminaEnVivo;
+		};
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXCopyFilesBuildPhase section */
@@ -88,6 +97,17 @@
 			name = "Embed Frameworks";
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		E1A00000000000000000000E /* Embed Foundation Extensions */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "";
+			dstSubfolderSpec = 13;
+			files = (
+				E1A00000000000000000000D /* StaminaEnVivo.appex in Embed Foundation Extensions */,
+			);
+			name = "Embed Foundation Extensions";
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
@@ -97,7 +117,18 @@
 		B5F3FEA83051B52600A4659E /* TrainerWatch Watch App.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "TrainerWatch Watch App.app"; sourceTree = BUILT_PRODUCTS_DIR; };
 		B5F3FEB73051B52900A4659E /* TrainerWatch Watch AppTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = "TrainerWatch Watch AppTests.xctest"; sourceTree = BUILT_PRODUCTS_DIR; };
 		B5F3FEC13051B52900A4659E /* TrainerWatch Watch AppUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = "TrainerWatch Watch AppUITests.xctest"; sourceTree = BUILT_PRODUCTS_DIR; };
+		E1A000000000000000000001 /* StaminaEnVivo.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = StaminaEnVivo.appex; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
+
+/* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
+		E1A000000000000000000003 /* Exceptions for "StaminaEnVivo" folder in "Trainer" target */ = {
+			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
+			membershipExceptions = (
+				ActividadEnVivoAtributos.swift,
+			);
+			target = B5E4E83E30517FE5001AB65F /* Trainer */;
+		};
+/* End PBXFileSystemSynchronizedBuildFileExceptionSet section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
 		B5E4E84130517FE5001AB65F /* Trainer */ = {
@@ -128,6 +159,14 @@
 		B5F3FEC43051B52900A4659E /* TrainerWatchUITests */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
 			path = TrainerWatchUITests;
+			sourceTree = "<group>";
+		};
+		E1A000000000000000000002 /* StaminaEnVivo */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			exceptions = (
+				E1A000000000000000000003 /* Exceptions for "StaminaEnVivo" folder in "Trainer" target */,
+			);
+			path = StaminaEnVivo;
 			sourceTree = "<group>";
 		};
 /* End PBXFileSystemSynchronizedRootGroup section */
@@ -179,6 +218,14 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		E1A000000000000000000006 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				E1A00000000000000000000C /* TrainerCore in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
@@ -191,6 +238,7 @@
 				B5F3FEA93051B52600A4659E /* TrainerWatch */,
 				B5F3FEBA3051B52900A4659E /* TrainerWatchTests */,
 				B5F3FEC43051B52900A4659E /* TrainerWatchUITests */,
+				E1A000000000000000000002 /* StaminaEnVivo */,
 				B5E4E84030517FE5001AB65F /* Products */,
 			);
 			sourceTree = "<group>";
@@ -204,6 +252,7 @@
 				B5F3FEA83051B52600A4659E /* TrainerWatch Watch App.app */,
 				B5F3FEB73051B52900A4659E /* TrainerWatch Watch AppTests.xctest */,
 				B5F3FEC13051B52900A4659E /* TrainerWatch Watch AppUITests.xctest */,
+				E1A000000000000000000001 /* StaminaEnVivo.appex */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -220,11 +269,13 @@
 				B5E4E83D30517FE5001AB65F /* Resources */,
 				C0DE000000000000000000C5 /* Embed Frameworks */,
 				C0DE000000000000000000C4 /* Embed Watch Content */,
+				E1A00000000000000000000E /* Embed Foundation Extensions */,
 			);
 			buildRules = (
 			);
 			dependencies = (
 				C0DE000000000000000000C3 /* PBXTargetDependency */,
+				E1A000000000000000000010 /* PBXTargetDependency */,
 			);
 			fileSystemSynchronizedGroups = (
 				B5E4E84130517FE5001AB65F /* Trainer */,
@@ -355,6 +406,29 @@
 			productReference = B5F3FEC13051B52900A4659E /* TrainerWatch Watch AppUITests.xctest */;
 			productType = "com.apple.product-type.bundle.ui-testing";
 		};
+		E1A000000000000000000004 /* StaminaEnVivo */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = E1A000000000000000000008 /* Build configuration list for PBXNativeTarget "StaminaEnVivo" */;
+			buildPhases = (
+				E1A000000000000000000005 /* Sources */,
+				E1A000000000000000000006 /* Frameworks */,
+				E1A000000000000000000007 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			fileSystemSynchronizedGroups = (
+				E1A000000000000000000002 /* StaminaEnVivo */,
+			);
+			name = StaminaEnVivo;
+			packageProductDependencies = (
+				E1A00000000000000000000B /* TrainerCore */,
+			);
+			productName = StaminaEnVivo;
+			productReference = E1A000000000000000000001 /* StaminaEnVivo.appex */;
+			productType = "com.apple.product-type.app-extension";
+		};
 /* End PBXNativeTarget section */
 
 /* Begin PBXProject section */
@@ -387,6 +461,9 @@
 						CreatedOnToolsVersion = 16.1;
 						TestTargetID = B5F3FEA73051B52600A4659E;
 					};
+					E1A000000000000000000004 = {
+						CreatedOnToolsVersion = 26.0;
+					};
 				};
 			};
 			buildConfigurationList = B5E4E83A30517FE5001AB65F /* Build configuration list for PBXProject "Trainer" */;
@@ -414,6 +491,7 @@
 				B5F3FEA73051B52600A4659E /* TrainerWatch Watch App */,
 				B5F3FEB63051B52900A4659E /* TrainerWatch Watch AppTests */,
 				B5F3FEC03051B52900A4659E /* TrainerWatch Watch AppUITests */,
+				E1A000000000000000000004 /* StaminaEnVivo */,
 			);
 		};
 /* End PBXProject section */
@@ -455,6 +533,13 @@
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 		B5F3FEBF3051B52900A4659E /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		E1A000000000000000000007 /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
@@ -506,6 +591,13 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		E1A000000000000000000005 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 /* End PBXSourcesBuildPhase section */
 
 /* Begin PBXTargetDependency section */
@@ -533,6 +625,11 @@
 			isa = PBXTargetDependency;
 			target = B5F3FEA73051B52600A4659E /* TrainerWatch Watch App */;
 			targetProxy = C0DE000000000000000000C2 /* PBXContainerItemProxy */;
+		};
+		E1A000000000000000000010 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = E1A000000000000000000004 /* StaminaEnVivo */;
+			targetProxy = E1A00000000000000000000F /* PBXContainerItemProxy */;
 		};
 /* End PBXTargetDependency section */
 
@@ -954,6 +1051,66 @@
 			};
 			name = Release;
 		};
+		E1A000000000000000000009 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 3;
+				DEVELOPMENT_TEAM = 8PGX254W77;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = "StaminaEnVivo-Info.plist";
+				INFOPLIST_KEY_CFBundleDisplayName = Stamina;
+				INFOPLIST_KEY_NSHumanReadableCopyright = "";
+				IPHONEOS_DEPLOYMENT_TARGET = 16.2;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@executable_path/../../Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.tecladus.Trainer.EnVivo;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SKIP_INSTALL = YES;
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
+				SUPPORTS_MACCATALYST = NO;
+				SUPPORTS_MAC_DESIGNED_FOR_IPHONE_IPAD = NO;
+				SUPPORTS_XR_DESIGNED_FOR_IPHONE_IPAD = NO;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = 1;
+			};
+			name = Debug;
+		};
+		E1A00000000000000000000A /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 3;
+				DEVELOPMENT_TEAM = 8PGX254W77;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = "StaminaEnVivo-Info.plist";
+				INFOPLIST_KEY_CFBundleDisplayName = Stamina;
+				INFOPLIST_KEY_NSHumanReadableCopyright = "";
+				IPHONEOS_DEPLOYMENT_TARGET = 16.2;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@executable_path/../../Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.tecladus.Trainer.EnVivo;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SKIP_INSTALL = YES;
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
+				SUPPORTS_MACCATALYST = NO;
+				SUPPORTS_MAC_DESIGNED_FOR_IPHONE_IPAD = NO;
+				SUPPORTS_XR_DESIGNED_FOR_IPHONE_IPAD = NO;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = 1;
+			};
+			name = Release;
+		};
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
@@ -1020,6 +1177,15 @@
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
+		E1A000000000000000000008 /* Build configuration list for PBXNativeTarget "StaminaEnVivo" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				E1A000000000000000000009 /* Debug */,
+				E1A00000000000000000000A /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
 /* End XCConfigurationList section */
 
 /* Begin XCLocalSwiftPackageReference section */
@@ -1036,6 +1202,11 @@
 			productName = TrainerCore;
 		};
 		C0DE000000000000000000B2 /* TrainerCore */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = C0DE000000000000000000A1 /* XCLocalSwiftPackageReference "../TrainerCore" */;
+			productName = TrainerCore;
+		};
+		E1A00000000000000000000B /* TrainerCore */ = {
 			isa = XCSwiftPackageProductDependency;
 			package = C0DE000000000000000000A1 /* XCLocalSwiftPackageReference "../TrainerCore" */;
 			productName = TrainerCore;
