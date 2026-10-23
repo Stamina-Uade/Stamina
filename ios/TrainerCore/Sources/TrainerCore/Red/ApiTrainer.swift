@@ -174,6 +174,10 @@ public protocol ServicioDelPlan: Sendable {
     func guardarComida(id: String, _ comida: ComidaEntrada) async -> Resultado<ComidaRegistrada>
     func borrarComida(id: String) async -> Resultado<SinCuerpo>
 
+    /// `PUT /plan/days/done` (1.7.0): "Lo hice: marcar como hecho" un día que pasó sin
+    /// una salida registrada. No crea una actividad ni inventa kilómetros.
+    func marcarDiaHecho(fechaMs: Int64, claveDeIdempotencia: String) async -> Resultado<SinCuerpo>
+
     func sincronizarSeries(sesion: String, _ series: [SerieDeGimnasioEntrada],
                            claveDeIdempotencia: String) async -> Resultado<SesionDeGimnasio>
     func sesionDeGimnasio(_ id: String) async -> Resultado<SesionDeGimnasio>
@@ -186,6 +190,7 @@ public protocol ServicioDelPlan: Sendable {
 public extension ServicioDelPlan {
     func diccionarioDeEjercicios() async -> Resultado<DiccionarioDeEjercicios> { .sinRed }
     func planes() async -> Resultado<[PlanDeObjetivo]> { .sinRed }
+    func marcarDiaHecho(fechaMs: Int64, claveDeIdempotencia: String) async -> Resultado<SinCuerpo> { .sinRed }
 }
 
 /// La actividad se guarda por id antes que su recorrido. El recorrido viaja
@@ -219,10 +224,15 @@ public protocol ServicioDeActividades: Sendable {
 public final class ApiTrainer: ServicioDeCuenta, ServicioDelPlan, ServicioDeActividades {
     private let cliente: ClienteAPI
     private let renovador: RenovadorDeSesion
+    /// Viaja al entrar y al registrarse (contrato 1.7.0): con él, el servidor avisa por
+    /// correo si la cuenta nunca vio este dispositivo. `nil` no manda nada.
+    private let dispositivo: DispositivoDeEntrada?
 
-    public init(cliente: ClienteAPI, renovador: RenovadorDeSesion) {
+    public init(cliente: ClienteAPI, renovador: RenovadorDeSesion,
+                dispositivo: DispositivoDeEntrada? = IdentidadDelDispositivo.actual()) {
         self.cliente = cliente
         self.renovador = renovador
+        self.dispositivo = dispositivo
     }
 
     // MARK: - Servicio
@@ -273,7 +283,7 @@ public final class ApiTrainer: ServicioDeCuenta, ServicioDelPlan, ServicioDeActi
         let respuesta: Resultado<Sesion> = await cliente.pedir(
             .post, "/auth/register/complete",
             cuerpo: PedidoCompletar(registrationToken: token, password: clave,
-                                    profile: perfil, legal: aceptacion))
+                                    profile: perfil, legal: aceptacion, device: dispositivo))
         return await abrir(respuesta)
     }
 
@@ -281,7 +291,7 @@ public final class ApiTrainer: ServicioDeCuenta, ServicioDelPlan, ServicioDeActi
 
     public func entrar(correo: String, clave: String) async -> Resultado<SesionAbierta> {
         let respuesta: Resultado<Sesion> = await cliente.pedir(
-            .post, "/auth/login", cuerpo: PedidoLogin(email: correo, password: clave))
+            .post, "/auth/login", cuerpo: PedidoLogin(email: correo, password: clave, device: dispositivo))
         return await abrir(respuesta)
     }
 
@@ -291,7 +301,8 @@ public final class ApiTrainer: ServicioDeCuenta, ServicioDelPlan, ServicioDeActi
                                    nonce: String) async -> Resultado<DesenlaceSocial> {
         let respuesta: Resultado<EntradaSocial> = await cliente.pedir(
             .post, "/auth/social",
-            cuerpo: PedidoSocial(provider: proveedor.claveDelContrato, idToken: idToken, nonce: nonce))
+            cuerpo: PedidoSocial(provider: proveedor.claveDelContrato, idToken: idToken, nonce: nonce,
+                                 device: dispositivo))
         switch respuesta {
         case .ok(let entrada):
             switch entrada.status {
@@ -314,7 +325,7 @@ public final class ApiTrainer: ServicioDeCuenta, ServicioDelPlan, ServicioDeActi
         let respuesta: Resultado<Sesion> = await cliente.pedir(
             .post, "/auth/register/complete",
             cuerpo: PedidoCompletarSocial(registrationToken: token, socialToken: permisoSocial,
-                                          profile: perfil, legal: aceptacion))
+                                          profile: perfil, legal: aceptacion, device: dispositivo))
         return await abrir(respuesta)
     }
 
@@ -337,7 +348,8 @@ public final class ApiTrainer: ServicioDeCuenta, ServicioDelPlan, ServicioDeActi
     /// decide la persona (`cerrarOtrasSesiones`).
     public func cambiarClave(token: String, clave: String) async -> Resultado<SesionAbierta> {
         let respuesta: Resultado<Sesion> = await cliente.pedir(
-            .post, "/auth/password/reset", cuerpo: PedidoReseteo(resetToken: token, password: clave))
+            .post, "/auth/password/reset", cuerpo: PedidoReseteo(resetToken: token, password: clave,
+                                                                 device: dispositivo))
         return await abrir(respuesta)
     }
 
@@ -405,6 +417,13 @@ public final class ApiTrainer: ServicioDeCuenta, ServicioDelPlan, ServicioDeActi
     public func guardarComida(id: String, _ comida: ComidaEntrada) async -> Resultado<ComidaRegistrada> {
         guard let ruta = Self.ruta("/meals/", id) else { return .respuestaRara(http: 0) }
         return await renovador.pedir(.put, ruta, cuerpo: comida)
+    }
+
+    /// `PUT /plan/days/done` (1.7.0). `fechaMs` es cualquier instante de ese día: el
+    /// servidor lo lleva al día local con la zona del plan. Idempotente.
+    public func marcarDiaHecho(fechaMs: Int64, claveDeIdempotencia: String) async -> Resultado<SinCuerpo> {
+        await renovador.pedir(.put, "/plan/days/done", cuerpo: PedidoDiaHecho(dateMs: fechaMs),
+                              claveDeIdempotencia: claveDeIdempotencia)
     }
 
     /// `DELETE /meals/{id}`. Idempotente: borrar lo ya borrado también da 204.
@@ -519,13 +538,13 @@ public final class ApiTrainer: ServicioDeCuenta, ServicioDelPlan, ServicioDeActi
 
     public func vincularProveedor(permiso: String, clave: String?) async -> Resultado<SesionAbierta> {
         let respuesta: Resultado<Sesion> = await cliente.pedir(
-            .post, "/auth/social/link", cuerpo: PedidoVincular(linkToken: permiso, password: clave))
+            .post, "/auth/social/link", cuerpo: PedidoVincular(linkToken: permiso, password: clave, device: dispositivo))
         return await abrir(respuesta)
     }
 
     public func reactivarCuenta(permiso: String) async -> Resultado<SesionAbierta> {
         let respuesta: Resultado<Sesion> = await cliente.pedir(
-            .post, "/auth/reactivate", cuerpo: PedidoReactivar(reactivationToken: permiso))
+            .post, "/auth/reactivate", cuerpo: PedidoReactivar(reactivationToken: permiso, device: dispositivo))
         return await abrir(respuesta)
     }
 
@@ -564,18 +583,23 @@ struct PedidoBorrarCuenta: Encodable, Sendable {
 struct PedidoVincular: Encodable, Sendable {
     let linkToken: String
     let password: String?
+    /// 1.7.0. `nil` no viaja.
+    var device: DispositivoDeEntrada? = nil
 
     enum CodingKeys: String, CodingKey {
         case linkToken = "link_token"
         case password
+        case device
     }
 }
 
 struct PedidoReactivar: Encodable, Sendable {
     let reactivationToken: String
+    var device: DispositivoDeEntrada? = nil
 
     enum CodingKeys: String, CodingKey {
         case reactivationToken = "reactivation_token"
+        case device
     }
 }
 
@@ -600,18 +624,30 @@ struct PedidoConCodigo: Encodable, Sendable {
     let code: String
 }
 
+/// `PUT /plan/days/done` (1.7.0).
+struct PedidoDiaHecho: Encodable, Sendable {
+    let dateMs: Int64
+
+    enum CodingKeys: String, CodingKey {
+        case dateMs = "date_ms"
+    }
+}
+
 struct PedidoLogin: Encodable, Sendable {
     let email: String
     let password: String
+    var device: DispositivoDeEntrada? = nil
 }
 
 struct PedidoReseteo: Encodable, Sendable {
     let resetToken: String
     let password: String
+    var device: DispositivoDeEntrada? = nil
 
     enum CodingKeys: String, CodingKey {
         case resetToken = "reset_token"
         case password
+        case device
     }
 }
 
@@ -620,12 +656,14 @@ struct PedidoCompletar: Encodable, Sendable {
     let password: String
     let profile: PerfilEntrada
     let legal: AceptacionLegal
+    var device: DispositivoDeEntrada? = nil
 
     enum CodingKeys: String, CodingKey {
         case registrationToken = "registration_token"
         case password
         case profile
         case legal
+        case device
     }
 }
 
@@ -635,12 +673,14 @@ struct PedidoCompletarSocial: Encodable, Sendable {
     let socialToken: String
     let profile: PerfilEntrada
     let legal: AceptacionLegal
+    var device: DispositivoDeEntrada? = nil
 
     enum CodingKeys: String, CodingKey {
         case registrationToken = "registration_token"
         case socialToken = "social_token"
         case profile
         case legal
+        case device
     }
 }
 
@@ -648,11 +688,13 @@ struct PedidoSocial: Encodable, Sendable {
     let provider: String
     let idToken: String
     let nonce: String
+    var device: DispositivoDeEntrada? = nil
 
     enum CodingKeys: String, CodingKey {
         case provider
         case idToken = "id_token"
         case nonce
+        case device
     }
 }
 

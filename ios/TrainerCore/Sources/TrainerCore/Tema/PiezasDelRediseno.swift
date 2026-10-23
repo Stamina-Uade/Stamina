@@ -1,4 +1,7 @@
 import SwiftUI
+#if canImport(UIKit)
+import UIKit
+#endif
 
 // =============================================================================
 // Las piezas del rediseño 2026-10 (mockup "7 pantallas principales del MVP").
@@ -245,16 +248,21 @@ public struct TarjetaMetrica: View {
 /// que asegura la lectura. Es la de "23 días para tu media maratón".
 public struct TarjetaHeroe<Contenido: View>: View {
     private let imagen: String?
+    private let encuadre: UnitPoint
     private let alto: CGFloat
     private let contenido: Contenido
 
     /// - Parameters:
     ///   - imagen: un recurso del catálogo de assets. Sin imagen, la tarjeta usa
     ///     el degradado de la marca: nunca queda un rectángulo vacío.
+    ///   - encuadre: dónde está la persona en la foto (fracciones de la foto). El
+    ///     recorte se centra en ese punto, sin salirse de la foto, para que no
+    ///     quede afuera la cabeza. Sin dato, el centro.
     ///   - alto: alto mínimo; crece si el contenido lo pide (Dynamic Type).
-    public init(imagen: String? = nil, alto: CGFloat = TokensEspaciado.e56 * 4,
+    public init(imagen: String? = nil, encuadre: UnitPoint = .center, alto: CGFloat = TokensEspaciado.e56 * 4,
                 @ViewBuilder contenido: () -> Contenido) {
         self.imagen = imagen
+        self.encuadre = encuadre
         self.alto = alto
         self.contenido = contenido()
     }
@@ -292,10 +300,14 @@ public struct TarjetaHeroe<Contenido: View>: View {
     private var fondo: some View {
         if let imagen {
             GeometryReader { geo in
+                let recorte = EncuadreDeFoto.recorte(foto: EncuadreDeFoto.tamanoDeFoto(imagen),
+                                                      marco: geo.size, encuadre: encuadre)
                 Image(imagen)
                     .resizable()
                     .scaledToFill()
-                    .frame(width: geo.size.width, height: geo.size.height)
+                    .frame(width: recorte.width, height: recorte.height)
+                    .offset(x: recorte.minX, y: recorte.minY)
+                    .frame(width: geo.size.width, height: geo.size.height, alignment: .topLeading)
                     .clipped()
             }
             .accessibilityHidden(true)
@@ -308,6 +320,32 @@ public struct TarjetaHeroe<Contenido: View>: View {
             }
             .accessibilityHidden(true)
         }
+    }
+}
+
+/// El recorte de la foto de una `TarjetaHeroe`, centrado en la persona.
+public enum EncuadreDeFoto {
+    /// El tamaño de la foto en el catálogo; sin ella, `nil` (se recorta al centro).
+    static func tamanoDeFoto(_ nombre: String) -> CGSize? {
+        #if canImport(UIKit)
+        return UIImage(named: nombre)?.size
+        #else
+        return nil
+        #endif
+    }
+
+    /// Dónde va la foto escalada para llenar `marco` con `encuadre` lo más al
+    /// centro posible, sin dejar huecos: el origen (negativo) y el tamaño.
+    public static func recorte(foto: CGSize?, marco: CGSize, encuadre: UnitPoint) -> CGRect {
+        guard let foto, foto.width > 0, foto.height > 0, marco.width > 0, marco.height > 0 else {
+            return CGRect(origin: .zero, size: marco)
+        }
+        let escala = max(marco.width / foto.width, marco.height / foto.height)
+        let ancho = foto.width * escala
+        let alto = foto.height * escala
+        let x = min(0, max(marco.width - ancho, marco.width / 2 - encuadre.x * ancho))
+        let y = min(0, max(marco.height - alto, marco.height / 2 - encuadre.y * alto))
+        return CGRect(x: x, y: y, width: ancho, height: alto)
     }
 }
 
