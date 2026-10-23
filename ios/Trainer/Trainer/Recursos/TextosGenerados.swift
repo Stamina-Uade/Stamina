@@ -9,7 +9,7 @@
 // números y unidades se formatean con el locale del sistema. Esto resuelve lo
 // primero; lo segundo es de quien presenta el dato.
 //
-// 846 claves · idioma de autoría: en
+// 844 claves · idioma de autoría: en
 // =============================================================================
 
 import Foundation
@@ -2253,14 +2253,8 @@ enum Textos {
     /// 10 km
     static var signupGoalC10k: String { String(localized: "signup.goal.c10k") }
 
-    /// 10 km
-    static var signupGoalC10kDetail: String { String(localized: "signup.goal.c10k.detail") }
-
     /// 5 km
     static var signupGoalC5k: String { String(localized: "signup.goal.c5k") }
-
-    /// 5 km
-    static var signupGoalC5kDetail: String { String(localized: "signup.goal.c5k.detail") }
 
     /// Choose your goal
     static var signupGoalChoose: String { String(localized: "signup.goal.choose") }

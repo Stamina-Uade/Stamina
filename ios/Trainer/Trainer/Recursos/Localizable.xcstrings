@@ -6474,7 +6474,7 @@
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Dura. Sólo palabras sueltas. Va en tramos, para subir tu umbral."
+            "value" : "Dura. Solo palabras sueltas. Va en tramos, para subir tu umbral."
           }
         },
         "fr" : {
@@ -8284,7 +8284,7 @@
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Stamina no reemplaza la consulta médica. Tu apto se guarda sólo en este teléfono, protegido, y no se comparte con nadie."
+            "value" : "Stamina no reemplaza la consulta médica. Tu apto se guarda solo en este teléfono, protegido, y no se comparte con nadie."
           }
         },
         "fr" : {
@@ -15471,7 +15471,7 @@
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Cambia sólo cómo se muestran: lo guardado no cambia."
+            "value" : "Cambia solo cómo se muestran: lo guardado no cambia."
           }
         },
         "fr" : {
@@ -16336,53 +16336,7 @@
         }
       }
     },
-    "signup.goal.c10k.detail" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "10 km"
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "10 km"
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "10 km"
-          }
-        }
-      }
-    },
     "signup.goal.c5k" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "5 km"
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "5 km"
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "5 km"
-          }
-        }
-      }
-    },
-    "signup.goal.c5k.detail" : {
       "extractionState" : "manual",
       "localizations" : {
         "en" : {
@@ -17500,7 +17454,7 @@
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Por ahora, Stamina es sólo para correr."
+            "value" : "Por ahora, Stamina es solo para correr."
           }
         },
         "fr" : {

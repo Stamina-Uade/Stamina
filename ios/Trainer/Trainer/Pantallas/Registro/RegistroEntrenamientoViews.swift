@@ -103,8 +103,8 @@ struct RegObjetivoView: View {
 
     private var objetivos: [(Objetivo, String, String)] {
         let todos: [(Objetivo, String, String)] = [
-            (.c5k, Textos.signupGoalC5k, Textos.signupGoalC5kDetail),
-            (.c10k, Textos.signupGoalC10k, Textos.signupGoalC10kDetail),
+            (.c5k, Textos.signupGoalC5k, ""),
+            (.c10k, Textos.signupGoalC10k, ""),
             (.mediaMaraton, Textos.signupGoalHalfMarathon, Textos.signupGoalHalfMarathonDetail),
             (.maraton, Textos.signupGoalMarathon, Textos.signupGoalMarathonDetail),
             (.trailMontana, Textos.signupGoalMountainTrail, Textos.signupGoalMountainTrailDetail),
