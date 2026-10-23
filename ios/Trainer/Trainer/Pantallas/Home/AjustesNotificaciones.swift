@@ -46,11 +46,16 @@ struct AjustesPaginaNotificaciones: View {
                     titulo: Textos.settingsNotificationsHeat,
                     pista: Textos.settingsNotificationsHeatDetail,
                     encendido: $calor)
-            }
 
-            // La atribución que Apple exige para los datos de WeatherKit.
-            AtribucionDeAppleWeather()
-                .padding(.leading, TokensEspaciado.e4)
+                // La atribución que Apple exige para los datos de WeatherKit, debajo
+                // de la fila del aviso que los usa (2026-10-23: el cuerpo de la
+                // notificación ya no dice "Datos:  Weather.").
+                AtribucionDeAppleWeather()
+                    .padding(.leading, TokensEspaciado.e14 + TokensEspaciado.e34 + TokensEspaciado.e12)
+                    .padding(.trailing, TokensEspaciado.e14)
+                    .padding(.bottom, TokensEspaciado.e12)
+                    .frame(maxWidth: .infinity, alignment: .leading)
+            }
         }
     }
 }
