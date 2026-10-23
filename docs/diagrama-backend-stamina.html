@@ -176,7 +176,7 @@
 <header>
   <div>
     <div class="titulo">Stamina · <b>cómo funciona el backend</b></div>
-    <div class="subtitulo">Node 22 · TypeScript · Fastify 5 · PostgreSQL · Redis &nbsp;—&nbsp; un solo proceso en <span class="mono">127.0.0.1:8082</span>, todo bajo <span class="mono">/v1</span>, contrato <span class="mono">shared/api/openapi.yaml 1.6.0</span></div>
+    <div class="subtitulo">Node 22 · TypeScript · Fastify 5 · PostgreSQL · Redis &nbsp;—&nbsp; un solo proceso en <span class="mono">127.0.0.1:8082</span>, todo bajo <span class="mono">/v1</span>, contrato <span class="mono">shared/api/openapi.yaml 1.7.0</span></div>
   </div>
   <div class="leyenda">
     <span><i class="lin"></i>pedido HTTP / flujo principal</span>
@@ -446,7 +446,7 @@
           <div class="hoja ok"><b>Reintento (≤ 2 min)</b><span>La respuesta se perdió en el camino: se devuelve la misma sucesora con un access nuevo.</span></div>
           <div class="hoja mal"><b>Reuso → familia revocada</b><span>Puede ser un robo: se revoca toda la familia y responde <code>session_revoked</code>.</span></div>
         </div>
-        <div class="alerta"><b>Recuperación:</b> <span class="mono">/password/forgot → /verify → /reset</span> sigue el mismo camino de código y permiso de un uso. Desde la 1.6.0 cambiar la clave <b>no</b> revoca las otras sesiones: la app pregunta y, si la persona quiere, llama a <span class="mono">/auth/logout/others</span>. Siempre se manda un correo avisando el cambio.</div>
+        <div class="alerta"><b>Recuperación:</b> <span class="mono">/password/forgot → /verify → /reset</span> sigue el mismo camino de código y permiso de un uso. Desde la 1.6.0 cambiar la clave <b>no</b> revoca las otras sesiones: la app pregunta y, si la persona quiere, llama a <span class="mono">/auth/logout/others</span>. Desde la 1.7.0 no se manda correo por el cambio; sí "Nuevo inicio de sesión" cuando se entra desde un dispositivo que la cuenta nunca vio (<span class="mono">dispositivos_conocidos</span>).</div>
       </div>
     </div>
 
