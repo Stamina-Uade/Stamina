@@ -182,7 +182,7 @@ struct RaizHomeView: View {
         switch actual {
         case .inicio:    InicioView()
         case .plan:      PlanView()
-        case .historial: HistorialDeActividadesView(servicio: estado.repositorio.servicioDeActividades(), esPestana: true)
+        case .historial: HistorialDeActividadesView(servicio: estado.repositorio.servicioDeActividades())
         case .perfil:    PerfilView()
         case .ajustes:   AjustesView()
         case .gimnasio:  GimnasioView()
