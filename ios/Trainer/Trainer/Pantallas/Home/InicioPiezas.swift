@@ -67,7 +67,8 @@ struct DetalleDeRachaView: View {
                 .accessibilityHidden(true)
 
                 VStack(spacing: TokensEspaciado.e4) {
-                    MetricaHeroe("\(racha.dias)", unidad: Textos.streakDays, etiquetaAccesible: Textos.streakTitle)
+                    MetricaHeroe("\(racha.dias)", unidad: racha.dias == 1 ? Textos.commonDay : Textos.streakDays,
+                                 etiquetaAccesible: Textos.streakTitle)
                     Text(Textos.streakTitle)
                         .estilo(.etiquetaSeccion, color: Paleta.acento)
                 }
