@@ -229,226 +229,6 @@
         }
       }
     },
-    "agenda.gym" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Gym · upper body and core"
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Gimnasio · tren superior y core"
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Salle · haut du corps et gainage"
-          }
-        }
-      }
-    },
-    "agenda.gym.detail" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "variations" : {
-            "plural" : {
-              "one" : {
-                "stringUnit" : {
-                  "state" : "translated",
-                  "value" : "%lld exercise · 45 min · tap to see the routine"
-                }
-              },
-              "other" : {
-                "stringUnit" : {
-                  "state" : "translated",
-                  "value" : "%lld exercises · 45 min · tap to see the routine"
-                }
-              }
-            }
-          }
-        },
-        "es" : {
-          "variations" : {
-            "plural" : {
-              "one" : {
-                "stringUnit" : {
-                  "state" : "translated",
-                  "value" : "%lld ejercicio · 45 min · toca para ver la rutina"
-                }
-              },
-              "other" : {
-                "stringUnit" : {
-                  "state" : "translated",
-                  "value" : "%lld ejercicios · 45 min · toca para ver la rutina"
-                }
-              }
-            }
-          }
-        },
-        "fr" : {
-          "variations" : {
-            "plural" : {
-              "one" : {
-                "stringUnit" : {
-                  "state" : "translated",
-                  "value" : "%lld exercice · 45 min · touche pour voir la séance"
-                }
-              },
-              "other" : {
-                "stringUnit" : {
-                  "state" : "translated",
-                  "value" : "%lld exercices · 45 min · touche pour voir la séance"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "agenda.prepare" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Prepare bottles and gels"
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Preparar bidones y geles"
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Prépare tes bidons et tes gels"
-          }
-        }
-      }
-    },
-    "agenda.prepare.detail" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "%1$@ with electrolytes · %2$lld gels · alert %3$lld min before"
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "%1$@ con sales · %2$lld geles · aviso %3$lld min antes"
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "%1$@ avec électrolytes · %2$lld gels · alerte %3$lld min avant"
-          }
-        }
-      }
-    },
-    "agenda.recovery" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Recovery"
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Recuperación"
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Récupération"
-          }
-        }
-      }
-    },
-    "agenda.recovery.detail" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "%1$lld g protein + %2$lld g carbs within 45 min"
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "%1$lld g proteína + %2$lld g carbos en 45 min"
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "%1$lld g de protéines + %2$lld g de glucides dans les 45 min"
-          }
-        }
-      }
-    },
-    "agenda.snack" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Pre-workout snack"
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Snack pre-entreno"
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Collation avant l'entraînement"
-          }
-        }
-      }
-    },
-    "agenda.snack.detail" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "%lld g carbs · banana + oats"
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "%lld g carbos · banana + avena"
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "%lld g de glucides · banane + flocons d'avoine"
-          }
-        }
-      }
-    },
     "catalog.clear_filters" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -780,30 +560,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Catalogue d'exercices"
-          }
-        }
-      }
-    },
-    "common.all" : {
-      "comment" : "Historial: período del resumen",
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "All"
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Todo"
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Tout"
           }
         }
       }
@@ -1447,30 +1203,6 @@
         }
       }
     },
-    "common.month" : {
-      "comment" : "Historial: período del resumen",
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Month"
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Mes"
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Mois"
-          }
-        }
-      }
-    },
     "common.more" : {
       "comment" : "A label that indicates the level of intensity is increasing.",
       "extractionState" : "manual",
@@ -1968,77 +1700,6 @@
         }
       }
     },
-    "common.steps" : {
-      "comment" : "Calendario de hitos",
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Steps"
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Pasos"
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Pas"
-          }
-        }
-      }
-    },
-    "common.steps_lowercase" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "steps"
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "pasos"
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "pas"
-          }
-        }
-      }
-    },
-    "common.time" : {
-      "comment" : "Calendario de hitos: resumen del día\nHistorial: resumen, tiempo acumulado",
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Time"
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Tiempo"
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Temps"
-          }
-        }
-      }
-    },
     "common.to_go" : {
       "comment" : "VoiceOver",
       "extractionState" : "manual",
@@ -2063,30 +1724,6 @@
         }
       }
     },
-    "common.to_go_lowercase" : {
-      "comment" : "Debajo de la cuenta regresiva de la salida",
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "to go"
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "faltan"
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "restant"
-          }
-        }
-      }
-    },
     "common.today" : {
       "comment" : "Ajustes: ejemplo en la vista previa\nDía elegido en el calendario de hitos\nEl día de hoy en la carga semanal\nMarca la zona de la sesión de hoy\nEtiqueta de la tarjeta del día en el inicio",
       "extractionState" : "manual",
@@ -2107,30 +1744,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Aujourd'hui"
-          }
-        }
-      }
-    },
-    "common.today_lowercase" : {
-      "comment" : "Día de hoy en los días de entrenamiento",
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "today"
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "hoy"
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "aujourd'hui"
           }
         }
       }
@@ -2182,30 +1795,6 @@
         }
       }
     },
-    "common.week" : {
-      "comment" : "Historial: período del resumen\nSemana del plan en el perfil",
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Week"
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Semana"
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Semaine"
-          }
-        }
-      }
-    },
     "common.weeks" : {
       "comment" : "Unidad de la cuenta regresiva\nUnidad de la cuenta regresiva de la carrera",
       "extractionState" : "manual",
@@ -2249,30 +1838,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Bouton d'entraînement"
-          }
-        }
-      }
-    },
-    "common.yesterday" : {
-      "comment" : "Día elegido en el calendario de hitos",
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Yesterday"
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Ayer"
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Hier"
           }
         }
       }
@@ -5110,30 +4675,6 @@
         }
       }
     },
-    "history.all_workouts" : {
-      "comment" : "Historial: qué abarca el resumen total",
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "All your workouts"
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Todas tus salidas"
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Toutes tes sorties"
-          }
-        }
-      }
-    },
     "history.close" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -5251,6 +4792,52 @@
         }
       }
     },
+    "history.gym_sets" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%lld sets"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%lld series"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%lld séries"
+          }
+        }
+      }
+    },
+    "history.gym_sets_one" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "1 set"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "1 serie"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "1 série"
+          }
+        }
+      }
+    },
     "history.load_more" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -5297,74 +4884,49 @@
         }
       }
     },
-    "history.opens_past_workouts" : {
-      "comment" : "VoiceOver, botón historial del plan",
+    "history.race_day" : {
+      "comment" : "Leyenda del calendario y título del día de una carrera",
       "extractionState" : "manual",
       "localizations" : {
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Opens your past workouts"
+            "value" : "Race"
           }
         },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Abre tus salidas anteriores"
+            "value" : "Carrera"
           }
         },
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Ouvre tes sorties précédentes"
+            "value" : "Course"
           }
         }
       }
     },
-    "history.period.month_detail" : {
-      "comment" : "Historial: qué abarca el resumen mensual",
+    "history.race_of_the_day" : {
       "extractionState" : "manual",
       "localizations" : {
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Since the 1st of this month"
+            "value" : "Race day: %@"
           }
         },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Desde el 1 de este mes"
+            "value" : "Día de carrera: %@"
           }
         },
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Depuis le 1er du mois"
-          }
-        }
-      }
-    },
-    "history.period.week_detail" : {
-      "comment" : "Historial: qué abarca el resumen semanal",
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "From Monday to today"
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Desde el lunes hasta hoy"
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "De lundi à aujourd'hui"
+            "value" : "Jour de course : %@"
           }
         }
       }
@@ -5416,26 +4978,25 @@
         }
       }
     },
-    "history.subtitle" : {
-      "comment" : "Sobretítulo del historial",
+    "history.steps" : {
       "extractionState" : "manual",
       "localizations" : {
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Everything you've trained"
+            "value" : "%@ steps"
           }
         },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Todo lo que entrenaste"
+            "value" : "%@ pasos"
           }
         },
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Tout ce que tu as fait"
+            "value" : "%@ pas"
           }
         }
       }
@@ -5488,49 +5049,48 @@
         }
       }
     },
-    "history.title" : {
+    "history.trainings_count" : {
       "extractionState" : "manual",
       "localizations" : {
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "My activities"
+            "value" : "%lld workouts"
           }
         },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Mis actividades"
+            "value" : "%lld entrenamientos"
           }
         },
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Mes activités"
+            "value" : "%lld entraînements"
           }
         }
       }
     },
-    "history.totals.partial_note" : {
-      "comment" : "Historial: aviso de que el total es parcial",
+    "history.trainings_one" : {
       "extractionState" : "manual",
       "localizations" : {
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "%@. Includes what's loaded so far: tap “Load more” below to add earlier ones."
+            "value" : "1 workout"
           }
         },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "%@. Suma lo cargado hasta ahora: toca «Cargar más» abajo para sumar las anteriores."
+            "value" : "1 entrenamiento"
           }
         },
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "%@. Ne compte que ce qui est chargé : touche « Charger plus » en bas pour ajouter les précédentes."
+            "value" : "1 entraînement"
           }
         }
       }
@@ -5555,30 +5115,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Voir le détail"
-          }
-        }
-      }
-    },
-    "history.workouts" : {
-      "comment" : "Historial: resumen, cantidad de actividades",
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Workouts"
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Salidas"
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Sorties"
           }
         }
       }
@@ -5631,26 +5167,26 @@
         }
       }
     },
-    "history.your_numbers" : {
-      "comment" : "Historial: título del resumen",
+    "history.year_total" : {
+      "comment" : "2026 · 412 km · 86 entrenamientos",
       "extractionState" : "manual",
       "localizations" : {
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Your numbers"
+            "value" : "%1$lld · %2$@ · %3$@"
           }
         },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Tus números"
+            "value" : "%1$lld · %2$@ · %3$@"
           }
         },
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Tes chiffres"
+            "value" : "%1$lld · %2$@ · %3$@"
           }
         }
       }
@@ -5675,6 +5211,237 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Tes sorties"
+          }
+        }
+      }
+    },
+    "home.back_to_workout" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Back to workout"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Volver a la salida"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Revenir à la sortie"
+          }
+        }
+      }
+    },
+    "home.bring.for" : {
+      "comment" : "Debajo del título de la hoja Qué llevar hoy; %@ es la sesión con su distancia",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "For today's workout: %@."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Para la salida de hoy: %@."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Pour la sortie d'aujourd'hui : %@."
+          }
+        }
+      }
+    },
+    "home.bring.grams_per_hour" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%lld g per hour"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%lld g por hora"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%lld g par heure"
+          }
+        }
+      }
+    },
+    "home.bring.ml_per_hour" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%lld ml per hour"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%lld ml por hora"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%lld ml par heure"
+          }
+        }
+      }
+    },
+    "home.bring.recovery" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Recovery"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Recuperación"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Récupération"
+          }
+        }
+      }
+    },
+    "home.bring.recovery_value" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%1$lld g protein + %2$lld g carbs"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%1$lld g de proteína + %2$lld g de carbos"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%1$lld g de protéines + %2$lld g de glucides"
+          }
+        }
+      }
+    },
+    "home.bring.snack" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%lld g of carbs"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%lld g de carbohidratos"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%lld g de glucides"
+          }
+        }
+      }
+    },
+    "home.bring.snack_at" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%1$@ · %2$lld g of carbs"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%1$@ · %2$lld g de carbohidratos"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%1$@ · %2$lld g de glucides"
+          }
+        }
+      }
+    },
+    "home.bring.snack_before" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Snack before"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Snack antes"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Collation avant"
+          }
+        }
+      }
+    },
+    "home.bring.water_with_salts" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Water with salts"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Agua con sales"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Eau avec des sels"
           }
         }
       }
@@ -5981,54 +5748,6 @@
         }
       }
     },
-    "home.explainer.after" : {
-      "comment" : "Fila de la hoja de hidratación",
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "When you're back"
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Al volver"
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Au retour"
-          }
-        }
-      }
-    },
-    "home.explainer.before" : {
-      "comment" : "Fila de la hoja de hidratación",
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Before you go"
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Antes de salir"
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Avant de partir"
-          }
-        }
-      }
-    },
     "home.explainer.carbs" : {
       "comment" : "Fila de la hoja de hidratación",
       "extractionState" : "manual",
@@ -6049,102 +5768,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Glucides"
-          }
-        }
-      }
-    },
-    "home.explainer.carbs_after" : {
-      "comment" : "Explicación de la comida de después",
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Carbs and protein to recover."
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Carbohidratos y proteína para recuperarte."
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Glucides et protéines pour récupérer."
-          }
-        }
-      }
-    },
-    "home.explainer.carbs_before" : {
-      "comment" : "Explicación de los carbohidratos antes",
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Carbs in your pre-workout meal, so you head out with energy."
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Carbohidratos en la comida previa, para salir con energía."
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Des glucides au repas d'avant, pour partir plein d'énergie."
-          }
-        }
-      }
-    },
-    "home.explainer.carbs_body" : {
-      "comment" : "Explicación de los carbohidratos por hora",
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "The energy your body uses fastest. It's what to add every hour, from gels, a sports drink or something solid."
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "La energía que tu cuerpo usa más rápido. Es lo que conviene sumar por cada hora, entre geles, bebida deportiva o algo sólido."
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "L'énergie que ton corps utilise le plus vite. C'est ce qu'il faut apporter chaque heure, en gels, boisson d'effort ou aliment solide."
-          }
-        }
-      }
-    },
-    "home.explainer.fueling_body" : {
-      "comment" : "Bajada de la hoja de hidratación",
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "What to drink and eat on this workout, based on your weight and today's session."
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Lo que conviene tomar en esta salida, calculado con tu peso y la sesión de hoy."
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Ce qu'il vaut mieux prendre pendant cette sortie, calculé selon ton poids et la séance du jour."
           }
         }
       }
@@ -6173,150 +5796,6 @@
         }
       }
     },
-    "home.explainer.gels_body" : {
-      "comment" : "Explicación de los geles",
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Packets of fast carbs. Take them with water, spread out over the workout."
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Sobres de carbohidratos rápidos. Tómalos con agua, repartidos durante la salida."
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Sachets de glucides rapides. Prends-les avec de l'eau, répartis pendant la sortie."
-          }
-        }
-      }
-    },
-    "home.explainer.not_needed_today" : {
-      "comment" : "Explicación sin geles",
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Not needed today: water is enough."
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Hoy no hacen falta: con el agua alcanza."
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Pas nécessaires aujourd'hui : l'eau suffit."
-          }
-        }
-      }
-    },
-    "home.explainer.sodium" : {
-      "comment" : "Fila de la hoja de hidratación",
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Sodium"
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Sodio"
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Sodium"
-          }
-        }
-      }
-    },
-    "home.explainer.sodium_body" : {
-      "comment" : "Explicación del sodio",
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "The salts you lose when you sweat. Get them from an electrolyte drink or salt tablets."
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Las sales que pierdes al transpirar. Van en una bebida con electrolitos o en pastillas de sal."
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Les sels que tu perds en transpirant. Dans une boisson aux électrolytes ou en pastilles de sel."
-          }
-        }
-      }
-    },
-    "home.explainer.water" : {
-      "comment" : "Fila de la hoja de hidratación",
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Water"
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Agua"
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Eau"
-          }
-        }
-      }
-    },
-    "home.explainer.water_body" : {
-      "comment" : "Explicación del agua por hora",
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "How much to drink each hour: small, frequent sips are better than all at once."
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Lo que conviene tomar por cada hora: mejor en sorbos chicos y seguidos que todo de golpe."
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Ce qu'il faut boire chaque heure : mieux vaut de petites gorgées régulières que tout d'un coup."
-          }
-        }
-      }
-    },
     "home.explainer.what_to_bring_today" : {
       "comment" : "Título de la hoja de hidratación",
       "extractionState" : "manual",
@@ -6337,222 +5816,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Quoi emporter aujourd'hui"
-          }
-        }
-      }
-    },
-    "home.explainer.whole_workout" : {
-      "comment" : "Agua total de la salida",
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "For the whole workout: %@."
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "En toda la salida: %@."
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Pour toute la sortie : %@."
-          }
-        }
-      }
-    },
-    "home.explainer.workout_minutes" : {
-      "comment" : "Duración en la hoja de hidratación",
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "%lld-min workout"
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Salida de %lld min"
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Sortie de %lld min"
-          }
-        }
-      }
-    },
-    "home.explainer.zone1" : {
-      "comment" : "Explicación de la zona 1",
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Very easy. You could chat nonstop. Good for recovery."
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Muy suave. Podrías charlar sin parar. Sirve para recuperar."
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Très facile. Tu pourrais bavarder sans t'arrêter. Idéal pour récupérer."
-          }
-        }
-      }
-    },
-    "home.explainer.zone2" : {
-      "comment" : "Explicación de la zona 2",
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Comfortable. You can speak in full sentences. It builds your base and it's the one you'll use most."
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Cómoda. Hablas en frases completas. Es la que arma tu base y la que más vas a usar."
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Confortable. Tu parles en phrases complètes. C'est elle qui construit ta base et que tu utiliseras le plus."
-          }
-        }
-      }
-    },
-    "home.explainer.zone3" : {
-      "comment" : "Explicación de la zona 3",
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Hard but sustainable. Only short sentences come out. Sharpens your race pace."
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Exigente pero sostenible. Te salen frases cortas. Afina tu ritmo de carrera."
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Exigeante mais tenable. Tu ne fais que des phrases courtes. Elle affine ton allure de course."
-          }
-        }
-      }
-    },
-    "home.explainer.zone4" : {
-      "comment" : "Explicación de la zona 4",
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Hard. Just a few words at a time. Done in intervals, to raise your threshold."
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Dura. Solo palabras sueltas. Va en tramos, para subir tu umbral."
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Difficile. Juste quelques mots. Se fait par fractions, pour élever ton seuil."
-          }
-        }
-      }
-    },
-    "home.explainer.zone5" : {
-      "comment" : "Explicación de la zona 5",
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "All out. You can't talk. Very short intervals, for speed."
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Al máximo. No puedes hablar. Tramos muy cortos, para la velocidad."
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "À fond. Impossible de parler. Fractions très courtes, pour la vitesse."
-          }
-        }
-      }
-    },
-    "home.explainer.zones_body" : {
-      "comment" : "Bajada de la hoja de zonas",
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "The zone tells you how hard to go. The simplest way to measure it: how much you can talk while you move."
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "La zona dice qué tan fuerte ir. La forma más simple de medirla: cuánto puedes hablar mientras te mueves."
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "La zone indique à quelle intensité aller. Le moyen le plus simple de la mesurer : à quel point tu peux parler en bougeant."
-          }
-        }
-      }
-    },
-    "home.explainer.zones_title" : {
-      "comment" : "Título de la hoja de zonas",
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Intensity zones"
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Zonas de intensidad"
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Zones d'intensité"
           }
         }
       }
@@ -6653,49 +5916,25 @@
         }
       }
     },
-    "home.hydration_note" : {
+    "home.ml_per_hour" : {
       "extractionState" : "manual",
       "localizations" : {
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "%1$lld ml/h and %2$lld g carbs/h · %3$@ is %4$@ intensity"
+            "value" : "%lld ml/h"
           }
         },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "%1$lld ml/h y %2$lld g de carbos/h · %3$@ es intensidad %4$@"
+            "value" : "%lld ml/h"
           }
         },
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "%1$lld ml/h et %2$lld g de glucides/h · %3$@ est d'intensité %4$@"
-          }
-        }
-      }
-    },
-    "home.hydration_rate" : {
-      "comment" : "Píldora del inicio",
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Hydration %lld ml/h"
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Hidratación %lld ml/h"
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Hydratation %lld ml/h"
+            "value" : "%lld ml/h"
           }
         }
       }
@@ -6747,150 +5986,7 @@
         }
       }
     },
-    "home.of_planned" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "of %@ planned"
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "de %@ previstos"
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "sur %@ prévus"
-          }
-        }
-      }
-    },
-    "home.prepare_workout" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Get ready"
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Preparar salida"
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Préparer la sortie"
-          }
-        }
-      }
-    },
-    "home.shortcuts.back_to_workout" : {
-      "comment" : "Acceso rápido con una salida en curso",
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Back to workout"
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Volver a la salida"
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Revenir à la sortie"
-          }
-        }
-      }
-    },
-    "home.shortcuts.history.hint" : {
-      "comment" : "VoiceOver del acceso rápido",
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Opens everything you've done"
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Abre todo lo que hiciste"
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Ouvre tout ce que tu as fait"
-          }
-        }
-      }
-    },
-    "home.shortcuts.medical.hint" : {
-      "comment" : "VoiceOver del acceso rápido",
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Opens your medical clearance"
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Abre tu apto físico"
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Ouvre ton certificat médical"
-          }
-        }
-      }
-    },
-    "home.shortcuts.plan.hint" : {
-      "comment" : "VoiceOver del acceso rápido",
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Opens your week-by-week plan"
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Abre tu plan semana a semana"
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Ouvre ton plan semaine par semaine"
-          }
-        }
-      }
-    },
-    "home.shortcuts.start_workout" : {
-      "comment" : "Acceso rápido al entreno",
+    "home.start_workout" : {
       "extractionState" : "manual",
       "localizations" : {
         "en" : {
@@ -6908,103 +6004,7 @@
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Commencer une sortie"
-          }
-        }
-      }
-    },
-    "home.shortcuts.title" : {
-      "comment" : "Título de sección del inicio",
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Shortcuts"
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Accesos rápidos"
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Raccourcis"
-          }
-        }
-      }
-    },
-    "home.shortcuts.view_plan" : {
-      "comment" : "Acceso rápido al plan",
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "View my plan"
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Ver mi plan"
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Voir mon plan"
-          }
-        }
-      }
-    },
-    "home.shortcuts.workout.hint" : {
-      "comment" : "VoiceOver del acceso rápido",
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Opens the GPS workout"
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Abre el entreno con GPS"
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Ouvre l'entraînement avec GPS"
-          }
-        }
-      }
-    },
-    "home.suggested" : {
-      "comment" : "Hora sugerida de la salida",
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Suggested %@"
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Sugerido %@"
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Suggéré %@"
+            "value" : "Commencer la sortie"
           }
         }
       }
@@ -7124,73 +6124,97 @@
         }
       }
     },
-    "home.today_workouts" : {
-      "comment" : "Título de sección del inicio",
+    "home.this_week" : {
       "extractionState" : "manual",
       "localizations" : {
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Today's workouts"
+            "value" : "This week"
           }
         },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Entrenamientos de hoy"
+            "value" : "Esta semana"
           }
         },
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Entraînements du jour"
+            "value" : "Cette semaine"
           }
         }
       }
     },
-    "home.until_your" : {
-      "comment" : "Debajo de la cuenta regresiva: para tu media maratón",
+    "home.today_at" : {
+      "comment" : "Arriba de la tarjeta de hoy, con la hora sugerida (se ve en mayúsculas)",
       "extractionState" : "manual",
       "localizations" : {
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "until your %@"
+            "value" : "Today · %@"
           }
         },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "para tu %@"
+            "value" : "Hoy · %@"
           }
         },
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "avant ton %@"
+            "value" : "Aujourd'hui · %@"
           }
         }
       }
     },
-    "home.view_history" : {
+    "home.today_done" : {
+      "comment" : "Tarjeta de hoy, después de entrenar (se ve en mayúsculas)",
       "extractionState" : "manual",
       "localizations" : {
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "View history"
+            "value" : "Today · Done"
           }
         },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Ver historial"
+            "value" : "Hoy · Hecho"
           }
         },
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Voir l'historique"
+            "value" : "Aujourd'hui · Fait"
+          }
+        }
+      }
+    },
+    "home.tomorrow" : {
+      "comment" : "Lo que toca mañana según el plan",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tomorrow: %@"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Mañana: %@"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Demain : %@"
           }
         }
       }
@@ -7241,149 +6265,6 @@
         }
       }
     },
-    "home.weekly_load" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Weekly load"
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Carga semanal"
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Charge hebdomadaire"
-          }
-        }
-      }
-    },
-    "home.weekly_load.day_number" : {
-      "comment" : "Día de la carga semanal sin fecha",
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Day %lld"
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Día %lld"
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Jour %lld"
-          }
-        }
-      }
-    },
-    "home.weekly_load.guide" : {
-      "comment" : "Explicación de la carga semanal en el inicio",
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "This week's km: done vs. planned. Each bar is a day; tap it to see that day."
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Los km de esta semana: lo hecho contra lo previsto. Cada barra es un día; tócala para verlo."
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Les km de la semaine : réalisés par rapport au prévu. Chaque barre est un jour ; touche-la pour le voir."
-          }
-        }
-      }
-    },
-    "home.weekly_load.no_km" : {
-      "comment" : "Día de la carga semanal sin distancia",
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "No km"
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Sin km"
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Aucun km"
-          }
-        }
-      }
-    },
-    "home.what_is_it" : {
-      "comment" : "Abre la explicación de la zona",
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "What is it?"
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "¿Qué es?"
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "C'est quoi ?"
-          }
-        }
-      }
-    },
-    "home.what_to_bring" : {
-      "comment" : "Abre la explicación de la hidratación",
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "What to bring"
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Qué llevar"
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Quoi emporter"
-          }
-        }
-      }
-    },
     "home.what_to_bring.hint" : {
       "comment" : "VoiceOver de los chips de hidratación",
       "extractionState" : "manual",
@@ -7408,73 +6289,26 @@
         }
       }
     },
-    "home.workout_in_progress" : {
-      "comment" : "Píldora del inicio mientras se corre",
+    "home.what_to_bring_line" : {
+      "comment" : "Línea tocable de la tarjeta de hoy: 500 ml/h · 1 gel",
       "extractionState" : "manual",
       "localizations" : {
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Workout in progress"
+            "value" : "What to bring: %@"
           }
         },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Salida en curso"
+            "value" : "Qué llevar: %@"
           }
         },
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Sortie en cours"
-          }
-        }
-      }
-    },
-    "home.your_day" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Your day"
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Tu día"
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Ta journée"
-          }
-        }
-      }
-    },
-    "home.zones.hint" : {
-      "comment" : "VoiceOver de la píldora de la zona",
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Explains what intensity zones are"
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Explica qué son las zonas de intensidad"
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Explique ce que sont les zones d'intensité"
+            "value" : "À emporter : %@"
           }
         }
       }
@@ -8199,30 +7033,6 @@
         }
       }
     },
-    "medical.add_title" : {
-      "comment" : "Píldora del inicio sin apto",
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Add your medical clearance"
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Carga tu apto físico"
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Ajoute ton certificat médical"
-          }
-        }
-      }
-    },
     "medical.certificate_detail" : {
       "comment" : "Ayuda de la tarjeta del archivo",
       "extractionState" : "manual",
@@ -8439,30 +7249,6 @@
         }
       }
     },
-    "medical.expires_in_days" : {
-      "comment" : "Píldora del inicio",
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Your clearance expires in %lld days"
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Tu apto vence en %lld días"
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Ton certificat expire dans %lld jours"
-          }
-        }
-      }
-    },
     "medical.expires_on" : {
       "comment" : "Fecha de vencimiento elegida",
       "extractionState" : "manual",
@@ -8483,30 +7269,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Expire le %@"
-          }
-        }
-      }
-    },
-    "medical.expires_today" : {
-      "comment" : "Píldora del inicio",
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Your clearance expires today"
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Tu apto vence hoy"
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Ton certificat expire aujourd'hui"
           }
         }
       }
@@ -8603,54 +7365,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Renouvelle-le pour continuer à recevoir des conseils pendant tes sorties."
-          }
-        }
-      }
-    },
-    "medical.status.expired" : {
-      "comment" : "Píldora del inicio",
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Clearance expired · renew it"
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Apto vencido · renuévalo"
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Certificat expiré · renouvelle-le"
-          }
-        }
-      }
-    },
-    "medical.status.valid_days_left" : {
-      "comment" : "Píldora del inicio",
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Clearance valid · expires in %lld days"
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Apto vigente · vence en %lld días"
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Certificat valide · expire dans %lld jours"
           }
         }
       }
@@ -8823,30 +7537,6 @@
         }
       }
     },
-    "milestones.active_days" : {
-      "comment" : "Calendario de hitos",
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Active days"
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Días activos"
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Jours actifs"
-          }
-        }
-      }
-    },
     "milestones.activity.high" : {
       "comment" : "Calendario de hitos: nivel 3",
       "extractionState" : "manual",
@@ -8967,292 +7657,6 @@
         }
       }
     },
-    "milestones.calendar.border_hint" : {
-      "comment" : "Calendario de hitos: qué significan los bordes",
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "The colored border marks today; the thick border, the day you picked."
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "El borde de color marca hoy; el borde grueso, el día que elegiste."
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "La bordure colorée indique aujourd'hui ; la bordure épaisse, le jour choisi."
-          }
-        }
-      }
-    },
-    "milestones.calendar.hint" : {
-      "comment" : "Calendario de hitos: cómo se usa",
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Each square is a day. Tap it to see what you did."
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Cada cuadrito es un día. Tócalo para ver qué hiciste."
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Chaque case est un jour. Touche-la pour voir ce que tu as fait."
-          }
-        }
-      }
-    },
-    "milestones.collapsed" : {
-      "comment" : "Estado de la leyenda",
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Collapsed"
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Cerrada"
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Réduite"
-          }
-        }
-      }
-    },
-    "milestones.completed_workouts" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Completed workouts"
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Entrenamientos realizados"
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Entraînements réalisés"
-          }
-        }
-      }
-    },
-    "milestones.day_distance" : {
-      "comment" : "Calendario de hitos: resumen del día",
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Distance for the day"
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Distancia del día"
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Distance du jour"
-          }
-        }
-      }
-    },
-    "milestones.debug.add_km" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Add 1 km of running to this day"
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Añadir 1 km running a este día"
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Ajouter 1 km de course à ce jour"
-          }
-        }
-      }
-    },
-    "milestones.expanded" : {
-      "comment" : "Estado de la leyenda",
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Expanded"
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Abierta"
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Développée"
-          }
-        }
-      }
-    },
-    "milestones.level.high" : {
-      "comment" : "Calendario de hitos: leyenda del nivel 3",
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "High: two workouts, or %@ or more in the day."
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Alto: dos salidas, o %@ o más en el día."
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Élevée : deux sorties, ou %@ ou plus dans la journée."
-          }
-        }
-      }
-    },
-    "milestones.level.light" : {
-      "comment" : "Calendario de hitos: leyenda del nivel 1",
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Light: a short workout (under %@) or %@ steps or more."
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Suave: una salida corta (menos de %@) o %@ pasos o más."
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Légère : une sortie courte (moins de %@) ou %@ pas ou plus."
-          }
-        }
-      }
-    },
-    "milestones.level.moderate" : {
-      "comment" : "Calendario de hitos: leyenda del nivel 2",
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Moderate: %@ or more in the day, or %@ steps or more."
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Moderado: %@ o más en el día, o %@ pasos o más."
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Modérée : %@ ou plus dans la journée, ou %@ pas ou plus."
-          }
-        }
-      }
-    },
-    "milestones.level.none" : {
-      "comment" : "Calendario de hitos: leyenda del nivel 0",
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "No activity: no workouts, and fewer than %@ steps."
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Sin actividad: ni salidas ni pasos que lleguen a %@."
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Aucune activité : ni sortie, ni %@ pas atteints."
-          }
-        }
-      }
-    },
-    "milestones.level.very_high" : {
-      "comment" : "Calendario de hitos: leyenda del nivel 4",
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Very high: three or more workouts, or %@ or more in the day."
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Muy alto: tres salidas o más, o %@ o más en el día."
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Très élevée : trois sorties ou plus, ou %@ ou plus dans la journée."
-          }
-        }
-      }
-    },
     "milestones.no_workouts" : {
       "comment" : "Calendario de hitos: accesibilidad de un día",
       "extractionState" : "manual",
@@ -9297,53 +7701,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Aucune sortie n'a été enregistrée ce jour-là."
-          }
-        }
-      }
-    },
-    "milestones.rest_day" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Rest day"
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Día de descanso"
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Jour de repos"
-          }
-        }
-      }
-    },
-    "milestones.sessions" : {
-      "comment" : "Calendario de hitos",
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Sessions"
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Sesiones"
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Séances"
           }
         }
       }
@@ -9398,29 +7755,6 @@
         }
       }
     },
-    "milestones.steps.logged" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Steps recorded for the day"
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Pasos registrados en el día"
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Pas enregistrés dans la journée"
-          }
-        }
-      }
-    },
     "milestones.steps.prompt" : {
       "comment" : "Calendario de hitos: mensaje del alerta de pasos",
       "extractionState" : "manual",
@@ -9469,102 +7803,6 @@
         }
       }
     },
-    "milestones.steps.source.health_connect" : {
-      "comment" : "Calendario de hitos: los pasos del día vienen de Health Connect",
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Health Connect"
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Health Connect"
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Health Connect"
-          }
-        }
-      }
-    },
-    "milestones.steps.source.manual" : {
-      "comment" : "Calendario de hitos: los pasos del día se cargaron a mano",
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Manual"
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Manual"
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Manuel"
-          }
-        }
-      }
-    },
-    "milestones.total_distance" : {
-      "comment" : "Calendario de hitos",
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Total distance"
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Distancia total"
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Distance totale"
-          }
-        }
-      }
-    },
-    "milestones.what_it_means" : {
-      "comment" : "Calendario de hitos: abre la explicación de los colores",
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "What does it mean?"
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "¿Qué significa?"
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Qu'est-ce que ça veut dire ?"
-          }
-        }
-      }
-    },
     "milestones.workouts_count" : {
       "comment" : "Calendario de hitos: accesibilidad de un día\nCalendario de hitos",
       "extractionState" : "manual",
@@ -9589,74 +7827,25 @@
         }
       }
     },
-    "milestones.workouts_one" : {
-      "comment" : "Calendario de hitos",
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "1 workout"
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "1 entrenamiento"
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "1 entraînement"
-          }
-        }
-      }
-    },
-    "milestones.your_year" : {
-      "comment" : "Título del calendario de hitos",
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Your year"
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Tu año"
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Ton année"
-          }
-        }
-      }
-    },
     "notification.heat.body" : {
-      "comment" : "Aviso de calor: temperatura y sensación térmica pronosticadas (Apple Weather)",
       "extractionState" : "manual",
       "localizations" : {
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "%1$lld °C at workout time (feels like %2$lld °C). Check the time and bring water. Data:  Weather."
+            "value" : "%1$lld °C at workout time (feels like %2$lld °C). Check the time and bring water."
           }
         },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "%1$lld °C a la hora de entrenar (sensación %2$lld °C). Revisa el horario y lleva agua. Datos:  Weather."
+            "value" : "%1$lld °C a la hora de entrenar (sensación %2$lld °C). Revisa el horario y lleva agua."
           }
         },
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "%1$lld °C à l'heure de l'entraînement (ressenti %2$lld °C). Vérifie l'horaire et emporte de l'eau. Données :  Weather."
+            "value" : "%1$lld °C à l'heure de l'entraînement (ressenti %2$lld °C). Vérifie l'horaire et emporte de l'eau."
           }
         }
       }
@@ -9681,6 +7870,77 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Chaleur prévue pour ton entraînement"
+          }
+        }
+      }
+    },
+    "notification.race_day.body" : {
+      "comment" : "6:00 del día de la carrera, sin nombre",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Today is your %1$@. You trained %2$lld weeks for this: trust what you did and enjoy the race. Let's go!"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Hoy es tu %1$@. Entrenaste %2$lld semanas para esto: confía en lo que hiciste y disfruta la carrera. ¡Vamos!"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "C'est aujourd'hui : ton %1$@. Tu as fait %2$lld semaines d'entraînement pour ça : fais confiance à ton travail et profite de la course. Allez !"
+          }
+        }
+      }
+    },
+    "notification.race_day.body_name" : {
+      "comment" : "6:00 del día de la carrera, con el nombre de pila",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Today is your %1$@. You trained %2$lld weeks for this: trust what you did and enjoy the race. Let's go, %3$@!"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Hoy es tu %1$@. Entrenaste %2$lld semanas para esto: confía en lo que hiciste y disfruta la carrera. ¡Vamos, %3$@!"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "C'est aujourd'hui : ton %1$@. Tu as fait %2$lld semaines d'entraînement pour ça : fais confiance à ton travail et profite de la course. Allez, %3$@ !"
+          }
+        }
+      }
+    },
+    "notification.race_day.title" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "The day is here!"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "¡Llegó el día!"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Le grand jour est arrivé !"
           }
         }
       }
@@ -10467,150 +8727,6 @@
         }
       }
     },
-    "plan.current_phase" : {
-      "comment" : "Píldora de la tarjeta del plan",
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Current phase: %@"
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Etapa actual: %@"
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Étape actuelle : %@"
-          }
-        }
-      }
-    },
-    "plan.day.available_that_day" : {
-      "comment" : "Plan, salida futura",
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Available on that day: you'll be able to start it from here or from Home."
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Se habilita ese día: la vas a poder empezar desde acá o desde Inicio."
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Disponible ce jour-là : tu pourras la commencer d'ici ou depuis l'Accueil."
-          }
-        }
-      }
-    },
-    "plan.day.carbs_per_hour" : {
-      "comment" : "Plan, carbohidratos por hora",
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "%lld g of carbs per hour"
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "%lld g de carbohidratos por hora"
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "%lld g de glucides par heure"
-          }
-        }
-      }
-    },
-    "plan.day.collapsed" : {
-      "comment" : "VoiceOver, día del plan plegado",
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Collapsed"
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Cerrado"
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Réduit"
-          }
-        }
-      }
-    },
-    "plan.day.expanded" : {
-      "comment" : "VoiceOver, día del plan desplegado",
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Expanded"
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Abierto"
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Développé"
-          }
-        }
-      }
-    },
-    "plan.day.fueling_body" : {
-      "comment" : "Plan, qué es el avituallamiento",
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "What the plan calls fueling: water, gels and salts so you don't run out of energy on the workout."
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Lo que el plan llama avituallamiento: agua, geles y sales para no quedarte sin energía en la salida."
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Ce que le plan appelle ravitaillement : eau, gels et sels pour ne pas manquer d'énergie pendant la sortie."
-          }
-        }
-      }
-    },
     "plan.day.gel_one" : {
       "comment" : "Plan, cantidad de geles",
       "extractionState" : "manual",
@@ -10659,170 +8775,71 @@
         }
       }
     },
-    "plan.day.past" : {
-      "comment" : "Plan, día pasado sin hacer",
+    "plan.day.mark_done" : {
       "extractionState" : "manual",
       "localizations" : {
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "This day has passed. No problem: the plan moves on to what's next."
+            "value" : "I did it: mark as done"
           }
         },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Este día ya pasó. No pasa nada: el plan sigue con lo que viene."
+            "value" : "Lo hice: marcar como hecho"
           }
         },
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Ce jour est passé. Pas de souci : le plan continue avec la suite."
+            "value" : "Je l'ai fait : marquer comme fait"
           }
         }
       }
     },
-    "plan.day.rest" : {
-      "comment" : "Plan, explicación de un día de descanso",
+    "plan.day.mark_failed" : {
       "extractionState" : "manual",
       "localizations" : {
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Today is a rest day. Your body gets stronger while it recovers: an easy walk or gentle stretching is fine."
+            "value" : "We couldn't mark it. Check your connection and try again."
           }
         },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Hoy toca descansar. El cuerpo se hace más fuerte mientras se recupera: caminar o elongar suave está bien."
+            "value" : "No pudimos marcarla. Revisa la conexión y prueba de nuevo."
           }
         },
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Aujourd'hui, c'est repos. Le corps se renforce pendant qu'il récupère : marcher ou s'étirer en douceur, c'est très bien."
+            "value" : "Nous n'avons pas pu la marquer. Vérifie ta connexion et réessaie."
           }
         }
       }
     },
-    "plan.day.run_walk" : {
-      "comment" : "Plan, sesión con correr y caminar",
+    "plan.day.missed" : {
       "extractionState" : "manual",
       "localizations" : {
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "You alternate jogging intervals with walking intervals."
+            "value" : "We didn't record this workout. If you did it without recording it, mark it as done: it counts toward your week, but the flame doesn't come back."
           }
         },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Alternas tramos de trote con tramos de caminata."
+            "value" : "No registramos esta salida. Si la hiciste sin grabarla, márcala como hecha: cuenta para tu semana, pero el fueguito no vuelve."
           }
         },
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Tu alternes des portions de footing et de marche."
-          }
-        }
-      }
-    },
-    "plan.day.salt_dose_one" : {
-      "comment" : "Plan, tomas de sales",
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "1 salt dose"
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "1 toma de sales"
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "1 prise de sels"
-          }
-        }
-      }
-    },
-    "plan.day.salt_doses_count" : {
-      "comment" : "Plan, tomas de sales",
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "%lld salt doses"
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "%lld tomas de sales"
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "%lld prises de sels"
-          }
-        }
-      }
-    },
-    "plan.day.session_shape" : {
-      "comment" : "Plan, título del detalle del día",
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "What the session looks like"
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Cómo es la sesión"
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Comment se passe la séance"
-          }
-        }
-      }
-    },
-    "plan.day.sodium_mg" : {
-      "comment" : "Plan, sodio",
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "%lld mg of sodium"
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "%lld mg de sodio"
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "%lld mg de sodium"
+            "value" : "Nous n'avons pas enregistré cette sortie. Si tu l'as faite sans l'enregistrer, marque-la comme faite : elle compte pour ta semaine, mais la flamme ne revient pas."
           }
         }
       }
@@ -10875,30 +8892,6 @@
         }
       }
     },
-    "plan.day.tap_to_close" : {
-      "comment" : "VoiceOver, día del plan",
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Tap to close the details"
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Toca para cerrar el detalle"
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Touche pour fermer le détail"
-          }
-        }
-      }
-    },
     "plan.day.tap_to_see" : {
       "comment" : "VoiceOver, día del plan",
       "extractionState" : "manual",
@@ -10919,30 +8912,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Touche pour voir quoi faire et pourquoi"
-          }
-        }
-      }
-    },
-    "plan.day.view_in_history" : {
-      "comment" : "Plan, día ya hecho",
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "View in your history"
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Ver en tu historial"
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Voir dans ton historique"
           }
         }
       }
@@ -10971,26 +8940,25 @@
         }
       }
     },
-    "plan.day.what_is" : {
-      "comment" : "Plan, explicación de la zona de intensidad",
+    "plan.day.water_with_salts" : {
       "extractionState" : "manual",
       "localizations" : {
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "What %@ is"
+            "value" : "%lld ml of water with salts"
           }
         },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Qué es %@"
+            "value" : "%lld ml de agua con sales"
           }
         },
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Qu'est-ce que %@"
+            "value" : "%lld ml d'eau avec des sels"
           }
         }
       }
@@ -11015,30 +8983,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Quoi emporter à boire et à manger"
-          }
-        }
-      }
-    },
-    "plan.day.why_today" : {
-      "comment" : "Plan, motivos de la sesión",
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Why today"
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Por qué hoy"
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Pourquoi aujourd'hui"
           }
         }
       }
@@ -11279,54 +9223,6 @@
         }
       }
     },
-    "plan.phase.base.body" : {
-      "comment" : "Plan, para qué sirve la fase base",
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "It's the foundation: lots of easy running so your heart, legs and tendons get used to running often without getting injured."
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Es el cimiento: mucho trote suave para que el corazón, las piernas y los tendones se acostumbren a correr seguido sin lesionarse."
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "C'est la fondation : beaucoup de footing facile pour que ton cœur, tes jambes et tes tendons s'habituent à courir souvent sans se blesser."
-          }
-        }
-      }
-    },
-    "plan.phase.base.tip" : {
-      "comment" : "Plan, consejo fase base",
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "If you feel slow, that's fine: it's on purpose."
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Si sientes que vas lento, está bien: es a propósito."
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Si tu as l'impression d'aller lentement, c'est normal : c'est voulu."
-          }
-        }
-      }
-    },
     "plan.phase.build" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -11346,126 +9242,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Développement"
-          }
-        }
-      }
-    },
-    "plan.phase.build.body" : {
-      "comment" : "Plan, para qué sirve la fase de construcción",
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Load builds up gradually: more kilometers and some pace sessions to gain endurance and speed."
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Se suma carga de a poco: más kilómetros y algunas sesiones a ritmo para ganar resistencia y velocidad."
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "La charge augmente peu à peu : plus de kilomètres et quelques séances à allure pour gagner en endurance et en vitesse."
-          }
-        }
-      }
-    },
-    "plan.phase.build.tip" : {
-      "comment" : "Plan, consejo fase de construcción",
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Some weeks are harder; the lighter ones are there so your body can absorb it."
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Algunas semanas cuestan más; las más livianas están para que el cuerpo lo absorba."
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Certaines semaines sont plus dures ; les plus légères sont là pour que ton corps assimile."
-          }
-        }
-      }
-    },
-    "plan.phase.completed" : {
-      "comment" : "Plan, fase hecha",
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Completed"
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Completada"
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Terminée"
-          }
-        }
-      }
-    },
-    "plan.phase.generic.body" : {
-      "comment" : "Plan, fase sin explicación específica",
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "A phase with its own goal. Each week's days already account for it: just follow them."
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Una etapa con un objetivo propio. Los días de cada semana ya la tienen en cuenta: síguelos y listo."
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Une étape avec son propre objectif. Les jours de chaque semaine en tiennent déjà compte : suis-les, c'est tout."
-          }
-        }
-      }
-    },
-    "plan.phase.hint" : {
-      "comment" : "VoiceOver, fases del plan",
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Explains what this phase is for"
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Explica para qué sirve esta etapa"
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Explique à quoi sert cette étape"
           }
         }
       }
@@ -11493,54 +9269,6 @@
         }
       }
     },
-    "plan.phase.peak.body" : {
-      "comment" : "Plan, para qué sirve la fase pico",
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "The toughest weeks: the longest long run and the workouts closest to race day."
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Las semanas más exigentes: el fondo más largo y los entrenamientos más parecidos a la carrera."
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Les semaines les plus exigeantes : la sortie longue la plus longue et les entraînements les plus proches de la course."
-          }
-        }
-      }
-    },
-    "plan.phase.peak.tip" : {
-      "comment" : "Plan, consejo fase pico",
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Sleep and eat well: feeling tired is expected here."
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Duerme y come bien: acá el cansancio es esperable."
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Dors et mange bien : ici, la fatigue est normale."
-          }
-        }
-      }
-    },
     "plan.phase.race" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -11564,54 +9292,6 @@
         }
       }
     },
-    "plan.phase.race.body" : {
-      "comment" : "Plan, para qué sirve la fase de carrera",
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Race week: short and easy, so you arrive with fresh legs."
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "La semana de la carrera: poco y suave, para llegar con las piernas frescas."
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "La semaine de la course : peu et facile, pour arriver avec les jambes fraîches."
-          }
-        }
-      }
-    },
-    "plan.phase.race.tip" : {
-      "comment" : "Plan, consejo fase de carrera",
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Don't try anything new on race day: no new shoes, no new gels."
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "No estrenes nada el día de la carrera: ni zapatillas ni geles."
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Ne teste rien de nouveau le jour de la course : ni chaussures ni gels."
-          }
-        }
-      }
-    },
     "plan.phase.taper" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -11631,78 +9311,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Affûtage"
-          }
-        }
-      }
-    },
-    "plan.phase.taper.body" : {
-      "comment" : "Plan, para qué sirve la fase de afinamiento",
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Volume drops so you arrive rested without losing your edge: fewer kilometers and a bit of pace."
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Baja el volumen para que llegues descansado sin perder la chispa: menos kilómetros y algo de ritmo."
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Le volume baisse pour que tu arrives reposé sans perdre ton peps : moins de kilomètres et un peu d'allure."
-          }
-        }
-      }
-    },
-    "plan.phase.taper.tip" : {
-      "comment" : "Plan, consejo fase de afinamiento",
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "If you have energy to spare, that's the idea. Don't add extra kilometers."
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Si te sobra energía, es la idea. No agregues kilómetros de más."
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Si tu as de l'énergie à revendre, c'est le but. N'ajoute pas de kilomètres en plus."
-          }
-        }
-      }
-    },
-    "plan.phase.upcoming" : {
-      "comment" : "Plan, fase futura",
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Coming up"
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Más adelante"
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "À venir"
           }
         }
       }
@@ -11731,30 +9339,6 @@
         }
       }
     },
-    "plan.phases.intro" : {
-      "comment" : "Plan, ayuda de las fases",
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Each phase has a different goal. Tap one to see what it's for."
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Cada etapa tiene un objetivo distinto. Toca una para ver para qué sirve."
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Chaque étape a un objectif différent. Touches-en une pour voir à quoi elle sert."
-          }
-        }
-      }
-    },
     "plan.phases.title" : {
       "comment" : "Plan, título de las fases",
       "extractionState" : "manual",
@@ -11775,6 +9359,145 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Les étapes de ton plan"
+          }
+        }
+      }
+    },
+    "plan.stage" : {
+      "comment" : "Debajo de Semana 2 de 20: Etapa Base",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ stage"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Etapa %@"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Étape %@"
+          }
+        }
+      }
+    },
+    "plan.stage.base.line" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Lots of easy running so your body gets used to it."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Mucho trote suave para que el cuerpo se acostumbre."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Beaucoup de course facile pour que ton corps s'habitue."
+          }
+        }
+      }
+    },
+    "plan.stage.build.line" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "More kilometers and some pace work."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Más kilómetros y algo de ritmo."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Plus de kilomètres et un peu de rythme."
+          }
+        }
+      }
+    },
+    "plan.stage.peak.line" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "The toughest weeks."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Las semanas más exigentes."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Les semaines les plus exigeantes."
+          }
+        }
+      }
+    },
+    "plan.stage.race.line" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Race week: little and easy, to arrive with fresh legs."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "La semana de la carrera: poco y suave, para llegar con las piernas frescas."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "La semaine de la course : peu et facile, pour arriver avec des jambes fraîches."
+          }
+        }
+      }
+    },
+    "plan.stage.taper.line" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Less volume so you arrive rested."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Menos volumen para llegar descansado."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Moins de volume pour arriver reposé."
           }
         }
       }
@@ -11849,143 +9572,50 @@
         }
       }
     },
-    "plan.until_race" : {
-      "comment" : "Debajo de la cuenta regresiva del plan",
+    "plan.week.done" : {
+      "comment" : "La semana tiene todos sus km hechos",
       "extractionState" : "manual",
       "localizations" : {
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "until your race"
+            "value" : "completed"
           }
         },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "para tu carrera"
+            "value" : "cumplida"
           }
         },
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "avant ta course"
+            "value" : "terminée"
           }
         }
       }
     },
-    "plan.week" : {
+    "plan.week.km_left" : {
+      "comment" : "faltan 14 km para completar la semana",
       "extractionState" : "manual",
       "localizations" : {
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Week %lld"
+            "value" : "%@ to go"
           }
         },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Semana %lld"
+            "value" : "faltan %@"
           }
         },
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Semaine %lld"
-          }
-        }
-      }
-    },
-    "plan.week.chip" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "W%lld"
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "S%lld"
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "S%lld"
-          }
-        }
-      }
-    },
-    "plan.week.complete" : {
-      "comment" : "Plan, semana completa",
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Week complete! Everything planned is done."
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "¡Semana cumplida! Todo lo previsto está hecho."
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Semaine accomplie ! Tout ce qui était prévu est fait."
-          }
-        }
-      }
-    },
-    "plan.week.in_progress" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Week %lld · in progress"
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Semana %lld · en curso"
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Semaine %lld · en cours"
-          }
-        }
-      }
-    },
-    "plan.week.left_to_complete" : {
-      "comment" : "Plan, km que faltan",
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "%@ to go to complete the week."
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Te faltan %@ para completar la semana."
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Encore %@ pour terminer la semaine."
+            "value" : "encore %@"
           }
         }
       }
@@ -12014,78 +9644,6 @@
         }
       }
     },
-    "plan.week.no_km_logged" : {
-      "comment" : "Plan, semana sin registros",
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "No kilometers recorded this week."
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Sin kilómetros registrados en esta semana."
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Aucun kilomètre enregistré cette semaine."
-          }
-        }
-      }
-    },
-    "plan.week.no_km_planned" : {
-      "comment" : "Plan, semana sin km",
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "No kilometers planned this week."
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Esta semana no tiene kilómetros previstos."
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Aucun kilomètre prévu cette semaine."
-          }
-        }
-      }
-    },
-    "plan.week.no_km_yet" : {
-      "comment" : "Plan, semana sin empezar",
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "You haven't logged any kilometers this week yet."
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Todavía no sumaste kilómetros esta semana."
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Tu n'as pas encore fait de kilomètres cette semaine."
-          }
-        }
-      }
-    },
     "plan.week.previous" : {
       "comment" : "VoiceOver, plan",
       "extractionState" : "manual",
@@ -12110,108 +9668,25 @@
         }
       }
     },
-    "plan.week.swipe_hint" : {
-      "comment" : "Plan, pista del gesto",
+    "plan.week_of" : {
       "extractionState" : "manual",
       "localizations" : {
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Swipe the days sideways to change weeks"
+            "value" : "Week %1$lld of %2$lld"
           }
         },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Desliza los días de costado para cambiar de semana"
+            "value" : "Semana %1$lld de %2$lld"
           }
         },
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Fais glisser les jours sur le côté pour changer de semaine"
-          }
-        }
-      }
-    },
-    "plan.weeks_left" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "variations" : {
-            "plural" : {
-              "one" : {
-                "stringUnit" : {
-                  "state" : "translated",
-                  "value" : "%lld week to go"
-                }
-              },
-              "other" : {
-                "stringUnit" : {
-                  "state" : "translated",
-                  "value" : "%lld weeks to go"
-                }
-              }
-            }
-          }
-        },
-        "es" : {
-          "variations" : {
-            "plural" : {
-              "one" : {
-                "stringUnit" : {
-                  "state" : "translated",
-                  "value" : "Falta %lld semana"
-                }
-              },
-              "other" : {
-                "stringUnit" : {
-                  "state" : "translated",
-                  "value" : "Faltan %lld semanas"
-                }
-              }
-            }
-          }
-        },
-        "fr" : {
-          "variations" : {
-            "plural" : {
-              "one" : {
-                "stringUnit" : {
-                  "state" : "translated",
-                  "value" : "Plus que %lld semaine"
-                }
-              },
-              "other" : {
-                "stringUnit" : {
-                  "state" : "translated",
-                  "value" : "Plus que %lld semaines"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "profile.age" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Age"
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Edad"
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Âge"
+            "value" : "Semaine %1$lld sur %2$lld"
           }
         }
       }
@@ -12239,74 +9714,117 @@
         }
       }
     },
-    "profile.complete_now" : {
-      "comment" : "Botón para completar el perfil",
+    "profile.countdown.days" : {
       "extractionState" : "manual",
       "localizations" : {
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Complete now"
+            "value" : "%lld days to go"
           }
         },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Completar ahora"
+            "value" : "faltan %lld días"
           }
         },
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Compléter maintenant"
+            "value" : "encore %lld jours"
           }
         }
       }
     },
-    "profile.complete_profile" : {
-      "comment" : "Botón para completar el perfil",
+    "profile.countdown.one_day" : {
       "extractionState" : "manual",
       "localizations" : {
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Complete profile"
+            "value" : "1 day to go"
           }
         },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Completar perfil"
+            "value" : "falta 1 día"
           }
         },
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Compléter le profil"
+            "value" : "encore 1 jour"
           }
         }
       }
     },
-    "profile.day_off" : {
-      "comment" : "Under a weekday chip in Profile when that day has no training.",
+    "profile.countdown.today" : {
       "extractionState" : "manual",
       "localizations" : {
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Rest"
+            "value" : "it's today"
           }
         },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Descanso"
+            "value" : "es hoy"
           }
         },
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Repos"
+            "value" : "c'est aujourd'hui"
+          }
+        }
+      }
+    },
+    "profile.countdown.weeks" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%lld weeks to go"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "faltan %lld semanas"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "encore %lld semaines"
+          }
+        }
+      }
+    },
+    "profile.days_and_time" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Days and time"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Días y horario"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Jours et horaire"
           }
         }
       }
@@ -12334,123 +9852,25 @@
         }
       }
     },
-    "profile.goals.choose_new" : {
-      "comment" : "A button that allows the user to select a new goal.",
-      "extractionState" : "manual",
-      "isCommentAutoGenerated" : true,
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Choose a new goal"
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Elegir nueva meta"
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Choisir un nouvel objectif"
-          }
-        }
-      }
-    },
-    "profile.goals.days_left" : {
-      "comment" : "Cuenta regresiva de una meta",
+    "profile.goals" : {
       "extractionState" : "manual",
       "localizations" : {
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "%lld days to go"
+            "value" : "Goals"
           }
         },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Faltan %lld días"
+            "value" : "Metas"
           }
         },
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Plus que %lld jours"
-          }
-        }
-      }
-    },
-    "profile.goals.finished" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Your previous goals have ended. Set a new goal to start your next plan."
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Tus metas anteriores ya finalizaron. Define una nueva meta para comenzar tu próximo plan."
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Tes objectifs précédents sont terminés. Définis un nouvel objectif pour commencer ton prochain plan."
-          }
-        }
-      }
-    },
-    "profile.goals.manage" : {
-      "comment" : "A button to manage the user's settings.",
-      "extractionState" : "manual",
-      "isCommentAutoGenerated" : true,
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "+ Manage"
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "+ Gestionar"
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "+ Gérer"
-          }
-        }
-      }
-    },
-    "profile.goals.no_fixed_date" : {
-      "comment" : "Perfil: meta sin fecha de evento",
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Plan with no fixed date"
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Plan sin fecha fija"
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Plan sans date fixe"
+            "value" : "Objectifs"
           }
         }
       }
@@ -12478,102 +9898,6 @@
         }
       }
     },
-    "profile.goals.one_day_left" : {
-      "comment" : "Cuenta regresiva de una meta",
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "1 day to go"
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Falta 1 día"
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Plus qu'1 jour"
-          }
-        }
-      }
-    },
-    "profile.goals.title" : {
-      "comment" : "A heading for the user's goals and objectives.",
-      "extractionState" : "manual",
-      "isCommentAutoGenerated" : true,
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Goals"
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Metas y objetivos"
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Objectifs"
-          }
-        }
-      }
-    },
-    "profile.goals.today" : {
-      "comment" : "Cuenta regresiva de una meta",
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "It's today!"
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "¡Es hoy!"
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "C'est aujourd'hui !"
-          }
-        }
-      }
-    },
-    "profile.goals.weeks_left" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "%lld wk to go"
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Faltan %lld sem"
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Plus que %lld sem."
-          }
-        }
-      }
-    },
     "profile.height" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -12597,74 +9921,117 @@
         }
       }
     },
-    "profile.medical.expired" : {
-      "comment" : "Estado del apto en el perfil",
+    "profile.medical.expired_short" : {
       "extractionState" : "manual",
       "localizations" : {
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Expired · renew it"
+            "value" : "Expired"
           }
         },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Vencido · renuévalo"
+            "value" : "Vencido"
           }
         },
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Expiré · renouvelle-le"
+            "value" : "Expiré"
           }
         }
       }
     },
-    "profile.medical.expires_on_days_left" : {
-      "comment" : "Estado del apto en el perfil",
+    "profile.medical.expires_in" : {
       "extractionState" : "manual",
       "localizations" : {
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Expires on %@ · %lld days left"
+            "value" : "Expires in %lld days"
           }
         },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Vence el %@ · faltan %lld días"
+            "value" : "Vence en %lld días"
           }
         },
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Expire le %@ · plus que %lld jours"
+            "value" : "Expire dans %lld jours"
           }
         }
       }
     },
-    "profile.medical.not_added" : {
-      "comment" : "Estado del apto en el perfil",
+    "profile.medical.expires_today" : {
       "extractionState" : "manual",
       "localizations" : {
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Not added · upload a photo or PDF"
+            "value" : "Expires today"
           }
         },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Sin cargar · sube foto o PDF"
+            "value" : "Vence hoy"
           }
         },
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Non renseigné · importe une photo ou un PDF"
+            "value" : "Expire aujourd'hui"
+          }
+        }
+      }
+    },
+    "profile.medical.none" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Not uploaded"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sin cargar"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Pas ajouté"
+          }
+        }
+      }
+    },
+    "profile.medical.valid" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Valid"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Vigente"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Valide"
           }
         }
       }
@@ -12688,319 +10055,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Pas de photo"
-          }
-        }
-      }
-    },
-    "profile.no_workout" : {
-      "comment" : "Día no elegido para entrenar",
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "no workout"
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "sin entrenamiento"
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "pas d'entraînement"
-          }
-        }
-      }
-    },
-    "profile.of_number" : {
-      "comment" : "Total de semanas del plan",
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "of %lld"
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "de %lld"
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "sur %lld"
-          }
-        }
-      }
-    },
-    "profile.of_text" : {
-      "comment" : "Distancia prevista de la semana",
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "of %@"
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "de %@"
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "sur %@"
-          }
-        }
-      }
-    },
-    "profile.opens_personal_data" : {
-      "comment" : "Perfil: pista de VoiceOver de las tarjetas de peso, altura y edad",
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Opens your personal details in Settings"
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Abre tus datos personales en Ajustes"
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Ouvre tes données personnelles dans Réglages"
-          }
-        }
-      }
-    },
-    "profile.opens_plan" : {
-      "comment" : "Pista de una tarjeta que lleva al plan",
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Opens your plan"
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Abre tu plan"
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Ouvre ton plan"
-          }
-        }
-      }
-    },
-    "profile.opens_training" : {
-      "comment" : "Perfil: pista de VoiceOver de la tarjeta de días de entrenamiento",
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Opens your days and times in Settings"
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Abre tus días y horarios en Ajustes"
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Ouvre tes jours et horaires dans Réglages"
-          }
-        }
-      }
-    },
-    "profile.per_week" : {
-      "comment" : "Cantidad de días de entrenamiento",
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "%lld per week"
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "%lld por semana"
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "%lld par semaine"
-          }
-        }
-      }
-    },
-    "profile.plan_week_of" : {
-      "comment" : "Progreso de una meta",
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Week %lld of %lld of the plan"
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Semana %lld de %lld del plan"
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Semaine %lld sur %lld du plan"
-          }
-        }
-      }
-    },
-    "profile.streak.hint" : {
-      "comment" : "Pista de la racha",
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Shows how the streak works"
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Muestra cómo funciona la racha"
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Montre comment fonctionne la série"
-          }
-        }
-      }
-    },
-    "profile.this_week" : {
-      "comment" : "Distancia de la semana en el perfil",
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "This week"
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Esta semana"
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Cette semaine"
-          }
-        }
-      }
-    },
-    "profile.training_days" : {
-      "comment" : "A section title that describes the user's workout days.",
-      "extractionState" : "manual",
-      "isCommentAutoGenerated" : true,
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Training days"
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Días de entrenamiento"
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Jours d'entraînement"
-          }
-        }
-      }
-    },
-    "profile.training_days.detail" : {
-      "comment" : "Explicación de los días de entrenamiento",
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "The filled days are the ones you chose: your plan spreads your workouts across them, at that time."
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Los días llenos son los que elegiste: tu plan reparte los entrenamientos en ellos, a esa hora."
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Les jours remplis sont ceux que tu as choisis : ton plan y répartit les entraînements, à cette heure-là."
-          }
-        }
-      }
-    },
-    "profile.training_days.none" : {
-      "comment" : "Sin días de entrenamiento",
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "You haven't chosen any days yet. Complete your profile so the plan knows when you train."
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Todavía no elegiste días. Completa tu perfil para que el plan sepa cuándo entrenas."
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Tu n'as pas encore choisi de jours. Complète ton profil pour que le plan sache quand tu t'entraînes."
           }
         }
       }
@@ -13047,54 +10101,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Poids"
-          }
-        }
-      }
-    },
-    "profile.you_train_at" : {
-      "comment" : "Día de entrenamiento elegido",
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "you train at %@"
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "entrenas a las %@"
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "tu t'entraînes à %@"
-          }
-        }
-      }
-    },
-    "profile.your_activity" : {
-      "comment" : "Sección del perfil",
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Your activity"
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Tu actividad"
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Ton activité"
           }
         }
       }
@@ -19933,76 +16939,53 @@
         }
       }
     },
-    "zone.high" : {
+    "zone.feel.1" : {
       "extractionState" : "manual",
       "localizations" : {
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "high"
+            "value" : "very easy"
           }
         },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "alta"
+            "value" : "muy suave"
           }
         },
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "élevée"
+            "value" : "très facile"
           }
         }
       }
     },
-    "zone.low" : {
+    "zone.feel.2" : {
       "extractionState" : "manual",
       "localizations" : {
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "low"
+            "value" : "easy"
           }
         },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "baja"
+            "value" : "suave"
           }
         },
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "basse"
+            "value" : "facile"
           }
         }
       }
     },
-    "zone.max" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "maximum"
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "máxima"
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "maximale"
-          }
-        }
-      }
-    },
-    "zone.moderate" : {
+    "zone.feel.3" : {
       "extractionState" : "manual",
       "localizations" : {
         "en" : {
@@ -20025,25 +17008,96 @@
         }
       }
     },
-    "zone.moderate_high" : {
+    "zone.feel.4" : {
       "extractionState" : "manual",
       "localizations" : {
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "moderate-high"
+            "value" : "hard"
           }
         },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "moderada-alta"
+            "value" : "fuerte"
           }
         },
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "modérée à élevée"
+            "value" : "difficile"
+          }
+        }
+      }
+    },
+    "zone.feel.5" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "all out"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "al máximo"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "à fond"
+          }
+        }
+      }
+    },
+    "zone.pill" : {
+      "comment" : "Píldora de la zona en la hoja del día del plan",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Zone %1$lld · %2$@"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Zona %1$lld · %2$@"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Zone %1$lld · %2$@"
+          }
+        }
+      }
+    },
+    "zone.words" : {
+      "comment" : "La zona en palabras: zona 2, suave",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "zone %1$lld, %2$@"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "zona %1$lld, %2$@"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "zone %1$lld, %2$@"
           }
         }
       }
