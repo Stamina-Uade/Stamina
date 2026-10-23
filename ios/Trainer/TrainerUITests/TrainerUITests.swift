@@ -341,8 +341,8 @@ final class FlujoDeEntradaUITests: XCTestCase {
     /// pantalla tenga contenido y no un hueco.
     func testCadaPestanaDelHomeMuestraSuContenido() {
         let esperado: [(String, String)] = [
-            ("inicio", "Tu día"),
-            ("plan", "Media maratón de Buenos Aires"),
+            ("inicio", "Fondo largo"),
+            ("plan", "Semana 6 de 12"),
             ("entreno", "Fondo largo"),
             ("historial", "Historial"),
             ("perfil", "Iván Benítez"),
@@ -355,6 +355,54 @@ final class FlujoDeEntradaUITests: XCTestCase {
                           "«\(pestana)» debería mostrar «\(texto)»")
             app.terminate()
         }
+    }
+
+    /// 2026-10-23: la barra de arriba (título y fueguito) no se va al bajar, en las
+    /// cuatro pestañas.
+    func testLaBarraDeArribaQuedaFijaAlBajar() {
+        for (pestana, titulo) in [("inicio", "Inicio"), ("plan", "Tu plan"), ("historial", "Historial"),
+                                  ("perfil", "Perfil")] {
+            let app = abrirHome(pestana)
+            let barra = app.staticTexts.matching(NSPredicate(format: "label == %@", titulo))
+                .allElementsBoundByIndex.first { $0.frame.minY < app.windows.firstMatch.frame.height * 0.2 }
+            XCTAssertNotNil(barra, "«\(pestana)» tiene que llevar «\(titulo)» arriba")
+            let antes = barra?.frame.minY ?? 0
+            app.swipeUp()
+            XCTAssertTrue(barra?.isHittable == true, "«\(titulo)» se fue con el scroll")
+            XCTAssertEqual(barra?.frame.minY ?? -1, antes, accuracy: 1, "la barra se movió al bajar")
+            app.terminate()
+        }
+    }
+
+    /// El día que tocaba entrenar y pasó sin salida: su hoja ofrece marcarlo como hecho.
+    func testElDiaSinHacerOfreceMarcarloComoHecho() {
+        let app = abrirHome("plan")
+        let lunes = app.staticTexts["Recuperación · 6 km"]
+        XCTAssertTrue(lunes.waitForExistence(timeout: 5))
+        lunes.tap()
+        let texto = app.staticTexts.containing(NSPredicate(format: "label BEGINSWITH %@", "No registramos esta salida"))
+            .firstMatch
+        XCTAssertTrue(texto.waitForExistence(timeout: 5))
+        XCTAssertTrue(app.buttons["Lo hice: marcar como hecho"].exists)
+    }
+
+    /// Las hojas miden su contenido: "Qué llevar hoy" no ocupa toda la pantalla.
+    func testLaHojaQueLlevarMideSuContenido() {
+        let app = abrirHome("inicio")
+        let linea = app.buttons.containing(NSPredicate(format: "label BEGINSWITH %@", "Qué llevar:")).firstMatch
+        XCTAssertTrue(linea.waitForExistence(timeout: 5))
+        linea.tap()
+        let titulo = app.staticTexts["Qué llevar hoy"]
+        XCTAssertTrue(titulo.waitForExistence(timeout: 5))
+        XCTAssertGreaterThan(titulo.frame.minY, app.windows.firstMatch.frame.height * 0.25,
+                             "la hoja subió hasta arriba: no mide su contenido")
+    }
+
+    /// Al entrar al historial, el día elegido es hoy (antes elegía ayer).
+    func testElHistorialAbreEnHoy() {
+        let app = abrirHome("historial")
+        let hoy = app.staticTexts.containing(NSPredicate(format: "label BEGINSWITH %@", "Hoy ·")).firstMatch
+        XCTAssertTrue(hoy.waitForExistence(timeout: 5))
     }
 
     /// La barra de pestañas tiene que dejarle la pantalla al contenido.
