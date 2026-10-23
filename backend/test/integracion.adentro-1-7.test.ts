@@ -189,9 +189,15 @@ describe("nuevo inicio de sesión desde un dispositivo nuevo (1.7.0)", { skip: S
     const r = await pedir("POST", "/v1/auth/login", { email, password: PASSWORD, device: otro }, undefined, {
       "cf-ipcountry": "AR",
       "cf-ipcity": "C%C3%B3rdoba",
+      "cf-connecting-ip": "181.93.48.185",
     });
     assert.equal(r.status, 200, JSON.stringify(r.json));
     assert.equal(avisosA(email)[0]!.aviso.ubicacion, "Córdoba, Argentina");
+    assert.equal(avisosA(email)[0]!.aviso.ip, "181.93.48.185", "la IP de la persona, no la del borde de Cloudflare");
+
+    const tercero = { id: `inst-${randomUUID()}`, model: "Pixel 9", os: "Android 16" };
+    await pedir("POST", "/v1/auth/login", { email, password: PASSWORD, device: tercero }, undefined, { "cf-connecting-ip": "no-es-una-ip" });
+    assert.match(avisosA(email)[1]!.aviso.ip, /^10\./, "si no es una IP, queda la del pedido");
   });
 
   test("entrar con Google ya vinculado desde un dispositivo nuevo avisa; vincular no manda los dos correos", async () => {
