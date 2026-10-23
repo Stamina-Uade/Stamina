@@ -115,6 +115,12 @@ final class EstadoReloj: ObservableObject {
     @Published var avisosDeSales = true
     @Published var guiaDeRutina = true
     @Published var avisosDeAvituallamiento = true
+    /// Lo que la persona dijo que lleva en ESTA salida, en la pregunta del
+    /// inicio (`PreguntaAvituallamientoView`). Es lo único que programa avisos:
+    /// con "No", o con todo en 0, no sale ninguno. Lo que dice el plan sólo
+    /// sirve para pre-cargar las cantidades cuando contesta "Sí"; `empezar` no
+    /// las vuelve a pisar con el plan. Una salida que arrancó el teléfono no
+    /// pregunta en el reloj, así que queda en 0 y sin avisos.
     @Published var gelesQueLleva = 0
     @Published var salesQueLleva = 0
     @Published var aguaMlQueLleva = 0
@@ -126,7 +132,10 @@ final class EstadoReloj: ObservableObject {
         avisoDeAvituallamiento = nil
     }
 
-    private func evaluarAvisoDeAvituallamiento(segundos: Int, deporte: DeporteDeSesion) {
+    /// No es `private` para que los tests puedan avanzar el reloj de la salida
+    /// sin correr de verdad. Lo llaman los dos caminos de tiempo (salida local y
+    /// salida espejada del teléfono).
+    func evaluarAvisoDeAvituallamiento(segundos: Int, deporte: DeporteDeSesion) {
         guard avisosDeAvituallamiento, avisoDeAvituallamiento == nil else { return }
         let insumos = InsumosDeSalida(geles: gelesQueLleva, sales: salesQueLleva,
                                      aguaMl: aguaMlQueLleva)
@@ -979,30 +988,40 @@ final class EstadoReloj: ObservableObject {
         self.iconoPendiente = icono
         self.iconoDeporteEnCurso = icono
 
-        iniciarSinAvituallamiento()
+        // Toda salida que se arranca desde el reloj pasa por la pregunta
+        // "¿Llevas hidratación o geles?" antes de la cuenta regresiva. Es la
+        // única puerta de inicio del reloj (las dos tarjetas de `AbrirView`
+        // llaman acá); `empezar` sólo lo llama `completarCuentaRegresiva`.
+        gelesQueLleva = 0
+        salesQueLleva = 0
+        aguaMlQueLleva = 0
+        cuentaRegresivaActiva = false
+        preguntaAvituallamientoActiva = true
     }
 
+    /// "No", o tocar afuera ("Toca para saltear"): no lleva nada, así que no se
+    /// programa ningún aviso de agua, gel ni sales.
     func iniciarSinAvituallamiento() {
-        if let sesion = sesionPlanificada {
-            gelesQueLleva = sesion.geles ?? 0
-            salesQueLleva = sesion.sales ?? 0
-            aguaMlQueLleva = sesion.aguaMl ?? 0
-        } else {
-            gelesQueLleva = 0
-            salesQueLleva = 0
-            aguaMlQueLleva = 0
-        }
+        gelesQueLleva = 0
+        salesQueLleva = 0
+        aguaMlQueLleva = 0
         preguntaAvituallamientoActiva = false
         cuentaRegresivaActiva = true
         pantalla = .metricas
     }
 
+    /// "Sí": las cantidades arrancan con lo que dice el plan de hoy (o en 0 si
+    /// no hay plan) y la persona las ajusta con − y + antes de "Iniciar".
+    func cargarAvituallamientoDelPlan() {
+        let sesion = sesionPlanificada
+        gelesQueLleva = sesion?.geles ?? 0
+        salesQueLleva = sesion?.sales ?? 0
+        aguaMlQueLleva = sesion?.aguaMl ?? 0
+    }
+
+    /// "Iniciar": se queda con lo que la persona dejó en pantalla. No se vuelve
+    /// a leer el plan, porque eso deshacía lo que acababa de elegir.
     func confirmarAvituallamientoEIniciar() {
-        if let sesion = sesionPlanificada {
-            gelesQueLleva = sesion.geles ?? 0
-            salesQueLleva = sesion.sales ?? 0
-            aguaMlQueLleva = sesion.aguaMl ?? 0
-        }
         preguntaAvituallamientoActiva = false
         cuentaRegresivaActiva = true
         pantalla = .metricas
@@ -1024,6 +1043,10 @@ final class EstadoReloj: ObservableObject {
 
     func cancelarCuentaRegresiva() {
         cuentaRegresivaActiva = false
+        preguntaAvituallamientoActiva = false
+        gelesQueLleva = 0
+        salesQueLleva = 0
+        aguaMlQueLleva = 0
         deportePendiente = nil
         objetivoMetrosPendiente = nil
         esTriatlonPendiente = false
@@ -1048,16 +1071,9 @@ final class EstadoReloj: ObservableObject {
         if let icono {
             self.iconoDeporteEnCurso = icono
         }
-        // Insumos configurados desde el celular
-        if let sesion = sesionPlanificada {
-            self.gelesQueLleva = sesion.geles ?? 0
-            self.salesQueLleva = sesion.sales ?? 0
-            self.aguaMlQueLleva = sesion.aguaMl ?? 0
-        } else {
-            self.gelesQueLleva = 0
-            self.salesQueLleva = 0
-            self.aguaMlQueLleva = 0
-        }
+        // Lo que lleva NO se toca acá: lo decidió la pregunta del inicio
+        // (`prepararInicioConCuentaRegresiva`). Antes se pisaba con el plan y
+        // los avisos salían aunque la persona hubiera dicho que no llevaba nada.
         guard estaAutenticado else {
             ir(a: .sinTelefono)
             return
