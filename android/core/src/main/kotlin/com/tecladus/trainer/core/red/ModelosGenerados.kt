@@ -3,7 +3,7 @@
 // NO EDITAR A MANO: se reescribe con `npm run generar:modelos` y el CI falla si
 // lo commiteado no coincide.
 //
-// contrato: Trainer API v1.6.0
+// contrato: Trainer API v1.7.0
 //
 // AGENTS.md §5: el JSON va en snake_case, los tiempos son enteros de milisegundos
 // desde epoch y todo viaja en un sobre {"data": …} o {"error": {…}}. Los nombres
@@ -41,6 +41,14 @@ enum class Plataforma {
     WATCHOS,
 
 }
+
+/** 1.7.0. Desde qué dispositivo se entra o se registra la cuenta, para el aviso de inicio de sesión desde un dispositivo nuevo. `id` identifica la INSTALACIÓN: un valor aleatorio que la app genera una vez y guarda en el llavero o el Keystore. El servidor guarda su hash, nunca el valor. `model` y `os` son para leer en el correo. */
+@Serializable
+data class Dispositivo(
+    val id: String,
+    val model: String? = null,
+    val os: String? = null,
+)
 
 /** Health */
 @Serializable
@@ -614,9 +622,10 @@ data class SemanaPlanificada(
     val plannedDurationMin: Int,
     @SerialName("planned_distance_m")
     val plannedDistanceM: Int,
-    /** Días de esa semana con una actividad o series de gimnasio registradas. */
+    /** Días de esa semana con una actividad o series de gimnasio registradas, o marcados a mano como hechos (1.7.0). */
     @SerialName("done_sessions")
     val doneSessions: Int,
+    /** Los metros de las actividades registradas. Un día marcado a mano no suma. */
     @SerialName("done_distance_m")
     val doneDistanceM: Int,
 )
@@ -662,8 +671,11 @@ data class DiaPlanificado(
     val title: String,
     val detail: String,
     val reasons: List<MotivoDelPlan>,
-    /** Hay una actividad o series de gimnasio registradas ese día. */
+    /** Hay una actividad o series de gimnasio registradas ese día, o (1.7.0) la persona lo marcó como hecho. */
     val done: Boolean,
+    /** 1.7.0. `true` si el día está hecho sólo porque la persona lo marcó a mano (`PUT /plan/days/done`), sin una salida registrada. Ausente o `false` en cualquier otro caso. */
+    @SerialName("manually_done")
+    val manuallyDone: Boolean? = null,
 )
 
 /** El "por qué" de un día (AGENTS.md §9.1: explicable). `code` es estable; `text` viene traducido. */
@@ -1085,6 +1097,32 @@ data class ExportacionDeDatos(
     val meals: List<ComidaRegistrada>,
     /** Desde la 1.3.0. Opcional para que un cliente nuevo lea la exportación de un servidor anterior. */
     val steps: List<DiaDePasos>? = null,
+    /** Desde la 1.7.0. Los días del plan marcados a mano como hechos. */
+    @SerialName("manual_done_days")
+    val manualDoneDays: List<DiaHechoAMano>? = null,
+    /** Desde la 1.7.0. Los dispositivos desde los que se entró a la cuenta. Sin el identificador. */
+    @SerialName("known_devices")
+    val knownDevices: List<DispositivoConocido>? = null,
+)
+
+/** DiaHechoAMano */
+@Serializable
+data class DiaHechoAMano(
+    /** El día local, YYYY-MM-DD. */
+    val date: String,
+    @SerialName("created_at_ms")
+    val createdAtMs: Long,
+)
+
+/** DispositivoConocido */
+@Serializable
+data class DispositivoConocido(
+    val model: String? = null,
+    val os: String? = null,
+    @SerialName("first_seen_at_ms")
+    val firstSeenAtMs: Long,
+    @SerialName("last_seen_at_ms")
+    val lastSeenAtMs: Long,
 )
 
 /** ObjetivoExportado */

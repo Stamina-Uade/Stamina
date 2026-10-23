@@ -3,7 +3,7 @@
 // NO EDITAR A MANO: se reescribe en cada `npm run generar:modelos`, y el CI
 // falla si el archivo commiteado no coincide con lo que el generador produce.
 //
-// Contrato 1.6.0
+// Contrato 1.7.0
 //
 // AGENTS.md §4.2: los modelos de red se generan desde el contrato, no se
 // escriben a mano. AGENTS.md §5: a partir de la primera versión en tienda,
@@ -43,6 +43,23 @@ public enum Plataforma: String, Codable, CaseIterable, Sendable {
     case ios = "ios"
     case wear = "wear"
     case watchos = "watchos"
+}
+
+/// 1.7.0. Desde qué dispositivo se entra o se registra la cuenta, para el aviso de inicio de sesión desde un dispositivo nuevo. `id` identifica la INSTALACIÓN: un valor aleatorio que la app genera una vez y guarda en el llavero o el Keystore. El servidor guarda su hash, nunca el valor. `model` y `os` son para leer en el correo.
+public struct Dispositivo: Codable, Equatable, Sendable {
+    public let id: String
+    public let model: String?
+    public let os: String?
+
+    public init(
+        id: String,
+        model: String? = nil,
+        os: String? = nil
+    ) {
+        self.id = id
+        self.model = model
+        self.os = os
+    }
 }
 
 public struct Health: Codable, Equatable, Sendable {
@@ -975,8 +992,9 @@ public struct SemanaPlanificada: Codable, Equatable, Sendable {
     public let isDeload: Bool
     public let plannedDurationMin: Int64
     public let plannedDistanceM: Int64
-    /// Días de esa semana con una actividad o series de gimnasio registradas.
+    /// Días de esa semana con una actividad o series de gimnasio registradas, o marcados a mano como hechos (1.7.0).
     public let doneSessions: Int64
+    /// Los metros de las actividades registradas. Un día marcado a mano no suma.
     public let doneDistanceM: Int64
 
     enum CodingKeys: String, CodingKey {
@@ -1038,8 +1056,10 @@ public struct DiaPlanificado: Codable, Equatable, Sendable {
     public let title: String
     public let detail: String
     public let reasons: [MotivoDelPlan]
-    /// Hay una actividad o series de gimnasio registradas ese día.
+    /// Hay una actividad o series de gimnasio registradas ese día, o (1.7.0) la persona lo marcó como hecho.
     public let done: Bool
+    /// 1.7.0. `true` si el día está hecho sólo porque la persona lo marcó a mano (`PUT /plan/days/done`), sin una salida registrada. Ausente o `false` en cualquier otro caso.
+    public let manuallyDone: Bool?
 
     enum CodingKeys: String, CodingKey {
         case dateMs = "date_ms"
@@ -1064,6 +1084,7 @@ public struct DiaPlanificado: Codable, Equatable, Sendable {
         case detail
         case reasons
         case done
+        case manuallyDone = "manually_done"
     }
 
     public init(
@@ -1088,7 +1109,8 @@ public struct DiaPlanificado: Codable, Equatable, Sendable {
         title: String,
         detail: String,
         reasons: [MotivoDelPlan],
-        done: Bool
+        done: Bool,
+        manuallyDone: Bool? = nil
     ) {
         self.dateMs = dateMs
         self.dayIndex = dayIndex
@@ -1112,6 +1134,7 @@ public struct DiaPlanificado: Codable, Equatable, Sendable {
         self.detail = detail
         self.reasons = reasons
         self.done = done
+        self.manuallyDone = manuallyDone
     }
 }
 
@@ -1924,6 +1947,10 @@ public struct ExportacionDeDatos: Codable, Equatable, Sendable {
     public let meals: [ComidaRegistrada]
     /// Desde la 1.3.0. Opcional para que un cliente nuevo lea la exportación de un servidor anterior.
     public let steps: [DiaDePasos]?
+    /// Desde la 1.7.0. Los días del plan marcados a mano como hechos.
+    public let manualDoneDays: [DiaHechoAMano]?
+    /// Desde la 1.7.0. Los dispositivos desde los que se entró a la cuenta. Sin el identificador.
+    public let knownDevices: [DispositivoConocido]?
 
     enum CodingKeys: String, CodingKey {
         case exportedAtMs = "exported_at_ms"
@@ -1935,6 +1962,8 @@ public struct ExportacionDeDatos: Codable, Equatable, Sendable {
         case activities
         case meals
         case steps
+        case manualDoneDays = "manual_done_days"
+        case knownDevices = "known_devices"
     }
 
     public init(
@@ -1946,7 +1975,9 @@ public struct ExportacionDeDatos: Codable, Equatable, Sendable {
         gymSessions: [SesionDeGimnasio],
         activities: [Actividad],
         meals: [ComidaRegistrada],
-        steps: [DiaDePasos]? = nil
+        steps: [DiaDePasos]? = nil,
+        manualDoneDays: [DiaHechoAMano]? = nil,
+        knownDevices: [DispositivoConocido]? = nil
     ) {
         self.exportedAtMs = exportedAtMs
         self.profile = profile
@@ -1957,6 +1988,53 @@ public struct ExportacionDeDatos: Codable, Equatable, Sendable {
         self.activities = activities
         self.meals = meals
         self.steps = steps
+        self.manualDoneDays = manualDoneDays
+        self.knownDevices = knownDevices
+    }
+}
+
+public struct DiaHechoAMano: Codable, Equatable, Sendable {
+    /// El día local, YYYY-MM-DD.
+    public let date: String
+    public let createdAtMs: Int64
+
+    enum CodingKeys: String, CodingKey {
+        case date
+        case createdAtMs = "created_at_ms"
+    }
+
+    public init(
+        date: String,
+        createdAtMs: Int64
+    ) {
+        self.date = date
+        self.createdAtMs = createdAtMs
+    }
+}
+
+public struct DispositivoConocido: Codable, Equatable, Sendable {
+    public let model: String?
+    public let os: String?
+    public let firstSeenAtMs: Int64
+    public let lastSeenAtMs: Int64
+
+    enum CodingKeys: String, CodingKey {
+        case model
+        case os
+        case firstSeenAtMs = "first_seen_at_ms"
+        case lastSeenAtMs = "last_seen_at_ms"
+    }
+
+    public init(
+        model: String? = nil,
+        os: String? = nil,
+        firstSeenAtMs: Int64,
+        lastSeenAtMs: Int64
+    ) {
+        self.model = model
+        self.os = os
+        self.firstSeenAtMs = firstSeenAtMs
+        self.lastSeenAtMs = lastSeenAtMs
     }
 }
 

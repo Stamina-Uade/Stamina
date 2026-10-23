@@ -16,7 +16,7 @@ openapi: 3.1.0
 
 info:
   title: Trainer API
-  version: 1.6.0
+  version: 1.7.0
   license:
     name: >-
       COMPLETAR. El repositorio es privado y la licencia del proyecto no está
@@ -57,6 +57,14 @@ info:
     contraseña ya NO revoca las otras sesiones. `weak_password` queda sólo para
     las tres reglas visibles. Aditivo para la forma: ningún campo existente
     cambió; un cliente viejo ve los códigos nuevos como un error que no conoce.
+    La 1.7.0 (cambios de "Adentro de la app", decisión de Iván del 2026-10-23)
+    agrega: marcar a mano como hecho un día del plan que pasó sin salida
+    registrada (`PUT /plan/days/done`, `manually_done` en el día); el
+    dispositivo (`device`, opcional) al entrar y al registrarse, para avisar por
+    correo de un inicio de sesión desde un dispositivo nuevo; y en la
+    exportación, los días marcados y los dispositivos conocidos. Se deja de
+    mandar el correo "Cambiaste la contraseña". Aditivo: ningún campo existente
+    cambió de forma.
 
     **Reglas que valen en TODA la API** (docs/API.md las explica):
 
@@ -333,6 +341,7 @@ paths:
                 social_token: { type: string, minLength: 1, maxLength: 4096 }
                 profile: { $ref: '#/components/schemas/PerfilEntrada' }
                 legal: { $ref: '#/components/schemas/AceptacionLegal' }
+                device: { $ref: '#/components/schemas/Dispositivo' }
       responses:
         '201':
           description: Cuenta creada y sesión abierta.
@@ -395,6 +404,7 @@ paths:
                 provider: { type: string, enum: [google, apple] }
                 id_token: { type: string, minLength: 1, maxLength: 8192 }
                 nonce: { type: string, minLength: 16, maxLength: 128 }
+                device: { $ref: '#/components/schemas/Dispositivo' }
       responses:
         '200':
           description: Entró, o hace falta completar el alta.
@@ -426,7 +436,9 @@ paths:
         cuenta para el tope de intentos de ese correo (`too_many_attempts`).
         Con éxito la identidad queda vinculada —desde ahí la cuenta entra con
         su contraseña o con el proveedor—, al dueño le llega un correo avisando
-        y vuelve la sesión.
+        y vuelve la sesión. El dispositivo (`device`, 1.7.0) queda conocido: el
+        correo de la vinculación ya dice desde dónde se hizo, así que no se
+        manda además el de "nuevo inicio de sesión".
 
         Errores: `invalid_link_token` (401, vencido, usado o adulterado),
         `wrong_password` (401), `too_many_attempts` (429), `conflict` (409, la
@@ -445,6 +457,7 @@ paths:
               properties:
                 link_token: { type: string, minLength: 1, maxLength: 4096 }
                 password: { type: string, minLength: 1, maxLength: 200 }
+                device: { $ref: '#/components/schemas/Dispositivo' }
       responses:
         '200':
           description: Vinculada y sesión abierta.
@@ -482,6 +495,7 @@ paths:
               additionalProperties: false
               properties:
                 reactivation_token: { type: string, minLength: 1, maxLength: 4096 }
+                device: { $ref: '#/components/schemas/Dispositivo' }
       responses:
         '200':
           description: Cuenta activa y sesión abierta.
@@ -523,6 +537,13 @@ paths:
           traen `details.reactivation_token` para `POST /auth/reactivate`. Con
           la contraseña equivocada contesta `wrong_password`, como siempre: el
           estado de la cuenta no se le dice a quien no la sabe.
+
+        1.7.0: con `device`, si la cuenta nunca vio ese dispositivo, al dueño le
+        llega "Nuevo inicio de sesión en tu cuenta de Stamina" (IP, dispositivo y
+        hora) y el dispositivo queda conocido. Sin `device` no se puede saber si
+        es nuevo y no se manda nada. Lo mismo vale para `POST /auth/social`
+        (cuando entra) y `POST /auth/reactivate`. Registrarse deja conocido el
+        dispositivo del alta, sin aviso.
       security: []
       requestBody:
         required: true
@@ -535,6 +556,7 @@ paths:
               properties:
                 email: { $ref: '#/components/schemas/Email' }
                 password: { type: string, minLength: 1, maxLength: 200 }
+                device: { $ref: '#/components/schemas/Dispositivo' }
       responses:
         '200':
           description: Sesión abierta.
@@ -706,8 +728,10 @@ paths:
 
         1.6.0: **ya no revoca las otras sesiones**. La app pregunta y, si la
         persona quiere, llama a `POST /auth/logout/others` con la sesión nueva.
-        Siempre se manda un correo avisando que la contraseña cambió, en el
-        idioma del pedido. Cambiarla reinicia el tope de intentos de ese correo.
+        Cambiarla reinicia el tope de intentos de ese correo. Desde la 1.7.0 ya
+        NO se manda el correo "Cambiaste la contraseña" (decisión de Iván del
+        2026-10-23): el código para cambiarla ya llegó a ese correo. El
+        dispositivo (`device`) queda conocido sin aviso.
         Si la cuenta está desactivada o por borrarse, la contraseña se cambia
         igual y contesta `account_deactivated` / `account_pending_deletion`
         (403) con su `reactivation_token`, como el login.
@@ -725,6 +749,7 @@ paths:
               properties:
                 reset_token: { type: string }
                 password: { $ref: '#/components/schemas/Password' }
+                device: { $ref: '#/components/schemas/Dispositivo' }
       responses:
         '200':
           description: Contraseña cambiada y sesión nueva abierta.
@@ -1010,8 +1035,9 @@ paths:
       description: >-
         **AGENTS.md §8.** Todo lo que el servidor guarda de la persona, en un solo
         JSON: perfil, aceptaciones legales, anclas del plan, sesiones de gimnasio con
-        sus series, actividades, comidas y, desde la 1.3.0, pasos diarios. Nunca
-        incluye hashes ni tokens.
+        sus series, actividades, comidas, desde la 1.3.0 pasos diarios y, desde la
+        1.7.0, los días marcados a mano y los dispositivos conocidos. Nunca
+        incluye hashes, tokens ni el identificador del dispositivo.
       responses:
         '200':
           description: Los datos.
@@ -1130,6 +1156,45 @@ paths:
                   data:
                     type: array
                     items: { $ref: '#/components/schemas/PlanDeObjetivo' }
+        '401': { $ref: '#/components/responses/NoAutorizado' }
+
+  /plan/days/done:
+    put:
+      tags: [plan]
+      operationId: markPlanDayDone
+      summary: Marcar como hecho un día que pasó sin salida registrada
+      description: |
+        1.7.0. Para el día que tocaba entrenar y pasó sin nada registrado,
+        cuando la persona hizo la salida pero no la grabó. Es una marca sobre
+        ese día del plan, no una actividad: no inventa kilómetros, tiempo ni
+        recorrido.
+
+        Desde ahí, en `GET /plan` y `GET /plans`, ese día sale `done: true` y
+        `manually_done: true`, y cuenta en `done_sessions` de su semana sin
+        sumar a `done_distance_m`. **La racha no vuelve**: `streak` sólo cuenta
+        días con una actividad o series registradas.
+
+        `date_ms` es cualquier instante del día, que el servidor lleva al día
+        local de la persona con la zona de su plan. Tiene que ser un día ANTERIOR
+        a hoy que en alguno de sus planes vigentes no es de descanso; si no,
+        `bad_request`. Idempotente: marcar un día ya marcado, o uno que ya tiene
+        una salida, contesta lo mismo.
+      parameters:
+        - $ref: '#/components/parameters/ClaveDeIdempotencia'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [date_ms]
+              additionalProperties: false
+              properties:
+                date_ms: { $ref: '#/components/schemas/EpochMs' }
+      responses:
+        '204':
+          description: Marcado. El plan nuevo se pide con `GET /plans`.
+        '400': { $ref: '#/components/responses/PedidoInvalido' }
         '401': { $ref: '#/components/responses/NoAutorizado' }
 
   /plan/routine:
@@ -1604,6 +1669,21 @@ components:
       type: string
       enum: [android, ios, wear, watchos]
       description: Los cuatro clientes de AGENTS.md §1.3. Cada uno versiona por separado.
+
+    Dispositivo:
+      type: object
+      required: [id]
+      additionalProperties: false
+      description: >-
+        1.7.0. Desde qué dispositivo se entra o se registra la cuenta, para el
+        aviso de inicio de sesión desde un dispositivo nuevo. `id` identifica la
+        INSTALACIÓN: un valor aleatorio que la app genera una vez y guarda en el
+        llavero o el Keystore. El servidor guarda su hash, nunca el valor.
+        `model` y `os` son para leer en el correo.
+      properties:
+        id: { type: string, minLength: 8, maxLength: 128 }
+        model: { type: string, minLength: 1, maxLength: 80, examples: ["iPhone 16"] }
+        os: { type: string, minLength: 1, maxLength: 40, examples: ["iOS 26.5"] }
 
     # ---- servicio ----
     Health:
@@ -2209,8 +2289,8 @@ components:
         is_deload: { type: boolean, description: Semana de descarga. No son opcionales (AGENTS.md §9.1). }
         planned_duration_min: { type: integer }
         planned_distance_m: { type: integer }
-        done_sessions: { type: integer, description: Días de esa semana con una actividad o series de gimnasio registradas. }
-        done_distance_m: { type: integer }
+        done_sessions: { type: integer, description: 'Días de esa semana con una actividad o series de gimnasio registradas, o marcados a mano como hechos (1.7.0).' }
+        done_distance_m: { type: integer, description: Los metros de las actividades registradas. Un día marcado a mano no suma. }
 
     DiaPlanificado:
       type: object
@@ -2244,7 +2324,13 @@ components:
         reasons:
           type: array
           items: { $ref: '#/components/schemas/MotivoDelPlan' }
-        done: { type: boolean, description: Hay una actividad o series de gimnasio registradas ese día. }
+        done: { type: boolean, description: 'Hay una actividad o series de gimnasio registradas ese día, o (1.7.0) la persona lo marcó como hecho.' }
+        manually_done:
+          type: boolean
+          description: >-
+            1.7.0. `true` si el día está hecho sólo porque la persona lo marcó a
+            mano (`PUT /plan/days/done`), sin una salida registrada. Ausente o
+            `false` en cualquier otro caso.
 
     MotivoDelPlan:
       type: object
@@ -2587,6 +2673,30 @@ components:
           type: array
           description: Desde la 1.3.0. Opcional para que un cliente nuevo lea la exportación de un servidor anterior.
           items: { $ref: '#/components/schemas/DiaDePasos' }
+        manual_done_days:
+          type: array
+          description: Desde la 1.7.0. Los días del plan marcados a mano como hechos.
+          items: { $ref: '#/components/schemas/DiaHechoAMano' }
+        known_devices:
+          type: array
+          description: Desde la 1.7.0. Los dispositivos desde los que se entró a la cuenta. Sin el identificador.
+          items: { $ref: '#/components/schemas/DispositivoConocido' }
+
+    DiaHechoAMano:
+      type: object
+      required: [date, created_at_ms]
+      properties:
+        date: { type: string, pattern: '^\d{4}-\d{2}-\d{2}$', description: 'El día local, YYYY-MM-DD.' }
+        created_at_ms: { $ref: '#/components/schemas/EpochMs' }
+
+    DispositivoConocido:
+      type: object
+      required: [first_seen_at_ms, last_seen_at_ms]
+      properties:
+        model: { type: string }
+        os: { type: string }
+        first_seen_at_ms: { $ref: '#/components/schemas/EpochMs' }
+        last_seen_at_ms: { $ref: '#/components/schemas/EpochMs' }
 
     ObjetivoExportado:
       type: object
