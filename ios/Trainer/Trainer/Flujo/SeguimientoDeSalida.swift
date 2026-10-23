@@ -268,6 +268,9 @@ final class SeguimientoDeSalida: NSObject, ObservableObject, CLLocationManagerDe
         if usuario != nil { Task { await subirPendientes() } }
     }
 
+    /// El deporte de la salida en curso (lo lee la actividad en vivo). `nil` sin salida.
+    var deporteEnCurso: DeporteDeSesion? { activa?.deporte }
+
     var ritmoSegPorKm: Int? {
         guard metros >= 100, segundos > 0 else { return nil }
         return Int((Double(segundos) * 1000 / Double(metros)).rounded())
