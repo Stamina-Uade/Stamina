@@ -22,11 +22,16 @@ struct FilaDeDiaDelPlan: View {
     }
 
     var body: some View {
-        Button(action: alTocar) { contenido }
-            .buttonStyle(EstiloPresionado())
-            .disabled(dia.esDescanso)
-            .accessibilityElement(children: .combine)
-            .accessibilityHint(dia.esDescanso ? "" : Textos.planDayTapToSee)
+        // Un descanso no es un botón (y no `.disabled`, que lo apagaría como a un día
+        // sin hacer): sólo lleva el texto en gris claro.
+        if dia.esDescanso {
+            contenido.accessibilityElement(children: .combine)
+        } else {
+            Button(action: alTocar) { contenido }
+                .buttonStyle(EstiloPresionado())
+                .accessibilityElement(children: .combine)
+                .accessibilityHint(Textos.planDayTapToSee)
+        }
     }
 
     private var contenido: some View {
@@ -71,7 +76,7 @@ struct FilaDeDiaDelPlan: View {
         if dia.hecho {
             Image(systemName: "checkmark.circle.fill")
                 .font(.system(size: TokensTipografia.tituloCardGrandeTamano, weight: .semibold))
-                .foregroundStyle(Paleta.exito)
+                .foregroundStyle(Paleta.verdeMedidor)
                 .accessibilityLabel(Textos.planDone)
         } else if dia.esHoy {
             Text(Textos.planTodayBadge)
@@ -107,11 +112,17 @@ struct HojaDelDiaDelPlan: View {
     @State private var marcando = false
     @State private var fallo = false
 
+    /// Hoy, si el día no trae algo, lo trae la sesión del día (el mismo plan).
+    private var sesionDeHoy: SesionDelDia? { dia.esHoy ? estado.sesion : nil }
+    private var zona: ZonaDeIntensidad? { dia.zona ?? sesionDeHoy?.zona }
+    private var avituallamiento: AvituallamientoDeSesion? { dia.avituallamiento ?? sesionDeHoy?.avituallamiento }
+    private var minutoDelDia: Int? { dia.minutoDelDia ?? sesionDeHoy?.minutoDelDia }
+
     var body: some View {
         HojaAMedida(estimado: dia.sinHacer ? 300 : 420) {
             VStack(alignment: .leading, spacing: TokensEspaciado.e16) {
                 VStack(alignment: .leading, spacing: TokensEspaciado.e4) {
-                    Text(PlanFechas.encabezado(dia))
+                    Text(PlanFechas.encabezado(dia, minuto: minutoDelDia))
                         .estilo(.etiquetaSeccion, color: dia.esHoy ? Paleta.acento : Paleta.textoTerciario)
                     Text(titulo)
                         .estilo(.tituloSeccion)
@@ -172,7 +183,7 @@ struct HojaDelDiaDelPlan: View {
 
     @ViewBuilder
     private var detalle: some View {
-        if let zona = dia.zona {
+        if let zona {
             VStack(alignment: .leading, spacing: TokensEspaciado.e8) {
                 PildoraDeEstado(Textos.zonePill(zona.numero, zona.sensacion), simbolo: "heart", tono: .acento)
                 Text(zona.planExplicacion)
@@ -217,7 +228,7 @@ struct HojaDelDiaDelPlan: View {
 
     /// "500 ml de agua con sales · 1 gel", con los números del servidor.
     private var queLlevar: String? {
-        guard let a = dia.avituallamiento else { return nil }
+        guard let a = avituallamiento else { return nil }
         var partes: [String] = []
         if a.mililitrosTotales > 0 { partes.append(Textos.planDayWaterWithSalts(a.mililitrosTotales)) }
         if a.geles > 0 { partes.append(a.geles == 1 ? Textos.planDayGelOne : Textos.planDayGelsCount(a.geles)) }
@@ -246,14 +257,14 @@ enum PlanFechas {
     }
 
     /// "JUEVES 22 · HOY · 18:30" (se ve en mayúsculas por el estilo).
-    static func encabezado(_ dia: DiaDelPlan) -> String {
+    static func encabezado(_ dia: DiaDelPlan, minuto: Int? = nil) -> String {
         var calendario = Calendar(identifier: .gregorian)
         calendario.locale = idioma
         let indice = dia.diaDeLaSemana % 7
         let nombre = calendario.weekdaySymbols.indices.contains(indice) ? calendario.weekdaySymbols[indice] : ""
         var partes = ["\(nombre) \(dia.numeroDeDia)"]
         if dia.esHoy { partes.append(Textos.commonToday) }
-        if !dia.sinHacer, let minuto = dia.minutoDelDia { partes.append(Formato.hora(minutoDelDia: minuto)) }
+        if !dia.sinHacer, let minuto = minuto ?? dia.minutoDelDia { partes.append(Formato.hora(minutoDelDia: minuto)) }
         return partes.joined(separator: " · ")
     }
 

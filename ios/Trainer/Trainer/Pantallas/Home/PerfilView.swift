@@ -74,8 +74,10 @@ struct PerfilView: View {
                     .estilo(.tituloSeccion)
                     .fixedSize(horizontal: false, vertical: true)
                     .accessibilityAddTraits(.isHeader)
-                Text(deporteYNivel)
-                    .estilo(.cuerpoSecundario, color: Paleta.textoSecundario)
+                if !deporteYNivel.isEmpty {
+                    Text(deporteYNivel)
+                        .estilo(.cuerpoSecundario, color: Paleta.textoSecundario)
+                }
             }
             Spacer(minLength: 0)
         }
@@ -217,7 +219,7 @@ struct PerfilView: View {
     }
 
     private var deporteYNivel: String {
-        guard let perfil = estado.perfil else { return Textos.commonNotSet }
+        guard let perfil = estado.perfil else { return "" }
         let deporte: String? = perfil.sport
             .flatMap { DeporteDeSesion(rawValue: $0.rawValue) }
             .map { MVP.acotado($0).nombreVisible }

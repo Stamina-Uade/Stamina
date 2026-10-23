@@ -79,7 +79,8 @@ struct PlanView: View {
             HojaDelDiaDelPlan(dia: elegido.dia, alMarcar: { await marcarComoHecho(elegido.dia) })
         }
         .sheet(isPresented: $mostrarEtapas) {
-            HojaDeEtapas(fases: bloqueVisible?.fases ?? [])
+            HojaDeEtapas(fases: bloqueVisible?.fases ?? [],
+                         etapaDeHoy: bloqueVisible?.semanas.first(where: { $0.enCurso })?.etapa)
         }
     }
 

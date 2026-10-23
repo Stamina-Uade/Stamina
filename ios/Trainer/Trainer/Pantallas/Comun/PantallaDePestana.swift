@@ -20,8 +20,10 @@ struct PantallaDePestana<Accesorio: View, Contenido: View>: View {
     private let accesorio: Accesorio
     private let contenido: Contenido
 
-    /// Cuánto bajó el contenido. Con más de un punto, la barra lleva la línea.
+    /// Si el contenido bajó más de un punto: la barra lleva la línea.
     @State private var desplazado = false
+    /// Dónde estaba el borde de arriba del contenido al aparecer (en la pantalla).
+    @State private var yInicial: CGFloat?
 
     init(_ titulo: String,
          alRefrescar: (() async -> Void)? = nil,
@@ -35,9 +37,11 @@ struct PantallaDePestana<Accesorio: View, Contenido: View>: View {
 
     var body: some View {
         desplazable
-            .coordinateSpace(name: Self.espacio)
             .onPreferenceChange(InicioDelContenidoDePestana.self) { y in
-                let bajo = y < -1
+                // En iOS 18 manda `onScrollGeometryChange` (`avisandoElScroll`).
+                if #available(iOS 18.0, *) { return }
+                if yInicial == nil { yInicial = y }
+                let bajo = y < (yInicial ?? y) - 1
                 if bajo != desplazado { desplazado = bajo }
             }
             .safeAreaInset(edge: .top, spacing: 0) { barra }
@@ -48,18 +52,20 @@ struct PantallaDePestana<Accesorio: View, Contenido: View>: View {
     @ViewBuilder
     private var desplazable: some View {
         let vista = ScrollView {
-            contenido
-                .background(alignment: .top) {
-                    GeometryReader { geo in
-                        Color.clear.preference(key: InicioDelContenidoDePestana.self,
-                                               value: geo.frame(in: .named(Self.espacio)).minY)
-                    }
+            VStack(spacing: 0) {
+                // Una marca de alto cero arriba de todo: dice cuánto bajó el contenido.
+                GeometryReader { geo in
+                    Color.clear.preference(key: InicioDelContenidoDePestana.self,
+                                           value: geo.frame(in: .global).minY)
                 }
+                .frame(height: 0)
+                contenido
+            }
         }
         if let alRefrescar {
-            vista.refreshable { await alRefrescar() }
+            vista.refreshable { await alRefrescar() }.avisandoElScroll($desplazado)
         } else {
-            vista
+            vista.avisandoElScroll($desplazado)
         }
     }
 
@@ -81,20 +87,35 @@ struct PantallaDePestana<Accesorio: View, Contenido: View>: View {
         .background(Paleta.fondo.ignoresSafeArea(edges: .top))
         .overlay(alignment: .bottom) {
             Rectangle()
-                .fill(Paleta.divisor)
+                .fill(Paleta.bordeSuperficie)
                 .frame(height: TokensEspaciado.e1)
                 .opacity(desplazado ? 1 : 0)
                 .accessibilityHidden(true)
         }
     }
-
-    private static var espacio: String { "pantalla-de-pestana" }
 }
 
-/// Dónde está el borde de arriba del contenido, en el espacio del `ScrollView`.
+/// Dónde está el borde de arriba del contenido, en la pantalla.
 private struct InicioDelContenidoDePestana: PreferenceKey {
     static let defaultValue: CGFloat = 0
     static func reduce(value: inout CGFloat, nextValue: () -> CGFloat) { value = nextValue() }
+}
+
+private extension View {
+    /// En iOS 18, cuánto bajó el contenido lo dice el `ScrollView` mismo; la marca de
+    /// alto cero de arriba queda para iOS 16 y 17.
+    @ViewBuilder
+    func avisandoElScroll(_ desplazado: Binding<Bool>) -> some View {
+        if #available(iOS 18.0, *) {
+            onScrollGeometryChange(for: Bool.self) { geo in
+                geo.contentOffset.y + geo.contentInsets.top > 1
+            } action: { _, bajo in
+                if bajo != desplazado.wrappedValue { desplazado.wrappedValue = bajo }
+            }
+        } else {
+            self
+        }
+    }
 }
 
 /// El fueguito de la barra fija. Sin plan, apagado en 0: la barra lo muestra igual,

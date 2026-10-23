@@ -217,7 +217,7 @@ struct CalendarioDeHitosView: View {
     /// "Lun" a "Dom", del calendario en el idioma de la app.
     private var columnaDeDias: some View {
         VStack(alignment: .leading, spacing: hueco) {
-            Color.clear.frame(height: TokensEspaciado.e14)
+            Color.clear.frame(width: 0, height: TokensEspaciado.e14)
             ForEach(1...7, id: \.self) { dia in
                 Text(PlanFechas.diaCorto(dia))
                     .estilo(.etiquetaSeccion.enMinusculas, color: Paleta.textoTerciario)
@@ -225,6 +225,8 @@ struct CalendarioDeHitosView: View {
                     .frame(height: celda)
             }
         }
+        // A la medida de "Mié": el resto del ancho es del gráfico.
+        .fixedSize(horizontal: true, vertical: false)
         .accessibilityHidden(true)
     }
 
@@ -275,13 +277,14 @@ struct CalendarioDeHitosView: View {
     }
 
     private func color(nivel: Int, vacio: Bool) -> Color {
-        if vacio { return Paleta.superficieAlterna.opacity(0.25) }
+        // Vacío (antes de la cuenta o todavía no llegó): se ve el lugar, apenas.
+        if vacio { return Paleta.superficieControl.opacity(0.35) }
         switch nivel {
         case 1: return Paleta.acento.opacity(0.30)
         case 2: return Paleta.acento.opacity(0.55)
         case 3: return Paleta.acento.opacity(0.80)
         case 4: return Paleta.acento
-        default: return Paleta.superficieAlterna.opacity(0.6)
+        default: return Paleta.superficieControl
         }
     }
 

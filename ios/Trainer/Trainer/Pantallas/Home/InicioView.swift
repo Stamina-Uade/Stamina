@@ -205,10 +205,10 @@ struct InicioView: View {
                 HStack(spacing: TokensEspaciado.e6) {
                     Image(systemName: "checkmark.circle.fill")
                         .font(.system(size: TokensTipografia.tituloCardTamano, weight: .bold))
-                        .foregroundStyle(Paleta.exito)
+                        .foregroundStyle(Paleta.verdeMedidor)
                         .accessibilityHidden(true)
                     Text(Textos.homeTodayDone)
-                        .estilo(.etiquetaSeccion, color: Paleta.exito)
+                        .estilo(.etiquetaSeccion, color: Paleta.verdeMedidor)
                 }
                 Text(estado.sesion?.tipo ?? actividad.sport.nombreVisible)
                     .estilo(.tituloCardGrande)

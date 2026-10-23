@@ -7,11 +7,16 @@ import TrainerCore
 struct HojaDeEtapas: View {
     /// Las del bloque, para saber en cuál estás.
     let fases: [FaseDelPlan]
+    /// La etapa de la semana en curso ("Base"), por si las fases no traen su código.
+    var etapaDeHoy: String? = nil
     @Environment(\.dismiss) private var cerrar
 
     private static let etapas: [Fase] = [.base, .construccion, .pico, .afinamiento]
 
-    private var actual: Fase? { fases.first(where: { $0.enCurso })?.fase }
+    private var actual: Fase? {
+        fases.first(where: { $0.enCurso })?.fase
+            ?? Self.etapas.first { TraduccionDelServidor.nombre(de: $0) == etapaDeHoy }
+    }
 
     var body: some View {
         HojaAMedida(estimado: 420) {
