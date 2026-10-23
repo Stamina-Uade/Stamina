@@ -8,7 +8,11 @@
 import type { FastifyInstance } from "fastify";
 import type { Contexto } from "../../contexto.js";
 import { crearGuardia, usuarioDe } from "../auth/guardia.js";
-import { calcularPlan, hechosDelBloque, calcularRacha, type HechoDelDia, type PlanCalculado } from "./servicio.js";
+import { calcularPlan, hechosDelBloque, calcularRacha, diaHecho, type HechoDelDia, type PlanCalculado } from "./servicio.js";
+import { crearRepoHechosAMano } from "./hechos-a-mano.js";
+import { ErrorApi } from "../../infra/errores.js";
+import { cuerpo } from "../../infra/esquemas.js";
+import { crearIdempotencia, conIdempotencia } from "../../infra/idempotencia.js";
 import { elegirRutina, textosDelHueco } from "./rutina.js";
 import { textosDelDia } from "./motor/textos.js";
 import type { DiaPlanificado } from "./motor/tipos.js";
@@ -34,8 +38,10 @@ function diaAApi(d: DiaPlanificado, zona: string, locale: Locale, hecho: HechoDe
     title: textos.titulo,
     detail: textos.detalle,
     reasons: d.motivos.map((code, i) => ({ code, text: textos.motivos[i] ?? "" })),
-    done: d.tipo !== "descanso" && (hecho?.sesiones ?? 0) > 0,
+    done: d.tipo !== "descanso" && diaHecho(hecho),
   };
+  // 1.7.0: hecho SÓLO por la marca a mano (sin una salida registrada ese día).
+  if (d.tipo !== "descanso" && hecho?.aMano === true && hecho.sesiones === 0) salida["manually_done"] = true;
   // Lo que falta se omite (docs/API.md §7): sin peso no hay kcal, sin edad no hay pulso.
   const opcionales: ReadonlyArray<readonly [string, number | string | null]> = [
     ["scheduled_minute_of_day", d.minutoDelDia],
@@ -74,7 +80,7 @@ function planAApi(c: PlanCalculado, hechos: Map<string, HechoDelDia>, locale: Lo
   const semanaDe = new Map<number, { sesiones: number; metros: number }>();
   for (const d of plan.dias) {
     const h = hechos.get(d.fecha);
-    if (h === undefined || d.tipo === "descanso") continue;
+    if (h === undefined || !diaHecho(h) || d.tipo === "descanso") continue;
     const previo = semanaDe.get(d.semana) ?? { sesiones: 0, metros: 0 };
     semanaDe.set(d.semana, { sesiones: previo.sesiones + 1, metros: previo.metros + h.metros });
   }
@@ -113,6 +119,7 @@ export async function rutasPlan(app: FastifyInstance, ctx: Contexto): Promise<vo
   const guardia = crearGuardia(ctx);
   const catalogo = crearRepoCatalogo(ctx.db);
   const gimnasio = crearRepoGimnasio(ctx.db);
+  const idem = crearIdempotencia(ctx.db, ctx.ahoraMs);
 
   app.get("/plan", { preHandler: guardia }, async (req) => {
     const usuarioId = usuarioDe(req);
@@ -136,6 +143,37 @@ export async function rutasPlan(app: FastifyInstance, ctx: Contexto): Promise<vo
     }
     return { data };
   });
+
+  /**
+   * 1.7.0: "Lo hice: marcar como hecho". Sólo un día ANTERIOR a hoy que en alguno
+   * de los planes vigentes tocaba entrenar. Se guarda por día de calendario local:
+   * si dos planes comparten ese día, los dos lo ven hecho, igual que con una salida.
+   */
+  app.put(
+    "/plan/days/done",
+    { preHandler: guardia, schema: { body: cuerpo("markPlanDayDone") } },
+    conIdempotencia(idem, async (req, res) => {
+      const usuarioId = usuarioDe(req);
+      const { date_ms } = req.body as { date_ms: number };
+      const objetivos = await crearRepoObjetivos(ctx.db).listar(usuarioId);
+      const ids = objetivos.length === 0 ? [null] : objetivos.map((o) => (o.id === "principal" ? null : o.id));
+      let fecha: string | null = null;
+      for (const id of ids) {
+        const calculado = await calcularPlan(ctx, usuarioId, id);
+        const candidata = fechaLocal(date_ms, calculado.zona);
+        const hoy = fechaLocal(ctx.ahoraMs(), calculado.zona);
+        const dia = calculado.plan.dias.find((d) => d.fecha === candidata);
+        if (candidata < hoy && dia !== undefined && dia.tipo !== "descanso") {
+          fecha = candidata;
+          break;
+        }
+      }
+      if (fecha === null) throw new ErrorApi("bad_request", "Only a past training day of the plan can be marked as done");
+      await crearRepoHechosAMano(ctx.db).marcar(usuarioId, fecha, ctx.ahoraMs());
+      res.code(204);
+      return null;
+    })
+  );
 
   app.get("/plan/routine", { preHandler: guardia, schema: parametros("getRoutine") }, async (req) => {
     const usuarioId = usuarioDe(req);

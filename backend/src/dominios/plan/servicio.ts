@@ -14,6 +14,7 @@ import { crearRepoActividades } from "../actividades/repositorio.js";
 import { crearRepoGimnasio } from "../gimnasio/repositorio.js";
 import { crearRepoPlan, type PlanFila } from "./repositorio.js";
 import { crearRepoObjetivos } from "../objetivos/repositorio.js";
+import { crearRepoHechosAMano } from "./hechos-a-mano.js";
 import { generarPlan, MOTOR_VERSION } from "./motor/generador.js";
 import type {
   DeportePerfil,
@@ -37,8 +38,19 @@ export interface PlanCalculado {
 }
 
 export interface HechoDelDia {
+  /** Actividades o días de gimnasio REGISTRADOS. Es lo único que cuenta para la racha. */
   sesiones: number;
   metros: number;
+  /**
+   * La persona lo marcó como hecho sin una salida registrada (contrato 1.7.0). El
+   * día cuenta como hecho y como sesión de su semana, sin metros y sin racha.
+   */
+  aMano?: boolean;
+}
+
+/** Hecho para el plan y la semana: registrado, o marcado a mano. */
+export function diaHecho(h: HechoDelDia | undefined): boolean {
+  return h !== undefined && (h.sesiones > 0 || h.aMano === true);
 }
 
 function sha256(texto: string): string {
@@ -159,6 +171,8 @@ export async function calcularPlan(ctx: Contexto, usuarioId: string, objetivoId:
 /**
  * Qué días del bloque ya tienen algo registrado: una actividad, o series de
  * gimnasio hechas. Es lo que el motor no puede saber y la pantalla sí muestra.
+ * Los días marcados a mano (1.7.0) entran con `aMano` y CERO sesiones: así la
+ * racha, que mira `sesiones`, no los cuenta.
  */
 export async function hechosDelBloque(
   ctx: Contexto,
@@ -171,13 +185,14 @@ export async function hechosDelBloque(
   const porFecha = new Map<string, HechoDelDia>();
   if (primero === undefined || ultimo === undefined) return porFecha;
 
-  const [actividades, conSeries] = await Promise.all([
+  const [actividades, conSeries, aMano] = await Promise.all([
     crearRepoActividades(ctx.db).enRango(
       usuarioId,
       inicioDelDiaMs(primero, zona),
       inicioDelDiaMs(sumarDias(ultimo, 1), zona)
     ),
     crearRepoGimnasio(ctx.db).fechasConSeries(usuarioId, primero, ultimo),
+    crearRepoHechosAMano(ctx.db).enRango(usuarioId, primero, ultimo),
   ]);
 
   const sumar = (fecha: string, metros: number) => {
@@ -186,6 +201,9 @@ export async function hechosDelBloque(
   };
   for (const a of actividades) sumar(fechaLocal(a.inicio_ms, zona), a.distancia_m ?? 0);
   for (const fecha of conSeries) sumar(fecha, 0);
+  for (const fecha of aMano) {
+    porFecha.set(fecha, { ...(porFecha.get(fecha) ?? { sesiones: 0, metros: 0 }), aMano: true });
+  }
   return porFecha;
 }
 
@@ -201,6 +219,8 @@ export interface Racha {
  * - Cuenta días de entrenamiento completados consecutivos.
  * - Los días de descanso NO rompen la racha ni requieren entrenar.
  * - Si un día que tocaba entrenar pasa sin registrarse, la racha se pierde (0).
+ *   Marcarlo después como hecho a mano (1.7.0) NO la devuelve: acá sólo cuentan
+ *   las `sesiones` registradas, nunca `aMano`.
  * - En el día actual: si toca entrenar y se entrena, se enciende el fueguito;
  *   si no se entrenó aún, el fueguito espera sin romperse hasta que pase el día.
  */
