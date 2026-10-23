@@ -23,6 +23,8 @@ import { serieAApi } from "../gimnasio/rutas.js";
 import { actividadAApi } from "../actividades/rutas.js";
 import { comidaAApi } from "../nutricion/rutas.js";
 import { crearRepoPasos, pasosAApi } from "../pasos/repositorio.js";
+import { crearRepoHechosAMano } from "../plan/hechos-a-mano.js";
+import { crearRepoDispositivos } from "../auth/dispositivos.js";
 
 /** Contrato 1.6.0: cuánto espera una cuenta marcada antes de borrarse de verdad. */
 export const GRACIA_BORRADO_MS = 30 * 24 * 60 * 60 * 1000;
@@ -88,7 +90,9 @@ export async function rutasCuenta(app: FastifyInstance, ctx: Contexto): Promise<
     },
     async (req) => {
       const usuarioId = usuarioDe(req);
-      const [perfil, legales, planes, objetivos, sesiones, series, actividades, comidas, diasDePasos] = await Promise.all([
+      const [
+        perfil, legales, planes, objetivos, sesiones, series, actividades, comidas, diasDePasos, aMano, dispositivos,
+      ] = await Promise.all([
         perfiles.leer(usuarioId),
         repo.aceptacionesLegales(usuarioId),
         repo.planes(usuarioId),
@@ -98,6 +102,8 @@ export async function rutasCuenta(app: FastifyInstance, ctx: Contexto): Promise<
         repo.actividades(usuarioId),
         repo.comidas(usuarioId),
         pasos.todos(usuarioId),
+        crearRepoHechosAMano(ctx.db).todos(usuarioId),
+        crearRepoDispositivos(ctx.db).todos(usuarioId),
       ]);
       if (perfil === null) throw new ErrorApi("not_found", "Profile not found");
 
@@ -136,6 +142,14 @@ export async function rutasCuenta(app: FastifyInstance, ctx: Contexto): Promise<
           activities: actividades.map(actividadAApi),
           meals: comidas.map(comidaAApi),
           steps: diasDePasos.map(pasosAApi),
+          // 1.7.0. Los dispositivos van sin su identificador (ni el hash).
+          manual_done_days: aMano.map((d) => ({ date: d.fecha, created_at_ms: d.creado_en_ms })),
+          known_devices: dispositivos.map((d) => {
+            const salida: Record<string, unknown> = { first_seen_at_ms: d.primera_vez_ms, last_seen_at_ms: d.ultima_vez_ms };
+            if (d.modelo !== null) salida["model"] = d.modelo;
+            if (d.sistema !== null) salida["os"] = d.sistema;
+            return salida;
+          }),
         },
       };
     }

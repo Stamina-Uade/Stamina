@@ -2,7 +2,12 @@
  * infra/plantillas-correo.ts — cómo se ven los correos de Stamina.
  *
  * Una tarjeta blanca centrada sobre gris, con el ícono y el nombre arriba, el
- * saludo, un recuadro con el dato importante (el código) y la letra chica abajo.
+ * saludo, un recuadro con el dato importante y la letra chica abajo. En los
+ * correos de código el recuadro lleva SÓLO el código, centrado y de todo el ancho
+ * (decisión de Iván del 2026-10-23); en los avisos, un título y sus filas.
+ *
+ * Todos empiezan con "Hola" y el nombre de pila ("Hola Iván,"), o "¡Hola!" sin
+ * nombre, y salen en el idioma de la persona (es, en o fr: infra/idioma.ts).
  * El rosa es el de la app (#FF23A7); para TEXTO rosa sobre blanco se usa el rosa
  * oscuro (#C8007F), que es el que pasa contraste AA. Igual que en la landing.
  *
@@ -24,9 +29,6 @@
 import type { IdiomaDeCorreo } from "./idioma.js";
 
 export const CID_LOGO = "logo-stamina@stamina.com.ar";
-
-/** Adonde se escribe si algo no cierra. Es el contacto de los textos legales. */
-export const CORREO_DE_CONTACTO = "support@stamina.com.ar";
 
 /** Lo que va en todos los correos, en cada idioma. */
 const PIE: Record<IdiomaDeCorreo, { lema: string; sinRespuesta: string }> = {
@@ -90,8 +92,9 @@ interface Piezas {
   saludo: string;
   parrafos: string[];
   recuadro: {
-    titulo: string;
-    /** El código grande. Si falta, el recuadro sólo lleva filas. */
+    /** Sin título, el recuadro es sólo el código. */
+    titulo?: string;
+    /** El código grande, centrado. Si falta, el recuadro sólo lleva filas. */
     codigo?: string;
     filas: Fila[];
   };
@@ -108,8 +111,13 @@ function filaHtml(f: Fila): string {
 }
 
 export function armarHtml(p: Piezas): string {
+  const titulo = p.recuadro.titulo === undefined ? "" : `
+              <tr><td style="padding:0 0 12px 0;font:700 15px/20px ${FUENTE};color:${C.rosaTinta};border-bottom:1px solid ${C.rosaBorde};">${escaparHtml(p.recuadro.titulo)}</td></tr>
+              <tr><td style="height:14px;line-height:14px;font-size:0;">&nbsp;</td></tr>`;
+  // El letter-spacing también se agrega después de la última letra: el padding de
+  // la izquierda lo compensa, para que el código quede centrado de verdad.
   const codigo = p.recuadro.codigo === undefined ? "" : `
-              <tr><td style="padding:2px 0 18px 0;">
+              <tr><td align="center" style="padding:4px 0 20px 8px;text-align:center;">
                 <span style="display:inline-block;font:800 34px/40px 'SF Mono',Menlo,Consolas,'Courier New',monospace;letter-spacing:8px;color:${C.tinta};">${escaparHtml(p.recuadro.codigo)}</span>
               </td></tr>`;
   const parrafos = p.parrafos
@@ -147,8 +155,7 @@ export function armarHtml(p: Piezas): string {
         <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="margin:4px 0 24px 0;background:${C.rosaSuave};border:1px solid ${C.rosaBorde};border-radius:12px;">
           <tr><td style="padding:20px 24px 4px 24px;">
             <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0">
-              <tr><td style="padding:0 0 12px 0;font:700 15px/20px ${FUENTE};color:${C.rosaTinta};border-bottom:1px solid ${C.rosaBorde};">${escaparHtml(p.recuadro.titulo)}</td></tr>
-              <tr><td style="height:14px;line-height:14px;font-size:0;">&nbsp;</td></tr>${codigo}${p.recuadro.filas.map(filaHtml).join("")}
+${titulo}${codigo}${p.recuadro.filas.map(filaHtml).join("")}
             </table>
           </td></tr>
         </table>
@@ -174,7 +181,9 @@ export function armarTexto(p: Piezas): string {
     // plano diga "n'était" y no "n&#39;était".
     ...p.parrafos.map((t) => desescaparHtml(t.replace(/<[^>]+>/g, ""))),
     "",
-    p.recuadro.codigo !== undefined ? `${p.recuadro.titulo}: ${p.recuadro.codigo}` : p.recuadro.titulo,
+    ...(p.recuadro.titulo !== undefined && p.recuadro.codigo !== undefined
+      ? [`${p.recuadro.titulo}: ${p.recuadro.codigo}`]
+      : [p.recuadro.titulo, p.recuadro.codigo].filter((x): x is string => x !== undefined)),
     ...filas,
     "",
     ...p.notas,
@@ -201,46 +210,153 @@ export function fechaLegible(ms: number, idioma: IdiomaDeCorreo = "es"): string 
 
 export type Proposito = "registro" | "recuperacion";
 
+/** "Hola Iván," o "¡Hola!": el saludo de todos los correos, con el nombre de pila. */
+export function saludo(nombre: string | null, idioma: IdiomaDeCorreo = "es"): string {
+  const t = { es: ["Hola", "¡Hola!"], en: ["Hi", "Hi!"], fr: ["Bonjour", "Bonjour !"] }[idioma];
+  return nombre === null ? t[1]! : `${t[0]} ${nombre},`;
+}
+
+const CODIGO: Record<IdiomaDeCorreo, {
+  previa: (codigo: string, min: number) => string;
+  registro: { asunto: (codigo: string) => string; parrafo: (min: number) => string; nota: string };
+  recuperacion: { asunto: (codigo: string) => string; parrafo: (min: number) => string; nota: string };
+  alerta: string;
+}> = {
+  es: {
+    previa: (c, m) => `Tu código es ${c}. Vence en ${m} minutos.`,
+    registro: {
+      asunto: (c) => `${c} es tu código de verificación de Stamina`,
+      parrafo: (m) => `Ya casi está. Ingresa este código en la app para validar tu correo y crear tu cuenta de <strong>Stamina</strong>. Vence en ${m} minutos.`,
+      nota: "Si no fuiste tú, puedes ignorar este mensaje: sin el código no se crea ninguna cuenta.",
+    },
+    recuperacion: {
+      asunto: (c) => `${c} es tu código para cambiar la contraseña de Stamina`,
+      parrafo: (m) => `Recibimos un pedido para cambiar la contraseña de tu cuenta de <strong>Stamina</strong>. Ingresa este código en la app para seguir. Vence en ${m} minutos.`,
+      nota: "Si no fuiste tú, puedes ignorar este mensaje: tu contraseña sigue siendo la misma.",
+    },
+    alerta: "Nunca te vamos a pedir este código por teléfono, chat ni redes. No se lo pases a nadie.",
+  },
+  en: {
+    previa: (c, m) => `Your code is ${c}. It expires in ${m} minutes.`,
+    registro: {
+      asunto: (c) => `${c} is your Stamina verification code`,
+      parrafo: (m) => `Almost there. Enter this code in the app to verify your email and create your <strong>Stamina</strong> account. It expires in ${m} minutes.`,
+      nota: "If it wasn't you, you can ignore this message: no account is created without the code.",
+    },
+    recuperacion: {
+      asunto: (c) => `${c} is your code to change your Stamina password`,
+      parrafo: (m) => `We received a request to change the password of your <strong>Stamina</strong> account. Enter this code in the app to continue. It expires in ${m} minutes.`,
+      nota: "If it wasn't you, you can ignore this message: your password stays the same.",
+    },
+    alerta: "We will never ask you for this code by phone, chat or social media. Don't share it with anyone.",
+  },
+  fr: {
+    previa: (c, m) => `Ton code est ${c}. Il expire dans ${m} minutes.`,
+    registro: {
+      asunto: (c) => `${c} est ton code de vérification Stamina`,
+      parrafo: (m) => `Tu y es presque. Saisis ce code dans l'app pour valider ton e-mail et créer ton compte <strong>Stamina</strong>. Il expire dans ${m} minutes.`,
+      nota: "Si ce n'était pas toi, tu peux ignorer ce message : sans le code, aucun compte n'est créé.",
+    },
+    recuperacion: {
+      asunto: (c) => `${c} est ton code pour changer ton mot de passe Stamina`,
+      parrafo: (m) => `Nous avons reçu une demande pour changer le mot de passe de ton compte <strong>Stamina</strong>. Saisis ce code dans l'app pour continuer. Il expire dans ${m} minutes.`,
+      nota: "Si ce n'était pas toi, tu peux ignorer ce message : ton mot de passe reste le même.",
+    },
+    alerta: "Nous ne te demanderons jamais ce code par téléphone, chat ou réseaux sociaux. Ne le donne à personne.",
+  },
+};
+
+/**
+ * El código para crear la cuenta o para cambiar la contraseña. El recuadro lleva
+ * SÓLO el código: sin título y sin filas (el vencimiento va en el párrafo).
+ */
 export function correoDeCodigo(opciones: {
   codigo: string;
   proposito: Proposito;
-  destino: string;
   nombre: string | null;
-  ahoraMs: number;
+  idioma?: IdiomaDeCorreo;
   vidaMin: number;
 }): { asunto: string; html: string; texto: string } {
-  const esAlta = opciones.proposito === "registro";
+  const idioma = opciones.idioma ?? "es";
+  const t = CODIGO[idioma];
+  const caso = t[opciones.proposito];
   const piezas: Piezas = {
-    previa: `Tu código es ${opciones.codigo}. Vence en ${opciones.vidaMin} minutos.`,
-    saludo: opciones.nombre === null ? "¡Hola!" : `Hola ${opciones.nombre},`,
-    parrafos: [
-      esAlta
-        ? "Ya casi está. Ingresa este código en la app para validar tu correo y crear tu cuenta de <strong>Stamina</strong>."
-        : "Recibimos un pedido para cambiar la contraseña de tu cuenta de <strong>Stamina</strong>. Ingresa este código en la app para seguir.",
-    ],
-    recuadro: {
-      titulo: esAlta ? "Tu código de verificación" : "Tu código para cambiar la contraseña",
-      codigo: opciones.codigo,
-      filas: [
-        { etiqueta: "Correo", valor: opciones.destino },
-        { etiqueta: "Vence", valor: `En ${opciones.vidaMin} minutos` },
-        { etiqueta: "Pedido", valor: fechaLegible(opciones.ahoraMs) },
-      ],
-    },
-    notas: [
-      esAlta
-        ? "Si no fuiste tú, puedes ignorar este mensaje: sin el código no se crea ninguna cuenta."
-        : "Si no fuiste tú, puedes ignorar este mensaje: tu contraseña sigue siendo la misma.",
-    ],
-    alerta: "Nunca te vamos a pedir este código por teléfono, chat ni redes. No se lo pases a nadie.",
+    idioma,
+    previa: t.previa(opciones.codigo, opciones.vidaMin),
+    saludo: saludo(opciones.nombre, idioma),
+    parrafos: [caso.parrafo(opciones.vidaMin)],
+    recuadro: { codigo: opciones.codigo, filas: [] },
+    notas: [caso.nota],
+    alerta: t.alerta,
   };
-  return {
-    asunto: esAlta
-      ? `${opciones.codigo} es tu código de Stamina`
-      : `${opciones.codigo} es tu código para cambiar la contraseña de Stamina`,
-    html: armarHtml(piezas),
-    texto: armarTexto(piezas),
+  return { asunto: caso.asunto(opciones.codigo), html: armarHtml(piezas), texto: armarTexto(piezas) };
+}
+
+/**
+ * Desde dónde se entró: lo que llevan "Nuevo inicio de sesión" y "Cuenta conectada
+ * con Google/Apple". Lo que no se sabe no se pone (nunca una fila con un guion).
+ */
+export interface AvisoDeAcceso {
+  nombre: string | null;
+  idioma: IdiomaDeCorreo;
+  ip: string;
+  /** "Ciudad, País". Hoy siempre null: ver dominios/auth/dispositivos.ts. */
+  ubicacion?: string | null;
+  /** "iPhone 16 · iOS 26.5" */
+  dispositivo: string | null;
+  ahoraMs: number;
+}
+
+const ACCESO: Record<IdiomaDeCorreo, { ip: string; ubicacion: string; dispositivo: string; hora: string; siFuisteTu: string }> = {
+  es: { ip: "Dirección IP", ubicacion: "Ubicación", dispositivo: "Dispositivo", hora: "Hora", siFuisteTu: "Si fuiste tú, no hace falta que hagas nada." },
+  en: { ip: "IP address", ubicacion: "Location", dispositivo: "Device", hora: "Time", siFuisteTu: "If it was you, there is nothing else to do." },
+  fr: { ip: "Adresse IP", ubicacion: "Localisation", dispositivo: "Appareil", hora: "Heure", siFuisteTu: "Si c'était toi, tu n'as rien d'autre à faire." },
+};
+
+function filasDeAcceso(a: AvisoDeAcceso): Fila[] {
+  const t = ACCESO[a.idioma];
+  return [
+    ...(a.ip ? [{ etiqueta: t.ip, valor: a.ip }] : []),
+    ...(a.ubicacion ? [{ etiqueta: t.ubicacion, valor: a.ubicacion }] : []),
+    ...(a.dispositivo ? [{ etiqueta: t.dispositivo, valor: a.dispositivo }] : []),
+    { etiqueta: t.hora, valor: fechaLegible(a.ahoraMs, a.idioma) },
+  ];
+}
+
+const NUEVO_INICIO: Record<IdiomaDeCorreo, { asunto: string; parrafo: string; titulo: string; alerta: string }> = {
+  es: {
+    asunto: "Nuevo inicio de sesión en tu cuenta de Stamina",
+    parrafo: "Detectamos un inicio de sesión en tu cuenta de <strong>Stamina</strong> desde un dispositivo nuevo.",
+    titulo: "Nuevo inicio de sesión",
+    alerta: "Si no fuiste tú, cambia tu contraseña desde «¿Olvidaste tu contraseña?» en la app: al terminar, te ofrece cerrar las otras sesiones.",
+  },
+  en: {
+    asunto: "New sign-in to your Stamina account",
+    parrafo: "We detected a sign-in to your <strong>Stamina</strong> account from a new device.",
+    titulo: "New sign-in",
+    alerta: "If it wasn't you, change your password from “Forgot your password?” in the app: when you finish, it offers to sign out your other sessions.",
+  },
+  fr: {
+    asunto: "Nouvelle connexion à ton compte Stamina",
+    parrafo: "Nous avons détecté une connexion à ton compte <strong>Stamina</strong> depuis un nouvel appareil.",
+    titulo: "Nouvelle connexion",
+    alerta: "Si ce n'était pas toi, change ton mot de passe depuis « Mot de passe oublié ? » dans l'app : à la fin, elle te propose de fermer les autres sessions.",
+  },
+};
+
+/** Se entró a la cuenta desde un dispositivo que nunca había estado en ella (1.7.0). */
+export function correoDeNuevoInicio(a: AvisoDeAcceso): { asunto: string; html: string; texto: string } {
+  const t = NUEVO_INICIO[a.idioma];
+  const piezas: Piezas = {
+    idioma: a.idioma,
+    previa: desescaparHtml(t.parrafo.replace(/<[^>]+>/g, "")),
+    saludo: saludo(a.nombre, a.idioma),
+    parrafos: [t.parrafo],
+    recuadro: { titulo: t.titulo, filas: filasDeAcceso(a) },
+    notas: [ACCESO[a.idioma].siFuisteTu],
+    alerta: t.alerta,
   };
+  return { asunto: t.asunto, html: armarHtml(piezas), texto: armarTexto(piezas) };
 }
 
 export function correoDeIntentoDeRegistro(opciones: { destino: string; ahoraMs: number }): {
@@ -267,90 +383,43 @@ export function correoDeIntentoDeRegistro(opciones: { destino: string; ahoraMs: 
   return { asunto: "Intento de registro en Stamina", html: armarHtml(piezas), texto: armarTexto(piezas) };
 }
 
-export function correoDeVinculacion(opciones: { destino: string; proveedor: "google" | "apple"; ahoraMs: number }): {
-  asunto: string; html: string; texto: string;
-} {
-  const nombre = opciones.proveedor === "google" ? "Google" : "Apple";
-  const piezas: Piezas = {
-    previa: `Ahora puedes entrar a Stamina con ${nombre}.`,
-    saludo: "¡Hola!",
-    parrafos: [
-      `Tu cuenta de <strong>Stamina</strong> ahora también se puede abrir con «Continuar con ${nombre}».`,
-    ],
-    recuadro: {
-      titulo: "Nueva forma de entrar",
-      filas: [
-        { etiqueta: "Cuenta", valor: opciones.destino },
-        { etiqueta: "Con", valor: nombre },
-        { etiqueta: "Fecha", valor: fechaLegible(opciones.ahoraMs) },
-      ],
-    },
-    notas: ["Si fuiste tú, no hace falta que hagas nada."],
-    alerta: "Si no fuiste tú, cambia ya la contraseña de tu cuenta de " + nombre + " y la de Stamina desde «¿Olvidaste tu contraseña?».",
-  };
-  return { asunto: `Ahora entras a Stamina con ${nombre}`, html: armarHtml(piezas), texto: armarTexto(piezas) };
-}
-
-/**
- * El aviso de que la contraseña cambió (contrato 1.6.0). Sale SIEMPRE que se
- * cambia, en el idioma del pedido: desde la 1.6.0 cambiarla ya no cierra las
- * otras sesiones, así que este correo es lo que le permite al dueño enterarse si
- * no fue él.
- */
-const CAMBIO_DE_PASSWORD: Record<IdiomaDeCorreo, {
-  asunto: string; saludo: string; aviso: string; titulo: string;
-  cuenta: string; fecha: string; contacto: string; nota: string;
+const VINCULACION: Record<IdiomaDeCorreo, {
+  asunto: (p: string) => string; parrafo: (p: string) => string; titulo: (p: string) => string; alerta: (p: string) => string;
 }> = {
   es: {
-    asunto: "Cambiaste la contraseña de Stamina",
-    saludo: "¡Hola!",
-    aviso: "Cambiaste la contraseña de tu cuenta de Stamina. Si no fuiste tú, escríbenos.",
-    titulo: "Contraseña cambiada",
-    cuenta: "Cuenta",
-    fecha: "Fecha",
-    contacto: "Escríbenos a",
-    nota: "Si fuiste tú, no hace falta que hagas nada.",
+    asunto: (p) => `Tu cuenta de Stamina se conectó con ${p}`,
+    parrafo: (p) => `Tu cuenta de <strong>Stamina</strong> se conectó con ${p} con éxito.`,
+    titulo: (p) => `Cuenta conectada con ${p}`,
+    alerta: (p) => `Si no fuiste tú, cambia ya la contraseña de tu cuenta de ${p} y la de Stamina desde «¿Olvidaste tu contraseña?».`,
   },
   en: {
-    asunto: "Your Stamina password was changed",
-    saludo: "Hi!",
-    aviso: "You changed the password of your Stamina account. If it wasn't you, write to us.",
-    titulo: "Password changed",
-    cuenta: "Account",
-    fecha: "Date",
-    contacto: "Write to us at",
-    nota: "If it was you, there is nothing else to do.",
+    asunto: (p) => `Your Stamina account was connected to ${p}`,
+    parrafo: (p) => `Your <strong>Stamina</strong> account was successfully connected to ${p}.`,
+    titulo: (p) => `Account connected to ${p}`,
+    alerta: (p) => `If it wasn't you, change the password of your ${p} account and your Stamina password right away, from “Forgot your password?”.`,
   },
   fr: {
-    asunto: "Tu as changé ton mot de passe Stamina",
-    saludo: "Bonjour !",
-    aviso: "Tu as changé le mot de passe de ton compte Stamina. Si ce n'était pas toi, écris-nous.",
-    titulo: "Mot de passe changé",
-    cuenta: "Compte",
-    fecha: "Date",
-    contacto: "Écris-nous à",
-    nota: "Si c'était toi, tu n'as rien d'autre à faire.",
+    asunto: (p) => `Ton compte Stamina a été connecté à ${p}`,
+    parrafo: (p) => `Ton compte <strong>Stamina</strong> a bien été connecté à ${p}.`,
+    titulo: (p) => `Compte connecté à ${p}`,
+    alerta: (p) => `Si ce n'était pas toi, change tout de suite le mot de passe de ton compte ${p} et celui de Stamina depuis « Mot de passe oublié ? ».`,
   },
 };
 
-export function correoDeCambioDePassword(opciones: { destino: string; idioma: IdiomaDeCorreo; ahoraMs: number }): {
+/** Se vinculó Google o Apple a una cuenta que ya existía: con el mismo recuadro que un inicio nuevo. */
+export function correoDeVinculacion(opciones: AvisoDeAcceso & { proveedor: "google" | "apple" }): {
   asunto: string; html: string; texto: string;
 } {
-  const t = CAMBIO_DE_PASSWORD[opciones.idioma];
+  const p = opciones.proveedor === "google" ? "Google" : "Apple";
+  const t = VINCULACION[opciones.idioma];
   const piezas: Piezas = {
     idioma: opciones.idioma,
-    previa: t.aviso,
-    saludo: t.saludo,
-    parrafos: [escaparHtml(t.aviso)],
-    recuadro: {
-      titulo: t.titulo,
-      filas: [
-        { etiqueta: t.cuenta, valor: opciones.destino },
-        { etiqueta: t.fecha, valor: fechaLegible(opciones.ahoraMs, opciones.idioma) },
-        { etiqueta: t.contacto, valor: CORREO_DE_CONTACTO },
-      ],
-    },
-    notas: [t.nota],
+    previa: desescaparHtml(t.parrafo(p).replace(/<[^>]+>/g, "")),
+    saludo: saludo(opciones.nombre, opciones.idioma),
+    parrafos: [t.parrafo(p)],
+    recuadro: { titulo: t.titulo(p), filas: filasDeAcceso(opciones) },
+    notas: [ACCESO[opciones.idioma].siFuisteTu],
+    alerta: t.alerta(p),
   };
-  return { asunto: t.asunto, html: armarHtml(piezas), texto: armarTexto(piezas) };
+  return { asunto: t.asunto(p), html: armarHtml(piezas), texto: armarTexto(piezas) };
 }

@@ -11,11 +11,18 @@
  * las demás sesiones. Manda siempre un correo de aviso, y la app ofrece cerrar las otras
  * con `POST /auth/logout/others`. Revocarlas solas dejaba afuera, sin explicación, al
  * reloj y a la tablet de quien sólo se había olvidado la clave.
+ *
+ * Contrato 1.7.0 (decisión de Iván del 2026-10-23): el correo "Cambiaste la
+ * contraseña" ya no sale. En su lugar, entrar desde un dispositivo que la cuenta
+ * nunca vio manda "Nuevo inicio de sesión" (`alEntrar`, dispositivos.ts).
  */
 import type { Contexto } from "../../contexto.js";
 import { ErrorApi } from "../../infra/errores.js";
 import { validarPassword } from "../../infra/password.js";
 import type { IdiomaDeCorreo } from "../../infra/idioma.js";
+import type { DatosDeAviso } from "../../infra/correo.js";
+import { crearRepoPerfil } from "../perfil/repositorio.js";
+import { crearRepoDispositivos, dispositivoLegible, type Dispositivo } from "./dispositivos.js";
 import { versionLegal } from "../legal/textos.js";
 import {
   firmarAcceso,
@@ -104,6 +111,17 @@ function clavePaso(token: string): string {
   return `auth:paso:${hashearToken(token)}`;
 }
 
+/**
+ * Desde dónde se entra (contrato 1.7.0): la IP del pedido, el idioma de la persona
+ * y el dispositivo que manda la app. Sin `dispositivo` no se puede saber si es
+ * nuevo, y no se avisa nada.
+ */
+export interface Acceso {
+  ip: string;
+  idioma: IdiomaDeCorreo;
+  dispositivo?: Dispositivo | null;
+}
+
 /** Lo que contesta `POST /auth/social`. */
 export type DesenlaceSocial =
   | { status: "signed_in"; session: Sesion }
@@ -118,6 +136,39 @@ export function crearServicioAuth(ctx: Contexto) {
     clientIds: ctx.config.proveedores ?? { google: [], apple: [] },
   });
   const tope = crearTopeDeIntentos(ctx.cache, ctx.ahoraMs);
+  const dispositivos = crearRepoDispositivos(ctx.db);
+  const perfiles = crearRepoPerfil(ctx.db);
+
+  /** El nombre de pila del perfil, para el "Hola Iván," de los correos. */
+  async function nombreDePila(usuarioId: string): Promise<string | null> {
+    const nombre = (await perfiles.leer(usuarioId))?.nombre;
+    return typeof nombre === "string" && nombre.trim() !== "" ? nombre.trim() : null;
+  }
+
+  async function datosDeAviso(usuarioId: string, acceso: Acceso | undefined): Promise<DatosDeAviso> {
+    return {
+      nombre: await nombreDePila(usuarioId),
+      idioma: acceso?.idioma ?? "es",
+      ip: acceso?.ip ?? "",
+      dispositivo: dispositivoLegible(acceso?.dispositivo),
+    };
+  }
+
+  /**
+   * Después de abrir una sesión: el dispositivo queda conocido y, si la cuenta
+   * nunca lo había visto y `avisar`, le llega al dueño "Nuevo inicio de sesión".
+   * No avisan el alta (el dispositivo con el que te registras nace conocido), el
+   * vínculo con Google o Apple (su propio correo ya dice desde dónde) ni la
+   * recuperación (el código acaba de llegar a ese correo). Si el correo falla, la
+   * entrada vale igual; si falla la base, falla fuerte (AGENTS.md §11).
+   */
+  async function alEntrar(u: { id: string; email: string }, acceso: Acceso | undefined, avisar: boolean): Promise<void> {
+    const d = acceso?.dispositivo;
+    if (d === undefined || d === null) return;
+    const nuevo = await dispositivos.registrar(u.id, d, ctx.ahoraMs());
+    if (!nuevo || !avisar || ctx.correo.avisarNuevoInicio === undefined) return;
+    try { await ctx.correo.avisarNuevoInicio(u.email, await datosDeAviso(u.id, acceso)); } catch { /* no bloquea */ }
+  }
 
   /**
    * Antes de mirar una contraseña: la IP y el correo no tienen que estar bloqueados.
@@ -210,7 +261,9 @@ export function crearServicioAuth(ctx: Contexto) {
     };
   }
 
-  async function emitirCodigo(email: string, proposito: "registro" | "recuperacion", nombreCompleto?: string) {
+  async function emitirCodigo(
+    email: string, proposito: "registro" | "recuperacion", nombre?: string, idioma: IdiomaDeCorreo = "es",
+  ) {
     const ahora = ctx.ahoraMs();
     const clave = claveCodigo(email, proposito);
     const enfriamiento = `${clave}:reenvio`;
@@ -230,7 +283,7 @@ export function crearServicioAuth(ctx: Contexto) {
     const valor = JSON.stringify(estado);
     await ctx.cache.poner(clave, valor, Math.ceil(RECUERDO_CODIGO_MS / 1000));
     try {
-      await ctx.correo.enviarCodigo(email, codigo, proposito, nombreCompleto);
+      await ctx.correo.enviarCodigo(email, codigo, proposito, nombre, idioma);
     } catch {
       // Un SMTP caído no debe bloquear el reintento con un código que nadie recibió.
       await ctx.cache.consumirSiIgual(clave, valor);
@@ -291,7 +344,7 @@ export function crearServicioAuth(ctx: Contexto) {
      * ofrece entrar o recuperar la contraseña. Decisión de Iván, 2026-10-21: antes
      * contestaba lo mismo exista o no, para no revelar qué correos tienen cuenta.
      */
-    async registroInicio(emailCrudo: string, nombre?: string, apellido?: string) {
+    async registroInicio(emailCrudo: string, nombre?: string, _apellido?: string, idioma: IdiomaDeCorreo = "es") {
       const email = normalizarEmail(emailCrudo);
       if (ctx.config.registroPermitido !== null && email !== ctx.config.registroPermitido) {
         // Staging no acepta cuentas ajenas. La respuesta no revela la lista.
@@ -302,8 +355,8 @@ export function crearServicioAuth(ctx: Contexto) {
       if (existente !== null) {
         throw new ErrorApi("email_already_registered", "An account with this email already exists");
       }
-      const nombreCompleto = nombre && apellido ? `${nombre.trim()} ${apellido.trim()}` : undefined;
-      return emitirCodigo(email, "registro", nombreCompleto);
+      // El saludo va con el nombre de pila: "Hola Iván,".
+      return emitirCodigo(email, "registro", nombre?.trim() || undefined, idioma);
     },
 
     async registroVerificar(emailCrudo: string, codigo: string) {
@@ -329,6 +382,8 @@ export function crearServicioAuth(ctx: Contexto) {
       registrationToken: string | undefined,
       credencial: { password: string } | { socialToken: string },
       legal: { version: string; accepted: boolean },
+      /** 1.7.0: el dispositivo del alta nace conocido, sin aviso. */
+      acceso?: Acceso,
     ): Promise<{ sesion: Sesion; usuarioId: string }> {
       const ahoraAlta = ctx.ahoraMs();
       let altaSocial: Awaited<ReturnType<typeof leerAltaSocial>> = null;
@@ -397,12 +452,14 @@ export function crearServicioAuth(ctx: Contexto) {
         await r.guardarAceptacionLegal(creado.id, vigente, ahora);
         return creado;
       });
-      return { sesion: await abrirSesion(usuario.id, null), usuarioId: usuario.id };
+      const sesion = await abrirSesion(usuario.id, null);
+      await alEntrar(usuario, acceso, false);
+      return { sesion, usuarioId: usuario.id };
     },
 
     // --------------------------------------------------------------- login --
     /** @param ip la del pedido: cuenta para el tope de fallos por IP. */
-    async login(emailCrudo: string, password: string, ip: string): Promise<Sesion> {
+    async login(emailCrudo: string, password: string, ip: string, acceso?: Acceso): Promise<Sesion> {
       const email = normalizarEmail(emailCrudo);
       await exigirSinBloqueo(email, password, ip);
       const usuario = await repo.buscarUsuarioPorEmail(email);
@@ -421,7 +478,9 @@ export function crearServicioAuth(ctx: Contexto) {
         throw await sinPassword(usuario.id);
       }
       await comprobarPassword(email, usuario.password_hash, password, ip);
-      return abrirSesionDe(usuario);
+      const sesion = await abrirSesionDe(usuario);
+      await alEntrar(usuario, acceso, true);
+      return sesion;
     },
 
     // ---------------------------------------------------------- reactivar --
@@ -430,7 +489,7 @@ export function crearServicioAuth(ctx: Contexto) {
      * `account_pending_deletion`: la cuenta vuelve a estar activa —si estaba por
      * borrarse, el borrado se cancela— y se abre la sesión.
      */
-    async reactivar(token: string): Promise<Sesion> {
+    async reactivar(token: string, acceso?: Acceso): Promise<Sesion> {
       const ahora = ctx.ahoraMs();
       const permiso = await leerReactivacion(ctx.config, token, ahora);
       if (permiso === null) throw new ErrorApi("invalid_reactivation_token", "Reactivation token is not valid");
@@ -442,7 +501,10 @@ export function crearServicioAuth(ctx: Contexto) {
       if (!(await repo.reactivar(permiso.usuarioId, ahora))) {
         throw new ErrorApi("invalid_reactivation_token", "Reactivation token is not valid");
       }
-      return abrirSesion(permiso.usuarioId, null);
+      const sesion = await abrirSesion(permiso.usuarioId, null);
+      const usuario = acceso?.dispositivo ? await repo.buscarUsuarioPorId(permiso.usuarioId) : null;
+      if (usuario !== null) await alEntrar(usuario, acceso, true);
+      return sesion;
     },
 
     // -------------------------------------------------- Google y Apple --
@@ -464,7 +526,9 @@ export function crearServicioAuth(ctx: Contexto) {
      *    cuenta se crea recién en `register/complete`, con ese permiso en vez de
      *    una contraseña.
      */
-    async entrarConProveedor(proveedor: NombreDeProveedor, idToken: string, nonce: string): Promise<DesenlaceSocial> {
+    async entrarConProveedor(
+      proveedor: NombreDeProveedor, idToken: string, nonce: string, acceso?: Acceso,
+    ): Promise<DesenlaceSocial> {
       if (!proveedores.configurado(proveedor)) {
         throw new ErrorApi("provider_not_configured", `Sign in with ${proveedor} is not configured`);
       }
@@ -480,7 +544,11 @@ export function crearServicioAuth(ctx: Contexto) {
       }
 
       const vinculado = await repo.buscarUsuarioPorIdentidad(proveedor, identidad.sujeto);
-      if (vinculado !== null) return { status: "signed_in", session: await abrirSesionDe(vinculado) };
+      if (vinculado !== null) {
+        const session = await abrirSesionDe(vinculado);
+        await alEntrar(vinculado, acceso, true);
+        return { status: "signed_in", session };
+      }
 
       const porCorreo = identidad.email === null ? null : await repo.buscarUsuarioPorEmail(identidad.email);
 
@@ -510,8 +578,12 @@ export function crearServicioAuth(ctx: Contexto) {
           await repo.vincularIdentidad(porCorreo.id, proveedor, identidad.sujeto, identidad.email, ctx.ahoraMs());
           // Que el dueño se entere: una forma nueva de entrar a su cuenta no puede
           // aparecer en silencio. Si el correo falla, igual entra.
-          try { await ctx.correo.avisarVinculacion(identidad.email, proveedor); } catch { /* no bloquea */ }
-          return { status: "signed_in", session: await abrirSesionDe(porCorreo) };
+          try {
+            await ctx.correo.avisarVinculacion(identidad.email, proveedor, await datosDeAviso(porCorreo.id, acceso));
+          } catch { /* no bloquea */ }
+          const session = await abrirSesionDe(porCorreo);
+          await alEntrar(porCorreo, acceso, false);
+          return { status: "signed_in", session };
         }
       }
 
@@ -552,7 +624,7 @@ export function crearServicioAuth(ctx: Contexto) {
      *
      * @param ip la del pedido, para el tope de fallos por IP.
      */
-    async vincularConPassword(token: string, password: string | undefined, ip: string): Promise<Sesion> {
+    async vincularConPassword(token: string, password: string | undefined, ip: string, acceso?: Acceso): Promise<Sesion> {
       const ahora = ctx.ahoraMs();
       const v = await leerVinculo(ctx.config, token, ahora);
       if (v === null) throw new ErrorApi("invalid_link_token", "Link token is not valid");
@@ -583,9 +655,13 @@ export function crearServicioAuth(ctx: Contexto) {
       }
       // Una forma nueva de entrar a la cuenta no puede aparecer en silencio. Si el
       // correo falla, el vínculo vale igual.
-      try { await ctx.correo.avisarVinculacion(usuario.email, v.proveedor); } catch { /* no bloquea */ }
+      try {
+        await ctx.correo.avisarVinculacion(usuario.email, v.proveedor, await datosDeAviso(usuario.id, acceso));
+      } catch { /* no bloquea */ }
       // Desactivada o por borrarse: el vínculo queda hecho y contesta el estado.
-      return abrirSesionDe(usuario);
+      const sesion = await abrirSesionDe(usuario);
+      await alEntrar(usuario, acceso, false);
+      return sesion;
     },
 
     // ------------------------------------------------------------- refresh --
@@ -697,13 +773,13 @@ export function crearServicioAuth(ctx: Contexto) {
     },
 
     // ------------------------------------------------------- recuperación --
-    async recuperacionInicio(emailCrudo: string) {
+    async recuperacionInicio(emailCrudo: string, idioma: IdiomaDeCorreo = "es") {
       const email = normalizarEmail(emailCrudo);
       const usuario = await repo.buscarUsuarioPorEmail(email);
       if (usuario === null) {
         throw new ErrorApi("user_not_found", "There is no account with this email");
       }
-      return emitirCodigo(email, "recuperacion");
+      return emitirCodigo(email, "recuperacion", (await nombreDePila(usuario.id)) ?? undefined, idioma);
     },
 
     async recuperacionVerificar(emailCrudo: string, codigo: string) {
@@ -712,8 +788,8 @@ export function crearServicioAuth(ctx: Contexto) {
       return { reset_token: r.token, expires_at_ms: r.expires_at_ms };
     },
 
-    /** @param idioma el del pedido: en ése sale el aviso de contraseña cambiada. */
-    async recuperacionAplicar(resetToken: string, password: string, idioma: IdiomaDeCorreo = "es"): Promise<Sesion> {
+    /** @param acceso 1.7.0: el dispositivo queda conocido, sin aviso. */
+    async recuperacionAplicar(resetToken: string, password: string, acceso?: Acceso): Promise<Sesion> {
       exigirPasswordValida(password);
       const ahora = ctx.ahoraMs();
       const emailDePaso = await emailDePasoDeCorreo(ctx.config, resetToken, "recuperacion", ahora);
@@ -726,13 +802,12 @@ export function crearServicioAuth(ctx: Contexto) {
       await repo.cambiarPassword(usuario.id, await hashearPassword(password), ahora);
       // Cambiar la contraseña reinicia el tope de ese correo (contrato 1.6.0).
       await tope.reiniciar(usuario.email);
-      // 1.6.0: las otras sesiones quedan abiertas (ver el encabezado), así que el
-      // aviso sale SIEMPRE: es como se entera el dueño si no fue él. Si el correo
-      // falla, el cambio vale igual: la persona ya eligió su contraseña nueva.
-      try { await ctx.correo.avisarCambioDePassword?.(usuario.email, idioma); } catch { /* no bloquea */ }
+      // 1.7.0: ya no sale "Cambiaste la contraseña" (ver el encabezado).
       // Con la cuenta desactivada o por borrarse, la contraseña queda cambiada igual
       // y contesta el estado con su permiso, como el login (contrato 1.6.0).
-      return abrirSesionDe(usuario);
+      const sesion = await abrirSesionDe(usuario);
+      await alEntrar(usuario, acceso, false);
+      return sesion;
     },
 
     /**
