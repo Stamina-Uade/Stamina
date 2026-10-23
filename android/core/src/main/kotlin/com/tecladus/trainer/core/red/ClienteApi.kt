@@ -275,6 +275,10 @@ class ClienteApi(
         clave: String? = null,
     ): Resultado<T> = pedir("PUT", ruta, cuerpo, true, clave) { leerSobre(it, comoLeerlo) }
 
+    /** PUT que contesta 204 sin cuerpo, como `PUT /plan/days/done` (contrato 1.7.0). */
+    suspend fun reemplazarSinRespuesta(ruta: String, cuerpo: String, clave: String? = null): Resultado<Unit> =
+        pedir("PUT", ruta, cuerpo, true, clave) { leerSinCuerpo(it) }
+
     /** DELETE. Lo que el contrato borra contesta 204 sin cuerpo. */
     suspend fun borrar(ruta: String, clave: String? = null): Resultado<Unit> =
         pedir("DELETE", ruta, null, true, clave) { leerSinCuerpo(it) }
