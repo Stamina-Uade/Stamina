@@ -161,9 +161,26 @@ public struct DiaDelPlan: Identifiable, Sendable {
     /// `true` si tocarlo abre la sesión. Un descanso no se abre.
     public let abrible: Bool
     public let fecha: Date?
+    /// El `date_ms` del servidor: lo que se manda para marcarlo como hecho.
+    public let fechaMs: Int64?
+    public let esDescanso: Bool
+    public let esFuerza: Bool
+    /// 1.7.0: tocaba entrenar, ya pasó y no hay nada registrado. Se ve en gris
+    /// apagado y su hoja ofrece "Lo hice: marcar como hecho".
+    public let sinHacer: Bool
+    /// Hecho sólo porque la persona lo marcó a mano (`manually_done`).
+    public let hechoAMano: Bool
+    public let distanciaMetros: Int?
+    public let zona: ZonaDeIntensidad?
+    public let minutoDelDia: Int?
+    public let avituallamiento: AvituallamientoDeSesion?
 
     public init(diaDeLaSemana: Int, numeroDeDia: Int, mesCorto: String, titulo: String,
-                detalle: String, hecho: Bool, esHoy: Bool, abrible: Bool, fecha: Date? = nil) {
+                detalle: String, hecho: Bool, esHoy: Bool, abrible: Bool, fecha: Date? = nil,
+                fechaMs: Int64? = nil, esDescanso: Bool = false, esFuerza: Bool = false,
+                sinHacer: Bool = false, hechoAMano: Bool = false, distanciaMetros: Int? = nil,
+                zona: ZonaDeIntensidad? = nil, minutoDelDia: Int? = nil,
+                avituallamiento: AvituallamientoDeSesion? = nil) {
         self.diaDeLaSemana = diaDeLaSemana
         self.numeroDeDia = numeroDeDia
         self.mesCorto = mesCorto
@@ -173,6 +190,15 @@ public struct DiaDelPlan: Identifiable, Sendable {
         self.esHoy = esHoy
         self.abrible = abrible
         self.fecha = fecha
+        self.fechaMs = fechaMs
+        self.esDescanso = esDescanso
+        self.esFuerza = esFuerza
+        self.sinHacer = sinHacer
+        self.hechoAMano = hechoAMano
+        self.distanciaMetros = distanciaMetros
+        self.zona = zona
+        self.minutoDelDia = minutoDelDia
+        self.avituallamiento = avituallamiento
     }
 }
 
@@ -183,13 +209,17 @@ public struct SemanaDelPlan: Identifiable, Sendable {
     public let metrosPrevistos: Int
     public let dias: [DiaDelPlan]
     public let enCurso: Bool
+    /// La etapa de la semana ("Base"), ya en el idioma de la app. `nil` sin dato.
+    public let etapa: String?
 
-    public init(numero: Int, metrosHechos: Int, metrosPrevistos: Int, dias: [DiaDelPlan], enCurso: Bool) {
+    public init(numero: Int, metrosHechos: Int, metrosPrevistos: Int, dias: [DiaDelPlan], enCurso: Bool,
+                etapa: String? = nil) {
         self.numero = numero
         self.metrosHechos = metrosHechos
         self.metrosPrevistos = metrosPrevistos
         self.dias = dias
         self.enCurso = enCurso
+        self.etapa = etapa
     }
 }
 
@@ -202,12 +232,15 @@ public struct FaseDelPlan: Identifiable, Sendable {
     /// `hecha` → llena; `enCurso` → media; si no, vacía.
     public let hecha: Bool
     public let enCurso: Bool
+    /// El código de la etapa, para la hoja "Las etapas de tu plan". `nil` sin dato.
+    public let fase: Fase?
 
-    public init(titulo: String, peso: Int, hecha: Bool, enCurso: Bool) {
+    public init(titulo: String, peso: Int, hecha: Bool, enCurso: Bool, fase: Fase? = nil) {
         self.titulo = titulo
         self.peso = peso
         self.hecha = hecha
         self.enCurso = enCurso
+        self.fase = fase
     }
 }
 
@@ -427,31 +460,6 @@ public enum UnidadDePeso: String, Sendable {
 }
 
 // MARK: - La agenda del día
-
-public struct FilaDeAgenda: Identifiable, Sendable {
-    public enum Clase: Sendable {
-        case simple
-        /// La fila de la sesión, que es la única con chips y botón de editar.
-        case sesion
-        /// La del gimnasio, que lleva a la rutina.
-        case gimnasio
-    }
-
-    public let id = UUID()
-    public let minutoDelDia: Int
-    public let titulo: String
-    public let detalle: String
-    public let clase: Clase
-    public let destino: PestanaHome?
-
-    public init(minutoDelDia: Int, titulo: String, detalle: String, clase: Clase, destino: PestanaHome?) {
-        self.minutoDelDia = minutoDelDia
-        self.titulo = titulo
-        self.detalle = detalle
-        self.clase = clase
-        self.destino = destino
-    }
-}
 
 // MARK: - Las pestañas
 

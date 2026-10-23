@@ -1,39 +1,260 @@
 import SwiftUI
 import TrainerCore
 
-// MARK: - Lo que se sabe de un día
+// MARK: - Un día, en la lista de la semana
 
-/// Lo que se puede contar de un día además de su título: el renglón del
-/// cronograma (sólo el plan principal) y, si es hoy, la sesión entera. 🛑 No se
-/// calcula nada: se junta lo que mandó el servidor.
-struct PlanDatosDelDia {
-    let planificado: DiaPlanificadoCompartido?
-    /// Sólo hoy: es la única sesión completa que llega.
-    let sesion: SesionDelDia?
-    let esFuerza: Bool
-    let esDescanso: Bool
-    let zona: ZonaDeIntensidad?
+/// Un día del plan, en una fila igual a las otras seis (2026-10-23): el día, el nombre
+/// de la sesión y, a la derecha, la tilde verde si está hecho, "HOY" si es hoy o una
+/// flecha si viene. Hoy lleva el borde del color de la app.
+///
+/// - Los descansos van en gris claro, sin flecha, y no se abren.
+/// - Un día que tocaba entrenar y pasó sin nada registrado (`sinHacer`) queda en gris
+///   apagado —toda la fila con baja opacidad—, sin cruz, sin rojo, sin ícono. Su hoja
+///   ofrece "Lo hice: marcar como hecho".
+/// - Tocar un día abre su hoja (`HojaDelDiaDelPlan`) en vez de desplegarse en la lista.
+struct FilaDeDiaDelPlan: View {
+    @EnvironmentObject private var estado: EstadoHome
+    let dia: DiaDelPlan
+    let alTocar: () -> Void
 
-    init(dia: DiaDelPlan, planificado: DiaPlanificadoCompartido? = nil,
-         sesion: SesionDelDia? = nil, esFuerzaHoy: Bool = false) {
-        self.planificado = planificado
-        self.sesion = sesion
-        self.esFuerza = esFuerzaHoy || (planificado?.esFuerza ?? false)
-        self.esDescanso = planificado?.esDescanso ?? false
-        self.zona = sesion?.zona ?? Self.zonaEscrita(en: dia.detalle)
+    private var forma: RoundedRectangle {
+        RoundedRectangle(cornerRadius: TokensRadio.boton, style: .continuous)
     }
 
-    var minutoDelDia: Int? { sesion?.minutoDelDia ?? planificado?.minutoDelDia }
-    var duracionMinutos: Int? { sesion?.duracionMinutos ?? planificado?.duracionMinutos }
-    var distanciaMetros: Int? { sesion?.distanciaMetros ?? planificado?.distanciaMetros }
+    var body: some View {
+        Button(action: alTocar) { contenido }
+            .buttonStyle(EstiloPresionado())
+            .disabled(dia.esDescanso)
+            .accessibilityElement(children: .combine)
+            .accessibilityHint(dia.esDescanso ? "" : Textos.planDayTapToSee)
+    }
 
-    /// El detalle de la fila es "10 km · Z2": la zona es uno de los pedazos.
-    private static func zonaEscrita(en detalle: String) -> ZonaDeIntensidad? {
-        for parte in detalle.components(separatedBy: "·") {
-            let limpia = parte.trimmingCharacters(in: .whitespaces).lowercased()
-            if let zona = ZonaDeIntensidad(rawValue: limpia) { return zona }
+    private var contenido: some View {
+        HStack(spacing: TokensEspaciado.e12) {
+            Text(PlanFechas.diaCorto(dia.diaDeLaSemana))
+                .estilo(.cuerpoDestacado, color: dia.esHoy ? Paleta.acento : Paleta.textoSecundario)
+                .frame(width: TokensEspaciado.e40, alignment: .leading)
+
+            Text(titulo)
+                .estilo(.cuerpoSecundario, color: dia.esDescanso ? Paleta.textoTerciario : Paleta.textoPrimario)
+                .lineLimit(2)
+                .multilineTextAlignment(.leading)
+                .frame(maxWidth: .infinity, alignment: .leading)
+
+            if let pasos = estado.pasos(para: dia), pasos > 0, !dia.esDescanso {
+                Text(Formato.pasos(pasos))
+                    .estilo(.notaLegal, color: Paleta.textoTerciario)
+                    .monospacedDigit()
+            }
+
+            final
         }
-        return nil
+        .padding(.horizontal, TokensEspaciado.e14)
+        .frame(minHeight: TokensTamano.objetivoTactilMinimo + TokensEspaciado.e8)
+        .background(dia.esHoy ? Paleta.acentoSuaveFondo : Paleta.superficie)
+        .clipShape(forma)
+        .overlay(forma.strokeBorder(dia.esHoy ? Paleta.acento : Paleta.bordeSuperficie,
+                                    lineWidth: dia.esHoy ? TokensEspaciado.e2 : TokensEspaciado.e1))
+        // El día sin hacer: toda la fila apagada, nada más.
+        .opacity(dia.sinHacer ? 0.4 : 1)
+        .contentShape(forma)
+    }
+
+    /// "Rodaje suave · 6 km".
+    private var titulo: String {
+        guard !dia.esDescanso, let metros = dia.distanciaMetros, metros > 0 else { return dia.titulo }
+        return "\(dia.titulo) · \(Formato.distancia(metros, unidades: estado.sistemaDeUnidades))"
+    }
+
+    @ViewBuilder
+    private var final: some View {
+        if dia.hecho {
+            Image(systemName: "checkmark.circle.fill")
+                .font(.system(size: TokensTipografia.tituloCardGrandeTamano, weight: .semibold))
+                .foregroundStyle(Paleta.exito)
+                .accessibilityLabel(Textos.planDone)
+        } else if dia.esHoy {
+            Text(Textos.planTodayBadge)
+                .estilo(.etiquetaSeccion, color: Paleta.acento)
+        } else if !dia.esDescanso && !dia.sinHacer {
+            Image(systemName: "chevron.right")
+                .font(.system(size: TokensTipografia.notaTamano, weight: .bold))
+                .foregroundStyle(Paleta.textoTerciario)
+                .accessibilityHidden(true)
+        }
+    }
+}
+
+// MARK: - La hoja de un día
+
+/// Lo que antes se desplegaba dentro de la lista, en una hoja a la medida:
+///
+///   JUEVES 22 · HOY · 18:30
+///   Rodaje suave · 8 km
+///   [Zona 2 · suave] y qué se siente
+///   Qué llevar para tomar: 500 ml de agua con sales · 1 gel
+///   «Empezar esta salida» (sólo hoy, como antes)
+///
+/// Un día sin hacer muestra un solo texto y "Lo hice: marcar como hecho" abajo de todo,
+/// con el botón secundario: cuenta para la semana, pero el fueguito no vuelve.
+struct HojaDelDiaDelPlan: View {
+    @EnvironmentObject private var estado: EstadoHome
+    @Environment(\.dismiss) private var cerrar
+    let dia: DiaDelPlan
+    /// Guarda la marca en el servidor. `false` si no se pudo.
+    let alMarcar: () async -> Bool
+
+    @State private var marcando = false
+    @State private var fallo = false
+
+    var body: some View {
+        HojaAMedida(estimado: dia.sinHacer ? 300 : 420) {
+            VStack(alignment: .leading, spacing: TokensEspaciado.e16) {
+                VStack(alignment: .leading, spacing: TokensEspaciado.e4) {
+                    Text(PlanFechas.encabezado(dia))
+                        .estilo(.etiquetaSeccion, color: dia.esHoy ? Paleta.acento : Paleta.textoTerciario)
+                    Text(titulo)
+                        .estilo(.tituloSeccion)
+                        .fixedSize(horizontal: false, vertical: true)
+                        .accessibilityAddTraits(.isHeader)
+                }
+
+                if dia.sinHacer {
+                    sinHacer
+                } else {
+                    detalle
+                }
+            }
+            .margenesDeHoja()
+        }
+    }
+
+    private var titulo: String {
+        guard let metros = dia.distanciaMetros, metros > 0 else { return dia.titulo }
+        return "\(dia.titulo) · \(Formato.distancia(metros, unidades: estado.sistemaDeUnidades))"
+    }
+
+    // MARK: El día que pasó sin salida
+
+    private var sinHacer: some View {
+        VStack(alignment: .leading, spacing: TokensEspaciado.e16) {
+            Text(Textos.planDayMissed)
+                .estilo(.cuerpoSecundario, color: Paleta.textoSecundario)
+                .fixedSize(horizontal: false, vertical: true)
+            if fallo {
+                Text(Textos.planDayMarkFailed)
+                    .estilo(.labelCampo, color: Paleta.error)
+                    .fixedSize(horizontal: false, vertical: true)
+            }
+            BotonSecundario(accion: marcar) {
+                HStack(spacing: TokensEspaciado.e8) {
+                    if marcando { ProgressView().tint(Paleta.textoPrimario) }
+                    Text(Textos.planDayMarkDone)
+                }
+            }
+            .disabled(marcando)
+        }
+    }
+
+    private func marcar() {
+        guard !marcando else { return }
+        Haptico.toque()
+        marcando = true
+        fallo = false
+        Task {
+            let listo = await alMarcar()
+            marcando = false
+            if listo { cerrar() } else { fallo = true }
+        }
+    }
+
+    // MARK: Un día con su sesión
+
+    @ViewBuilder
+    private var detalle: some View {
+        if let zona = dia.zona {
+            VStack(alignment: .leading, spacing: TokensEspaciado.e8) {
+                PildoraDeEstado(Textos.zonePill(zona.numero, zona.sensacion), simbolo: "heart", tono: .acento)
+                Text(zona.planExplicacion)
+                    .estilo(.cuerpoSecundario, color: Paleta.textoSecundario)
+                    .fixedSize(horizontal: false, vertical: true)
+            }
+        } else if dia.esFuerza {
+            Text(Textos.planDayStrength)
+                .estilo(.cuerpoSecundario, color: Paleta.textoSecundario)
+                .fixedSize(horizontal: false, vertical: true)
+        } else if !dia.detalle.isEmpty, dia.distanciaMetros == nil {
+            Text(dia.detalle)
+                .estilo(.cuerpoSecundario, color: Paleta.textoSecundario)
+                .fixedSize(horizontal: false, vertical: true)
+        }
+
+        if let llevar = queLlevar {
+            VStack(alignment: .leading, spacing: TokensEspaciado.e4) {
+                Text(Textos.planDayWhatToBring)
+                    .estilo(.etiquetaSeccion, color: Paleta.textoTerciario)
+                    .accessibilityAddTraits(.isHeader)
+                Text(llevar)
+                    .estilo(.cuerpoDestacado)
+                    .fixedSize(horizontal: false, vertical: true)
+            }
+        }
+
+        if dia.abrible {
+            BotonPrimario(Textos.planDayStartWorkout) {
+                Haptico.toque()
+                cerrar()
+                estado.ir(a: .entreno)
+            }
+        } else if dia.esFuerza && dia.esHoy {
+            BotonTonal(Textos.planDayViewRoutine) {
+                Haptico.toque()
+                cerrar()
+                estado.ir(a: .gimnasio)
+            }
+        }
+    }
+
+    /// "500 ml de agua con sales · 1 gel", con los números del servidor.
+    private var queLlevar: String? {
+        guard let a = dia.avituallamiento else { return nil }
+        var partes: [String] = []
+        if a.mililitrosTotales > 0 { partes.append(Textos.planDayWaterWithSalts(a.mililitrosTotales)) }
+        if a.geles > 0 { partes.append(a.geles == 1 ? Textos.planDayGelOne : Textos.planDayGelsCount(a.geles)) }
+        return partes.isEmpty ? nil : partes.joined(separator: " · ")
+    }
+}
+
+// MARK: - Fechas de los días
+
+enum PlanFechas {
+    private static var idioma: Locale {
+        Locale(identifier: Bundle.main.preferredLocalizations.first ?? "es")
+    }
+
+    /// "Lun" a "Dom" (ISO: 1 = lunes), los del catálogo.
+    static func diaCorto(_ diaIso: Int) -> String {
+        switch diaIso {
+        case 1: return Textos.weekdayShortMon
+        case 2: return Textos.weekdayShortTue
+        case 3: return Textos.weekdayShortWed
+        case 4: return Textos.weekdayShortThu
+        case 5: return Textos.weekdayShortFri
+        case 6: return Textos.weekdayShortSat
+        default: return Textos.weekdayShortSun
+        }
+    }
+
+    /// "JUEVES 22 · HOY · 18:30" (se ve en mayúsculas por el estilo).
+    static func encabezado(_ dia: DiaDelPlan) -> String {
+        var calendario = Calendar(identifier: .gregorian)
+        calendario.locale = idioma
+        let indice = dia.diaDeLaSemana % 7
+        let nombre = calendario.weekdaySymbols.indices.contains(indice) ? calendario.weekdaySymbols[indice] : ""
+        var partes = ["\(nombre) \(dia.numeroDeDia)"]
+        if dia.esHoy { partes.append(Textos.commonToday) }
+        if !dia.sinHacer, let minuto = dia.minutoDelDia { partes.append(Formato.hora(minutoDelDia: minuto)) }
+        return partes.joined(separator: " · ")
     }
 
     /// La fecha como la escribe el cronograma (`yyyy-MM-dd`, zona local).
@@ -49,543 +270,17 @@ struct PlanDatosDelDia {
     }()
 }
 
-// MARK: - Un día, en la línea de tiempo
-
-/// Un día del plan. Lo hecho se atenúa y lleva tilde; hoy lleva el acento, el
-/// brillo y la palabra — nunca sólo el color (AGENTS.md §10.1). Tocarlo lo abre
-/// en el lugar y muestra qué hacer, por qué y el botón para hacerlo.
-struct FilaDeDiaDelPlan: View {
-    @EnvironmentObject private var estado: EstadoHome
-    @Environment(\.accessibilityReduceMotion) private var reducirMovimiento
-    let dia: DiaDelPlan
-    let datos: PlanDatosDelDia
-    let abierto: Bool
-    var esPrimero: Bool = false
-    var esUltimo: Bool = false
-    let alTocar: () -> Void
-    let abrirHistorial: () -> Void
-
-    // Init explícito: con propiedades `private` el memberwise no se ve desde PlanView.
-    init(dia: DiaDelPlan, datos: PlanDatosDelDia, abierto: Bool, esPrimero: Bool = false, esUltimo: Bool = false,
-         alTocar: @escaping () -> Void, abrirHistorial: @escaping () -> Void) {
-        self.dia = dia
-        self.datos = datos
-        self.abierto = abierto
-        self.esPrimero = esPrimero
-        self.esUltimo = esUltimo
-        self.alTocar = alTocar
-        self.abrirHistorial = abrirHistorial
-    }
-
-    private var forma: RoundedRectangle {
-        RoundedRectangle(cornerRadius: TokensRadio.boton, style: .continuous)
-    }
-
-    private var transicion: AnyTransition {
-        reducirMovimiento ? AnyTransition.opacity
-            : AnyTransition.opacity.combined(with: .move(edge: .top))
-    }
-
-    var body: some View {
-        VStack(spacing: 0) {
-            Button(action: alTocar) { cabecera }
-                .buttonStyle(EstiloPresionado())
-                .accessibilityElement(children: .combine)
-                .accessibilityValue(abierto
-                    ? Textos.planDayExpanded
-                    : Textos.planDayCollapsed)
-                .accessibilityHint(abierto
-                    ? Textos.planDayTapToClose
-                    : Textos.planDayTapToSee)
-
-            if abierto {
-                PlanDetalleDelDia(dia: dia, datos: datos, abrirHistorial: abrirHistorial)
-                    .transition(transicion)
-            }
-        }
-        .frame(maxWidth: .infinity)
-        .background(dia.esHoy ? Paleta.acentoSuaveFondo : Paleta.superficie)
-        .clipShape(forma)
-        .overlay(
-            forma.strokeBorder(dia.esHoy || abierto ? Paleta.acentoSuaveBorde : Paleta.bordeSuperficie,
-                               lineWidth: TokensEspaciado.e1)
-        )
-        .shadow(color: dia.esHoy ? Paleta.acentoBrillo : Color.clear, radius: TokensEspaciado.e8)
-        .padding(.leading, TokensEspaciado.e26)
-        .padding(.vertical, TokensEspaciado.e4)
-        .overlay(alignment: .topLeading) { lineaDeTiempo }
-    }
-
-    // MARK: Cabecera (siempre visible)
-
-    private var cabecera: some View {
-        HStack(spacing: TokensEspaciado.e10) {
-            VStack(alignment: .leading, spacing: 0) {
-                Text(nombreDelDia)
-                Text(verbatim: "\(dia.numeroDeDia) \(dia.mesCorto)")
-            }
-            .estilo(.etiquetaSeccion.enMinusculas, color: dia.esHoy ? Paleta.acento : Paleta.textoTerciario)
-            .monospacedDigit()
-            .frame(width: TokensEspaciado.e34, alignment: .leading)
-
-            VStack(alignment: .leading, spacing: TokensEspaciado.e2) {
-                Text(dia.titulo)
-                    .estilo(.cuerpoDestacado)
-                    .multilineTextAlignment(.leading)
-                HStack(spacing: TokensEspaciado.e6) {
-                    if !dia.detalle.isEmpty {
-                        Text(dia.detalle)
-                            .estilo(.labelCampo, color: Paleta.textoSecundario)
-                    }
-                    if let pasos = estado.pasos(para: dia), pasos > 0 {
-                        pildoraDePasos(pasos)
-                    }
-                }
-            }
-            .frame(maxWidth: .infinity, alignment: .leading)
-
-            if dia.hecho {
-                Image(systemName: "checkmark.circle.fill")
-                    .font(.system(size: TokensTipografia.tituloCardGrandeTamano,
-                                  weight: TokensTipografia.tituloCardPeso))
-                    .foregroundStyle(Paleta.acento)
-                    .accessibilityLabel(Textos.planDone)
-            } else if dia.esHoy {
-                Text(Textos.planTodayBadge)
-                    .estilo(.etiquetaSeccion, color: Paleta.acento)
-            }
-
-            Image(systemName: "chevron.down")
-                .font(.system(size: TokensTipografia.notaTamano, weight: .bold))
-                .foregroundStyle(Paleta.textoTerciario)
-                .rotationEffect(.degrees(abierto ? 180 : 0))
-                .accessibilityHidden(true)
-        }
-        .padding(.horizontal, TokensEspaciado.e13)
-        .padding(.vertical, TokensEspaciado.e12)
-        .frame(maxWidth: .infinity)
-        .opacity(dia.hecho && !abierto ? 0.6 : 1)
-        .objetivoTactilAlto()
-    }
-
-    private func pildoraDePasos(_ pasos: Int) -> some View {
-        HStack(spacing: TokensEspaciado.e3) {
-            Image(systemName: "figure.walk")
-                .font(.system(size: TokensTipografia.etiquetaSeccionTamano, weight: .semibold))
-            Text(Formato.pasos(pasos))
-                .estilo(.etiquetaSeccion.enMinusculas, color: Paleta.textoTerciario)
-                .monospacedDigit()
-        }
-        .foregroundStyle(Paleta.textoTerciario)
-        .padding(.horizontal, TokensEspaciado.e5)
-        .padding(.vertical, TokensEspaciado.e2)
-        .background(Paleta.superficieAlterna)
-        .clipShape(Capsule())
-    }
-
-    // MARK: Línea de tiempo
-
-    /// El punto y la línea vertical. Es decoración: el estado ya lo dicen la
-    /// tilde y "HOY" dentro de la tarjeta.
-    private var lineaDeTiempo: some View {
-        VStack(spacing: 0) {
-            Rectangle()
-                .fill(esPrimero ? Color.clear : Paleta.acentoSuaveBorde)
-                .frame(width: TokensEspaciado.e2, height: TokensEspaciado.e22)
-            Circle()
-                .fill(colorDelPunto)
-                .frame(width: TokensEspaciado.e12, height: TokensEspaciado.e12)
-                .overlay(Circle().strokeBorder(dia.hecho || dia.esHoy ? Color.clear : Paleta.bordeSuperficie,
-                                               lineWidth: TokensEspaciado.e1))
-                .shadow(color: dia.esHoy ? Paleta.acentoBrillo : Color.clear, radius: TokensEspaciado.e6)
-            Rectangle()
-                .fill(esUltimo ? Color.clear : Paleta.acentoSuaveBorde)
-                .frame(width: TokensEspaciado.e2)
-                .frame(maxHeight: .infinity)
-        }
-        .frame(width: TokensEspaciado.e16)
-        .frame(maxHeight: .infinity, alignment: .top)
-        .accessibilityHidden(true)
-    }
-
-    private var colorDelPunto: Color {
-        if dia.esHoy || dia.hecho { return Paleta.acento }
-        return Paleta.superficieControl
-    }
-
-    /// El nombre corto del día, del calendario en el idioma de la app y no de una lista fija.
-    private var nombreDelDia: String {
-        var calendario = Calendar.current
-        calendario.locale = Locale(identifier: Bundle.main.preferredLocalizations.first ?? "es")
-        let simbolos = calendario.shortWeekdaySymbols
-        // `shortWeekdaySymbols` arranca en domingo; el plan arranca en lunes.
-        let indice = (dia.diaDeLaSemana % 7)
-        return simbolos.indices.contains(indice) ? simbolos[indice].capitalized : ""
-    }
-}
-
-// MARK: - El detalle, desplegado
-
-/// Qué hacer, cómo, por qué y con qué, con el botón para hacerlo. Cada parte
-/// aparece sólo si el servidor la mandó: lo que no hay no se rellena.
-private struct PlanDetalleDelDia: View {
-    @EnvironmentObject private var estado: EstadoHome
-    let dia: DiaDelPlan
-    let datos: PlanDatosDelDia
-    let abrirHistorial: () -> Void
-
-    init(dia: DiaDelPlan, datos: PlanDatosDelDia, abrirHistorial: @escaping () -> Void) {
-        self.dia = dia
-        self.datos = datos
-        self.abrirHistorial = abrirHistorial
-    }
-
-    private enum Momento { case pasado, hoy, futuro }
-
-    private var momento: Momento? {
-        if dia.esHoy { return .hoy }
-        guard let fecha = dia.fecha else { return nil }
-        return fecha < Calendar.current.startOfDay(for: Date()) ? .pasado : .futuro
-    }
-
-    var body: some View {
-        VStack(alignment: .leading, spacing: TokensEspaciado.e14) {
-            Rectangle()
-                .fill(Paleta.divisor)
-                .frame(height: TokensEspaciado.e1)
-                .accessibilityHidden(true)
-
-            if !datosRapidos.isEmpty {
-                FlujoHorizontal(espaciado: TokensEspaciado.e6) {
-                    ForEach(datosRapidos) { dato in
-                        PlanChipDeDato(simbolo: dato.simbolo, texto: dato.texto)
-                    }
-                }
-            }
-
-            queEs
-            estructura
-            porQueHoy
-            explicacionDeZona
-            hidratacion
-            clima
-
-            accion
-        }
-        .padding(.horizontal, TokensEspaciado.e13)
-        .padding(.bottom, TokensEspaciado.e14)
-        .frame(maxWidth: .infinity, alignment: .leading)
-    }
-
-    // MARK: Datos rápidos
-
-    private struct DatoRapido: Identifiable {
-        let id: String
-        let simbolo: String
-        let texto: String
-    }
-
-    private var datosRapidos: [DatoRapido] {
-        var datosDelDia: [DatoRapido] = []
-        if let minuto = datos.minutoDelDia {
-            datosDelDia.append(DatoRapido(id: "hora", simbolo: "clock", texto: Formato.hora(minutoDelDia: minuto)))
-        }
-        if let minutos = datos.duracionMinutos, minutos > 0 {
-            datosDelDia.append(DatoRapido(id: "duracion", simbolo: "timer",
-                                          texto: Formato.duracionLarga(minutos: minutos)))
-        }
-        if let metros = datos.distanciaMetros, metros > 0 {
-            datosDelDia.append(DatoRapido(id: "distancia", simbolo: "ruler",
-                                          texto: Formato.distancia(metros, unidades: estado.sistemaDeUnidades)))
-        }
-        if let zona = datos.zona {
-            datosDelDia.append(DatoRapido(id: "zona", simbolo: "heart",
-                                          texto: "\(zona.corta) · \(zona.planIntensidad)"))
-        }
-        return datosDelDia
-    }
-
-    // MARK: Secciones
-
-    /// Lo que es el día cuando no es una salida: descanso o fuerza.
-    @ViewBuilder
-    private var queEs: some View {
-        if datos.esDescanso {
-            parrafo(simbolo: "bed.double",
-                    Textos.planDayRest)
-        } else if datos.esFuerza {
-            parrafo(simbolo: "dumbbell",
-                    Textos.planDayStrength)
-        }
-    }
-
-    @ViewBuilder
-    private var estructura: some View {
-        if let sesion = datos.sesion, !sesion.bloques.isEmpty {
-            seccion(Textos.planDaySessionShape,
-                    simbolo: "list.bullet") {
-                VStack(alignment: .leading, spacing: TokensEspaciado.e8) {
-                    ForEach(sesion.bloques) { bloque in
-                        HStack(alignment: .top, spacing: TokensEspaciado.e8) {
-                            VStack(alignment: .leading, spacing: TokensEspaciado.e2) {
-                                Text(bloque.titulo).estilo(.tituloCard)
-                                if !bloque.detalle.isEmpty {
-                                    Text(bloque.detalle)
-                                        .estilo(.cuerpoSecundario, color: Paleta.textoSecundario)
-                                        .fixedSize(horizontal: false, vertical: true)
-                                }
-                            }
-                            .frame(maxWidth: .infinity, alignment: .leading)
-                            if let insignia = bloque.insignia, !insignia.isEmpty {
-                                Text(insignia).estilo(.chip, color: Paleta.acento)
-                            }
-                        }
-                        .accessibilityElement(children: .combine)
-                    }
-                    if sesion.runWalkRun {
-                        Text(Textos.planDayRunWalk)
-                            .estilo(.labelCampo, color: Paleta.textoTerciario)
-                    }
-                }
-            }
-        }
-    }
-
-    @ViewBuilder
-    private var porQueHoy: some View {
-        if let motivos = datos.sesion?.motivos, !motivos.isEmpty {
-            seccion(Textos.planDayWhyToday,
-                    simbolo: "lightbulb") {
-                VStack(alignment: .leading, spacing: TokensEspaciado.e6) {
-                    ForEach(Array(motivos.enumerated()), id: \.offset) { _, motivo in
-                        HStack(alignment: .top, spacing: TokensEspaciado.e6) {
-                            Circle()
-                                .fill(Paleta.acento)
-                                .frame(width: TokensEspaciado.e5, height: TokensEspaciado.e5)
-                                .padding(.top, TokensEspaciado.e6)
-                                .accessibilityHidden(true)
-                            Text(motivo)
-                                .estilo(.cuerpoSecundario, color: Paleta.textoCuerpo)
-                                .fixedSize(horizontal: false, vertical: true)
-                        }
-                    }
-                }
-            }
-        }
-    }
-
-    @ViewBuilder
-    private var explicacionDeZona: some View {
-        if let zona = datos.zona {
-            seccion(Textos.planDayWhatIs(zona.corta),
-                    simbolo: "heart.text.square") {
-                Text(zona.planExplicacion)
-                    .estilo(.cuerpoSecundario, color: Paleta.textoSecundario)
-                    .fixedSize(horizontal: false, vertical: true)
-            }
-            .accessibilityElement(children: .combine)
-            .accessibilityLabel(Text(verbatim: "\(Textos.zoneAccessibility(zona.numero)). \(zona.planExplicacion)"))
-        }
-    }
-
-    private var datosDeHidratacion: [DatoRapido] {
-        var lista: [DatoRapido] = []
-        if let a = datos.sesion?.avituallamiento {
-            if a.mililitrosTotales > 0 {
-                lista.append(DatoRapido(id: "agua", simbolo: "drop", texto: Formato.litros(a.mililitrosTotales)))
-            }
-            if a.geles > 0 {
-                lista.append(DatoRapido(id: "geles", simbolo: "bolt", texto: Self.geles(a.geles)))
-            }
-            if a.sodioMg > 0 {
-                lista.append(DatoRapido(id: "sodio", simbolo: "sparkle",
-                                        texto: Textos.planDaySodiumMg(a.sodioMg)))
-            }
-            if a.carbohidratosPorHoraG > 0 {
-                lista.append(DatoRapido(id: "carbos", simbolo: "fork.knife",
-                                        texto: Textos.planDayCarbsPerHour(a.carbohidratosPorHoraG)))
-            }
-        } else if let p = datos.planificado {
-            if let agua = p.aguaMl, agua > 0 {
-                lista.append(DatoRapido(id: "agua", simbolo: "drop", texto: Formato.litros(agua)))
-            }
-            if let geles = p.geles, geles > 0 {
-                lista.append(DatoRapido(id: "geles", simbolo: "bolt", texto: Self.geles(geles)))
-            }
-            if let sales = p.sales, sales > 0 {
-                lista.append(DatoRapido(id: "sales", simbolo: "sparkle",
-                                        texto: sales == 1
-                                            ? Textos.planDaySaltDoseOne
-                                            : Textos.planDaySaltDosesCount(sales)))
-            }
-        }
-        return lista
-    }
-
-    private static func geles(_ cantidad: Int) -> String {
-        cantidad == 1
-            ? Textos.planDayGelOne
-            : Textos.planDayGelsCount(cantidad)
-    }
-
-    @ViewBuilder
-    private var hidratacion: some View {
-        let lista = datosDeHidratacion
-        if !lista.isEmpty {
-            seccion(Textos.planDayWhatToBring,
-                    simbolo: "drop.fill") {
-                VStack(alignment: .leading, spacing: TokensEspaciado.e8) {
-                    Text(Textos.planDayFuelingBody)
-                        .estilo(.labelCampo, color: Paleta.textoTerciario)
-                        .fixedSize(horizontal: false, vertical: true)
-                    FlujoHorizontal(espaciado: TokensEspaciado.e6) {
-                        ForEach(lista) { dato in
-                            PlanChipDeDato(simbolo: dato.simbolo, texto: dato.texto)
-                        }
-                    }
-                }
-            }
-        }
-    }
-
-    @ViewBuilder
-    private var clima: some View {
-        if let nota = datos.sesion?.notaDelClima, !nota.isEmpty {
-            parrafo(simbolo: "cloud.sun", nota)
-        }
-    }
-
-    // MARK: La acción
-
-    @ViewBuilder
-    private var accion: some View {
-        if dia.hecho {
-            BotonTonal(Textos.planDayViewInHistory) {
-                abrirHistorial()
-            }
-        } else if datos.esFuerza {
-            BotonTonal(Textos.planDayViewRoutine) {
-                Haptico.toque()
-                estado.ir(a: .gimnasio)
-            }
-        } else if dia.abrible {
-            BotonPrimario(Textos.planDayStartWorkout) {
-                Haptico.toque()
-                estado.ir(a: .entreno)
-            }
-        } else if !datos.esDescanso, momento == .futuro {
-            // `entreno` muestra la salida de HOY: abrir otro día mostraría una
-            // sesión que no es la suya. Se dice cuándo se habilita.
-            nota(simbolo: "calendar.badge.clock",
-                 Textos.planDayAvailableThatDay)
-        } else if !datos.esDescanso, momento == .pasado {
-            nota(simbolo: "arrow.uturn.forward",
-                 Textos.planDayPast)
-        }
-    }
-
-    // MARK: Piezas
-
-    private func seccion<Contenido: View>(_ titulo: String, simbolo: String,
-                                          @ViewBuilder contenido: () -> Contenido) -> some View {
-        VStack(alignment: .leading, spacing: TokensEspaciado.e6) {
-            HStack(spacing: TokensEspaciado.e6) {
-                Image(systemName: simbolo)
-                    .font(.system(size: TokensTipografia.notaTamano, weight: .semibold))
-                    .foregroundStyle(Paleta.acento)
-                    .accessibilityHidden(true)
-                Text(titulo)
-                    .estilo(.etiquetaSeccion, color: Paleta.textoSecundario)
-                    .accessibilityAddTraits(.isHeader)
-            }
-            contenido()
-        }
-        .frame(maxWidth: .infinity, alignment: .leading)
-    }
-
-    private func parrafo(simbolo: String, _ texto: String) -> some View {
-        HStack(alignment: .top, spacing: TokensEspaciado.e8) {
-            Image(systemName: simbolo)
-                .font(.system(size: TokensTipografia.tituloCardTamano, weight: .semibold))
-                .foregroundStyle(Paleta.acento)
-                .frame(width: TokensEspaciado.e16)
-                .accessibilityHidden(true)
-            Text(texto)
-                .estilo(.cuerpoSecundario, color: Paleta.textoCuerpo)
-                .fixedSize(horizontal: false, vertical: true)
-        }
-    }
-
-    private func nota(simbolo: String, _ texto: String) -> some View {
-        HStack(alignment: .top, spacing: TokensEspaciado.e8) {
-            Image(systemName: simbolo)
-                .font(.system(size: TokensTipografia.notaTamano, weight: .semibold))
-                .foregroundStyle(Paleta.textoTerciario)
-                .accessibilityHidden(true)
-            Text(texto)
-                .estilo(.labelCampo, color: Paleta.textoTerciario)
-                .fixedSize(horizontal: false, vertical: true)
-        }
-        .padding(TokensEspaciado.e10)
-        .frame(maxWidth: .infinity, alignment: .leading)
-        .background(Paleta.superficieAlterna)
-        .clipShape(RoundedRectangle(cornerRadius: TokensRadio.input, style: .continuous))
-    }
-}
-
-// MARK: - Chip de un dato
-
-/// "07:00", "51 min", "Z2 · moderada": un dato con su ícono.
-struct PlanChipDeDato: View {
-    let simbolo: String
-    let texto: String
-
-    var body: some View {
-        HStack(spacing: TokensEspaciado.e4) {
-            Image(systemName: simbolo)
-                .font(.system(size: TokensTipografia.chipTamano, weight: .semibold))
-                .foregroundStyle(Paleta.acento)
-                .accessibilityHidden(true)
-            Text(texto)
-                .estilo(.chip, color: Paleta.textoPrimario)
-                .lineLimit(1)
-        }
-        .padding(.horizontal, TokensEspaciado.e8)
-        .padding(.vertical, TokensEspaciado.e5)
-        .background(Paleta.superficieAlterna)
-        .clipShape(Capsule())
-        .overlay(Capsule().strokeBorder(Paleta.bordeSuperficie, lineWidth: TokensEspaciado.e1))
-        .accessibilityElement(children: .combine)
-    }
-}
-
 // MARK: - Las zonas, en palabras
 
 extension ZonaDeIntensidad {
-    /// "baja", "moderada"… los mismos textos que usa Inicio.
-    fileprivate var planIntensidad: String {
-        switch self {
-        case .z1: return Textos.zoneLow
-        case .z2: return Textos.zoneModerate
-        case .z3: return Textos.zoneModerateHigh
-        case .z4: return Textos.zoneHigh
-        case .z5: return Textos.zoneMax
-        }
-    }
-
     /// Qué se siente y para qué sirve, sin jerga: la prueba del habla.
     fileprivate var planExplicacion: String {
         switch self {
-        case .z1:
-            return Textos.planDayZone1
-        case .z2:
-            return Textos.planDayZone2
-        case .z3:
-            return Textos.planDayZone3
-        case .z4:
-            return Textos.planDayZone4
-        case .z5:
-            return Textos.planDayZone5
+        case .z1: return Textos.planDayZone1
+        case .z2: return Textos.planDayZone2
+        case .z3: return Textos.planDayZone3
+        case .z4: return Textos.planDayZone4
+        case .z5: return Textos.planDayZone5
         }
     }
 }

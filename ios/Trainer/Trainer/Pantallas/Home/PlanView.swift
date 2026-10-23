@@ -1,26 +1,31 @@
 import SwiftUI
 import TrainerCore
 
-/// `plan` — el bloque de semanas, con sus fases, el selector de semana y los
-/// siete días.
+/// `plan` — "menos cosas a la vista" (decisión de Iván del 2026-10-23):
 ///
-/// Las piezas viven al lado, con prefijo `Plan`: las fases en
-/// `PlanTarjetaDeFases.swift`, la semana en `PlanSemana.swift`, cada día en
-/// `PlanFilaDeDia.swift` y el selector de metas para cuando el plan terminó en
+///   la barra fija «Tu plan» con el fueguito (`PantallaDePestana`)
+///   el selector de objetivo (21K | 10K), si hay más de uno
+///   la cabecera de la semana: ‹ Semana 2 de 20 ›, "Etapa Base ⓘ" y los km
+///   los 7 días en filas iguales; tocar uno abre su hoja
+///
+/// Se fueron el héroe de "20 semanas para tu carrera", la tarjeta fija de las etapas
+/// (ahora es una hoja que abre "Etapa Base"), los chips S1…S20 (ahora flechas, y
+/// deslizar sigue andando) y el botón del mapa (era la pestaña Historial).
+///
+/// Las piezas viven al lado, con prefijo `Plan`: la cabecera en `PlanSemana.swift`,
+/// cada día y su hoja en `PlanFilaDeDia.swift`, las etapas en
+/// `PlanTarjetaDeFases.swift` y el selector de metas para cuando el plan terminó en
 /// `PlanSelectorDeMetasView.swift`.
 struct PlanView: View {
     @EnvironmentObject private var estado: EstadoHome
     @EnvironmentObject private var flujo: FlujoEntrada
     @Environment(\.accessibilityReduceMotion) private var reducirMovimiento
-    @State private var mostrarHistorial = false
     @State private var planesDeObjetivos: [PlanDeObjetivo] = []
     @State private var objetivoElegido = "principal"
     @State private var faltanObjetivos = false
-    /// El día abierto en la línea de tiempo (`"semana-día"`). Uno a la vez: es un
-    /// acordeón. Vive acá y no en la fila porque los días de un objetivo que no es
-    /// el principal se traducen de nuevo en cada `body` y sus `id` cambian.
-    @State private var diaAbierto: String?
-    @State private var yaAbrioHoy = false
+    /// El día cuya hoja está abierta.
+    @State private var diaElegido: DiaElegido?
+    @State private var mostrarEtapas = false
 
     private var bloqueVisible: BloqueDelPlan? {
         guard objetivoElegido != "principal" else { return estado.bloque }
@@ -30,7 +35,9 @@ struct PlanView: View {
 
     private var semanaVisible: SemanaDelPlan? {
         guard let bloque = bloqueVisible else { return nil }
-        return bloque.semanas.first { $0.numero == estado.semanaElegida } ?? bloque.semanas.first
+        return bloque.semanas.first { $0.numero == estado.semanaElegida }
+            ?? bloque.semanas.first { $0.enCurso }
+            ?? bloque.semanas.first
     }
 
     private var planVencido: Bool { estado.planVencido }
@@ -41,10 +48,10 @@ struct PlanView: View {
     }
 
     var body: some View {
-        ScrollView {
-            VStack(alignment: .leading, spacing: TokensEspaciado.e20) {
-                encabezado
-
+        PantallaDePestana(Textos.planTitle, alRefrescar: { await refrescar() }) {
+            FueguitoDeLaBarra()
+        } contenido: {
+            VStack(alignment: .leading, spacing: TokensEspaciado.e16) {
                 if !planVencido && planesDeObjetivos.count > 1 {
                     selectorDeObjetivo
                 }
@@ -53,11 +60,6 @@ struct PlanView: View {
                     SelectorInteractivoDeMetasView()
                 } else if let bloque = bloqueVisible, let semana = semanaVisible {
                     if esElPrincipal { AvisoDeLoGuardado(seccion: estado.contenido.plan) }
-                    tarjetaDelEvento(bloque)
-                    if !bloque.fases.isEmpty {
-                        PlanTarjetaDeFases(fases: bloque.fases)
-                            .id(objetivoElegido)
-                    }
                     semanaYDias(bloque: bloque, semana: semana)
                 } else {
                     SinDatosView(problema: estado.contenido.plan.problema, actualizando: estado.actualizando) {
@@ -69,35 +71,15 @@ struct PlanView: View {
             .padding(.top, TokensEspaciado.e8)
             .padding(.bottom, TokensEspaciado.e36)
         }
-        .frame(maxWidth: .infinity, maxHeight: .infinity)
         .task(id: estado.semana?.numero) {
             await estado.cargarPasosDeLaSemana()
         }
         .task { await cargarPlanes() }
-        .onAppear { abrirHoySiHaceFalta() }
-        .onChange(of: estado.semanaElegida) { _ in
-            withAnimation(animacion) { diaAbierto = nil }
-            abrirHoySiHaceFalta()
+        .sheet(item: $diaElegido) { elegido in
+            HojaDelDiaDelPlan(dia: elegido.dia, alMarcar: { await marcarComoHecho(elegido.dia) })
         }
-        .sheet(isPresented: $mostrarHistorial) {
-            HistorialDeActividadesView(servicio: estado.repositorio.servicioDeActividades())
-                .environmentObject(estado)
-        }
-    }
-
-    // MARK: - Encabezado
-
-    /// "Tu plan" grande, el subtítulo del bloque arriba; el historial a la derecha.
-    private var encabezado: some View {
-        EncabezadoDePestana(
-            Textos.planTitle,
-            sobretitulo: (!planVencido ? bloqueVisible?.subtitulo : nil)
-        ) {
-            BotonCircular("map", etiqueta: Textos.historyTitle) {
-                Haptico.toque()
-                mostrarHistorial = true
-            }
-            .accessibilityHint(Textos.historyOpensPastWorkouts)
+        .sheet(isPresented: $mostrarEtapas) {
+            HojaDeEtapas(fases: bloqueVisible?.fases ?? [])
         }
     }
 
@@ -115,11 +97,10 @@ struct PlanView: View {
                         Haptico.seleccion()
                         withAnimation(animacion) {
                             objetivoElegido = item.goalId
-                            estado.semanaElegida = 1
-                            diaAbierto = nil
+                            estado.semanaElegida = semanaDeHoy(de: item) ?? 1
                         }
                     } label: {
-                        Text(nombreDelObjetivo(item.plan.goal))
+                        Text(TraduccionDelServidor.nombre(de: item.plan.goal))
                             .estilo(.tituloCard, color: elegido ? Paleta.textoPrimario : Paleta.textoTerciario)
                             .lineLimit(1)
                             .padding(.horizontal, TokensEspaciado.e16)
@@ -140,6 +121,11 @@ struct PlanView: View {
         }
     }
 
+    /// La semana de hoy en otro objetivo, para no abrirlo en la semana 1.
+    private func semanaDeHoy(de item: PlanDeObjetivo) -> Int? {
+        TraduccionDelServidor.plan(item.plan, ahoraMs: RenovadorDeSesion.ahoraEnMs())?.semanaDeHoy
+    }
+
     private func cargarPlanes() async {
         guard let servicio = estado.repositorio.servicioDelCatalogo() else { return }
         if case .ok(let planes) = await servicio.planes() {
@@ -149,103 +135,53 @@ struct PlanView: View {
         }
     }
 
-    private func nombreDelObjetivo(_ objetivo: Objetivo) -> String {
-        switch objetivo {
-        case .c5k: return Textos.signupGoalC5k
-        case .c10k: return Textos.signupGoalC10k
-        case .mediaMaraton: return Textos.signupGoalHalfMarathon
-        case .maraton: return Textos.signupGoalMarathon
-        case .trailMontana: return Textos.signupGoalMountainTrail
-        case .triatlonOlimpico: return Textos.signupGoalOlympicTriathlon
-        case .volverSinLesiones: return Textos.signupGoalInjuryFree
-        }
+    private func refrescar() async {
+        await estado.actualizar()
+        await cargarPlanes()
     }
 
-    // MARK: - Tarjeta héroe del evento
-
-    /// Foto + cuenta regresiva ("6 semanas") + la etapa en la que estás. La
-    /// barra de etapas, ahora tocable, va en su propia tarjeta abajo.
-    private func tarjetaDelEvento(_ bloque: BloqueDelPlan) -> some View {
-        TarjetaHeroe(imagen: FondosDeTarjeta.imagen(para: .running, contexto: "plan")) {
-            VStack(alignment: .leading, spacing: TokensEspaciado.e12) {
-                if !bloque.cuando.isEmpty {
-                    PildoraDeEstado(bloque.cuando, simbolo: "calendar")
-                }
-
-                VStack(alignment: .leading, spacing: TokensEspaciado.e4) {
-                    if let dias = bloque.diasParaLaCarrera() {
-                        MetricaHeroe("\(dias)",
-                                     unidad: dias == 1
-                                        ? Textos.commonDay
-                                        : Textos.commonDays,
-                                     etiquetaAccesible: Textos.commonToGo)
-                        Text(Textos.planUntilRace)
-                            .estilo(.cuerpoSecundario, color: Paleta.textoSecundario)
-                    } else if bloque.semanasQueFaltan > 0 {
-                        MetricaHeroe("\(bloque.semanasQueFaltan)",
-                                     unidad: Textos.commonWeeks,
-                                     etiquetaAccesible: Textos.planWeeksLeft(bloque.semanasQueFaltan))
-                    }
-                    Text(bloque.evento)
-                        .estilo(bloque.semanasQueFaltan > 0 ? EstiloTipografico.tituloCard : EstiloTipografico.tituloSeccion,
-                                color: bloque.semanasQueFaltan > 0 ? Paleta.textoSecundario : Paleta.textoPrimario)
-                        .fixedSize(horizontal: false, vertical: true)
-                }
-
-                if let actual = bloque.fases.first(where: { $0.enCurso }) {
-                    PildoraDeEstado(
-                        Textos.planCurrentPhase(actual.titulo),
-                        simbolo: "location.fill", tono: .acento)
-                }
-            }
-        }
+    /// Lo marca en el servidor y trae los planes de nuevo (el principal y los demás).
+    private func marcarComoHecho(_ dia: DiaDelPlan) async -> Bool {
+        guard await estado.marcarComoHecho(dia) else { return false }
+        await cargarPlanes()
+        return true
     }
 
     // MARK: - Semana y días
 
     private func semanaYDias(bloque: BloqueDelPlan, semana: SemanaDelPlan) -> some View {
         VStack(alignment: .leading, spacing: TokensEspaciado.e12) {
-            PlanSelectorDeSemana(semanas: bloque.semanas, elegida: semana.numero) { numero in
-                elegirSemana(numero)
-            }
-
-            PlanProgresoDeLaSemana(
+            PlanCabeceraDeSemana(
                 semana: semana,
+                totalDeSemanas: bloque.totalDeSemanas,
                 unidades: estado.sistemaDeUnidades,
                 hayAnterior: indice(de: semana, en: bloque).map { $0 > 0 } ?? false,
                 haySiguiente: indice(de: semana, en: bloque).map { $0 < bloque.semanas.count - 1 } ?? false,
-                alMoverse: { paso in moverSemana(paso, desde: semana, en: bloque) })
+                alMoverse: { paso in moverSemana(paso, desde: semana, en: bloque) },
+                abrirEtapas: {
+                    Haptico.toque()
+                    mostrarEtapas = true
+                })
 
-            lineaDeTiempo(semana)
-                // Deslizar de costado sobre los días cambia de semana. Es simultáneo
-                // para no robarle el gesto vertical al scroll.
-                .simultaneousGesture(
-                    DragGesture(minimumDistance: TokensEspaciado.e26)
-                        .onEnded { arrastre in
-                            let dx = arrastre.translation.width
-                            let dy = arrastre.translation.height
-                            guard abs(dx) > TokensEspaciado.e56, abs(dx) > abs(dy) * 2 else { return }
-                            moverSemana(dx < 0 ? 1 : -1, desde: semana, en: bloque)
-                        })
-        }
-    }
-
-    private func lineaDeTiempo(_ semana: SemanaDelPlan) -> some View {
-        // Sin hueco entre filas para que la línea no se corte.
-        VStack(spacing: 0) {
-            ForEach(Array(semana.dias.enumerated()), id: \.offset) { indice, dia in
-                let clave = claveDelDia(dia, en: semana)
-                FilaDeDiaDelPlan(dia: dia,
-                                 datos: datos(de: dia),
-                                 abierto: diaAbierto == clave,
-                                 esPrimero: indice == 0,
-                                 esUltimo: indice == semana.dias.count - 1,
-                                 alTocar: { alternar(clave) },
-                                 abrirHistorial: {
-                                     Haptico.toque()
-                                     mostrarHistorial = true
-                                 })
+            VStack(spacing: TokensEspaciado.e8) {
+                ForEach(Array(semana.dias.enumerated()), id: \.offset) { _, dia in
+                    FilaDeDiaDelPlan(dia: dia) {
+                        Haptico.toque()
+                        diaElegido = DiaElegido(dia: dia)
+                    }
+                }
             }
+            .contentShape(Rectangle())
+            // Deslizar de costado sobre los días cambia de semana. Es simultáneo
+            // para no robarle el gesto vertical al scroll.
+            .simultaneousGesture(
+                DragGesture(minimumDistance: TokensEspaciado.e26)
+                    .onEnded { arrastre in
+                        let dx = arrastre.translation.width
+                        let dy = arrastre.translation.height
+                        guard abs(dx) > TokensEspaciado.e56, abs(dx) > abs(dy) * 2 else { return }
+                        moverSemana(dx < 0 ? 1 : -1, desde: semana, en: bloque)
+                    })
         }
     }
 
@@ -253,47 +189,18 @@ struct PlanView: View {
         bloque.semanas.firstIndex { $0.numero == semana.numero }
     }
 
-    private func elegirSemana(_ numero: Int) {
-        guard numero != estado.semanaElegida else { return }
-        Haptico.seleccion()
-        withAnimation(animacion) { estado.semanaElegida = numero }
-    }
-
     private func moverSemana(_ paso: Int, desde semana: SemanaDelPlan, en bloque: BloqueDelPlan) {
         guard let actual = indice(de: semana, en: bloque) else { return }
         let destino = actual + paso
         guard bloque.semanas.indices.contains(destino) else { return }
-        elegirSemana(bloque.semanas[destino].numero)
+        Haptico.seleccion()
+        withAnimation(animacion) { estado.semanaElegida = bloque.semanas[destino].numero }
     }
+}
 
-    private func claveDelDia(_ dia: DiaDelPlan, en semana: SemanaDelPlan) -> String {
-        "\(semana.numero)-\(dia.diaDeLaSemana)"
-    }
-
-    private func alternar(_ clave: String) {
-        Haptico.toque()
-        withAnimation(animacion) { diaAbierto = diaAbierto == clave ? nil : clave }
-    }
-
-    /// La primera vez, el día de hoy aparece abierto: es lo que más se busca.
-    /// Después lo que abra o cierre la persona manda.
-    private func abrirHoySiHaceFalta() {
-        guard !yaAbrioHoy, let semana = semanaVisible, let hoy = semana.dias.first(where: { $0.esHoy }) else { return }
-        yaAbrioHoy = true
-        diaAbierto = claveDelDia(hoy, en: semana)
-    }
-
-    /// Lo que se sabe de un día además de su fila: el cronograma del plan
-    /// principal y, si es hoy, la sesión entera. De otro objetivo no hay más
-    /// que el título y el detalle.
-    private func datos(de dia: DiaDelPlan) -> PlanDatosDelDia {
-        guard esElPrincipal else { return PlanDatosDelDia(dia: dia) }
-        let planificado: DiaPlanificadoCompartido? = dia.fecha.flatMap { fecha in
-            estado.plan?.cronograma.first { $0.fechaIso == PlanDatosDelDia.iso(fecha) }
-        }
-        let deHoy = dia.esHoy ? estado.hoy : nil
-        return PlanDatosDelDia(dia: dia, planificado: planificado,
-                               sesion: deHoy?.sesion,
-                               esFuerzaHoy: deHoy?.esFuerza ?? false)
-    }
+/// El día de la hoja abierta. Los `id` de `DiaDelPlan` son `UUID()` que cambian en
+/// cada traducción, así que la hoja se identifica por la fecha.
+private struct DiaElegido: Identifiable {
+    let dia: DiaDelPlan
+    var id: String { "\(dia.fechaMs ?? 0)-\(dia.diaDeLaSemana)" }
 }
