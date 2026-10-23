@@ -14,7 +14,7 @@ import TrainerCore
 ///
 /// Las piezas viven al lado, con prefijo `Plan`: la cabecera en `PlanSemana.swift`,
 /// cada día y su hoja en `PlanFilaDeDia.swift`, las etapas en
-/// `PlanTarjetaDeFases.swift` y el selector de metas para cuando el plan terminó en
+/// `PlanEtapas.swift` y el selector de metas para cuando el plan terminó en
 /// `PlanSelectorDeMetasView.swift`.
 struct PlanView: View {
     @EnvironmentObject private var estado: EstadoHome
