@@ -271,20 +271,27 @@ public struct TarjetaHeroe<Contenido: View>: View {
         ZStack(alignment: .bottomLeading) {
             fondo
             // Ronda 7: la foto va A COLOR y casi entera. El degradado sólo
-            // oscurece la franja de abajo, donde va el texto, para que se lea.
+            // oscurece las franjas donde va el texto, para que se lea.
+            // 2026-10-23 (Iván): "Maratón · Mar, 9 feb" arriba no se leía sobre el
+            // cielo claro de la foto. La franja de arriba pasa de 0,15 a 0,6 y el
+            // medio, donde suele estar la persona, sigue limpio.
             LinearGradient(
                 stops: [
-                    .init(color: Color.black.opacity(0.15), location: 0.0),
-                    .init(color: Color.clear, location: 0.25),
+                    .init(color: Color.black.opacity(0.6), location: 0.0),
+                    .init(color: Color.black.opacity(0.3), location: 0.2),
+                    .init(color: Color.clear, location: 0.38),
                     .init(color: Color.clear, location: 0.45),
-                    .init(color: Color.black.opacity(0.45), location: 0.72),
-                    .init(color: Color.black.opacity(0.78), location: 1.0),
+                    .init(color: Color.black.opacity(0.5), location: 0.7),
+                    .init(color: Color.black.opacity(0.8), location: 1.0),
                 ],
                 startPoint: .top, endPoint: .bottom)
                 .accessibilityHidden(true)
             contenido
                 .padding(TokensEspaciado.e16)
                 .frame(maxWidth: .infinity, alignment: .leading)
+                // Una sombra suave detrás de las letras: el rosa de "días" y los
+                // textos chicos se leen aunque caigan sobre una parte clara.
+                .shadow(color: Color.black.opacity(0.55), radius: TokensEspaciado.e6, x: 0, y: 1)
         }
         .frame(maxWidth: .infinity, minHeight: alto, alignment: .bottomLeading)
         .clipShape(RoundedRectangle(cornerRadius: TokensRadio.cardDestacada, style: .continuous))

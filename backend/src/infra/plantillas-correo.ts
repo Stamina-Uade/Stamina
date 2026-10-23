@@ -300,7 +300,7 @@ export interface AvisoDeAcceso {
   nombre: string | null;
   idioma: IdiomaDeCorreo;
   ip: string;
-  /** "Ciudad, País". Hoy siempre null: ver dominios/auth/dispositivos.ts. */
+  /** "Ciudad, País", de los headers de Cloudflare (infra/ubicacion.ts). */
   ubicacion?: string | null;
   /** "iPhone 16 · iOS 26.5" */
   dispositivo: string | null;

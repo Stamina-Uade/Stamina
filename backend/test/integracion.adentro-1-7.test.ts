@@ -39,6 +39,9 @@ const PASSWORD = "Caballo-bateria-grapa-9";
 
 before(async () => {
   if (!HAY_SERVICIOS) return;
+  // Detrás de un proxy de confianza, como en el servidor: si no, los headers de
+  // ubicación de Cloudflare no se leen (infra/ubicacion.ts).
+  process.env["TRUST_PROXY"] = "true";
   const config = cargarConfig();
   db = crearDb(config);
   cache = crearCache(config);
@@ -117,7 +120,8 @@ const PERFIL = {
   training_days: [1, 2, 3, 4, 5, 6, 7].map((weekday) => ({ weekday, minute_of_day: 1110 })),
 };
 
-async function registrar(device: object | undefined = IPHONE, email = nuevoEmail()) {
+/** `null`: un alta sin `device` (pasar `undefined` cae en el default). */
+async function registrar(device: object | null = IPHONE, email = nuevoEmail()) {
   assert.equal((await pedir("POST", "/v1/auth/register", { email })).status, 202);
   const v = await pedir("POST", "/v1/auth/register/verify", { email, code: ultimoCodigo(email) });
   assert.equal(v.status, 200, JSON.stringify(v.json));
@@ -126,7 +130,7 @@ async function registrar(device: object | undefined = IPHONE, email = nuevoEmail
     password: PASSWORD,
     profile: PERFIL,
     legal: { version: versionLegal(), accepted: true },
-    ...(device === undefined ? {} : { device }),
+    ...(device === null ? {} : { device }),
   });
   assert.equal(r.status, 201, JSON.stringify(r.json));
   return { email, sesion: r.json.data as { access_token: string; user_id: string } };
@@ -162,9 +166,32 @@ describe("nuevo inicio de sesión desde un dispositivo nuevo (1.7.0)", { skip: S
   });
 
   test("sin device (un cliente que no lo manda) no se sabe si es nuevo y no avisa", async () => {
-    const { email } = await registrar(undefined);
+    const { email } = await registrar(null);
     assert.equal((await pedir("POST", "/v1/auth/login", { email, password: PASSWORD })).status, 200);
     assert.equal(avisosA(email).length, 0);
+  });
+
+  test("una cuenta sin dispositivos anotados (de antes de 1.7.0): el primero entra callado, el segundo avisa", async () => {
+    const { email } = await registrar(null);
+    const suTelefono = { id: `inst-${randomUUID()}`, model: "iPhone 13", os: "iOS 26.5" };
+    assert.equal((await pedir("POST", "/v1/auth/login", { email, password: PASSWORD, device: suTelefono })).status, 200);
+    assert.equal(avisosA(email).length, 0, "la primera entrada con la app nueva no es un dispositivo extraño");
+
+    const otro = { id: `inst-${randomUUID()}`, model: "Pixel 9", os: "Android 16" };
+    assert.equal((await pedir("POST", "/v1/auth/login", { email, password: PASSWORD, device: otro })).status, 200);
+    assert.equal(avisosA(email).length, 1);
+    assert.equal(avisosA(email)[0]!.aviso.dispositivo, "Pixel 9 · Android 16");
+  });
+
+  test("la ubicación sale de los headers de Cloudflare, en el idioma del correo", async () => {
+    const { email } = await registrar();
+    const otro = { id: `inst-${randomUUID()}`, model: "iPad Air", os: "iPadOS 26.1" };
+    const r = await pedir("POST", "/v1/auth/login", { email, password: PASSWORD, device: otro }, undefined, {
+      "cf-ipcountry": "AR",
+      "cf-ipcity": "C%C3%B3rdoba",
+    });
+    assert.equal(r.status, 200, JSON.stringify(r.json));
+    assert.equal(avisosA(email)[0]!.aviso.ubicacion, "Córdoba, Argentina");
   });
 
   test("entrar con Google ya vinculado desde un dispositivo nuevo avisa; vincular no manda los dos correos", async () => {

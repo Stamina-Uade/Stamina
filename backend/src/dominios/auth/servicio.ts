@@ -119,6 +119,8 @@ function clavePaso(token: string): string {
 export interface Acceso {
   ip: string;
   idioma: IdiomaDeCorreo;
+  /** "Ciudad, País", de los headers de Cloudflare (infra/ubicacion.ts), o null. */
+  ubicacion?: string | null;
   dispositivo?: Dispositivo | null;
 }
 
@@ -150,6 +152,7 @@ export function crearServicioAuth(ctx: Contexto) {
       nombre: await nombreDePila(usuarioId),
       idioma: acceso?.idioma ?? "es",
       ip: acceso?.ip ?? "",
+      ubicacion: acceso?.ubicacion ?? null,
       dispositivo: dispositivoLegible(acceso?.dispositivo),
     };
   }
@@ -161,12 +164,19 @@ export function crearServicioAuth(ctx: Contexto) {
    * vínculo con Google o Apple (su propio correo ya dice desde dónde) ni la
    * recuperación (el código acaba de llegar a ese correo). Si el correo falla, la
    * entrada vale igual; si falla la base, falla fuerte (AGENTS.md §11).
+   *
+   * Tampoco avisa el PRIMER dispositivo de una cuenta que no conocía ninguno: son
+   * las cuentas de antes de 1.7.0 (o de una app vieja que no manda `device`), y
+   * su primera entrada con la app nueva es casi siempre la persona en su propio
+   * teléfono. Es lo mismo que pasaba antes de que existiera el aviso; desde el
+   * segundo dispositivo, avisa. Una cuenta nueva nunca cae acá: el dispositivo
+   * del alta ya queda anotado.
    */
   async function alEntrar(u: { id: string; email: string }, acceso: Acceso | undefined, avisar: boolean): Promise<void> {
     const d = acceso?.dispositivo;
     if (d === undefined || d === null) return;
-    const nuevo = await dispositivos.registrar(u.id, d, ctx.ahoraMs());
-    if (!nuevo || !avisar || ctx.correo.avisarNuevoInicio === undefined) return;
+    const { nuevo, primero } = await dispositivos.registrar(u.id, d, ctx.ahoraMs());
+    if (!nuevo || primero || !avisar || ctx.correo.avisarNuevoInicio === undefined) return;
     try { await ctx.correo.avisarNuevoInicio(u.email, await datosDeAviso(u.id, acceso)); } catch { /* no bloquea */ }
   }
 

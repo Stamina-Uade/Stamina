@@ -264,8 +264,8 @@ Rama `cambios-adentro-ios` (sale de `cambios-entrada-ios`).
   código, centrado y de todo el ancho; el vencimiento va en el párrafo. Nuevo **"Nuevo inicio de sesión"**
   cuando se entra desde un dispositivo que la cuenta nunca vio (no al registrarse, no al vincular, no al
   recuperar). La vinculación con Google/Apple lleva el mismo recuadro. Se eliminó "Cambiaste la
-  contraseña". **Sin ubicación**: sacarla de la IP pide una base de GeoIP en el servidor o los headers de
-  ubicación de Cloudflare (y un ajuste en `config.ts`); queda para decidir.
+  contraseña". La **ubicación** ("Córdoba, Argentina") sale de los headers de Cloudflare
+  (`infra/ubicacion.ts`), sólo detrás de un proxy de confianza (`TRUST_PROXY`).
 - **iPhone**: barra fija en las cuatro pestañas (`PantallaDePestana`; la línea de abajo usa
   `onScrollGeometryChange` en iOS 18 y una marca de alto cero antes), hojas a la medida del contenido
   (`HojaAMedida`). Inicio, Plan, Historial y Perfil como el lienzo "Propuesta · menos cosas a la vista".
@@ -288,3 +288,14 @@ Rama `cambios-adentro-ios` (sale de `cambios-entrada-ios`).
   vivo y la isla en un iPhone de verdad.
 - Probar en un **reloj de verdad** la pregunta del inicio, los avisos y el deslizar a los controles.
 - Android todavía no tiene el botón "Lo hice: marcar como hecho" (sólo el método en `ApiTrainer`).
+- **Cloudflare**: prender la regla administrada "Add visitor location headers" (Rules › Transform Rules ›
+  Managed Transforms) para que llegue la ciudad. Sin ella, el correo sólo dice el país.
+
+### Arreglos de la revisión (23-10)
+
+- **Cuentas de antes de 1.7.0**: no tienen dispositivos anotados, y su primera entrada después del deploy
+  (desde su propio teléfono) iba a mandar "Nuevo inicio de sesión". Ahora el primer dispositivo de una cuenta
+  que no conocía ninguno entra callado; desde el segundo, avisa (`dispositivos.ts`, `alEntrar`).
+- **Ubicación en los correos de acceso**, de los headers de Cloudflare (ver arriba).
+- **Tarjeta del objetivo**: el velo de arriba pasa de 0,15 a 0,6 y el texto lleva una sombra suave; "Maratón ·
+  Mar, 9 feb" y "días" se leen sobre cualquier foto (`TarjetaHeroe`).
