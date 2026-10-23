@@ -341,7 +341,7 @@ paths:
                 social_token: { type: string, minLength: 1, maxLength: 4096 }
                 profile: { $ref: '#/components/schemas/PerfilEntrada' }
                 legal: { $ref: '#/components/schemas/AceptacionLegal' }
-                device: { $ref: '#/components/schemas/Dispositivo' }
+                device: { $ref: '#/components/schemas/DispositivoDeEntrada' }
       responses:
         '201':
           description: Cuenta creada y sesión abierta.
@@ -404,7 +404,7 @@ paths:
                 provider: { type: string, enum: [google, apple] }
                 id_token: { type: string, minLength: 1, maxLength: 8192 }
                 nonce: { type: string, minLength: 16, maxLength: 128 }
-                device: { $ref: '#/components/schemas/Dispositivo' }
+                device: { $ref: '#/components/schemas/DispositivoDeEntrada' }
       responses:
         '200':
           description: Entró, o hace falta completar el alta.
@@ -457,7 +457,7 @@ paths:
               properties:
                 link_token: { type: string, minLength: 1, maxLength: 4096 }
                 password: { type: string, minLength: 1, maxLength: 200 }
-                device: { $ref: '#/components/schemas/Dispositivo' }
+                device: { $ref: '#/components/schemas/DispositivoDeEntrada' }
       responses:
         '200':
           description: Vinculada y sesión abierta.
@@ -495,7 +495,7 @@ paths:
               additionalProperties: false
               properties:
                 reactivation_token: { type: string, minLength: 1, maxLength: 4096 }
-                device: { $ref: '#/components/schemas/Dispositivo' }
+                device: { $ref: '#/components/schemas/DispositivoDeEntrada' }
       responses:
         '200':
           description: Cuenta activa y sesión abierta.
@@ -556,7 +556,7 @@ paths:
               properties:
                 email: { $ref: '#/components/schemas/Email' }
                 password: { type: string, minLength: 1, maxLength: 200 }
-                device: { $ref: '#/components/schemas/Dispositivo' }
+                device: { $ref: '#/components/schemas/DispositivoDeEntrada' }
       responses:
         '200':
           description: Sesión abierta.
@@ -749,7 +749,7 @@ paths:
               properties:
                 reset_token: { type: string }
                 password: { $ref: '#/components/schemas/Password' }
-                device: { $ref: '#/components/schemas/Dispositivo' }
+                device: { $ref: '#/components/schemas/DispositivoDeEntrada' }
       responses:
         '200':
           description: Contraseña cambiada y sesión nueva abierta.
@@ -1670,7 +1670,7 @@ components:
       enum: [android, ios, wear, watchos]
       description: Los cuatro clientes de AGENTS.md §1.3. Cada uno versiona por separado.
 
-    Dispositivo:
+    DispositivoDeEntrada:
       type: object
       required: [id]
       additionalProperties: false

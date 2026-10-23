@@ -12,7 +12,7 @@
 import type { Db } from "../../infra/db.js";
 import { hashearToken } from "../../infra/cripto.js";
 
-/** El `Dispositivo` del contrato. */
+/** El `DispositivoDeEntrada` del contrato. */
 export interface Dispositivo {
   id: string;
   model?: string;

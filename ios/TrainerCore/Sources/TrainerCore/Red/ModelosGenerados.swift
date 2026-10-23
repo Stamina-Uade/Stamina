@@ -46,7 +46,7 @@ public enum Plataforma: String, Codable, CaseIterable, Sendable {
 }
 
 /// 1.7.0. Desde qué dispositivo se entra o se registra la cuenta, para el aviso de inicio de sesión desde un dispositivo nuevo. `id` identifica la INSTALACIÓN: un valor aleatorio que la app genera una vez y guarda en el llavero o el Keystore. El servidor guarda su hash, nunca el valor. `model` y `os` son para leer en el correo.
-public struct Dispositivo: Codable, Equatable, Sendable {
+public struct DispositivoDeEntrada: Codable, Equatable, Sendable {
     public let id: String
     public let model: String?
     public let os: String?
