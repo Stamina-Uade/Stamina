@@ -222,6 +222,20 @@ class ApiDelPlanYElGimnasioTest {
         assertNull(pedido.cuerpo)
     }
 
+    @Test
+    fun `marcar un dia como hecho es un PUT con el instante que contesta 204`() = runBlocking {
+        val (api, servidor) = conSesion { RespuestaHttp(204, "") }
+        api.restaurarSesion()
+
+        assertEquals(Resultado.Ok(Unit), api.marcarDiaHecho(1_789_033_542_979, clave = "clave-1"))
+
+        val pedido = servidor.pedidos.single()
+        assertEquals("PUT", pedido.metodo)
+        assertEquals("/plan/days/done", pedido.ruta)
+        val cuerpo = Json.parseToJsonElement(requireNotNull(pedido.cuerpo)).jsonObject
+        assertEquals(setOf("date_ms"), cuerpo.keys)
+    }
+
     // ------------------------------------------------------------- gimnasio --
 
     @Test

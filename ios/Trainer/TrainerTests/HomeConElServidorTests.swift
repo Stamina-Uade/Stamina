@@ -87,7 +87,6 @@ struct HomeConElServidorTests {
         #expect(estado.rutina.isEmpty)
         #expect(estado.objetivoNutricional == nil)
         #expect(estado.comidas.isEmpty)
-        #expect(estado.agenda.isEmpty)
         #expect(estado.contenido.plan.problema == .sinRed, "la pantalla puede decir por qué no hay nada")
         #expect(estado.contenido.nutricion.problema == .sinRed)
         #expect(estado.repositorio.platosFrecuentes().isEmpty)

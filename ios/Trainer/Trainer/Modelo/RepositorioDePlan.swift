@@ -272,7 +272,7 @@ extension RepositorioProvisional {
                 ("Descanso", "Fuerza opcional · 30 min"), ("Fondo largo · 12 km", "Zona 2 · 650 ml/h · 1 gel"),
                 ("Descanso", "Movilidad y elongación"), ("Ritmo · 8 km", "5:00 /km · 07:00"),
                 ("Suave · 6 km", "Zona 1-2 · sin geles")]),
-            semana(6, hechos: 48_000, previstos: 62_000, desde: 25, mes: "ago", diasHechos: 3, hoy: 3, filas: [
+            semana(6, hechos: 42_000, previstos: 62_000, desde: 25, mes: "ago", diasHechos: 3, hoy: 3, sinHacer: [0], filas: [
                 ("Recuperación · 6 km", "Zona 1 · 38 min"), ("Series · 8×400 m", "7 km totales · 1 gel"),
                 ("Descanso", "Fuerza opcional · 30 min"), ("Fondo largo · 14 km", "Zona 2 · 750 ml/h · 2 geles"),
                 ("Descanso", "Movilidad y elongación"), ("Ritmo · 10 km", "4:55 /km · 07:00"),
@@ -359,16 +359,23 @@ extension RepositorioProvisional {
     }
 
     private static func semana(_ numero: Int, hechos: Int, previstos: Int, desde: Int, mes: String,
-                               diasHechos: Int, hoy: Int, filas: [(String, String)]) -> SemanaDelPlan {
+                               diasHechos: Int, hoy: Int, sinHacer: Set<Int> = [],
+                               filas: [(String, String)]) -> SemanaDelPlan {
         SemanaDelPlan(
             numero: numero, metrosHechos: hechos, metrosPrevistos: previstos,
             dias: filas.enumerated().map { i, fila in
-                DiaDelPlan(diaDeLaSemana: i + 1, numeroDeDia: desde + i, mesCorto: mes,
-                           titulo: fila.0, detalle: fila.1,
-                           hecho: i < diasHechos, esHoy: i == hoy,
-                           // Un descanso no se abre, y lo ya hecho tampoco.
-                           abrible: !fila.0.hasPrefix("Descanso") && i >= diasHechos)
+                let descanso = fila.0.hasPrefix("Descanso")
+                let perdido = sinHacer.contains(i) && !descanso
+                return DiaDelPlan(diaDeLaSemana: i + 1, numeroDeDia: desde + i, mesCorto: mes,
+                                  titulo: fila.0, detalle: fila.1,
+                                  hecho: i < diasHechos && !descanso && !perdido, esHoy: i == hoy,
+                                  // Un descanso no se abre, y lo ya hecho tampoco.
+                                  abrible: !descanso && i >= diasHechos,
+                                  esDescanso: descanso,
+                                  // Como el lunes del lienzo: tocaba correr y no se registró.
+                                  sinHacer: perdido)
             },
-            enCurso: hoy >= 0)
+            enCurso: hoy >= 0,
+            etapa: numero <= 5 ? Textos.planPhaseBase : Textos.planPhaseBuild)
     }
 }

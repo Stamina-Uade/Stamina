@@ -18,7 +18,7 @@ import type { Db } from "../src/infra/db.js";
 import type { FastifyRequest } from "fastify";
 import { idiomaDeCorreo } from "../src/infra/idioma.js";
 import {
-  correoDeCambioDePassword, correoDeCodigo, correoDeIntentoDeRegistro, correoDeVinculacion,
+  correoDeCodigo, correoDeIntentoDeRegistro, correoDeNuevoInicio, correoDeVinculacion, saludo,
 } from "../src/infra/plantillas-correo.js";
 
 describe("el sobre de error con details (1.6.0)", () => {
@@ -66,7 +66,7 @@ function dbFalsa(usuario: object | null): Db {
   return db;
 }
 
-function armar(usuario: object | null = null, opciones: { avisoFalla?: boolean } = {}) {
+function armar(usuario: object | null = null) {
   let ahora = 1_800_000_000_000;
   const codigos: string[] = [];
   const avisos: Array<{ destino: string; idioma: string }> = [];
@@ -78,9 +78,8 @@ function armar(usuario: object | null = null, opciones: { avisoFalla?: boolean }
       async enviarCodigo(_d, codigo) { codigos.push(codigo); },
       async avisarIntentoDeRegistro() {},
       async avisarVinculacion() {},
-      async avisarCambioDePassword(destino, idioma) {
-        avisos.push({ destino, idioma });
-        if (opciones.avisoFalla === true) throw new Error("SMTP caído");
+      async avisarNuevoInicio(destino, aviso) {
+        avisos.push({ destino, idioma: aviso.idioma });
       },
     },
     ahoraMs: () => ahora,
@@ -289,31 +288,20 @@ describe("desactivar, borrar con gracia y reactivar (1.6.0)", () => {
   });
 });
 
-describe("cambiar la contraseña avisa siempre, en el idioma del pedido (1.6.0)", () => {
+describe("cambiar la contraseña ya no avisa por correo (1.7.0)", () => {
   const FILA = {
     id: "u-1", usuario_id: "u-1", familia_id: "f-1", vence_en_ms: 1_900_000_000_000,
     email: "a@b.co", password_hash: "x", creado_en_ms: 0, actualizado_en_ms: 0,
     desactivada_en_ms: null, borrar_en_ms: null,
   };
 
-  async function resetear(opciones: { avisoFalla?: boolean } = {}) {
-    const a = armar(FILA, opciones);
+  test("recuperar devuelve la sesión y no manda ningún aviso", async () => {
+    const a = armar(FILA);
     await a.auth.recuperacionInicio("a@b.co");
     const { reset_token } = await a.auth.recuperacionVerificar("a@b.co", a.codigos.at(-1)!);
-    const sesion = await a.auth.recuperacionAplicar(reset_token, "Caballo-bateria-9", "fr");
-    return { ...a, sesion };
-  }
-
-  test("el aviso sale en el idioma pedido", async () => {
-    const { avisos, sesion } = await resetear();
+    const sesion = await a.auth.recuperacionAplicar(reset_token, "Caballo-bateria-9", { ip: "10.0.0.1", idioma: "fr" });
     assert.equal(sesion.user_id, "u-1");
-    assert.deepEqual(avisos, [{ destino: "a@b.co", idioma: "fr" }]);
-  });
-
-  test("si el correo falla, el cambio vale igual y vuelve la sesión", async () => {
-    const { avisos, sesion } = await resetear({ avisoFalla: true });
-    assert.equal(avisos.length, 1);
-    assert.equal(sesion.user_id, "u-1");
+    assert.deepEqual(a.avisos, []);
   });
 
   test("el idioma sale del Accept-Language: inglés, francés, y si no, español", () => {
@@ -325,16 +313,78 @@ describe("cambiar la contraseña avisa siempre, en el idioma del pedido (1.6.0)"
     assert.equal(idiomaDeCorreo(pedido()), "es");
   });
 
-  test("el texto de cada idioma, con el lang del HTML y el texto plano sin entidades", () => {
-    const es = correoDeCambioDePassword({ destino: "a@b.co", idioma: "es", ahoraMs: 0 });
-    assert.ok(es.texto.includes("Cambiaste la contraseña de tu cuenta de Stamina. Si no fuiste tú, escríbenos."));
+  test("cada correo sale en su idioma, con el lang del HTML y el texto plano sin entidades", () => {
+    const aviso = { nombre: null, ip: "203.0.113.7", dispositivo: "iPhone 16 · iOS 26.5", ahoraMs: 0 };
+    const es = correoDeNuevoInicio({ ...aviso, idioma: "es" });
     assert.ok(es.html.includes('<html lang="es">'));
-    const en = correoDeCambioDePassword({ destino: "a@b.co", idioma: "en", ahoraMs: 0 });
-    assert.ok(en.texto.includes("If it wasn't you, write to us."), en.texto);
+    const en = correoDeNuevoInicio({ ...aviso, idioma: "en" });
+    assert.equal(en.asunto, "New sign-in to your Stamina account");
+    assert.ok(en.texto.includes("If it wasn't you"), en.texto);
     assert.ok(en.html.includes('<html lang="en">') && en.html.includes("does not receive replies"));
-    const fr = correoDeCambioDePassword({ destino: "a@b.co", idioma: "fr", ahoraMs: 0 });
-    assert.ok(fr.texto.includes("Tu as changé le mot de passe de ton compte Stamina. Si ce n'était pas toi, écris-nous."), fr.texto);
+    const fr = correoDeCodigo({ codigo: "K7Q2MB", proposito: "registro", nombre: "Iván", idioma: "fr", vidaMin: 15 });
+    assert.equal(fr.asunto, "K7Q2MB est ton code de vérification Stamina");
+    assert.ok(fr.texto.startsWith("Bonjour Iván,"), fr.texto);
+    assert.ok(fr.texto.includes("Tu y es presque. Saisis ce code dans l'app"), fr.texto);
     assert.ok(!/\bvous\b/i.test(fr.texto + fr.html), "en francés se tutea");
+  });
+});
+
+describe("los correos de la 1.7.0", () => {
+  const aviso = { nombre: "Iván", idioma: "es" as const, ip: "203.0.113.7", dispositivo: "iPhone 16 · iOS 26.5", ahoraMs: 0 };
+
+  test("todos empiezan con Hola y el nombre, o con ¡Hola! sin nombre", () => {
+    assert.equal(saludo("Iván"), "Hola Iván,");
+    assert.equal(saludo(null), "¡Hola!");
+    assert.equal(saludo("Emma", "en"), "Hi Emma,");
+    assert.equal(saludo(null, "fr"), "Bonjour !");
+    for (const c of [
+      correoDeCodigo({ codigo: "K7Q2MB", proposito: "registro", nombre: "Iván", vidaMin: 15 }),
+      correoDeCodigo({ codigo: "K7Q2MB", proposito: "recuperacion", nombre: "Iván", vidaMin: 15 }),
+      correoDeNuevoInicio(aviso),
+      correoDeVinculacion({ ...aviso, proveedor: "google" }),
+    ]) assert.ok(c.texto.startsWith("Hola Iván,"), c.texto);
+  });
+
+  test("el código: asunto nuevo, sólo el código en el recuadro y el vencimiento en el párrafo", () => {
+    const alta = correoDeCodigo({ codigo: "K7Q2MB", proposito: "registro", nombre: null, vidaMin: 15 });
+    assert.equal(alta.asunto, "K7Q2MB es tu código de verificación de Stamina");
+    assert.ok(alta.texto.includes("crear tu cuenta de Stamina. Vence en 15 minutos."), alta.texto);
+    for (const fuera of ["Tu código de verificación", "Correo:", "Vence:", "Pedido:"]) {
+      assert.ok(!alta.texto.includes(fuera), `no va «${fuera}»`);
+    }
+    assert.ok(alta.html.includes('align="center"') && alta.html.includes("K7Q2MB"));
+    assert.ok(alta.texto.includes("Si no fuiste tú, puedes ignorar este mensaje"));
+    assert.ok(alta.texto.includes("Nunca te vamos a pedir este código"));
+    const clave = correoDeCodigo({ codigo: "K7Q2MB", proposito: "recuperacion", nombre: null, vidaMin: 15 });
+    assert.equal(clave.asunto, "K7Q2MB es tu código para cambiar la contraseña de Stamina");
+    assert.ok(!clave.texto.includes("Tu código para cambiar la contraseña"));
+  });
+
+  test("nuevo inicio de sesión: el recuadro con IP, dispositivo y hora, y sin ubicación si no se sabe", () => {
+    const c = correoDeNuevoInicio(aviso);
+    assert.equal(c.asunto, "Nuevo inicio de sesión en tu cuenta de Stamina");
+    assert.ok(c.texto.includes("Detectamos un inicio de sesión en tu cuenta de Stamina desde un dispositivo nuevo."));
+    for (const fila of ["Nuevo inicio de sesión", "Dirección IP: 203.0.113.7", "Dispositivo: iPhone 16 · iOS 26.5", "Hora: "]) {
+      assert.ok(c.texto.includes(fila), fila);
+    }
+    assert.ok(!c.texto.includes("Ubicación"));
+    assert.ok(c.texto.includes("Si fuiste tú, no hace falta que hagas nada."));
+    assert.ok(c.texto.includes("al terminar, te ofrece cerrar las otras sesiones."));
+    assert.ok(correoDeNuevoInicio({ ...aviso, ubicacion: "Rosario, Argentina" }).texto.includes("Ubicación: Rosario, Argentina"));
+  });
+
+  test("vinculación: el mismo recuadro, titulado con el proveedor", () => {
+    const g = correoDeVinculacion({ ...aviso, proveedor: "google" });
+    assert.equal(g.asunto, "Tu cuenta de Stamina se conectó con Google");
+    assert.ok(g.texto.includes("Tu cuenta de Stamina se conectó con Google con éxito."));
+    assert.ok(g.texto.includes("Cuenta conectada con Google") && g.texto.includes("Dirección IP: 203.0.113.7"));
+    assert.ok(g.texto.includes("cambia ya la contraseña de tu cuenta de Google y la de Stamina"));
+    assert.equal(correoDeVinculacion({ ...aviso, proveedor: "apple" }).asunto, "Tu cuenta de Stamina se conectó con Apple");
+  });
+
+  test("el nombre se escapa en el HTML", () => {
+    const c = correoDeNuevoInicio({ ...aviso, nombre: "<b>Iván</b>" });
+    assert.ok(!c.html.includes("<b>Iván</b>"));
   });
 });
 
@@ -345,12 +395,12 @@ describe("los correos en español van de tú (1.6.0)", () => {
 
   test("ningún correo en español vosea", () => {
     const correos = [
-      correoDeCodigo({ codigo: "K7P4XM", proposito: "registro", destino: "a@b.co", nombre: "Emma", ahoraMs: 0, vidaMin: 15 }),
-      correoDeCodigo({ codigo: "K7P4XM", proposito: "recuperacion", destino: "a@b.co", nombre: null, ahoraMs: 0, vidaMin: 15 }),
+      correoDeCodigo({ codigo: "K7P4XM", proposito: "registro", nombre: "Emma", vidaMin: 15 }),
+      correoDeCodigo({ codigo: "K7P4XM", proposito: "recuperacion", nombre: null, vidaMin: 15 }),
       correoDeIntentoDeRegistro({ destino: "a@b.co", ahoraMs: 0 }),
-      correoDeVinculacion({ destino: "a@b.co", proveedor: "google", ahoraMs: 0 }),
-      correoDeVinculacion({ destino: "a@b.co", proveedor: "apple", ahoraMs: 0 }),
-      correoDeCambioDePassword({ destino: "a@b.co", idioma: "es", ahoraMs: 0 }),
+      correoDeVinculacion({ nombre: null, idioma: "es", ip: "203.0.113.7", dispositivo: null, ahoraMs: 0, proveedor: "google" }),
+      correoDeVinculacion({ nombre: null, idioma: "es", ip: "203.0.113.7", dispositivo: null, ahoraMs: 0, proveedor: "apple" }),
+      correoDeNuevoInicio({ nombre: null, idioma: "es", ip: "203.0.113.7", dispositivo: null, ahoraMs: 0 }),
     ];
     for (const c of correos) {
       for (const parte of [c.asunto, c.texto, c.html]) {
@@ -360,6 +410,6 @@ describe("los correos en español van de tú (1.6.0)", () => {
     }
     assert.ok(correos[0]!.texto.includes("Ingresa este código"));
     assert.ok(correos[0]!.texto.includes("Si no fuiste tú, puedes ignorar"));
-    assert.ok(correos[3]!.asunto.startsWith("Ahora entras a Stamina"));
+    assert.ok(correos[3]!.asunto.startsWith("Tu cuenta de Stamina se conectó"));
   });
 });

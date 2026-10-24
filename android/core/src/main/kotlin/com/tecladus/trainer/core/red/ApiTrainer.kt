@@ -274,6 +274,21 @@ class ApiTrainer(private val cliente: ClienteApi) {
         cliente.obtener("/plans", kotlinx.serialization.builtins.ListSerializer(PlanDeObjetivo.serializer()))
 
     /**
+     * "Lo hice: marcar como hecho" un día que tocaba entrenar y pasó sin una salida
+     * registrada: `PUT /plan/days/done` (contrato 1.7.0). No es una actividad: el día
+     * sale `done` y cuenta para su semana, sin kilómetros, y la racha no vuelve. Sólo
+     * días anteriores a hoy; si no, `bad_request`.
+     *
+     * @param instanteMs cualquier instante de ese día, como en [rutinaDelDia].
+     */
+    suspend fun marcarDiaHecho(instanteMs: Long, clave: String? = null): Resultado<Unit> =
+        cliente.reemplazarSinRespuesta(
+            "/plan/days/done",
+            json.encodeToString(PedidoDiaHecho.serializer(), PedidoDiaHecho(instanteMs)),
+            clave,
+        )
+
+    /**
      * La rutina de gimnasio de un día: `GET /plan/routine`.
      *
      * @param instanteMs cualquier instante del día que se pide. El SERVIDOR lo lleva al
@@ -384,6 +399,10 @@ class ApiTrainer(private val cliente: ClienteApi) {
 /** El cuerpo de `POST /gym/sessions/{id}/sets`. El contrato no admite nada más que `sets`. */
 @Serializable
 private data class PedidoSeries(val sets: List<SerieDeGimnasioEntrada>)
+
+/** El cuerpo de `PUT /plan/days/done` (1.7.0). */
+@Serializable
+private data class PedidoDiaHecho(@kotlinx.serialization.SerialName("date_ms") val dateMs: Long)
 
 @Serializable
 private data class PedidoLogin(val email: String, val password: String)

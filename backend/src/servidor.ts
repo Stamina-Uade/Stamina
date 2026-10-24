@@ -19,6 +19,7 @@ import { rutasActividades } from "./dominios/actividades/rutas.js";
 import { rutasNutricion } from "./dominios/nutricion/rutas.js";
 import { rutasCuenta } from "./dominios/cuenta/rutas.js";
 import { rutasPasos } from "./dominios/pasos/rutas.js";
+import { confianzaDeProxy } from "./infra/cloudflare.js";
 
 /** Tope de cuerpo. §12: todo lo que viene del body tiene tope server-side. */
 const MAX_BODY_BYTES = 64 * 1024;
@@ -26,7 +27,8 @@ const MAX_BODY_BYTES = 64 * 1024;
 export async function crearServidor(ctx: Contexto): Promise<FastifyInstance> {
   const app = Fastify({
     logger: opcionesLogger(ctx.config.nivelLog, ctx.config.entorno),
-    trustProxy: ctx.config.trustProxy,
+    // La lista de TRUST_PROXY más los rangos de Cloudflare (infra/cloudflare.ts).
+    trustProxy: confianzaDeProxy(ctx.config.trustProxy),
     bodyLimit: MAX_BODY_BYTES,
     // Sin esto, un cuerpo con `__proto__` puede contaminar el prototipo.
     onProtoPoisoning: "remove",

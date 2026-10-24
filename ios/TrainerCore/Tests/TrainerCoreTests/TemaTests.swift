@@ -60,3 +60,28 @@ final class TemaTests: XCTestCase {
         XCTAssertEqual(MarcaApp.recursoLogo, "AppIcon")
     }
 }
+
+// MARK: - Encuadre de la foto de la tarjeta héroe (2026-10-23)
+
+/// El recorte de la tarjeta héroe se centra en la persona sin salirse de la foto.
+final class EncuadreDeFotoTests: XCTestCase {
+    private let foto = CGSize(width: 1536, height: 2752)
+    private let marco = CGSize(width: 361, height: 224)
+
+    func testLlenaElAnchoYCentraElPuntoDeEncuadre() {
+        let r = EncuadreDeFoto.recorte(foto: foto, marco: marco, encuadre: UnitPoint(x: 0.5, y: 0.5))
+        XCTAssertEqual(r.width, 361, accuracy: 0.01)
+        XCTAssertEqual(r.minY + 0.5 * r.height, 112, accuracy: 0.01, "la persona queda en la mitad del marco")
+    }
+
+    func testCercaDelBordeNoDejaHuecos() {
+        let arriba = EncuadreDeFoto.recorte(foto: foto, marco: marco, encuadre: UnitPoint(x: 0.5, y: 0.0))
+        XCTAssertEqual(arriba.minY, 0)
+        let abajo = EncuadreDeFoto.recorte(foto: foto, marco: marco, encuadre: UnitPoint(x: 0.5, y: 1.0))
+        XCTAssertEqual(abajo.maxY, marco.height, accuracy: 0.01)
+    }
+
+    func testSinFotoConocidaQuedaElMarco() {
+        XCTAssertEqual(EncuadreDeFoto.recorte(foto: nil, marco: marco, encuadre: .center), CGRect(origin: .zero, size: marco))
+    }
+}

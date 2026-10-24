@@ -38,7 +38,7 @@ let ctx: Contexto;
 const enviados = {
   codigos: [] as Array<{ destino: string; codigo: string }>,
   vinculaciones: [] as Array<{ destino: string; proveedor: string }>,
-  cambiosDePassword: [] as Array<{ destino: string; idioma: string }>,
+  nuevosInicios: [] as Array<{ destino: string; idioma: string }>,
 };
 
 const PASSWORD = "Caballo-bateria-grapa-9";
@@ -63,8 +63,8 @@ before(async () => {
       async avisarVinculacion(destino, proveedor) {
         enviados.vinculaciones.push({ destino, proveedor });
       },
-      async avisarCambioDePassword(destino, idioma) {
-        enviados.cambiosDePassword.push({ destino, idioma });
+      async avisarNuevoInicio(destino, aviso) {
+        enviados.nuevosInicios.push({ destino, idioma: aviso.idioma });
       },
     },
     // El id_token de prueba es la identidad en JSON. El servidor igual exige que
@@ -435,7 +435,7 @@ describe("vincular Google o Apple a una cuenta con contraseña", { skip: SIN_SER
 });
 
 describe("sesiones al cambiar la contraseña", { skip: SIN_SERVICIOS }, () => {
-  test("recuperar ya NO cierra las otras sesiones, y avisa por correo en el idioma del pedido", async () => {
+  test("recuperar ya NO cierra las otras sesiones, y (1.7.0) no manda ningún aviso", async () => {
     const { email, sesion } = await registrar();
     const otra = await pedir("POST", "/v1/auth/login", { email, password: PASSWORD });
     const nueva = "Clave-nueva-de-prueba-4";
@@ -444,7 +444,7 @@ describe("sesiones al cambiar la contraseña", { skip: SIN_SERVICIOS }, () => {
     assert.equal((await pedir("GET", "/v1/me", undefined, sesion.access_token)).status, 200);
     assert.equal((await pedir("GET", "/v1/me", undefined, otra.json.data.access_token)).status, 200);
     assert.equal((await pedir("GET", "/v1/me", undefined, r.json.data.access_token)).status, 200);
-    assert.deepEqual(enviados.cambiosDePassword.filter((x) => x.destino === email), [{ destino: email, idioma: "fr" }]);
+    assert.deepEqual(enviados.nuevosInicios.filter((x) => x.destino === email), []);
     assert.equal((await pedir("POST", "/v1/auth/login", { email, password: PASSWORD })).json.error.code, "wrong_password");
   });
 

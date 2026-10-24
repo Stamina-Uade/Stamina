@@ -1,190 +1,6 @@
 {
   "sourceLanguage" : "en",
   "strings" : {
-    "alert.done" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Done"
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Hecho"
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Terminé"
-          }
-        }
-      }
-    },
-    "alert.gel" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Gel + 300 ml with electrolytes"
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Gel + 300 ml con sales"
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Gel + 300 ml avec électrolytes"
-          }
-        }
-      }
-    },
-    "alert.gel.detail" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "You're at 300 mg of sodium. 40 min of Z2 effort left."
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Vas 300 mg de sodio. Quedan 40 min de esfuerzo en Z2."
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Tu en es à 300 mg de sodium. Encore 40 min d'effort en Z2."
-          }
-        }
-      }
-    },
-    "alert.hydration" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Hydration"
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Hidratación"
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Hydratation"
-          }
-        }
-      }
-    },
-    "alert.minute" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Minute %lld"
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Minuto %lld"
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Minute %lld"
-          }
-        }
-      }
-    },
-    "alert.no_water" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "No water on me"
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Sin agua encima"
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Pas d'eau sur moi"
-          }
-        }
-      }
-    },
-    "alert.ready" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Done"
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Listo"
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Terminé"
-          }
-        }
-      }
-    },
-    "alert.remind_later" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Remind me in 5 min"
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Recordar en 5 min"
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Me le rappeler dans 5 min"
-          }
-        }
-      }
-    },
     "alert.tap_to_continue" : {
       "comment" : "A label displayed in the bottom of the alert that says \"Tap to continue\".",
       "extractionState" : "manual",
@@ -205,52 +21,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Touche pour continuer"
-          }
-        }
-      }
-    },
-    "alert.water" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Drink 200 ml"
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Toma 200 ml"
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Bois 200 ml"
-          }
-        }
-      }
-    },
-    "alert.water.detail" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "You're at %1$@ of %2$@. At 26° you lose more than you feel."
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Vas %1$@ de %2$@. Con 26° pierdes más de lo que sientes."
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Tu en es à %1$@ sur %2$@. À 26°, tu perds plus que tu ne le sens."
           }
         }
       }
@@ -555,7 +325,7 @@
       }
     },
     "common.no" : {
-      "comment" : "A button that skips the hydration/freeze question.",
+      "comment" : "Button: No (for example, not carrying water or gels).",
       "extractionState" : "manual",
       "localizations" : {
         "en" : {
@@ -579,7 +349,7 @@
       }
     },
     "common.start" : {
-      "comment" : "A button that starts the timer.",
+      "comment" : "Button that starts the workout countdown.",
       "extractionState" : "manual",
       "localizations" : {
         "en" : {
@@ -646,7 +416,8 @@
             "value" : "Oui"
           }
         }
-      }
+      },
+      "comment" : "Button: Yes (for example, carrying water or gels)."
     },
     "controls.finish" : {
       "extractionState" : "manual",
@@ -690,29 +461,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Tour"
-          }
-        }
-      }
-    },
-    "controls.lock" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Lock"
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Bloquear"
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Verrouiller"
           }
         }
       }
@@ -782,29 +530,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Réglages"
-          }
-        }
-      }
-    },
-    "controls.title" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Controls"
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Controles"
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Contrôles"
           }
         }
       }
@@ -945,121 +670,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Terminer ?"
-          }
-        }
-      }
-    },
-    "fuel.alert.dismiss" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Tap to dismiss"
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Toca para cerrar"
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Touche pour fermer"
-          }
-        }
-      }
-    },
-    "fuel.alert.gel" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Take a gel"
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Toma un gel"
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Prends un gel"
-          }
-        }
-      }
-    },
-    "fuel.alert.salts" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Consider salt tablets"
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Considera las sales"
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Pense aux comprimés de sel"
-          }
-        }
-      }
-    },
-    "fuel.alert.water" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Drink water"
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Toma agua"
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Bois de l’eau"
-          }
-        }
-      }
-    },
-    "fuel.enable" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Fuel and hydration alerts"
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Avisos de nutrición e hidratación"
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Alertes alimentation et hydratation"
           }
         }
       }
@@ -1208,31 +818,8 @@
         }
       }
     },
-    "fuel.gels" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Gels"
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Geles"
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Gels"
-          }
-        }
-      }
-    },
     "fuel.prompt.gels" : {
-      "comment" : "Pregunta de qué lleva antes de empezar",
+      "comment" : "Row label in \"What are you carrying?\" before a workout: number of energy gels.",
       "extractionState" : "manual",
       "localizations" : {
         "en" : {
@@ -1256,7 +843,7 @@
       }
     },
     "fuel.prompt.question" : {
-      "comment" : "A question that asks the user if they are bringing water or ice.",
+      "comment" : "Asked when starting a workout on the watch, before the countdown: is the user carrying water or gels? Answered with No / Yes.",
       "extractionState" : "manual",
       "localizations" : {
         "en" : {
@@ -1280,7 +867,7 @@
       }
     },
     "fuel.prompt.salts" : {
-      "comment" : "Pregunta de qué lleva antes de empezar",
+      "comment" : "Row label in \"What are you carrying?\" before a workout: number of salt tablets.",
       "extractionState" : "manual",
       "localizations" : {
         "en" : {
@@ -1304,7 +891,7 @@
       }
     },
     "fuel.prompt.tap_to_skip" : {
-      "comment" : "A label displayed under the question asking if the user is drinking water or ice.",
+      "comment" : "Hint under the question \"Carrying water or gels?\": tapping anywhere else counts as No.",
       "extractionState" : "manual",
       "localizations" : {
         "en" : {
@@ -1328,7 +915,7 @@
       }
     },
     "fuel.prompt.title" : {
-      "comment" : "A heading for the section of the view that asks the user what they're bringing.",
+      "comment" : "Heading of the screen where the user sets how much water, gels and salts they carry, shown after answering Yes.",
       "extractionState" : "manual",
       "localizations" : {
         "en" : {
@@ -1352,76 +939,7 @@
       }
     },
     "fuel.prompt.water" : {
-      "comment" : "Pregunta de qué lleva antes de empezar",
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Water"
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Agua"
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Eau"
-          }
-        }
-      }
-    },
-    "fuel.salts" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Salt tablets"
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Sales"
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Comprimés de sel"
-          }
-        }
-      }
-    },
-    "fuel.title" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "What you carry"
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Lo que llevas"
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Ce que tu emportes"
-          }
-        }
-      }
-    },
-    "fuel.water" : {
+      "comment" : "Row label in \"What are you carrying?\" before a workout; the value next to it is a number of millilitres.",
       "extractionState" : "manual",
       "localizations" : {
         "en" : {
@@ -3105,29 +2623,6 @@
         }
       }
     },
-    "settings.fuel_alerts" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Salt and gel alerts"
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Avisos de sales y geles"
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Alertes sels et gels"
-          }
-        }
-      }
-    },
     "settings.routine" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -3163,7 +2658,7 @@
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Sólo para esta salida"
+            "value" : "Solo para esta salida"
           }
         },
         "fr" : {
@@ -3493,29 +2988,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "%1$lld exercices au programme"
-          }
-        }
-      }
-    },
-    "start.gels_count" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "%lld gels"
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "%lld geles"
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "%lld gels"
           }
         }
       }

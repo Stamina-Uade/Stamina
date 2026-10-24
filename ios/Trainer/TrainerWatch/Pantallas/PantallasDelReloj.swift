@@ -70,6 +70,9 @@ struct RaizReloj: View {
     private var contenido: some View {
         if !estado.estaAutenticado && !estado.corriendo {
             SinTelefonoView()
+        } else if estado.preguntaAvituallamientoActiva {
+            // Antes de la cuenta regresiva: "¿Llevas hidratación o geles?".
+            PreguntaAvituallamientoView()
         } else if estado.cuentaRegresivaActiva {
             VistaCuentaRegresiva {
                 estado.completarCuentaRegresiva()
@@ -565,15 +568,23 @@ struct AlertaEntrenamientoCompletaView: View {
     }
 }
 
-/// Diálogo ágil previo al inicio: pregunta si el usuario lleva hidratación o geles.
-/// Si toca cualquier parte de la pantalla o "No", se saltea al instante sin fricción.
+/// La pregunta del inicio, entre tocar una salida y la cuenta regresiva
+/// (`EstadoReloj.prepararInicioConCuentaRegresiva`).
+///
+/// 1. "¿Llevas hidratación o geles?" con "No" y "Sí". Tocar afuera es "No"
+///    ("Toca para saltear"): un toque y a correr, sin mirar.
+/// 2. Con "Sí": "¿QUÉ LLEVAS?" con agua, geles y sales, que arrancan con lo que
+///    dice el plan y se ajustan con − y +; "Iniciar" pasa a la cuenta regresiva.
+///
+/// Sólo lo que se contesta acá programa avisos de agua, gel y sales: con "No", o
+/// con todo en 0, no sale ninguno.
 struct PreguntaAvituallamientoView: View {
     @EnvironmentObject private var estado: EstadoReloj
     @State private var configurando = false
 
     var body: some View {
         ZStack {
-            Color.black.opacity(0.92)
+            PaletaReloj.fondo
                 .ignoresSafeArea()
                 .contentShape(Rectangle())
                 .onTapGesture {
@@ -592,6 +603,7 @@ struct PreguntaAvituallamientoView: View {
                         .font(.system(size: 15, weight: .bold, design: .rounded))
                         .foregroundStyle(.white)
                         .multilineTextAlignment(.center)
+                        .fixedSize(horizontal: false, vertical: true)
                         .padding(.horizontal, 8)
 
                     Text(TextosReloj.fuelPromptTapToSkip)
@@ -612,13 +624,14 @@ struct PreguntaAvituallamientoView: View {
                         .buttonStyle(.plain)
 
                         Button {
+                            estado.cargarAvituallamientoDelPlan()
                             withAnimation(.easeInOut(duration: 0.2)) {
                                 configurando = true
                             }
                         } label: {
                             Text(TextosReloj.commonYes)
                                 .font(.system(size: 14, weight: .bold))
-                                .foregroundStyle(PaletaReloj.fondo)
+                                .foregroundStyle(PaletaReloj.sobreAcento)
                                 .frame(maxWidth: .infinity, minHeight: 38)
                                 .background(PaletaReloj.acento)
                                 .clipShape(Capsule())
@@ -635,15 +648,15 @@ struct PreguntaAvituallamientoView: View {
                             .font(.system(size: 12, weight: .heavy, design: .rounded))
                             .foregroundStyle(PaletaReloj.acento)
 
-                        controlItem(titulo: TextosReloj.fuelPromptWater, valor: "\(estado.aguaMlQueLleva) ml",
+                        controlItem(titulo: TextosReloj.fuelPromptWater, valor: estado.aguaMlQueLleva,
                                     alMenos: { estado.aguaMlQueLleva = max(0, estado.aguaMlQueLleva - 250) },
                                     alMas: { estado.aguaMlQueLleva = min(3000, estado.aguaMlQueLleva + 250) })
 
-                        controlItem(titulo: TextosReloj.fuelPromptGels, valor: "\(estado.gelesQueLleva)",
+                        controlItem(titulo: TextosReloj.fuelPromptGels, valor: estado.gelesQueLleva,
                                     alMenos: { estado.gelesQueLleva = max(0, estado.gelesQueLleva - 1) },
                                     alMas: { estado.gelesQueLleva = min(15, estado.gelesQueLleva + 1) })
 
-                        controlItem(titulo: TextosReloj.fuelPromptSalts, valor: "\(estado.salesQueLleva)",
+                        controlItem(titulo: TextosReloj.fuelPromptSalts, valor: estado.salesQueLleva,
                                     alMenos: { estado.salesQueLleva = max(0, estado.salesQueLleva - 1) },
                                     alMas: { estado.salesQueLleva = min(15, estado.salesQueLleva + 1) })
 
@@ -652,7 +665,7 @@ struct PreguntaAvituallamientoView: View {
                         } label: {
                             Text(TextosReloj.commonStart)
                                 .font(.system(size: 14, weight: .bold))
-                                .foregroundStyle(PaletaReloj.fondo)
+                                .foregroundStyle(PaletaReloj.sobreAcento)
                                 .frame(maxWidth: .infinity, minHeight: 38)
                                 .background(PaletaReloj.acento)
                                 .clipShape(Capsule())
@@ -667,39 +680,52 @@ struct PreguntaAvituallamientoView: View {
         }
     }
 
-    private func controlItem(titulo: String, valor: String, alMenos: @escaping () -> Void, alMas: @escaping () -> Void) -> some View {
-        HStack {
+    /// Una fila de "¿QUÉ LLEVAS?". La unidad del agua va en el título
+    /// ("Agua (ml)"), así que el valor es sólo el número.
+    private func controlItem(titulo: String, valor: Int, alMenos: @escaping () -> Void, alMas: @escaping () -> Void) -> some View {
+        HStack(spacing: 4) {
             Text(titulo)
                 .font(.system(size: 13, weight: .bold, design: .rounded))
                 .foregroundStyle(.white)
-            Spacer()
-            Button(action: alMenos) {
-                Text(verbatim: "-")
-                    .font(.system(size: 16, weight: .bold))
-                    .frame(width: 28, height: 28)
-                    .background(PaletaReloj.superficieAlterna)
-                    .clipShape(Circle())
-            }
-            .buttonStyle(.plain)
+                .lineLimit(1)
+                .minimumScaleFactor(0.8)
+            Spacer(minLength: 2)
+            botonDeCantidad("minus", accion: alMenos)
 
-            Text(valor)
+            Text(valor, format: .number.grouping(.never))
                 .font(.system(size: 12, weight: .bold))
                 .foregroundStyle(PaletaReloj.acento)
-                .frame(minWidth: 44)
+                .monospacedDigit()
+                .frame(minWidth: 36)
 
-            Button(action: alMas) {
-                Text(verbatim: "+")
-                    .font(.system(size: 16, weight: .bold))
-                    .frame(width: 28, height: 28)
-                    .background(PaletaReloj.superficieAlterna)
-                    .clipShape(Circle())
-            }
-            .buttonStyle(.plain)
+            botonDeCantidad("plus", accion: alMas)
         }
         .padding(.horizontal, 10)
         .padding(.vertical, 6)
         .background(PaletaReloj.superficie)
         .clipShape(RoundedRectangle(cornerRadius: 12, style: .continuous))
+        .accessibilityElement(children: .ignore)
+        .accessibilityLabel(titulo)
+        .accessibilityValue(Text(valor, format: .number))
+        .accessibilityAdjustableAction { direccion in
+            switch direccion {
+            case .increment: alMas()
+            case .decrement: alMenos()
+            @unknown default: break
+            }
+        }
+    }
+
+    private func botonDeCantidad(_ simbolo: String, accion: @escaping () -> Void) -> some View {
+        Button(action: accion) {
+            Image(systemName: simbolo)
+                .font(.system(size: 13, weight: .bold))
+                .foregroundStyle(.white)
+                .frame(width: 28, height: 28)
+                .background(PaletaReloj.superficieAlterna)
+                .clipShape(Circle())
+        }
+        .buttonStyle(.plain)
     }
 }
 
@@ -763,13 +789,63 @@ struct CarruselEntrenamientoRelojView: View {
     }
 }
 
+/// Hacia dónde va un arrastre en la página central del entrenamiento, decidido
+/// UNA vez, con los primeros puntos del gesto (ver `MetricasContenedorVerticalView`).
+///
+/// Sólo es vertical si es claramente vertical: |dy| tiene que superar a |dx| por
+/// `factorVertical`. Todo lo demás, diagonales incluidas, es de costado, porque
+/// de costado es el `TabView` (controles ← métricas → música) y es el que no
+/// tiene que perder nunca.
+enum EjeDeArrastreReloj: Equatable {
+    case horizontal, vertical
+
+    static let factorVertical: CGFloat = 1.5
+
+    static func decidir(dx: CGFloat, dy: CGFloat) -> EjeDeArrastreReloj {
+        abs(dy) > abs(dx) * factorVertical ? .vertical : .horizontal
+    }
+}
+
 /// Contenedor vertical para la página central del entrenamiento (Estilo Strava):
 /// Mientras el usuario desliza verticalmente, la pantalla se desenfoca progresivamente.
 /// Al soltar el dedo tras superar el umbral, cambia de pantalla al instante y el desenfoque
 /// se disipa con una transición rápida (0.18s), sin desplazamiento físico de láminas superpuestas.
+///
+/// 🪤 El gesto vertical convive con el `TabView` de costado de
+/// `CarruselEntrenamientoRelojView`, y antes le ganaba seguido: ir a los
+/// controles deslizando a la derecha "no lo tomaba". Tres cosas lo evitan:
+///
+/// 1. `distanciaMinima` (20 pt) es mayor que lo que necesita el paginado de
+///    costado para arrancar. En un deslizamiento de costado el `TabView`
+///    empieza primero y se queda con el toque; el arrastre vertical recién
+///    existiría a los 20 pt.
+/// 2. La dirección se decide una sola vez, con el primer punto del arrastre
+///    (`EjeDeArrastreReloj.decidir`), y queda bloqueada hasta soltar: un
+///    arrastre que empezó de costado nunca desenfoca ni cambia de pantalla,
+///    aunque después se tuerza.
+/// 3. El desenfoque vive en un `@GestureState`, que vuelve a 0 solo si el
+///    sistema cancela el gesto (porque el `TabView` se quedó con el toque); con
+///    un `@State` quedaba la pantalla borrosa.
+///
+/// Sigue siendo `simultaneousGesture` a propósito: los gestos que compiten con
+/// ese modo son los de ADENTRO (el scroll de `ParcialesView`, el toque del
+/// ritmo), no el `TabView` de afuera, y con `.gesture` el scroll de los
+/// parciales le ganaría a "deslizar hacia abajo para volver a métricas".
 struct MetricasContenedorVerticalView: View {
     @EnvironmentObject private var estado: EstadoReloj
-    @State private var radioBlur: CGFloat = 0
+
+    private struct EjeBloqueado {
+        let inicio: CGPoint
+        let eje: EjeDeArrastreReloj
+    }
+
+    private static let distanciaMinima: CGFloat = 20
+    private static let umbralDeCambio: CGFloat = 32
+
+    @GestureState(resetTransaction: Transaction(animation: .easeOut(duration: 0.15)))
+    private var desenfoqueDelArrastre: CGFloat = 0
+    @State private var desenfoqueDeTransicion: CGFloat = 0
+    @State private var ejeBloqueado: EjeBloqueado?
 
     var body: some View {
         ZStack {
@@ -786,49 +862,62 @@ struct MetricasContenedorVerticalView: View {
                 }
             }
             .frame(maxWidth: .infinity, maxHeight: .infinity)
-            .blur(radius: radioBlur)
+            .blur(radius: max(desenfoqueDelArrastre, desenfoqueDeTransicion))
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
         .contentShape(Rectangle())
-        .simultaneousGesture(
-            DragGesture(minimumDistance: 12)
-                .onChanged { valor in
-                    let dx = valor.translation.width
-                    let dy = valor.translation.height
-                    // Solo activar si el gesto es netamente vertical
-                    guard abs(dy) > abs(dx) * 1.15 else { return }
-
-                    // En la lista de parciales, deslizar hacia arriba es para scrollear los parciales;
-                    // solo desenfocar si desliza hacia abajo (para regresar a métricas)
-                    if estado.pantalla == .parciales && dy < 0 {
-                        return
-                    }
-
-                    // El desenfoque aumenta con la distancia del dedo hasta un máximo de 16
-                    let progreso = min(1.0, abs(dy) / 40.0)
-                    radioBlur = progreso * 16.0
-                }
-                .onEnded { valor in
-                    let dx = valor.translation.width
-                    let dy = valor.translation.height
-                    if abs(dy) > 32 && abs(dy) > abs(dx) * 1.15 {
-                        cambiarPantallaVertical(dy: dy)
-                    } else {
-                        withAnimation(.easeOut(duration: 0.15)) {
-                            radioBlur = 0
-                        }
-                    }
-                }
-        )
+        .simultaneousGesture(arrastreVertical)
         .onChange(of: estado.pantalla) { _, nuevaPantalla in
             // Si la pantalla cambió por toque de botón u otra vía externa:
-            if radioBlur == 0 && (nuevaPantalla == .metricas || nuevaPantalla == .mapa || nuevaPantalla == .parciales) {
-                radioBlur = 14
+            if desenfoqueDeTransicion == 0 && (nuevaPantalla == .metricas || nuevaPantalla == .mapa || nuevaPantalla == .parciales) {
+                desenfoqueDeTransicion = 14
                 withAnimation(.easeOut(duration: 0.18)) {
-                    radioBlur = 0
+                    desenfoqueDeTransicion = 0
                 }
             }
         }
+    }
+
+    private var arrastreVertical: some Gesture {
+        DragGesture(minimumDistance: Self.distanciaMinima)
+            .updating($desenfoqueDelArrastre) { valor, desenfoque, _ in
+                desenfoque = desenfoqueDurante(valor)
+            }
+            .onChanged { valor in
+                // El primer punto de cada arrastre decide el eje; los demás no.
+                if ejeBloqueado?.inicio != valor.startLocation {
+                    ejeBloqueado = EjeBloqueado(
+                        inicio: valor.startLocation,
+                        eje: EjeDeArrastreReloj.decidir(dx: valor.translation.width,
+                                                        dy: valor.translation.height))
+                }
+            }
+            .onEnded { valor in
+                let eje = eje(de: valor)
+                ejeBloqueado = nil
+                let dx = valor.translation.width
+                let dy = valor.translation.height
+                guard eje == .vertical, abs(dy) > Self.umbralDeCambio, abs(dy) > abs(dx) else { return }
+                cambiarPantallaVertical(dy: dy)
+            }
+    }
+
+    /// El eje bloqueado de este arrastre o, en su primer punto, el que decide.
+    private func eje(de valor: DragGesture.Value) -> EjeDeArrastreReloj {
+        if let ejeBloqueado, ejeBloqueado.inicio == valor.startLocation {
+            return ejeBloqueado.eje
+        }
+        return EjeDeArrastreReloj.decidir(dx: valor.translation.width, dy: valor.translation.height)
+    }
+
+    private func desenfoqueDurante(_ valor: DragGesture.Value) -> CGFloat {
+        guard eje(de: valor) == .vertical else { return 0 }
+        let dy = valor.translation.height
+        // En la lista de parciales, deslizar hacia arriba es para scrollear los parciales;
+        // solo desenfocar si desliza hacia abajo (para regresar a métricas)
+        if estado.pantalla == .parciales && dy < 0 { return 0 }
+        // El desenfoque aumenta con la distancia del dedo hasta un máximo de 16
+        return min(1.0, abs(dy) / 40.0) * 16.0
     }
 
     private func cambiarPantallaVertical(dy: CGFloat) {
@@ -844,20 +933,15 @@ struct MetricasContenedorVerticalView: View {
             destino = nil
         }
 
-        guard let target = destino else {
-            withAnimation(.easeOut(duration: 0.15)) {
-                radioBlur = 0
-            }
-            return
-        }
+        guard let target = destino else { return }
 
-        radioBlur = 16.0
+        desenfoqueDeTransicion = 16.0
         estado.ir(a: target)
         #if os(watchOS)
         WKInterfaceDevice.current().play(.click)
         #endif
         withAnimation(.easeOut(duration: 0.18)) {
-            radioBlur = 0
+            desenfoqueDeTransicion = 0
         }
     }
 }
@@ -1085,11 +1169,27 @@ struct RutinaView: View {
 
 // MARK: - `controles`
 
-/// 🛑 **Cinco botones, no seis.** El sexto era "compartir ubicación" y quedó
-/// fuera de la v1 (decisión 0003). La grilla se rehízo para cinco en vez de
-/// dejar un hueco donde estaba.
+/// 🛑 **Cuatro botones.** El que faltaba en la grilla de seis era "compartir
+/// ubicación", que quedó fuera de la v1 (decisión 0003); después salió también
+/// "Bloquear". La grilla se rehízo para cuatro en vez de dejar huecos.
+///
+/// Los cuatro son iguales en tamaño, letra y borde (ninguno); sólo cambia el
+/// color de fondo, tenue, con texto e ícono en blanco: Finalizar rojo,
+/// Pausar/Reanudar amarillo, Ajustes gris y Vuelta verde.
+///
+/// 🪤 El tamaño de letra es UNO para los cuatro. Con `minimumScaleFactor` cada
+/// texto se achicaba por su cuenta y "Reanudar" quedaba más chico que el resto.
+/// Ahora `ViewThatFits` prueba la grilla entera con cada tamaño, de mayor a
+/// menor, y cada botón mide lo que el título más largo (ver `etiqueta`), así
+/// que el tamaño elegido es el que entra en el más largo, en cualquier idioma
+/// y en cualquier reloj.
 struct ControlesView: View {
     @EnvironmentObject private var estado: EstadoReloj
+
+    /// De mayor a menor; el primero en el que entra el título más largo.
+    private static let tamanosDeLetra: [CGFloat] = [14.5, 13.5, 12.5, 11.5, 10.5]
+    /// La misma opacidad para los cuatro fondos.
+    private static let opacidadDelFondo: Double = 0.3
 
     var body: some View {
         VStack(spacing: PaletaReloj.puntosDeDiseno(TokensEspaciado.e6)) {
@@ -1111,21 +1211,9 @@ struct ControlesView: View {
                 }
                 .buttonStyle(.plain)
             }
-            HStack(spacing: PaletaReloj.puntosDeDiseno(TokensEspaciado.e6)) {
-                control(TextosReloj.controlsFinish, simbolo: "flag.fill", tono: .error) {
-                    estado.solicitarFinalizacion()
-                }
-                control(estado.pausada ? TextosReloj.controlsResume : TextosReloj.controlsPause,
-                        simbolo: estado.pausada ? "play.fill" : "pause.fill", tono: .pausa) {
-                    estado.pausarOReanudar()
-                }
-            }
-            HStack(spacing: PaletaReloj.puntosDeDiseno(TokensEspaciado.e6)) {
-                control(TextosReloj.controlsSettings, simbolo: "gearshape.fill", tono: .normal) {
-                    estado.ir(a: .ajustes)
-                }
-                control(TextosReloj.controlsLap, simbolo: "arrow.triangle.2.circlepath", tono: .vuelta) {
-                    estado.marcarVuelta()
+            ViewThatFits(in: .horizontal) {
+                ForEach(Self.tamanosDeLetra, id: \.self) { tamano in
+                    grilla(tamanoDeLetra: tamano)
                 }
             }
         }
@@ -1135,58 +1223,69 @@ struct ControlesView: View {
         .padding(.bottom, PaletaReloj.puntosDeDiseno(TokensEspaciado.e10))
     }
 
-    private enum TonoControl: Equatable { case normal, acento, error, vuelta, pausa }
+    private func grilla(tamanoDeLetra: CGFloat) -> some View {
+        VStack(spacing: PaletaReloj.puntosDeDiseno(TokensEspaciado.e6)) {
+            HStack(spacing: PaletaReloj.puntosDeDiseno(TokensEspaciado.e6)) {
+                control(TextosReloj.controlsFinish, simbolo: "flag.fill",
+                        color: PaletaReloj.error, tamanoDeLetra: tamanoDeLetra) {
+                    estado.solicitarFinalizacion()
+                }
+                control(estado.pausada ? TextosReloj.controlsResume : TextosReloj.controlsPause,
+                        simbolo: estado.pausada ? "play.fill" : "pause.fill",
+                        color: .yellow, tamanoDeLetra: tamanoDeLetra) {
+                    estado.pausarOReanudar()
+                }
+            }
+            HStack(spacing: PaletaReloj.puntosDeDiseno(TokensEspaciado.e6)) {
+                control(TextosReloj.controlsSettings, simbolo: "gearshape.fill",
+                        color: .gray, tamanoDeLetra: tamanoDeLetra) {
+                    estado.ir(a: .ajustes)
+                }
+                control(TextosReloj.controlsLap, simbolo: "arrow.triangle.2.circlepath",
+                        color: .green, tamanoDeLetra: tamanoDeLetra) {
+                    estado.marcarVuelta()
+                }
+            }
+        }
+    }
 
-    private func control(_ titulo: String, simbolo: String, tono: TonoControl,
+    /// Todos los títulos que puede mostrar la grilla, "Pausar" y "Reanudar"
+    /// incluidos, para que el tamaño no salte al pausar.
+    private var todosLosTitulos: [String] {
+        [TextosReloj.controlsFinish, TextosReloj.controlsPause, TextosReloj.controlsResume,
+         TextosReloj.controlsSettings, TextosReloj.controlsLap]
+    }
+
+    /// El título visible encima de todos los títulos ocultos: así el ancho
+    /// ideal de cada botón es el del título más largo, y `ViewThatFits`
+    /// descarta los tamaños en los que ese no entra en medio ancho.
+    private func etiqueta(_ titulo: String, tamanoDeLetra: CGFloat) -> some View {
+        let fuente = Font.system(size: tamanoDeLetra, weight: .bold, design: .rounded)
+        return ZStack {
+            ForEach(todosLosTitulos, id: \.self) { otro in
+                Text(otro).font(fuente).lineLimit(1).hidden().accessibilityHidden(true)
+            }
+            Text(titulo).font(fuente).lineLimit(1)
+        }
+        .padding(.horizontal, 4)
+    }
+
+    private func control(_ titulo: String, simbolo: String, color: Color, tamanoDeLetra: CGFloat,
                          accion: @escaping () -> Void) -> some View {
         Button(action: accion) {
             VStack(spacing: 4) {
                 Image(systemName: simbolo)
                     .font(.system(size: 26, weight: .bold))
-                Text(titulo)
-                    .font(.system(size: 14.5, weight: .bold, design: .rounded))
-                    .foregroundStyle(color(tono))
-                    .minimumScaleFactor(0.75)
-                    .lineLimit(1)
+                etiqueta(titulo, tamanoDeLetra: tamanoDeLetra)
             }
-            .foregroundStyle(color(tono))
+            .foregroundStyle(.white)
             .frame(maxWidth: .infinity, maxHeight: .infinity)
-            .background(fondo(tono))
+            .background(color.opacity(Self.opacidadDelFondo))
             .clipShape(RoundedRectangle(cornerRadius: 16, style: .continuous))
-            .overlay(RoundedRectangle(cornerRadius: 16, style: .continuous)
-                .strokeBorder(borde(tono), lineWidth: 1.5))
             .contentShape(Rectangle())
         }
         .buttonStyle(.plain)
-    }
-
-    private func fondo(_ tono: TonoControl) -> Color {
-        switch tono {
-        case .normal: PaletaReloj.superficie
-        case .acento: PaletaReloj.acento
-        case .error: PaletaReloj.errorFondo
-        case .vuelta: PaletaReloj.vueltaFondo
-        case .pausa: PaletaReloj.controlPausa
-        }
-    }
-
-    private func color(_ tono: TonoControl) -> Color {
-        switch tono {
-        case .normal: PaletaReloj.textoPrimario
-        case .acento: PaletaReloj.sobreAcento
-        case .error: PaletaReloj.error
-        case .vuelta: PaletaReloj.vuelta
-        case .pausa: PaletaReloj.sobreControlPausa
-        }
-    }
-
-    private func borde(_ tono: TonoControl) -> Color {
-        switch tono {
-        case .error: PaletaReloj.error.opacity(0.4)
-        case .vuelta: PaletaReloj.vuelta.opacity(0.4)
-        case .pausa: PaletaReloj.controlPausa.opacity(0.4)
-        default: .clear
-        }
+        .accessibilityLabel(titulo)
     }
 }
 

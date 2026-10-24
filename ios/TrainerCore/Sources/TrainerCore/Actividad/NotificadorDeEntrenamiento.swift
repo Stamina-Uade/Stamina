@@ -80,6 +80,7 @@ public enum NotificadorDeEntrenamiento {
         centro.getPendingNotificationRequests { pedidos in
             let ids = pedidos.map(\.identifier).filter {
                 $0.hasPrefix("recordatorio-manana-") || $0.hasPrefix("recordatorio-hora-")
+                    || $0.hasPrefix("recordatorio-carrera-")
             }
             if !ids.isEmpty {
                 centro.removePendingNotificationRequests(withIdentifiers: ids)

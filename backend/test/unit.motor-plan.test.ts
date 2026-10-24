@@ -787,6 +787,19 @@ describe("calcularRacha (fueguitos estilo Duolingo)", async () => {
     assert.equal(r.entrenado_hoy, true);
   });
 
+  test("un día marcado a mano cuenta como hecho, pero no devuelve la racha (1.7.0)", async () => {
+    const { diaHecho } = await import("../src/dominios/plan/servicio.js");
+    const dias = [crearDia("2026-03-02", "fondo"), crearDia("2026-03-03", "fondo"), crearDia("2026-03-04", "fondo")];
+    const hechos = new Map([
+      ["2026-03-02", { sesiones: 1, metros: 5000 }],
+      ["2026-03-03", { sesiones: 0, metros: 0, aMano: true }],
+    ]);
+    assert.equal(diaHecho(hechos.get("2026-03-03")), true);
+    const r = calcularRacha(dias, hechos, "2026-03-04");
+    assert.equal(r.dias, 0, "el fueguito sigue apagado");
+    assert.equal(r.activa_hoy, false);
+  });
+
   test("el día de descanso no rompe la racha", () => {
     const dias = [
       crearDia("2026-03-02", "fondo"),

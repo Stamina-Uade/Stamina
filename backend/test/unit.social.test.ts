@@ -102,8 +102,8 @@ test("el permiso de alta social ida y vuelta, y vencido no sirve", async () => {
 });
 
 test("el correo del código escapa el nombre y lleva el código en HTML y en texto", () => {
-  const c = correoDeCodigo({ codigo: "K7P4XM", proposito: "registro", destino: "a@b.com",
-    nombre: "<a href=x>Emma</a>", ahoraMs: 0, vidaMin: 15 });
+  const c = correoDeCodigo({ codigo: "K7P4XM", proposito: "registro",
+    nombre: "<a href=x>Emma</a>", vidaMin: 15 });
   assert.ok(!c.html.includes("<a href=x>"));
   assert.ok(c.html.includes(escaparHtml("<a href=x>Emma</a>")));
   assert.ok(c.html.includes("K7P4XM") && c.texto.includes("K7P4XM"));

@@ -2,10 +2,10 @@ import SwiftUI
 import TrainerCore
 
 // =============================================================================
-// Piezas del historial (rediseño 2026-10, ronda 3): el resumen con su selector
-// Semana | Mes | Todo, los chips de deporte, el encabezado de cada mes y el
-// estado vacío que enseña qué hacer. Todo se calcula sobre lo que ya se cargó
-// del servidor: nada pide red de más.
+// Piezas del historial: los chips de deporte, el encabezado de cada mes y el
+// estado vacío que enseña qué hacer. El selector Semana | Mes | Todo y la tarjeta
+// "Tus números" se fueron el 2026-10-23: el total del año va en una línea del
+// calendario. Todo se calcula sobre lo que ya se cargó del servidor.
 // =============================================================================
 
 // MARK: - Cálculos
@@ -40,16 +40,6 @@ enum HistorialFormato {
         return "\(Formato.ritmo(segundosPorKm: ritmo, unidades: unidades)) \(ResumenFormato.unidadDeRitmo(unidades))"
     }
 
-    /// Un tiempo acumulado partido en número y unidad: ("5:20", "h") o ("45", "min").
-    static func tiempoAcumulado(segundos: Int) -> (valor: String, unidad: String) {
-        let horas = segundos / 3600
-        let minutos = (segundos % 3600) / 60
-        if horas > 0 {
-            return ("\(horas):\(String(format: "%02d", minutos))", "h")
-        }
-        return ("\(minutos)", "min")
-    }
-
     /// "Octubre 2026": el mes suelto, sin el "de" del formato largo.
     static func mesYAnio(_ fecha: Date) -> String {
         let df = DateFormatter()
@@ -73,156 +63,6 @@ enum HistorialMovimiento {
             cambio()
         } else {
             withAnimation(.easeInOut(duration: TokensMovimiento.rapida), cambio)
-        }
-    }
-}
-
-/// Distancia, cantidad y tiempo de un grupo de actividades.
-struct HistorialTotales {
-    let metros: Int
-    let sesiones: Int
-    let segundos: Int
-
-    init(_ actividades: [Actividad]) {
-        metros = actividades.reduce(0) { $0 + Int($1.distanceM ?? 0) }
-        sesiones = actividades.count
-        segundos = actividades.reduce(0) { $0 + Int($1.durationS) }
-    }
-}
-
-// MARK: - Período del resumen
-
-enum HistorialPeriodo: String, CaseIterable, Identifiable {
-    case semana, mes, todo
-
-    var id: String { rawValue }
-
-    var titulo: String {
-        switch self {
-        case .semana: return Textos.commonWeek
-        case .mes: return Textos.commonMonth
-        case .todo: return Textos.commonAll
-        }
-    }
-
-    /// Qué cuenta, dicho en palabras, para debajo de las tarjetas.
-    var explicacion: String {
-        switch self {
-        case .semana: return Textos.historyPeriodWeekDetail
-        case .mes: return Textos.historyPeriodMonthDetail
-        case .todo: return Textos.historyAllWorkouts
-        }
-    }
-
-    /// Desde cuándo cuenta. `nil`: sin límite.
-    func inicio(hoy: Date = Date()) -> Date? {
-        let cal = HistorialFormato.calendario
-        switch self {
-        case .semana: return cal.dateInterval(of: .weekOfYear, for: hoy)?.start
-        case .mes: return cal.dateInterval(of: .month, for: hoy)?.start
-        case .todo: return nil
-        }
-    }
-}
-
-/// "Semana | Mes | Todo": una cápsula con el segmento elegido en el acento.
-struct HistorialSelectorDePeriodo: View {
-    @Binding var periodo: HistorialPeriodo
-    @Environment(\.accessibilityReduceMotion) private var movimientoReducido
-    @Namespace private var espacio
-
-    var body: some View {
-        HStack(spacing: TokensEspaciado.e4) {
-            ForEach(HistorialPeriodo.allCases) { opcion in
-                segmento(opcion)
-            }
-        }
-        .padding(TokensEspaciado.e4)
-        .background(Paleta.superficieAlterna)
-        .clipShape(Capsule())
-        .overlay(Capsule().strokeBorder(Paleta.bordeSuperficie, lineWidth: TokensEspaciado.e1))
-    }
-
-    private func segmento(_ opcion: HistorialPeriodo) -> some View {
-        let elegida = opcion == periodo
-        return Button {
-            guard opcion != periodo else { return }
-            Haptico.seleccion()
-            HistorialMovimiento.animar(movimientoReducido) { periodo = opcion }
-        } label: {
-            Text(opcion.titulo)
-                .estilo(.chip, color: elegida ? Paleta.sobreAcento : Paleta.textoSecundario)
-                .frame(maxWidth: .infinity)
-                .frame(minHeight: TokensEspaciado.e40)
-                .background {
-                    if elegida {
-                        Capsule()
-                            .fill(Paleta.acento)
-                            .matchedGeometryEffect(id: "segmento", in: espacio)
-                    }
-                }
-                .contentShape(Capsule())
-        }
-        .buttonStyle(EstiloPresionado())
-        .accessibilityAddTraits(elegida ? [.isButton, .isSelected] : .isButton)
-    }
-}
-
-// MARK: - Franja de resumen
-
-/// Lo de arriba del historial: el selector y tres tarjetas (distancia, salidas,
-/// tiempo) del período elegido.
-struct HistorialFranjaDeResumen: View {
-    /// Ya filtradas por deporte.
-    let actividades: [Actividad]
-    let deporte: DeporteDeSesion?
-    let unidades: SistemaDeUnidades
-    /// Si el servidor tiene más páginas: el total puede quedarse corto.
-    let hayMasPorCargar: Bool
-    @Binding var periodo: HistorialPeriodo
-
-    private var desdeMs: Int64? {
-        periodo.inicio().map { Int64($0.timeIntervalSince1970 * 1000) }
-    }
-
-    private var delPeriodo: [Actividad] {
-        guard let desdeMs else { return actividades }
-        return actividades.filter { $0.startedAtMs >= desdeMs }
-    }
-
-    /// Lo cargado no llega hasta el principio del período: la suma es parcial.
-    private var esParcial: Bool {
-        guard hayMasPorCargar else { return false }
-        guard let desdeMs else { return true }
-        let masVieja = actividades.map(\.startedAtMs).min() ?? Int64.max
-        return masVieja >= desdeMs
-    }
-
-    var body: some View {
-        let totales = HistorialTotales(delPeriodo)
-        let tiempo = HistorialFormato.tiempoAcumulado(segundos: totales.segundos)
-        return VStack(alignment: .leading, spacing: TokensEspaciado.e10) {
-            EncabezadoDeSeccion(Textos.historyYourNumbers,
-                                detalle: deporte?.nombreVisible)
-
-            HistorialSelectorDePeriodo(periodo: $periodo)
-
-            HStack(spacing: TokensEspaciado.e8) {
-                TarjetaMetrica(Textos.commonDistance,
-                               valor: Formato.distanciaNumero(totales.metros, unidades: unidades),
-                               unidad: Formato.unidadDeDistancia(unidades),
-                               simbolo: "map", destacada: true)
-                TarjetaMetrica(Textos.historyWorkouts,
-                               valor: "\(totales.sesiones)", simbolo: "figure.run")
-                TarjetaMetrica(Textos.commonTime,
-                               valor: tiempo.valor, unidad: tiempo.unidad, simbolo: "clock")
-            }
-
-            Text(esParcial
-                 ? Textos.historyTotalsPartialNote(periodo.explicacion)
-                 : periodo.explicacion)
-                .estilo(.labelCampo, color: Paleta.textoTerciario)
-                .fixedSize(horizontal: false, vertical: true)
         }
     }
 }

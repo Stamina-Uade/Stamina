@@ -9,7 +9,7 @@
 // números y unidades se formatean con el locale del sistema. Esto resuelve lo
 // primero; lo segundo es de quien presenta el dato.
 //
-// 209 claves · idioma de autoría: en
+// 186 claves · idioma de autoría: en
 // =============================================================================
 
 import Foundation
@@ -18,42 +18,8 @@ import Foundation
 /// clave deja de ser un bug de producción y pasa a ser un error de compilación.
 enum TextosReloj {
 
-    /// Done
-    static var alertDone: String { String(localized: "alert.done") }
-
-    /// Gel + 300 ml with electrolytes
-    static var alertGel: String { String(localized: "alert.gel") }
-
-    /// You're at 300 mg of sodium. 40 min of Z2 effort left.
-    static var alertGelDetail: String { String(localized: "alert.gel.detail") }
-
-    /// Hydration
-    static var alertHydration: String { String(localized: "alert.hydration") }
-
-    /// Minute %lld
-    static func alertMinute(_ arg1: Int) -> String {
-        String(format: String(localized: "alert.minute"), arg1)
-    }
-
-    /// No water on me
-    static var alertNoWater: String { String(localized: "alert.no_water") }
-
-    /// Done
-    static var alertReady: String { String(localized: "alert.ready") }
-
-    /// Remind me in 5 min
-    static var alertRemindLater: String { String(localized: "alert.remind_later") }
-
     /// Tap to continue
     static var alertTapToContinue: String { String(localized: "alert.tap_to_continue") }
-
-    /// Drink 200 ml
-    static var alertWater: String { String(localized: "alert.water") }
-
-    /// You're at %1$@ of %2$@. At 26° you lose more than you feel.
-    static func alertWaterDetail(_ arg1: String, _ arg2: String) -> String {
-        String(format: String(localized: "alert.water.detail"), arg1, arg2)
-    }
 
     /// There are no scheduled alerts for this workout yet.
     static var alertsEmpty: String { String(localized: "alerts.empty") }
@@ -114,9 +80,6 @@ enum TextosReloj {
     /// Lap
     static var controlsLap: String { String(localized: "controls.lap") }
 
-    /// Lock
-    static var controlsLock: String { String(localized: "controls.lock") }
-
     /// Pause
     static var controlsPause: String { String(localized: "controls.pause") }
 
@@ -125,9 +88,6 @@ enum TextosReloj {
 
     /// Settings
     static var controlsSettings: String { String(localized: "controls.settings") }
-
-    /// Controls
-    static var controlsTitle: String { String(localized: "controls.title") }
 
     /// Switch to cycling
     static var controlsTriathlonToCycling: String { String(localized: "controls.triathlon.to_cycling") }
@@ -146,21 +106,6 @@ enum TextosReloj {
 
     /// Finish?
     static var finishTitle: String { String(localized: "finish.title") }
-
-    /// Tap to dismiss
-    static var fuelAlertDismiss: String { String(localized: "fuel.alert.dismiss") }
-
-    /// Take a gel
-    static var fuelAlertGel: String { String(localized: "fuel.alert.gel") }
-
-    /// Consider salt tablets
-    static var fuelAlertSalts: String { String(localized: "fuel.alert.salts") }
-
-    /// Drink water
-    static var fuelAlertWater: String { String(localized: "fuel.alert.water") }
-
-    /// Fuel and hydration alerts
-    static var fuelEnable: String { String(localized: "fuel.enable") }
 
     /// Energy to keep going
     static var fuelFullscreenGelSubtitle: String { String(localized: "fuel.fullscreen.gel.subtitle") }
@@ -181,9 +126,6 @@ enum TextosReloj {
     static var fuelFullscreenWaterTitle: String { String(localized: "fuel.fullscreen.water.title") }
 
     /// Gels
-    static var fuelGels: String { String(localized: "fuel.gels") }
-
-    /// Gels
     static var fuelPromptGels: String { String(localized: "fuel.prompt.gels") }
 
     /// Carrying water or gels?
@@ -198,17 +140,8 @@ enum TextosReloj {
     /// WHAT ARE YOU CARRYING?
     static var fuelPromptTitle: String { String(localized: "fuel.prompt.title") }
 
-    /// Water
-    static var fuelPromptWater: String { String(localized: "fuel.prompt.water") }
-
-    /// Salt tablets
-    static var fuelSalts: String { String(localized: "fuel.salts") }
-
-    /// What you carry
-    static var fuelTitle: String { String(localized: "fuel.title") }
-
     /// Water (ml)
-    static var fuelWater: String { String(localized: "fuel.water") }
+    static var fuelPromptWater: String { String(localized: "fuel.prompt.water") }
 
     /// You completed all sets today.
     static var goalAllSetsDone: String { String(localized: "goal.all_sets_done") }
@@ -438,9 +371,6 @@ enum TextosReloj {
     /// Auto pause
     static var settingsAutoPause: String { String(localized: "settings.auto_pause") }
 
-    /// Salt and gel alerts
-    static var settingsFuelAlerts: String { String(localized: "settings.fuel_alerts") }
-
     /// Routine guidance
     static var settingsRoutine: String { String(localized: "settings.routine") }
 
@@ -491,11 +421,6 @@ enum TextosReloj {
     /// %lld exercises
     static func startExercisesCount(_ arg1: Int) -> String {
         String(format: String(localized: "start.exercises_count"), arg1)
-    }
-
-    /// %lld gels
-    static func startGelsCount(_ arg1: Int) -> String {
-        String(format: String(localized: "start.gels_count"), arg1)
     }
 
     /// Completed · %@

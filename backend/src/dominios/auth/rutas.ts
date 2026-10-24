@@ -5,15 +5,17 @@
  * lo genera `scripts/generar-esquemas.mjs` desde shared/api/openapi.yaml. No hay
  * un esquema escrito a mano que pueda divergir del contrato (§4.2).
  */
-import type { FastifyInstance } from "fastify";
+import type { FastifyInstance, FastifyRequest } from "fastify";
 import type { Contexto } from "../../contexto.js";
-import { crearServicioAuth } from "./servicio.js";
+import { crearServicioAuth, type Acceso } from "./servicio.js";
+import type { Dispositivo } from "./dispositivos.js";
 import { cuerpo } from "../../infra/esquemas.js";
 import { crearHookAuth } from "../../infra/autenticacion.js";
 import { ErrorApi } from "../../infra/errores.js";
 import { crearRepoPerfil } from "../perfil/repositorio.js";
 import { crearGuardia } from "./guardia.js";
 import { idiomaDeCorreo } from "../../infra/idioma.js";
+import { ubicacionDeCloudflare } from "../../infra/ubicacion.js";
 
 /**
  * 🛑 Rate limit estricto donde duele. AGENTS.md §12 lo pide "en login, registro,
@@ -27,16 +29,34 @@ import { idiomaDeCorreo } from "../../infra/idioma.js";
  */
 const ESTRICTO = { rateLimit: { max: 8, timeWindow: "1 minute" } } as const;
 
+/**
+ * Desde dónde se entra (contrato 1.7.0). `req.ip` ya respeta `TRUST_PROXY` y los
+ * rangos de Cloudflare (servidor.ts, infra/cloudflare.ts): es la IP de la persona,
+ * no la de Apache ni la del borde de Cloudflare. La
+ * ubicación sale de los headers de Cloudflare, y sólo detrás de un proxy de
+ * confianza (infra/ubicacion.ts).
+ */
+function accesoDe(req: FastifyRequest, dispositivo: Dispositivo | undefined, detrasDeProxy: boolean): Acceso {
+  const idioma = idiomaDeCorreo(req);
+  return {
+    ip: req.ip,
+    idioma,
+    ubicacion: ubicacionDeCloudflare(req.headers, idioma, detrasDeProxy),
+    dispositivo: dispositivo ?? null,
+  };
+}
+
 export async function rutasAuth(app: FastifyInstance, ctx: Contexto): Promise<void> {
   const auth = crearServicioAuth(ctx);
   const perfiles = crearRepoPerfil(ctx.db);
   const requiereAuth = crearHookAuth(ctx.config);
   const guardia = crearGuardia(ctx);
+  const detrasDeProxy = ctx.config.trustProxy !== false;
 
   // ------------------------------------------------------------- registro --
   app.post("/auth/register", { config: ESTRICTO, schema: { body: cuerpo("registerStart") } }, async (req, res) => {
     const b = req.body as { email: string; first_name?: string; last_name?: string };
-    const r = await auth.registroInicio(b.email, b.first_name, b.last_name);
+    const r = await auth.registroInicio(b.email, b.first_name, b.last_name, idiomaDeCorreo(req));
     res.code(202);
     return { data: r };
   });
@@ -53,6 +73,7 @@ export async function rutasAuth(app: FastifyInstance, ctx: Contexto): Promise<vo
       social_token?: string;
       profile: Record<string, unknown>;
       legal: { version: string; accepted: boolean };
+      device?: Dispositivo;
     };
     // Una de las dos credenciales, nunca las dos ni ninguna (contrato 1.4.0).
     if ((b.password === undefined) === (b.social_token === undefined)) {
@@ -62,7 +83,8 @@ export async function rutasAuth(app: FastifyInstance, ctx: Contexto): Promise<vo
       throw new ErrorApi("invalid_registration_token", "Registration token is required");
     }
     const credencial = b.password !== undefined ? { password: b.password } : { socialToken: b.social_token as string };
-    const { sesion, usuarioId } = await auth.registroCompletar(b.registration_token, credencial, b.legal);
+    const { sesion, usuarioId } = await auth.registroCompletar(
+      b.registration_token, credencial, b.legal, accesoDe(req, b.device, detrasDeProxy));
     // El perfil se guarda en la misma operación: una cuenta sin perfil no le
     // sirve al motor del plan (AGENTS.md §9.1).
     await perfiles.guardar(usuarioId, b.profile, ctx.ahoraMs());
@@ -72,27 +94,27 @@ export async function rutasAuth(app: FastifyInstance, ctx: Contexto): Promise<vo
 
   // ---------------------------------------------------------------- login --
   app.post("/auth/login", { config: ESTRICTO, schema: { body: cuerpo("login") } }, async (req) => {
-    const b = req.body as { email: string; password: string };
+    const b = req.body as { email: string; password: string; device?: Dispositivo };
     // La IP del pedido, para el tope de fallos por IP entre todos los correos.
-    return { data: await auth.login(b.email, b.password, req.ip) };
+    return { data: await auth.login(b.email, b.password, req.ip, accesoDe(req, b.device, detrasDeProxy)) };
   });
 
   // ------------------------------------------------------- Google y Apple --
   app.post("/auth/social", { config: ESTRICTO, schema: { body: cuerpo("socialSignIn") } }, async (req) => {
-    const b = req.body as { provider: "google" | "apple"; id_token: string; nonce: string };
-    return { data: await auth.entrarConProveedor(b.provider, b.id_token, b.nonce) };
+    const b = req.body as { provider: "google" | "apple"; id_token: string; nonce: string; device?: Dispositivo };
+    return { data: await auth.entrarConProveedor(b.provider, b.id_token, b.nonce, accesoDe(req, b.device, detrasDeProxy)) };
   });
 
   // 1.6.0: vincular Google o Apple a una cuenta con contraseña (`account_link_available`).
   app.post("/auth/social/link", { config: ESTRICTO, schema: { body: cuerpo("socialLink") } }, async (req) => {
-    const b = req.body as { link_token: string; password?: string };
-    return { data: await auth.vincularConPassword(b.link_token, b.password, req.ip) };
+    const b = req.body as { link_token: string; password?: string; device?: Dispositivo };
+    return { data: await auth.vincularConPassword(b.link_token, b.password, req.ip, accesoDe(req, b.device, detrasDeProxy)) };
   });
 
   // 1.6.0: volver a una cuenta desactivada o por borrarse.
   app.post("/auth/reactivate", { config: ESTRICTO, schema: { body: cuerpo("reactivateAccount") } }, async (req) => {
-    const b = req.body as { reactivation_token: string };
-    return { data: await auth.reactivar(b.reactivation_token) };
+    const b = req.body as { reactivation_token: string; device?: Dispositivo };
+    return { data: await auth.reactivar(b.reactivation_token, accesoDe(req, b.device, detrasDeProxy)) };
   });
 
   app.post("/auth/refresh", { schema: { body: cuerpo("refresh") } }, async (req) => {
@@ -126,7 +148,7 @@ export async function rutasAuth(app: FastifyInstance, ctx: Contexto): Promise<vo
   // ---------------------------------------------------------- recuperación --
   app.post("/auth/password/forgot", { config: ESTRICTO, schema: { body: cuerpo("passwordForgot") } }, async (req, res) => {
     const b = req.body as { email: string };
-    const r = await auth.recuperacionInicio(b.email);
+    const r = await auth.recuperacionInicio(b.email, idiomaDeCorreo(req));
     res.code(202);
     return { data: r };
   });
@@ -137,7 +159,7 @@ export async function rutasAuth(app: FastifyInstance, ctx: Contexto): Promise<vo
   });
 
   app.post("/auth/password/reset", { schema: { body: cuerpo("passwordReset") } }, async (req) => {
-    const b = req.body as { reset_token: string; password: string };
-    return { data: await auth.recuperacionAplicar(b.reset_token, b.password, idiomaDeCorreo(req)) };
+    const b = req.body as { reset_token: string; password: string; device?: Dispositivo };
+    return { data: await auth.recuperacionAplicar(b.reset_token, b.password, accesoDe(req, b.device, detrasDeProxy)) };
   });
 }

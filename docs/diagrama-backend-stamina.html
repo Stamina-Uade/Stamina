@@ -176,7 +176,7 @@
 <header>
   <div>
     <div class="titulo">Stamina · <b>cómo funciona el backend</b></div>
-    <div class="subtitulo">Node 22 · TypeScript · Fastify 5 · PostgreSQL · Redis &nbsp;—&nbsp; un solo proceso en <span class="mono">127.0.0.1:8082</span>, todo bajo <span class="mono">/v1</span>, contrato <span class="mono">shared/api/openapi.yaml 1.2.0</span></div>
+    <div class="subtitulo">Node 22 · TypeScript · Fastify 5 · PostgreSQL · Redis &nbsp;—&nbsp; un solo proceso en <span class="mono">127.0.0.1:8082</span>, todo bajo <span class="mono">/v1</span>, contrato <span class="mono">shared/api/openapi.yaml 1.7.0</span></div>
   </div>
   <div class="leyenda">
     <span><i class="lin"></i>pedido HTTP / flujo principal</span>
@@ -234,7 +234,7 @@
         <div class="kv" style="grid-template-columns:118px 1fr">
           <span class="k">trainer-api</span><span>MemoryMax 300 M, CPU 60 %, sistema de archivos de sólo lectura</span>
           <span class="k">trainer-redis</span><span>su propio Redis, 64 M</span>
-          <span class="k" id="k-purga">trainer-purgar</span><span>timer diario 04:40 → <span class="mono">purgar.js</span>: historial de series de más de 90 días, idempotencia y sesiones vencidas</span>
+          <span class="k" id="k-purga">trainer-purgar</span><span>timer diario 04:40 → <span class="mono">purgar.js</span>: cuentas con el plazo de 30 días vencido, historial de series de más de 90 días, idempotencia y sesiones vencidas</span>
         </div>
       </div>
     </div>
@@ -252,7 +252,7 @@
       <div class="pipeline" id="pipeline">
         <div class="etapa" id="e1"><div class="n">01</div><h4>TLS y proxy</h4><p>Apache termina TLS y pasa sólo <code>/v1/*</code> a <code>127.0.0.1:8082</code>. Si el backend cae, responde 502/503 en JSON.</p></div>
         <div class="etapa" id="e2"><div class="n">02</div><h4>Fastify + límite de tasa</h4><p>Cuerpo ≤ 64 KB, quita <code>__proto__</code>. 60 pedidos/min por ruta + IP; 8/min en login, alta y recuperación.</p></div>
-        <div class="etapa" id="e3"><div class="n">03</div><h4>Validación de esquema</h4><p>Ajv con esquemas generados desde <code>openapi.yaml</code>. Si no cumple: <code>bad_request</code> o <code>weak_password</code>.</p></div>
+        <div class="etapa" id="e3"><div class="n">03</div><h4>Validación de esquema</h4><p>Ajv con esquemas generados desde <code>openapi.yaml</code>. Si no cumple: <code>bad_request</code> o <code>weak_password</code> (sólo las tres reglas: 10 caracteres, una mayúscula, un número).</p></div>
         <div class="etapa clave" id="e4"><div class="n">04</div><h4>Guardia de auth</h4><p>JWT HS256 fijado en código (iss <code>trainer</code>, aud <code>trainer-app</code>) y además la sesión viva en <code>sesiones</code>.</p></div>
         <div class="etapa clave" id="e5"><div class="n">05</div><h4>Idempotencia</h4><p><code>Idempotency-Key</code> + usuario + ruta + hash del cuerpo en la tabla <code>idempotencia</code> (24 h). Si se repite, la misma respuesta.</p></div>
         <div class="etapa" id="e6"><div class="n">06</div><h4>Ruta de dominio</h4><p><code>rutas.ts</code> traduce el contrato y llama a <code>servicio.ts</code> o al motor. El id de usuario sale sólo del token.</p></div>
@@ -273,12 +273,16 @@
           <div class="ep"><span class="m w">POST</span>/auth/register/verify</div>
           <div class="ep"><span class="m w">POST</span>/auth/register/complete</div>
           <div class="ep"><span class="m w">POST</span>/auth/login</div>
+          <div class="ep"><span class="m w">POST</span>/auth/social</div>
+          <div class="ep"><span class="m w">POST</span>/auth/social/link</div>
+          <div class="ep"><span class="m w">POST</span>/auth/reactivate</div>
           <div class="ep"><span class="m w">POST</span>/auth/refresh</div>
           <div class="ep"><span class="m w">POST</span>/auth/logout <span class="badge jwt">JWT</span></div>
+          <div class="ep"><span class="m w">POST</span>/auth/logout/others <span class="badge jwt">JWT</span></div>
           <div class="ep"><span class="m w">POST</span>/auth/password/forgot</div>
           <div class="ep"><span class="m w">POST</span>/auth/password/verify</div>
           <div class="ep"><span class="m w">POST</span>/auth/password/reset</div>
-          <div class="desc">argon2id, anti‑enumeración (también por tiempo), códigos de correo en Redis.</div>
+          <div class="desc">argon2id, anti‑enumeración (también por tiempo), códigos de correo en Redis. Tope de intentos en Redis: 5 contraseñas equivocadas por correo → 15 min de bloqueo (<code>too_many_attempts</code>), más 20 por IP. Google/Apple con vinculación (<code>account_link_available</code>). Reactivar sirve para la cuenta desactivada y para la que está por borrarse.</div>
           <div class="tablas"><span class="tabla r">usuarios</span><span class="tabla r">sesiones</span><span class="tabla r">aceptaciones_legales</span><span class="tabla r">perfiles</span><span class="tabla x">Redis</span></div>
         </div>
 
@@ -338,9 +342,10 @@
 
         <div class="dom" id="d-cuenta">
           <div class="cab"><h5>Cuenta</h5><span class="badge jwt">JWT</span></div>
+          <div class="ep"><span class="m w">POST</span>/me/deactivate</div>
           <div class="ep"><span class="m w">POST</span>/me/delete</div>
           <div class="ep"><span class="m">GET</span>/me/export</div>
-          <div class="desc">Borrar pide la contraseña y es un <code>DELETE</code> físico que arrastra todo en cascada. Exportar junta todo (3/min).</div>
+          <div class="desc">Desactivar cierra las sesiones y guarda <code>desactivada_en_ms</code> (no vence). Borrar pide la contraseña y marca <code>borrar_en_ms</code> = ahora + 30 días: hasta entonces se recupera iniciando sesión (<code>account_pending_deletion</code>); después la purga diaria hace el <code>DELETE</code> físico en cascada. Exportar junta todo (3/min).</div>
           <div class="tablas"><span class="tabla r">usuarios ↘ cascada</span><span class="tabla">todas las del usuario</span></div>
         </div>
 
@@ -429,7 +434,7 @@
       <div class="pasos">
         <div class="paso donde" ><div class="num">1</div><div class="q" data-actor="Redis + SMTP"><span class="mono">POST /auth/register</span></div><div class="d">Genera un código de 6 caracteres y guarda su hash en Redis (15 min). Responde 202 igual, exista o no la cuenta: si existe, al dueño le llega sólo un aviso.</div></div>
         <div class="baja"></div>
-        <div class="paso donde"><div class="num">2</div><div class="q" data-actor="Redis"><span class="mono">POST /auth/register/verify</span></div><div class="d">Compara en tiempo constante; con 3 errores el código muere. Devuelve un <code>registration_token</code>: JWT de un uso, válido 10 min.</div></div>
+        <div class="paso donde"><div class="num">2</div><div class="q" data-actor="Redis"><span class="mono">POST /auth/register/verify</span></div><div class="d">Compara en tiempo constante; con 5 errores el código muere (<code>code_attempts_exceeded</code>, distinto de <code>code_expired</code>). Pedir otro invalida el anterior. Devuelve un <code>registration_token</code>: JWT de un uso, válido 10 min.</div></div>
         <div class="baja"></div>
         <div class="paso donde"><div class="num">3</div><div class="q" data-actor="Postgres"><span class="mono">POST /auth/register/complete</span></div><div class="d">Política de contraseña, aviso legal vigente y argon2id → <code>usuarios</code> + <code>aceptaciones_legales</code> + <code>perfiles</code> + primera sesión.</div></div>
         <div class="baja"></div>
@@ -441,7 +446,7 @@
           <div class="hoja ok"><b>Reintento (≤ 2 min)</b><span>La respuesta se perdió en el camino: se devuelve la misma sucesora con un access nuevo.</span></div>
           <div class="hoja mal"><b>Reuso → familia revocada</b><span>Puede ser un robo: se revoca toda la familia y responde <code>session_revoked</code>.</span></div>
         </div>
-        <div class="alerta"><b>Recuperación:</b> <span class="mono">/password/forgot → /verify → /reset</span> sigue el mismo camino de código y permiso de un uso; al cambiar la clave se revocan <b>todas</b> las sesiones y se abre una nueva.</div>
+        <div class="alerta"><b>Recuperación:</b> <span class="mono">/password/forgot → /verify → /reset</span> sigue el mismo camino de código y permiso de un uso. Desde la 1.6.0 cambiar la clave <b>no</b> revoca las otras sesiones: la app pregunta y, si la persona quiere, llama a <span class="mono">/auth/logout/others</span>. Desde la 1.7.0 no se manda correo por el cambio; sí "Nuevo inicio de sesión" cuando se entra desde un dispositivo que la cuenta nunca vio (<span class="mono">dispositivos_conocidos</span>).</div>
       </div>
     </div>
 

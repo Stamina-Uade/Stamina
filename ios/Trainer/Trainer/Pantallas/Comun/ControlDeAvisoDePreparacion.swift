@@ -11,8 +11,10 @@ struct FilaDeMinutosDeAviso: View {
         HStack(spacing: TokensEspaciado.e10) {
             Text(Textos.notificationsPrepBefore)
                 .estilo(.opcionTitulo, color: Paleta.textoPrimario)
-                .lineLimit(1)
-                .minimumScaleFactor(0.85)
+                // En Ajustes la fila va con sangría y en una línea quedaba "Antes de
+                // cada…": baja a una segunda línea antes que cortarse.
+                .lineLimit(2)
+                .fixedSize(horizontal: false, vertical: true)
             Spacer(minLength: TokensEspaciado.e8)
             BotonCircular("minus", etiqueta: Textos.commonLess) { cambiar(-AvisoDePreparacion.paso) }
                 .disabled(minutos <= AvisoDePreparacion.rango.lowerBound)

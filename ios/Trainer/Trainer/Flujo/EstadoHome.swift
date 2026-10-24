@@ -505,6 +505,40 @@ final class EstadoHome: ObservableObject {
                 }
             }
         }
+
+        // 3. "¡Llegó el día!" (2026-10-23): a las 6:00 del día de la carrera, bien
+        // temprano porque no sabemos a qué hora larga. Va con el mismo ajuste que el
+        // plan del día. Se arma de nuevo con cada plan que llega y lo viejo se borra
+        // antes (`limpiarRecordatorios`): si el objetivo se borró o cambió de fecha,
+        // la de la fecha vieja no sale.
+        if avisoMananaHabilitado, let aviso = Self.avisoDelDiaDeLaCarrera(plan.bloque, nombre: perfil?.firstName,
+                                                                           calendario: calendario),
+           aviso.fecha > ahora {
+            NotificadorDeEntrenamiento.programarRecordatorio(
+                id: "carrera-\(aviso.clave)", titulo: Textos.notificationRaceDayTitle,
+                cuerpo: aviso.cuerpo, fecha: aviso.fecha)
+        }
+    }
+
+    /// Cuándo y qué dice "¡Llegó el día!": la carrera y las semanas de plan reales.
+    /// `nil` si el plan no tiene fecha de carrera.
+    static func avisoDelDiaDeLaCarrera(_ bloque: BloqueDelPlan, nombre: String?,
+                                       calendario: Calendar = .current) -> (fecha: Date, clave: String, cuerpo: String)? {
+        guard let ms = bloque.fechaDelEventoMs else { return nil }
+        let dia = Date(timeIntervalSince1970: TimeInterval(ms) / 1000)
+        var partes = calendario.dateComponents([.year, .month, .day], from: dia)
+        partes.hour = 6
+        partes.minute = 0
+        guard let fecha = calendario.date(from: partes) else { return nil }
+        // "Media maratón" → "media maratón"; "10K" queda igual.
+        let carrera = bloque.evento.prefix(2).allSatisfy(\.isUppercase)
+            ? bloque.evento : bloque.evento.prefix(1).lowercased() + bloque.evento.dropFirst()
+        let semanas = bloque.totalDeSemanas
+        let limpio = nombre?.trimmingCharacters(in: .whitespacesAndNewlines).split(separator: " ").first.map(String.init)
+        let cuerpo = limpio.map { Textos.notificationRaceDayBodyName(carrera, semanas, $0) }
+            ?? Textos.notificationRaceDayBody(carrera, semanas)
+        let clave = String(format: "%04d-%02d-%02d", partes.year ?? 0, partes.month ?? 0, partes.day ?? 0)
+        return (fecha, clave, cuerpo)
     }
 
     // MARK: - Lo que leen las pantallas
@@ -589,41 +623,6 @@ final class EstadoHome: ObservableObject {
     /// no tiene fecha o la fecha ya pasó.
     var diasParaLaCarrera: Int? { bloque?.diasParaLaCarrera() }
 
-    /// La agenda del día. El **orden, los horarios y los números** salen de la
-    /// sesión que manda el servidor; los títulos son de la interfaz y por eso sí
-    /// están localizados. Sin horario no hay nada que ordenar, y lo que el servidor
-    /// no calculó —el avituallamiento, sin el peso— no se anota.
-    var agenda: [FilaDeAgenda] {
-        var filas: [FilaDeAgenda] = []
-        if let s = sesion, let minuto = s.minutoDelDia {
-            filas.append(FilaDeAgenda(minutoDelDia: minuto, titulo: "", detalle: "",
-                                      clase: .sesion, destino: .entreno))
-            if let a = s.avituallamiento {
-                filas.append(FilaDeAgenda(minutoDelDia: minuto - 180,
-                                          titulo: Textos.agendaSnack,
-                                          detalle: Textos.agendaSnackDetail(a.carbohidratosAntesG),
-                                          clase: .simple, destino: nil))
-                filas.append(FilaDeAgenda(minutoDelDia: minuto - anticipacionMinutos,
-                                          titulo: Textos.agendaPrepare,
-                                          detalle: Textos.agendaPrepareDetail(Formato.litros(a.mililitrosTotales),
-                                                                               a.geles, anticipacionMinutos),
-                                          clase: .simple, destino: nil))
-                filas.append(FilaDeAgenda(minutoDelDia: minuto + s.duracionMinutos + 20,
-                                          titulo: Textos.agendaRecovery,
-                                          detalle: Textos.agendaRecoveryDetail(a.proteinaDespuesG,
-                                                                                    a.carbohidratosDespuesG),
-                                          clase: .simple, destino: nil))
-            }
-        }
-        if contenido.rutina.valor?.planificada == true, !rutina.isEmpty {
-            filas.append(FilaDeAgenda(minutoDelDia: 12 * 60,
-                                      titulo: Textos.agendaGym,
-                                      detalle: Textos.agendaGymDetail(rutina.count),
-                                      clase: .gimnasio, destino: .gimnasio))
-        }
-        return filas.sorted { $0.minutoDelDia < $1.minutoDelDia }
-    }
-
     // MARK: - Nutrición, lo consumido
 
     var consumido: ObjetivoNutricional {
@@ -658,6 +657,21 @@ final class EstadoHome: ObservableObject {
     }
 
     // MARK: - Acciones
+
+    /// "Lo hice: marcar como hecho" (contrato 1.7.0) un día del plan que pasó sin una
+    /// salida registrada. Se guarda en el servidor —así queda igual en otro
+    /// dispositivo— y después se trae el plan de nuevo: el día vuelve con su tilde y
+    /// la semana con la sesión sumada. No crea una salida ni inventa kilómetros, y la
+    /// racha no vuelve (la calcula el servidor). `false` si no se pudo guardar.
+    func marcarComoHecho(_ dia: DiaDelPlan) async -> Bool {
+        guard let fechaMs = dia.fechaMs, let servicio = repositorio.servicioDelCatalogo() else { return false }
+        let clave = UUID().uuidString
+        guard case .ok = await servicio.marcarDiaHecho(fechaMs: fechaMs, claveDeIdempotencia: clave) else {
+            return false
+        }
+        await actualizar()
+        return true
+    }
 
     func ir(a destino: PestanaHome) {
         guard destino != pestana else { return }

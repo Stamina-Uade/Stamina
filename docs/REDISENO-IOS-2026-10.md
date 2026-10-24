@@ -250,3 +250,55 @@ Rama `cambios-entrada-ios` (sale de `rediseno-ios-2026-10`). Compilado con Xcode
   persona y no se tocó; los comportamientos nuevos están cubiertos en `integracion.cuenta-1-6.test.ts`.
 - Los tests de UI no se corrieron enteros en esta ronda (ver el resumen de la sesión).
 - `docs/diagrama-backend-stamina.html` todavía dice que cambiar la contraseña revoca las otras sesiones.
+
+## Octava ronda (23-10) — "Adentro de la app"
+
+Rama `cambios-adentro-ios` (sale de `cambios-entrada-ios`).
+
+- **Contrato 1.7.0** (aditivo): `PUT /plan/days/done` marca a mano un día que pasó sin salida
+  (`manually_done` en el día); `device` (`DispositivoDeEntrada`, opcional) al entrar y al registrarse;
+  en la exportación, `manual_done_days` y `known_devices`. Migraciones **020** (`dias_hechos_a_mano`) y
+  **021** (`dispositivos_conocidos`). El día marcado cuenta para su semana sin sumar metros, y la racha
+  sólo cuenta salidas registradas: el fueguito no vuelve.
+- **Correos** en es, en y fr, con "Hola" y el nombre de pila. Código de alta y de contraseña: sólo el
+  código, centrado y de todo el ancho; el vencimiento va en el párrafo. Nuevo **"Nuevo inicio de sesión"**
+  cuando se entra desde un dispositivo que la cuenta nunca vio (no al registrarse, no al vincular, no al
+  recuperar). La vinculación con Google/Apple lleva el mismo recuadro. Se eliminó "Cambiaste la
+  contraseña". La **ubicación** ("Córdoba, Argentina") sale de los headers de Cloudflare
+  (`infra/ubicacion.ts`), sólo detrás de un proxy de confianza (`TRUST_PROXY`).
+- **iPhone**: barra fija en las cuatro pestañas (`PantallaDePestana`; la línea de abajo usa
+  `onScrollGeometryChange` en iOS 18 y una marca de alto cero antes), hojas a la medida del contenido
+  (`HojaAMedida`). Inicio, Plan, Historial y Perfil como el lienzo "Propuesta · menos cosas a la vista".
+  Fondos de la tarjeta del objetivo: de las 20 `FondoRunning` sólo 8 dejan ver a la persona entera en la
+  tarjeta apaisada (02, 06, 10, 13, 14, 15, 17 y 19), cada una con su punto de encuadre.
+- **Notificaciones**: el aviso de calor ya no dice "Datos: Weather" (la marca y el enlace van en Ajustes ›
+  Notificaciones, debajo de Calor); nuevo "¡Llegó el día!" a las 6:00 del día de la carrera.
+- **Actividad en vivo**: extensión `StaminaEnVivo` (ActivityKit, iOS 16.2+) con deporte, "En pausa",
+  duración, ritmo y distancia; en la isla, el ícono y la duración. Tocarla abre la salida (`stamina://salida`).
+- **Reloj**: vuelve "¿Llevas hidratación o geles?"; los avisos salen sólo con lo que dijiste que llevas;
+  los cuatro controles parejos; el arrastre vertical ya no le gana al de costado.
+
+### Pendiente para una persona
+
+- **Desplegar el backend** con las migraciones 020 y 021 (`scripts/desplegar-backend.sh`).
+- `backend/.env.example` todavía dice `MAIL_FROM=no-responder@example.invalid`: va
+  `MAIL_FROM=no-reply@stamina.com.ar` (el servidor ya lo tiene en `paso2y3-node-y-postgres.sh`). El archivo
+  tiene cambios de otra persona sin commitear y no se tocó.
+- **App ID de la extensión** `com.tecladus.Trainer.EnVivo` en el portal de Apple, y probar la actividad en
+  vivo y la isla en un iPhone de verdad.
+- Probar en un **reloj de verdad** la pregunta del inicio, los avisos y el deslizar a los controles.
+- Android todavía no tiene el botón "Lo hice: marcar como hecho" (sólo el método en `ApiTrainer`).
+- **Cloudflare**: prender la regla administrada "Add visitor location headers" (Rules › Transform Rules ›
+  Managed Transforms) para que llegue la ciudad. Sin ella, el correo sólo dice el país.
+
+### Arreglos de la revisión (23-10)
+
+- **Cuentas de antes de 1.7.0**: no tienen dispositivos anotados, y su primera entrada después del deploy
+  (desde su propio teléfono) iba a mandar "Nuevo inicio de sesión". Ahora el primer dispositivo de una cuenta
+  que no conocía ninguno entra callado; desde el segundo, avisa (`dispositivos.ts`, `alEntrar`).
+- **Ubicación en los correos de acceso**, de los headers de Cloudflare (ver arriba).
+- **La IP de la persona detrás de Cloudflare**: con `TRUST_PROXY=127.0.0.1`, `req.ip` era el borde de Cloudflare y
+  todas las personas que entraban por el mismo nodo compartían el rate limit. Ahora `trustProxy` suma los rangos
+  publicados de Cloudflare (`infra/cloudflare.ts`): `req.ip` es la IP real, para el rate limit y para los correos.
+- **Tarjeta del objetivo**: el velo de arriba pasa de 0,15 a 0,6 y el texto lleva una sombra suave; "Maratón ·
+  Mar, 9 feb" y "días" se leen sobre cualquier foto (`TarjetaHeroe`).

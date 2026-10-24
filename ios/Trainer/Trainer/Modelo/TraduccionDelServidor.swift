@@ -18,11 +18,6 @@ import TrainerCore
 
 enum TraduccionDelServidor {
 
-    /// Las semanas que muestra el selector del plan: la anterior, la de hoy y las
-    /// tres que vienen, como el diseño. Once chips no entran en el ancho con el
-    /// mínimo táctil.
-    static let semanasALaVista = 5
-
     // MARK: - Plan
 
     static func plan(_ plan: Plan, ahoraMs: Int64) -> PlanDelHome? {
@@ -34,12 +29,9 @@ enum TraduccionDelServidor {
         let yaTermino = dias.last.map { hoyMs > $0.dateMs } ?? false
         let total = Int(plan.totalWeeks)
 
-        // La ventana de semanas: alrededor de hoy, o las últimas si el bloque terminó.
-        let referencia = semanaDeHoy ?? (yaTermino ? total : 1)
-        let primera = max(1, min(referencia - 1, total - semanasALaVista + 1))
-        let semanas = plan.weeks
-            .sorted { $0.number < $1.number }
-            .filter { Int($0.number) >= primera && Int($0.number) < primera + semanasALaVista }
+        // Todas las semanas: desde 2026-10-23 se recorren con las flechas ‹ › (o
+        // deslizando), y ya no hay una fila de chips S1…S20 que tenga que entrar en el ancho.
+        let semanas = plan.weeks.sorted { $0.number < $1.number }
 
         // MVP sólo running: nunca se deduce triatlón (un día de bici es cross-training).
         let esTriatlon = MVP.permite(.triatlon) &&
@@ -62,7 +54,8 @@ enum TraduccionDelServidor {
                     metrosPrevistos: Int(semana.plannedDistanceM),
                     dias: dias.filter { $0.weekNumber == semana.number }
                         .map { dia($0, hoyMs: hoyMs, zona: zona, enTriatlon: esTriatlon) },
-                    enCurso: Int(semana.number) == semanaDeHoy)
+                    enCurso: Int(semana.number) == semanaDeHoy,
+                    etapa: nombre(de: semana.phase))
             },
             fechaDelEventoMs: plan.eventDateMs,
             distanciaDelEventoMetros: esTriatlon ? nil : distanciaEnMetros(de: plan.goal))
@@ -160,7 +153,8 @@ enum TraduccionDelServidor {
             titulo: "\(nombre(de: tramo.phase)) · \(semanas)",
             peso: hasta - desde + 1,
             hecha: yaTermino || (semanaDeHoy.map { $0 > hasta } ?? false),
-            enCurso: semanaDeHoy.map { (desde...hasta).contains($0) } ?? false)
+            enCurso: semanaDeHoy.map { (desde...hasta).contains($0) } ?? false,
+            fase: tramo.phase)
     }
 
     private static func dia(_ dia: DiaPlanificado, hoyMs: Int64, zona: TimeZone, enTriatlon: Bool = false) -> DiaDelPlan {
@@ -173,6 +167,7 @@ enum TraduccionDelServidor {
         let esHoy = dia.dateMs == hoyMs
         let esEvento = dia.type == .carrera || dia.title.localizedCaseInsensitiveContains("evento") || dia.title.localizedCaseInsensitiveContains("marat")
         let tituloLimpio = esEvento ? Formato.limpiarTituloEvento(dia.title, enTriatlon: enTriatlon) : dia.title
+        let esDescanso = dia.type == .descanso
         return DiaDelPlan(
             diaDeLaSemana: Int(dia.weekday),
             numeroDeDia: calendario.component(.day, from: fecha),
@@ -184,7 +179,18 @@ enum TraduccionDelServidor {
             // Tocar un día abre `entreno`, que muestra la salida de HOY: abrir otro
             // día mostraría una sesión que no es la suya.
             abrible: esHoy && !dia.done && dia.type != .descanso && dia.sport != .fuerza,
-            fecha: fecha)
+            fecha: fecha,
+            fechaMs: dia.dateMs,
+            esDescanso: esDescanso,
+            esFuerza: dia.sport == .fuerza || dia.type == .fuerza,
+            // 1.7.0: tocaba entrenar, ya pasó y no quedó nada registrado. Lo decide el
+            // `done` del servidor, que es el mismo dato con el que calcula la racha.
+            sinHacer: !esDescanso && !dia.done && dia.dateMs < hoyMs,
+            hechoAMano: dia.manuallyDone == true,
+            distanciaMetros: dia.distanceM.map { Int($0) },
+            zona: dia.zone.flatMap { ZonaDeIntensidad(rawValue: $0.rawValue) },
+            minutoDelDia: dia.scheduledMinuteOfDay.map { Int($0) },
+            avituallamiento: dia.fueling.map(avituallamiento))
     }
 
     /// El renglón de abajo del título: lo estructurado, corto. El `detail` del

@@ -332,4 +332,161 @@ struct TrainerWatch_Watch_AppTests {
         estado.sincronizador.simularUsuarioRemoto(nil)
         try? await Task.sleep(nanoseconds: 10_000_000)
     }
+
+    // MARK: - La pregunta del inicio y los avisos de agua, gel y sales
+
+    /// Un plan de hoy con agua, geles y sales, para ver que el plan sólo
+    /// pre-carga las cantidades y no programa avisos por su cuenta.
+    private static let sesionConAvituallamiento = SesionCompartida(
+        tipo: "Carrera larga",
+        distanciaMetros: 18000,
+        duracionMinutos: 110,
+        minutoDelDia: nil,
+        geles: 2,
+        aguaMl: 500,
+        sales: 1,
+        esDescanso: false,
+        esFuerza: false
+    )
+
+    /// Corre dos horas de salida, cerrando cada aviso como lo cierra la persona
+    /// (tocando la pantalla), y devuelve los avisos que salieron.
+    @MainActor
+    private static func avisosEnDosHoras(_ estado: EstadoReloj) -> [TipoDeAvisoDeAvituallamiento] {
+        var avisos: [TipoDeAvisoDeAvituallamiento] = []
+        for segundo in 0...7_200 {
+            estado.evaluarAvisoDeAvituallamiento(segundos: segundo, deporte: .running)
+            if let aviso = estado.avisoDeAvituallamiento {
+                avisos.append(aviso)
+                estado.cerrarAvisoDeAvituallamiento()
+            }
+        }
+        return avisos
+    }
+
+    @MainActor
+    private static func estadoConPlan() async -> EstadoReloj {
+        let estado = EstadoReloj()
+        estado.sincronizador.simularUsuarioRemoto("usuario_123")
+        estado.sincronizador.simularSesionRemota(sesionConAvituallamiento)
+        try? await Task.sleep(nanoseconds: 10_000_000)
+        return estado
+    }
+
+    @MainActor
+    private static func cerrar(_ estado: EstadoReloj) async {
+        estado.sincronizador.simularSesionRemota(nil)
+        estado.sincronizador.simularUsuarioRemoto(nil)
+        try? await Task.sleep(nanoseconds: 10_000_000)
+    }
+
+    @MainActor
+    @Test("Tocar una salida abre la pregunta, no la cuenta regresiva")
+    func tocarUnaSalidaPregunta() async throws {
+        let estado = await Self.estadoConPlan()
+
+        estado.prepararInicioConCuentaRegresiva(deporte: .running, icono: "figure.run")
+        #expect(estado.preguntaAvituallamientoActiva, "tiene que preguntar si lleva hidratación o geles")
+        #expect(!estado.cuentaRegresivaActiva, "la cuenta regresiva viene después de contestar")
+        #expect(estado.aguaMlQueLleva == 0 && estado.gelesQueLleva == 0 && estado.salesQueLleva == 0,
+                "antes de contestar no lleva nada")
+
+        estado.cancelarCuentaRegresiva()
+        #expect(!estado.preguntaAvituallamientoActiva)
+        await Self.cerrar(estado)
+    }
+
+    @MainActor
+    @Test("Con \"No\" (o tocando afuera) no sale ningún aviso, aunque el plan diga que lleva")
+    func conNoNoHayAvisos() async throws {
+        let estado = await Self.estadoConPlan()
+
+        estado.prepararInicioConCuentaRegresiva(deporte: .running)
+        estado.iniciarSinAvituallamiento()
+        #expect(!estado.preguntaAvituallamientoActiva)
+        #expect(estado.cuentaRegresivaActiva, "después de contestar viene la cuenta regresiva")
+        #expect(estado.aguaMlQueLleva == 0 && estado.gelesQueLleva == 0 && estado.salesQueLleva == 0)
+        #expect(Self.avisosEnDosHoras(estado).isEmpty, "con \"No\" no se programa ningún aviso")
+
+        estado.cancelarCuentaRegresiva()
+        await Self.cerrar(estado)
+    }
+
+    @MainActor
+    @Test("Con \"Sí\" las cantidades arrancan con el plan y se respetan las que elige la persona")
+    func conSiArrancaConElPlan() async throws {
+        let estado = await Self.estadoConPlan()
+
+        estado.prepararInicioConCuentaRegresiva(deporte: .running)
+        estado.cargarAvituallamientoDelPlan()
+        #expect(estado.aguaMlQueLleva == 500)
+        #expect(estado.gelesQueLleva == 2)
+        #expect(estado.salesQueLleva == 1)
+
+        // Lleva agua, pero no geles ni sales.
+        estado.gelesQueLleva = 0
+        estado.salesQueLleva = 0
+        estado.confirmarAvituallamientoEIniciar()
+        #expect(estado.cuentaRegresivaActiva)
+        #expect(estado.aguaMlQueLleva == 500, "\"Iniciar\" no vuelve a leer el plan")
+        #expect(estado.gelesQueLleva == 0)
+
+        let avisos = Self.avisosEnDosHoras(estado)
+        #expect(!avisos.isEmpty, "con agua > 0 tiene que avisar")
+        #expect(avisos.allSatisfy { $0 == .agua }, "sólo los de agua: no lleva geles ni sales")
+
+        estado.cancelarCuentaRegresiva()
+        await Self.cerrar(estado)
+    }
+
+    @MainActor
+    @Test("Con \"Sí\" y todo en 0 no sale ningún aviso")
+    func conSiYTodoEnCeroNoHayAvisos() async throws {
+        let estado = await Self.estadoConPlan()
+
+        estado.prepararInicioConCuentaRegresiva(deporte: .running)
+        estado.cargarAvituallamientoDelPlan()
+        estado.aguaMlQueLleva = 0
+        estado.gelesQueLleva = 0
+        estado.salesQueLleva = 0
+        estado.confirmarAvituallamientoEIniciar()
+        #expect(Self.avisosEnDosHoras(estado).isEmpty)
+
+        estado.cancelarCuentaRegresiva()
+        await Self.cerrar(estado)
+    }
+
+    @MainActor
+    @Test("Al terminar la cuenta regresiva la salida conserva lo que contestó, no lo del plan")
+    func empezarNoPisaLoQueContesto() async throws {
+        let estado = await Self.estadoConPlan()
+
+        estado.prepararInicioConCuentaRegresiva(deporte: .running)
+        estado.iniciarSinAvituallamiento()
+        estado.completarCuentaRegresiva()
+        #expect(estado.aguaMlQueLleva == 0 && estado.gelesQueLleva == 0 && estado.salesQueLleva == 0,
+                "`empezar` no tiene que volver a cargar el plan")
+        estado.descartar()
+
+        estado.prepararInicioConCuentaRegresiva(deporte: .running)
+        estado.cargarAvituallamientoDelPlan()
+        estado.gelesQueLleva = 3
+        estado.confirmarAvituallamientoEIniciar()
+        estado.completarCuentaRegresiva()
+        #expect(estado.gelesQueLleva == 3)
+        #expect(estado.aguaMlQueLleva == 500)
+        estado.descartar()
+
+        await Self.cerrar(estado)
+    }
+
+    @Test("El arrastre sólo es vertical si es claramente vertical; si no, gana el de costado")
+    func ejeDelArrastre() {
+        #expect(EjeDeArrastreReloj.decidir(dx: 20, dy: 3) == .horizontal)
+        #expect(EjeDeArrastreReloj.decidir(dx: -20, dy: 8) == .horizontal)
+        #expect(EjeDeArrastreReloj.decidir(dx: 14, dy: 16) == .horizontal, "una diagonal es de costado")
+        #expect(EjeDeArrastreReloj.decidir(dx: 14, dy: -14) == .horizontal)
+        #expect(EjeDeArrastreReloj.decidir(dx: 4, dy: 20) == .vertical)
+        #expect(EjeDeArrastreReloj.decidir(dx: -5, dy: -22) == .vertical)
+    }
 }

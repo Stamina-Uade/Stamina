@@ -96,6 +96,7 @@ struct RaizHomeView: View {
         // Durante el tour, VoiceOver lee sólo el globito.
         .accessibilityHidden(mostrarTour)
         .environmentObject(estado)
+        .actividadEnVivo(de: estado)
         .animation(.spring(response: 0.35, dampingFraction: 0.85), value: estado.pestana)
         // El tour de la primera vez, ENCIMA de la app de verdad (barra incluida):
         // un velo, la mascota en una esquina y su globito. Ver `TourGuiado`.
@@ -182,7 +183,7 @@ struct RaizHomeView: View {
         switch actual {
         case .inicio:    InicioView()
         case .plan:      PlanView()
-        case .historial: HistorialDeActividadesView(servicio: estado.repositorio.servicioDeActividades(), esPestana: true)
+        case .historial: HistorialDeActividadesView(servicio: estado.repositorio.servicioDeActividades())
         case .perfil:    PerfilView()
         case .ajustes:   AjustesView()
         case .gimnasio:  GimnasioView()

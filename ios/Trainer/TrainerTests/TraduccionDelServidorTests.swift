@@ -48,7 +48,10 @@ struct TraduccionDelServidorTests {
         #expect(home.bloque.fases.map(\.peso) == [5, 2, 2, 1, 1])
         #expect(home.bloque.fases.first?.titulo == "\(Textos.planPhaseBase) · 1-5")
         #expect(home.bloque.fases.map(\.enCurso) == [true, false, false, false, false])
-        #expect(home.bloque.semanas.map(\.numero) == [1, 2, 3, 4, 5])
+        // 2026-10-23: todas las semanas, que se recorren con las flechas.
+        #expect(home.bloque.semanas.map(\.numero) == Array(1...11))
+        #expect(home.bloque.semanas.first?.etapa == Textos.planPhaseBase)
+        #expect(home.bloque.fases.first?.fase == .base)
 
         let semana = try #require(home.bloque.semanas.first)
         #expect(semana.enCurso)
@@ -80,6 +83,40 @@ struct TraduccionDelServidorTests {
         #expect(home.cargaSemanal.count == 7)
         #expect(home.cargaSemanal.first == 7_100)
         #expect(home.indiceDeHoy == 0)
+    }
+
+    @Test("Un día que tocaba entrenar y pasó sin nada registrado queda sin hacer; un descanso nunca")
+    func diaSinHacer() throws {
+        let plan = try FixturasDelServidor.dato("plan", como: Plan.self)
+        // Domingo 13: el jueves 10 (suave) y el sábado 12 (fuerza) pasaron sin nada.
+        let home = try #require(TraduccionDelServidor.plan(plan, ahoraMs: Self.diezDeLaManana + 3 * Self.unDia))
+        let dias = try #require(home.bloque.semanas.first?.dias)
+        #expect(dias[0].sinHacer, "el jueves tocaba correr")
+        #expect(!dias[1].sinHacer, "un descanso no se debe")
+        #expect(dias[2].sinHacer, "la fuerza también tocaba")
+        #expect(!dias[3].sinHacer, "hoy todavía no pasó")
+        #expect(!dias[5].sinHacer, "lo que viene no se debe")
+        #expect(dias[0].fechaMs == Self.dia10)
+        #expect(dias[0].zona == .z2)
+        #expect(dias[0].distanciaMetros == 7_100)
+        #expect(dias[0].avituallamiento?.geles == 1)
+        #expect(dias[1].esDescanso)
+        #expect(!dias[0].hechoAMano)
+    }
+
+    @Test("Un día marcado a mano llega hecho, y no queda sin hacer")
+    func diaHechoAMano() throws {
+        var texto = try FixturasDelServidor.texto("plan")
+        // El primer día de la fixtura, como lo manda un servidor 1.7.0 después de marcarlo.
+        if let primero = texto.range(of: "\"done\": false") {
+            texto.replaceSubrange(primero, with: "\"done\": true, \"manually_done\": true")
+        }
+        let plan = try JSONDecoder().decode(SobreDeLaFixtura<Plan>.self, from: Data(texto.utf8)).data
+        let home = try #require(TraduccionDelServidor.plan(plan, ahoraMs: Self.diezDeLaManana + 3 * Self.unDia))
+        let dia = try #require(home.bloque.semanas.first?.dias.first)
+        #expect(dia.hecho)
+        #expect(dia.hechoAMano)
+        #expect(!dia.sinHacer)
     }
 
     @Test("Un descanso y un día de fuerza no son una salida")

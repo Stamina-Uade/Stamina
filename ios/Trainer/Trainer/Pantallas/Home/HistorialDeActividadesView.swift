@@ -1,30 +1,34 @@
 import SwiftUI
 import TrainerCore
 
-/// Historial leído de GET /activities. El mapa de detalle se pide sólo al abrir
-/// la actividad: el listado del servidor nunca arrastra puntos GPS.
+/// `historial` — "menos cosas a la vista" (decisión de Iván del 2026-10-23):
 ///
-/// Ronda 3: resumen Semana | Mes | Todo, filtro por
-/// deporte, lista agrupada por mes y un estado vacío que lleva al entreno.
-/// El resumen y el filtro se calculan sobre lo ya cargado (sin pedir más red).
+///   la barra fija «Historial» con el fueguito (`PantallaDePestana`)
+///   el año entrenado (`CalendarioDeHitosView`): los años de la cuenta, el total, el
+///     gráfico de enero a diciembre y el día elegido
+///   "Tus salidas", una por fila, agrupadas por mes, como antes
+///
+/// Se fueron los botones Semana · Mes · Todo y la tarjeta "Tus números": el total del
+/// año va en una línea. El listado sale de `GET /activities`; el mapa de cada salida
+/// se pide sólo al abrirla.
 struct HistorialDeActividadesView: View {
     let servicio: (any ServicioDeActividades)?
-    /// `true` cuando es una pestaña de la barra (rediseño 2026-10): lleva el
-    /// encabezado grande y no tiene botón de cerrar. `false` cuando se abre como
-    /// hoja desde otra pantalla.
-    var esPestana: Bool = false
-    /// 🪤 Como hoja (desde Plan) llega igual: desde iOS 14 una `.sheet` hereda
-    /// los `environmentObject` de la vista que la presenta.
     @EnvironmentObject private var estado: EstadoHome
-    @Environment(\.dismiss) private var cerrar
     @State private var actividades: [Actividad] = []
     @State private var cursor: String?
     @State private var hayMas = true
     @State private var cargando = false
     @State private var fallo = false
     @State private var elegida: ActividadElegida?
-    @State private var periodo: HistorialPeriodo = .semana
     @State private var deporteElegido: DeporteDeSesion?
+    /// Los días de carrera de los objetivos, con su nombre.
+    @State private var carreras: [String: String] = [:]
+    /// Las series de gimnasio hechas, por día.
+    @State private var gimnasioPorDia: [String: Int] = [:]
+
+    /// Para el total del año hacen falta las salidas del año: se siguen pidiendo
+    /// páginas hasta pasar el 1 de enero del año de alta, con este tope.
+    private static let paginasComoMucho = 25
 
     struct ActividadElegida: Identifiable {
         let actividad: Actividad
@@ -32,6 +36,10 @@ struct HistorialDeActividadesView: View {
     }
 
     private var unidades: SistemaDeUnidades { estado.sistemaDeUnidades }
+
+    private var fechaDeAlta: Date? {
+        estado.perfil.map { Date(timeIntervalSince1970: TimeInterval($0.createdAtMs) / 1000) }
+    }
 
     /// Los deportes que aparecen en lo cargado, en el orden de siempre. Los
     /// chips sólo ofrecen los del MVP (sólo running); las salidas de otros
@@ -54,23 +62,32 @@ struct HistorialDeActividadesView: View {
     }
 
     var body: some View {
-        Group {
-            if esPestana {
-                lista(conEncabezado: true)
-            } else {
-                NavigationStack {
-                    lista(conEncabezado: false)
-                        .navigationTitle(Textos.historyTitle)
-                        .toolbar {
-                            ToolbarItem(placement: .confirmationAction) {
-                                Button(Textos.historyClose) { cerrar() }
-                            }
-                        }
+        PantallaDePestana(Textos.historyTab, alRefrescar: { await cargar(desdeElPrincipio: true) }) {
+            FueguitoDeLaBarra()
+        } contenido: {
+            VStack(alignment: .leading, spacing: TokensEspaciado.e14) {
+                CalendarioDeHitosView(unidades: unidades, fechaDeAlta: fechaDeAlta,
+                                      carreras: carreras, gimnasioPorDia: gimnasioPorDia)
+
+                if actividades.isEmpty, !cargando {
+                    HistorialEstadoVacio(
+                        fallo: fallo,
+                        reintentar: { Task { await cargar(desdeElPrincipio: true) } },
+                        empezar: { estado.ir(a: .entreno) }
+                    )
                 }
+
+                salidas
             }
+            .padding(.horizontal, TokensEspaciado.e16)
+            .padding(.top, TokensEspaciado.e8)
+            .padding(.bottom, TokensEspaciado.e36)
         }
-        .frame(maxWidth: .infinity, maxHeight: .infinity)
-        .task { if actividades.isEmpty { await cargar() } }
+        .task {
+            if actividades.isEmpty { await cargar() }
+            await cargarDelAnio()
+        }
+        .task { await cargarCarrerasYGimnasio() }
         .sheet(item: $elegida) { seleccion in
             DetalleDeActividadView(
                 actividad: seleccion.actividad,
@@ -79,50 +96,6 @@ struct HistorialDeActividadesView: View {
                 unidades: unidades
             )
         }
-    }
-
-    private func lista(conEncabezado: Bool) -> some View {
-        ScrollView {
-            VStack(alignment: .leading, spacing: TokensEspaciado.e14) {
-                if conEncabezado {
-                    encabezado
-                }
-
-                if actividades.isEmpty, !cargando {
-                    HistorialEstadoVacio(
-                        fallo: fallo,
-                        reintentar: { Task { await cargar(desdeElPrincipio: true) } },
-                        empezar: empezarPrimeraSalida
-                    )
-                } else if !actividades.isEmpty {
-                    HistorialFranjaDeResumen(
-                        actividades: filtradas,
-                        deporte: filtro,
-                        unidades: unidades,
-                        hayMasPorCargar: hayMas,
-                        periodo: $periodo
-                    )
-                }
-
-                CalendarioDeHitosView(unidades: unidades)
-
-                salidas
-            }
-            .padding(.horizontal, TokensEspaciado.e16)
-            .padding(.top, conEncabezado ? TokensEspaciado.e8 : TokensEspaciado.e16)
-            .padding(.bottom, TokensEspaciado.e36)
-        }
-        .background(Paleta.fondo)
-        .refreshable { await cargar(desdeElPrincipio: true) }
-    }
-
-    // MARK: - Encabezado
-
-    private var encabezado: some View {
-        EncabezadoDePestana(
-            Textos.historyTab,
-            sobretitulo: Textos.historySubtitle
-        )
     }
 
     // MARK: - Lista de salidas, por mes
@@ -179,12 +152,6 @@ struct HistorialDeActividadesView: View {
         elegida = ActividadElegida(actividad: actividad)
     }
 
-    /// Del estado vacío al entreno. Como hoja, primero se cierra.
-    private func empezarPrimeraSalida() {
-        if !esPestana { cerrar() }
-        estado.ir(a: .entreno)
-    }
-
     /// La página siguiente; con `desdeElPrincipio` (tirar hacia abajo, reintentar)
     /// vuelve a la primera y reemplaza la lista sólo cuando la respuesta llegó bien.
     private func cargar(desdeElPrincipio: Bool = false) async {
@@ -200,6 +167,62 @@ struct HistorialDeActividadesView: View {
         }
         cursor = pagina.paginacion.nextCursor
         hayMas = pagina.paginacion.hasMore
+        // El calendario del año lee de `AlmacenDeHitos`: lo que llega se anota ahí.
+        for actividad in pagina.elementos { AlmacenDeHitos.compartido.registrarActividad(actividad) }
+    }
+
+    /// Sigue pidiendo páginas mientras la salida más vieja cargada sea de un año que
+    /// la cuenta tuvo, para que el gráfico y el total del año estén completos.
+    private func cargarDelAnio() async {
+        let cal = Calendar.current
+        let desde = fechaDeAlta.flatMap { cal.date(from: DateComponents(year: cal.component(.year, from: $0))) }
+            ?? cal.date(from: DateComponents(year: cal.component(.year, from: Date())))
+        guard let desdeMs = desde.map({ Int64($0.timeIntervalSince1970 * 1000) }) else { return }
+        var paginas = 0
+        while hayMas, paginas < Self.paginasComoMucho, let masVieja = actividades.last?.startedAtMs, masVieja >= desdeMs {
+            paginas += 1
+            await cargar()
+            if fallo { return }
+        }
+    }
+
+    /// Las fechas de los objetivos (también las que vienen) y las series de gimnasio
+    /// de cada día, para el calendario.
+    private func cargarCarrerasYGimnasio() async {
+        guard let plan = estado.repositorio.servicioDelCatalogo() else { return }
+        var porDia: [String: String] = [:]
+        if let perfil = estado.perfil, let ms = perfil.goalDateMs, let goal = perfil.goal {
+            porDia[Self.claveDeCarrera(ms)] = TraduccionDelServidor.nombre(de: goal)
+        }
+        if case .ok(let planes) = await plan.planes() {
+            for item in planes {
+                if let ms = item.plan.eventDateMs {
+                    porDia[Self.claveDeCarrera(ms)] = TraduccionDelServidor.nombre(de: item.plan.goal)
+                }
+            }
+        }
+        carreras = porDia
+        if case .ok(let pagina) = await plan.sesionesDeGimnasio(limite: 100, cursor: nil) {
+            var series: [String: Int] = [:]
+            for sesion in pagina.elementos where sesion.setsDone > 0 {
+                guard let ms = sesion.dateMs else { continue }
+                let clave = AlmacenDeHitos.clave(para: Date(timeIntervalSince1970: TimeInterval(ms) / 1000))
+                series[clave, default: 0] += Int(sesion.setsDone)
+            }
+            gimnasioPorDia = series
+        }
+    }
+
+    /// La fecha de una carrera es un día SIN HORA: el servidor la guarda a las 00:00
+    /// UTC (`goal_date_ms`) o a las 00:00 locales (`event_date_ms`); al mediodía UTC
+    /// cae en el mismo día de calendario en cualquier zona de América y Europa.
+    private static func claveDeCarrera(_ ms: Int64) -> String {
+        var utc = Calendar(identifier: .gregorian)
+        utc.timeZone = TimeZone(identifier: "UTC") ?? .current
+        let fecha = Date(timeIntervalSince1970: TimeInterval(ms) / 1000)
+        let partes = utc.dateComponents([.year, .month, .day], from: fecha.addingTimeInterval(6 * 3600))
+        let dia = Calendar.current.date(from: partes) ?? fecha
+        return AlmacenDeHitos.clave(para: dia)
     }
 }
 
