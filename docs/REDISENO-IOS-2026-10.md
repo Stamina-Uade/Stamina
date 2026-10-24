@@ -297,5 +297,8 @@ Rama `cambios-adentro-ios` (sale de `cambios-entrada-ios`).
   (desde su propio teléfono) iba a mandar "Nuevo inicio de sesión". Ahora el primer dispositivo de una cuenta
   que no conocía ninguno entra callado; desde el segundo, avisa (`dispositivos.ts`, `alEntrar`).
 - **Ubicación en los correos de acceso**, de los headers de Cloudflare (ver arriba).
+- **La IP de la persona detrás de Cloudflare**: con `TRUST_PROXY=127.0.0.1`, `req.ip` era el borde de Cloudflare y
+  todas las personas que entraban por el mismo nodo compartían el rate limit. Ahora `trustProxy` suma los rangos
+  publicados de Cloudflare (`infra/cloudflare.ts`): `req.ip` es la IP real, para el rate limit y para los correos.
 - **Tarjeta del objetivo**: el velo de arriba pasa de 0,15 a 0,6 y el texto lleva una sombra suave; "Maratón ·
   Mar, 9 feb" y "días" se leen sobre cualquier foto (`TarjetaHeroe`).

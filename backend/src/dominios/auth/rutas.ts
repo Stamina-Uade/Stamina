@@ -5,7 +5,6 @@
  * lo genera `scripts/generar-esquemas.mjs` desde shared/api/openapi.yaml. No hay
  * un esquema escrito a mano que pueda divergir del contrato (§4.2).
  */
-import { isIP } from "node:net";
 import type { FastifyInstance, FastifyRequest } from "fastify";
 import type { Contexto } from "../../contexto.js";
 import { crearServicioAuth, type Acceso } from "./servicio.js";
@@ -31,29 +30,16 @@ import { ubicacionDeCloudflare } from "../../infra/ubicacion.js";
 const ESTRICTO = { rateLimit: { max: 8, timeWindow: "1 minute" } } as const;
 
 /**
- * La IP que va en los correos de acceso. stamina.com.ar pasa por Cloudflare y
- * después por Apache: con `TRUST_PROXY=127.0.0.1`, `req.ip` es la del borde de
- * Cloudflare, no la de la persona. Cloudflare la manda en `cf-connecting-ip`, y
- * sólo se le cree detrás de un proxy de confianza (infra/ubicacion.ts). Es nada
- * más para mostrar: el rate limit sigue con `req.ip`.
- */
-function ipDeLaPersona(req: FastifyRequest, detrasDeProxy: boolean): string {
-  if (!detrasDeProxy) return req.ip;
-  const crudo = req.headers["cf-connecting-ip"];
-  const ip = (Array.isArray(crudo) ? crudo[0] : crudo)?.trim() ?? "";
-  return isIP(ip) !== 0 ? ip : req.ip;
-}
-
-/**
- * Desde dónde se entra (contrato 1.7.0). `req.ip` ya respeta `TRUST_PROXY`
- * (servidor.ts): detrás del proxy es la IP de la persona, no la del proxy. La
+ * Desde dónde se entra (contrato 1.7.0). `req.ip` ya respeta `TRUST_PROXY` y los
+ * rangos de Cloudflare (servidor.ts, infra/cloudflare.ts): es la IP de la persona,
+ * no la de Apache ni la del borde de Cloudflare. La
  * ubicación sale de los headers de Cloudflare, y sólo detrás de un proxy de
  * confianza (infra/ubicacion.ts).
  */
 function accesoDe(req: FastifyRequest, dispositivo: Dispositivo | undefined, detrasDeProxy: boolean): Acceso {
   const idioma = idiomaDeCorreo(req);
   return {
-    ip: ipDeLaPersona(req, detrasDeProxy),
+    ip: req.ip,
     idioma,
     ubicacion: ubicacionDeCloudflare(req.headers, idioma, detrasDeProxy),
     dispositivo: dispositivo ?? null,
